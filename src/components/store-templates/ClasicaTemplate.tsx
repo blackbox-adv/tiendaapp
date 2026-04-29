@@ -164,6 +164,7 @@ export function ClasicaTemplate({ store, products, storeSlug }: { store: Store; 
             )
           })}
         </div>
+        </div>
       </nav>
 
       {/* Product List — Horizontal layout (image left, text right) */}
