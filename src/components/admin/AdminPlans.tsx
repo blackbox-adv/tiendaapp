@@ -35,7 +35,7 @@ export function AdminPlans() {
     setLoading(true)
     try {
       const token = typeof window !== 'undefined' ? localStorage.getItem('tiendapp_token') : null
-      const headers = token ? { Authorization: `Bearer ${token}` } : {}
+      const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {}
 
       const [payRes, subRes] = await Promise.all([
         fetch('/api/payments', { headers }),

@@ -42,6 +42,7 @@ export async function DELETE(
   if (auth.error) {
     return NextResponse.json({ error: auth.error }, { status: auth.status })
   }
+  if (!auth.user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
 
   try {
     const { id } = await params

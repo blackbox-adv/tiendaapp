@@ -34,6 +34,7 @@ export async function GET(request: NextRequest) {
     if (auth.error) {
       return NextResponse.json({ error: auth.error }, { status: auth.status })
     }
+    if (!auth.user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
 
     if (auth.user.role !== 'super_admin') {
       return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 })
@@ -61,6 +62,7 @@ export async function POST(request: NextRequest) {
   if (auth.error) {
     return NextResponse.json({ error: auth.error }, { status: auth.status })
   }
+  if (!auth.user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
 
   try {
     const body = await request.json()
@@ -113,6 +115,7 @@ export async function PUT(request: NextRequest) {
   if (auth.error) {
     return NextResponse.json({ error: auth.error }, { status: auth.status })
   }
+  if (!auth.user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
 
   try {
     const body = await request.json()

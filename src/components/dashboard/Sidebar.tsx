@@ -56,7 +56,7 @@ export function Sidebar() {
           return (
             <button
               key={item.page}
-              onClick={() => navigate({ page: item.page })}
+              onClick={() => navigate({ page: item.page } as PageRoute)}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                 isActive
                   ? 'bg-violet-600 text-white shadow-lg shadow-violet-600/30'

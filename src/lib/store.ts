@@ -437,10 +437,26 @@ export const useAppStore = create<AppState>((set, get) => ({
     } catch { /* fallback to local state */ }
   },
 
-  deleteProduct: (id) =>
+  deleteProduct: async (id) => {
+    // Remove from local state immediately (optimistic)
     set((state) => ({
       products: state.products.filter((p) => p.id !== id),
-    })),
+    }))
+    // Persist to API
+    try {
+      const token = getToken()
+      const res = await fetch(`/api/store-products/${id}`, {
+        method: 'DELETE',
+        headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      })
+      if (!res.ok) {
+        console.warn('[Store] Failed to delete product on server:', res.status)
+        // Optionally: re-fetch products to restore consistency
+      }
+    } catch (error) {
+      console.warn('[Store] Error deleting product:', error)
+    }
+  },
 
   updateStoreSettings: (data) =>
     set((state) => {

@@ -1,6 +1,7 @@
 import { db } from '@/lib/db'
 import { NextRequest, NextResponse } from 'next/server'
 import { authenticateRequest, hashPassword } from '@/lib/auth'
+import { validateBody, registerSchema } from '@/lib/validations'
 
 // GET /api/users - List users (admin only)
 export async function GET(request: NextRequest) {
@@ -8,6 +9,7 @@ export async function GET(request: NextRequest) {
   if (auth.error) {
     return NextResponse.json({ error: auth.error }, { status: auth.status })
   }
+  if (!auth.user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
 
   if (auth.user.role !== 'super_admin') {
     return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 })
@@ -29,8 +31,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(safeUsers)
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Error fetching users'
-    return NextResponse.json({ error: message }, { status: 500 })
+    console.error('[USERS] GET error:', error instanceof Error ? error.message : String(error))
+    return NextResponse.json({ error: 'Error obteniendo usuarios' }, { status: 500 })
   }
 }
 
@@ -38,14 +40,11 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { email, password, name, phone } = body
-
-    if (!email || !password || !name) {
-      return NextResponse.json(
-        { error: 'email, password y name son requeridos' },
-        { status: 400 },
-      )
+    const validation = validateBody(registerSchema, body)
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error }, { status: 400 })
     }
+    const { email, password, name, phone } = validation.data
 
     // Check duplicate
     const existing = await db.user.findUnique({ where: { email } })
@@ -74,8 +73,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(safeUser, { status: 201 })
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Error creating user'
-    return NextResponse.json({ error: message }, { status: 500 })
+    console.error('[USERS] POST error:', error instanceof Error ? error.message : String(error))
+    return NextResponse.json({ error: 'Error creando usuario' }, { status: 500 })
   }
 }
 
@@ -85,6 +84,7 @@ export async function PUT(request: NextRequest) {
   if (auth.error) {
     return NextResponse.json({ error: auth.error }, { status: auth.status })
   }
+  if (!auth.user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
 
   try {
     const body = await request.json()
@@ -118,7 +118,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json(safeUser)
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Error updating user'
-    return NextResponse.json({ error: message }, { status: 500 })
+    console.error('[USERS] PUT error:', error instanceof Error ? error.message : String(error))
+    return NextResponse.json({ error: 'Error actualizando usuario' }, { status: 500 })
   }
 }

@@ -27,7 +27,7 @@ export function AdminOverview() {
     async function loadData() {
       try {
         const token = typeof window !== 'undefined' ? localStorage.getItem('tiendapp_token') : null
-        const headers = token ? { Authorization: `Bearer ${token}` } : {}
+        const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {}
 
         const [statsRes, billingRes] = await Promise.all([
           fetch('/api/admin/stats', { headers }),

@@ -1,20 +1,46 @@
+import { db } from '@/lib/db'
 import { NextRequest, NextResponse } from 'next/server'
 import { authenticateRequest } from '@/lib/auth'
 
-// In-memory settings (migrate to DB later)
-const settingsStore: Record<string, string> = {
-  name: 'TiendApp',
-  defaultPlanId: 'free',
-  maintenanceMode: 'false',
-  registrationsEnabled: 'true',
-  whatsappSupport: '+51999999999',
-  currency: 'PEN',
-  countryCode: 'PE',
-}
-
 // GET /api/settings - Public
 export async function GET() {
-  return NextResponse.json(settingsStore)
+  try {
+    // Try to get from database (PlatformSettings table)
+    // Fallback to defaults if table doesn't exist yet
+    let settings: Record<string, string> = {}
+
+    try {
+      const dbSettings = await db.platformSetting.findMany()
+      for (const s of dbSettings) {
+        settings[s.key] = s.value
+      }
+    } catch {
+      // Table doesn't exist yet, use defaults
+    }
+
+    const defaults: Record<string, string> = {
+      name: 'TiendApp',
+      defaultPlanId: 'free',
+      maintenanceMode: 'false',
+      registrationsEnabled: 'true',
+      whatsappSupport: '+51999999999',
+      currency: 'PEN',
+      countryCode: 'PE',
+    }
+
+    // Merge: defaults as base, DB overrides
+    return NextResponse.json({ ...defaults, ...settings })
+  } catch {
+    return NextResponse.json({
+      name: 'TiendApp',
+      defaultPlanId: 'free',
+      maintenanceMode: 'false',
+      registrationsEnabled: 'true',
+      whatsappSupport: '+51999999999',
+      currency: 'PEN',
+      countryCode: 'PE',
+    })
+  }
 }
 
 // PUT /api/settings - Admin only
@@ -23,6 +49,7 @@ export async function PUT(request: NextRequest) {
   if (auth.error) {
     return NextResponse.json({ error: auth.error }, { status: auth.status })
   }
+  if (!auth.user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
 
   if (auth.user.role !== 'super_admin') {
     return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 })
@@ -33,11 +60,17 @@ export async function PUT(request: NextRequest) {
     const entries = Object.entries(body) as [string, string][]
 
     for (const [key, value] of entries) {
-      settingsStore[key] = value
+      if (typeof key !== 'string' || typeof value !== 'string') continue
+
+      await db.platformSetting.upsert({
+        where: { key },
+        update: { value },
+        create: { key, value },
+      })
     }
 
-    return NextResponse.json({ success: true, settings: settingsStore })
-  } catch (error) {
-    return NextResponse.json({ error: 'Error updating settings' }, { status: 500 })
+    return NextResponse.json({ success: true })
+  } catch {
+    return NextResponse.json({ error: 'Error actualizando configuracion' }, { status: 500 })
   }
 }

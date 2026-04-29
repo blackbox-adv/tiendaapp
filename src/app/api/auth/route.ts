@@ -1,15 +1,17 @@
 import { db } from '@/lib/db'
 import { NextResponse } from 'next/server'
 import { hashPassword, verifyPassword, generateToken } from '@/lib/auth'
+import { validateBody, loginSchema } from '@/lib/validations'
 
 // POST /api/auth - Login
 export async function POST(request: Request) {
   try {
-    const { email, password } = await request.json()
-
-    if (!email || !password) {
-      return NextResponse.json({ error: 'Email y contraseña son requeridos' }, { status: 400 })
+    const body = await request.json()
+    const validation = validateBody(loginSchema, body)
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error }, { status: 400 })
     }
+    const { email, password } = validation.data
 
     const user = await db.user.findUnique({ where: { email } })
 
@@ -21,18 +23,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Cuenta desactivada. Contacta soporte.' }, { status: 403 })
     }
 
-    // Try bcrypt comparison first, fallback to plaintext for migration
+    // Verify password with bcrypt only
     let isMatch = false
-    if (user.password.startsWith('$2')) {
+    try {
       isMatch = await verifyPassword(password, user.password)
-    } else {
-      // Legacy plaintext comparison - will be phased out
-      isMatch = user.password === password
-      if (isMatch) {
-        // Auto-migrate: hash the plaintext password
-        const hashed = await hashPassword(password)
-        await db.user.update({ where: { id: user.id }, data: { password: hashed } })
-      }
+    } catch {
+      return NextResponse.json({ error: 'Error de autenticacion' }, { status: 500 })
     }
 
     if (!isMatch) {
@@ -61,8 +57,8 @@ export async function POST(request: Request) {
       },
     })
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err)
-    return NextResponse.json({ error: 'Error en login', details: msg }, { status: 500 })
+    console.error('[AUTH] Login error:', err instanceof Error ? err.message : String(err))
+    return NextResponse.json({ error: 'Error en login' }, { status: 500 })
   }
 }
 

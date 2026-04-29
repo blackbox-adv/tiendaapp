@@ -133,3 +133,10 @@ model Payment {
   planId String
   plan   Plan @relation(fields: [planId], references: [id])
 }
+
+model PlatformSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}

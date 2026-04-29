@@ -9,6 +9,7 @@ export async function POST(request: Request) {
   if (auth.error) {
     return NextResponse.json({ error: auth.error }, { status: auth.status })
   }
+  if (!auth.user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
   if (auth.user.role !== 'super_admin') {
     return NextResponse.json({ error: 'Solo administradores' }, { status: 403 })
   }
@@ -43,8 +44,8 @@ export async function POST(request: Request) {
 
     const pastDueSubscriptions = await db.subscription.findMany({
       where: { status: 'past_due', nextBillingDate: { lte: sevenDaysAgo } },
-      include: { plan: { where: { type: { not: 'free' } } } },
-    })
+      include: { plan: true },
+    }).then(subs => subs.filter(sub => sub.plan.type !== 'free'))
 
     for (const sub of pastDueSubscriptions) {
       await db.subscription.update({
@@ -81,6 +82,7 @@ export async function POST(request: Request) {
 export async function GET(request: Request) {
   const auth = authenticateRequest(request)
   if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status })
+  if (!auth.user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
   if (auth.user.role !== 'super_admin') return NextResponse.json({ error: 'Solo administradores' }, { status: 403 })
 
   try {
