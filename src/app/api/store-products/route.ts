@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server'
 import { authenticateRequest, requireRole } from '@/lib/auth'
 import { validateBody, createProductSchema, updateProductSchema } from '@/lib/validations'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
+import { sanitizeBasic, sanitizeHtml, sanitizeUrl } from '@/lib/sanitize'
 
 // GET /api/store-products - Public (product browsing)
 export async function GET(request: NextRequest) {
@@ -100,15 +101,21 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Sanitize user-generated content (XSS prevention)
+    const sanitizedName = sanitizeBasic(name)
+    const sanitizedDescription = sanitizeHtml(description || '')
+    const sanitizedImageUrl = sanitizeUrl(imageUrl || '')
+    const sanitizedCategory = sanitizeBasic(category || '')
+
     const product = await db.storeProduct.create({
       data: {
         storeId,
-        name,
-        description: description || '',
+        name: sanitizedName,
+        description: sanitizedDescription,
         price: parseFloat(price.toString()),
         originalPrice: originalPrice ? parseFloat(originalPrice.toString()) : null,
-        imageUrl: imageUrl || '',
-        category: category || '',
+        imageUrl: sanitizedImageUrl,
+        category: sanitizedCategory,
         color: color || null,
         isActive: isActive !== undefined ? isActive : true,
         featured: featured === true,
@@ -139,6 +146,12 @@ export async function PUT(request: NextRequest) {
     }
 
     const { id, ...data } = validation.data
+
+    // Sanitize user-generated content before update
+    if (data.name) data.name = sanitizeBasic(data.name)
+    if (data.description) data.description = sanitizeHtml(data.description)
+    if (data.imageUrl) data.imageUrl = sanitizeUrl(data.imageUrl)
+    if (data.category) data.category = sanitizeBasic(data.category)
 
     // Check ownership through store
     if (!requireRole(auth.user, ['super_admin'])) {

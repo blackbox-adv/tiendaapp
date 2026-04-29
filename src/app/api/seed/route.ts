@@ -2,6 +2,7 @@ import { db } from '@/lib/db'
 import { NextRequest } from 'next/server'
 import { authenticateRequest, hashPassword, requireRole } from '@/lib/auth'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
+import { auditLog, getClientIp } from '@/lib/env'
 
 // POST /api/seed - ADMIN ONLY - Seeds the database
 // NOTE: Changed from GET to POST for security (GET should never mutate data)
@@ -155,17 +156,21 @@ export async function POST(request: NextRequest) {
       await db.platformSetting.create({ data: s })
     }
 
-    return apiSuccess(
-      {
-        success: true,
-        message: 'Base de datos poblada exitosamente',
-        counts: {
+    const counts = {
           plans: await db.plan.count(),
           users: await db.user.count(),
           stores: await db.store.count(),
           products: await db.storeProduct.count(),
           subscriptions: await db.subscription.count(),
-        },
+        }
+
+    auditLog({ action: 'SEED_DB', userId: auth.user.userId, ip: getClientIp(request), details: counts, success: true, statusCode: 200 })
+
+    return apiSuccess(
+      {
+        success: true,
+        message: 'Base de datos poblada exitosamente',
+        counts,
       },
       200,
       request

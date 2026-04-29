@@ -34,9 +34,57 @@ if (typeof setInterval !== 'undefined') {
   }, 5 * 60 * 1000)
 }
 
+// ── Security Headers ──
+const securityHeaders: Record<string, string> = {
+  'X-Frame-Options': 'DENY',
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=()',
+  'X-DNS-Prefetch-Control': 'on',
+  'X-XSS-Protection': '1; mode=block',
+  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+}
+
+// Content Security Policy
+const CSP_POLICY = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "font-src 'self' https://fonts.gstatic.com",
+  "img-src 'self' data: blob: https://images.unsplash.com https://*.tile.openstreetmap.org https://lh3.googleusercontent.com",
+  "connect-src 'self' https://wa.me https://api.culqi.com https://*.supabase.co",
+  "frame-ancestors 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+].join('; ')
+
+function getSecurityHeaders(): Record<string, string> {
+  return {
+    ...securityHeaders,
+    'Content-Security-Policy': CSP_POLICY,
+  }
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const method = request.method
+
+  // ── Security Headers for ALL responses ──
+  const response = NextResponse.next()
+
+  // Apply security headers to page routes (not API)
+  if (!pathname.startsWith('/api/')) {
+    const secHeaders = getSecurityHeaders()
+    for (const [key, value] of Object.entries(secHeaders)) {
+      response.headers.set(key, value)
+    }
+  }
+
+  // API-specific headers
+  if (pathname.startsWith('/api/')) {
+    response.headers.set('X-Content-Type-Options', 'nosniff')
+    response.headers.set('X-Frame-Options', 'DENY')
+  }
 
   // Handle CORS preflight for ALL API routes
   if (method === 'OPTIONS' && pathname.startsWith('/api/')) {
@@ -101,7 +149,7 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // Rate limit: Seed endpoint (max 3 requests per hour per IP - this is dangerous)
+  // Rate limit: Seed endpoint (max 3 requests per hour per IP)
   if (pathname === '/api/seed' && method === 'POST') {
     const key = getRateLimitKey(request, 'seed')
     if (isRateLimited(key, 3, 60 * 60 * 1000)) {
@@ -112,11 +160,12 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  return NextResponse.next()
+  return response
 }
 
 export const config = {
   matcher: [
+    // API routes
     '/api/auth',
     '/api/users',
     '/api/payments',
@@ -129,5 +178,7 @@ export const config = {
     '/api/download-zip',
     '/api/plans',
     '/api/upload',
+    // Page routes (for security headers)
+    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)',
   ],
 }

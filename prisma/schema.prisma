@@ -4,20 +4,22 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:./local.db"
+  url      = env("DATABASE_URL")
 }
 
 // ---- TiendApp SaaS Models ----
+// Note: When migrating to PostgreSQL, change provider to "postgresql"
+// and update DATABASE_URL. All indexes and relations are compatible.
 
 model Plan {
   id          String   @id @default(cuid())
-  type        String   @unique
+  type        String   @unique                    // free, pro, premium
   name        String
   price       Float    @default(0)
   currency    String   @default("PEN")
   maxProducts Int      @default(10)
   description String   @default("")
-  features    String   @default("[]")
+  features    String   @default("[]")              // JSON array as string
   popular     Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -29,9 +31,9 @@ model Plan {
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
-  password  String
+  password  String                                // bcrypt hash
   name      String
-  role      String   @default("store_owner")
+  role      String   @default("store_owner")      // super_admin, store_owner
   phone     String?
   avatar    String?
   isActive  Boolean  @default(true)
@@ -42,6 +44,10 @@ model User {
   stores       Store[]
   subscriptions Subscription[]
   payments     Payment[]
+
+  @@index([role])                                 // For admin queries
+  @@index([isActive])                             // For filtering active users
+  @@index([createdAt])                            // For sorting newest users
 }
 
 model Store {
@@ -49,11 +55,11 @@ model Store {
   name           String
   slug           String   @unique
   description    String   @default("")
-  logo           String   @default("🛍️")
+  logo           String   @default("")
   primaryColor   String   @default("#7C3AED")
   secondaryColor String   @default("#10B981")
   whatsappNumber String?
-  template       String   @default("moderna")
+  template       String   @default("moderna")     // moderna, vibrante, clasica
   category       String   @default("otros")
   isActive       Boolean  @default(true)
   visitCount     Int      @default(0)
@@ -66,6 +72,12 @@ model Store {
   products      StoreProduct[]
   subscriptions Subscription[]
   payments     Payment[]
+
+  @@index([ownerId])                              // Owner's stores lookup
+  @@index([isActive])                             // Active stores filter
+  @@index([category])                             // Category browse
+  @@index([visitCount(sort: Desc)])               // Popular stores
+  @@index([createdAt(sort: Desc)])                // Newest stores
 }
 
 model StoreProduct {
@@ -85,16 +97,22 @@ model StoreProduct {
 
   storeId String
   store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@index([storeId])                              // Products by store
+  @@index([storeId, isActive])                    // Active products per store
+  @@index([storeId, featured(sort: Desc)])        // Featured products per store
+  @@index([createdAt(sort: Desc)])                // Newest products
+  @@index([category])                             // Products by category
 }
 
 model Subscription {
   id              String    @id @default(cuid())
-  status          String    @default("active")   // active, past_due, cancelled, expired
+  status          String    @default("active")    // active, past_due, cancelled, expired
   startDate       DateTime  @default(now())
-  endDate         DateTime?                    // Set when cancelled or expired
-  nextBillingDate DateTime?                    // When the next payment is due
-  billingCycle    String    @default("monthly") // monthly, yearly
-  amountPaid      Float     @default(0)        // Last amount paid
+  endDate         DateTime?                      // Set when cancelled or expired
+  nextBillingDate DateTime?                      // When the next payment is due
+  billingCycle    String    @default("monthly")  // monthly, yearly
+  amountPaid      Float     @default(0)          // Last amount paid
 
   userId String
   user   User @relation(fields: [userId], references: [id])
@@ -106,19 +124,24 @@ model Subscription {
   plan   Plan @relation(fields: [planId], references: [id])
 
   payments Payment[]
+
+  @@index([userId])                               // User's subscriptions
+  @@index([storeId])                              // Store's subscriptions
+  @@index([status])                               // Active subscriptions filter
+  @@unique([userId, storeId, status])             // One active sub per user+store
 }
 
 model Payment {
   id              String   @id @default(cuid())
   amount          Float
   currency        String   @default("PEN")
-  status          String   @default("pending") // pending, completed, failed, refunded
-  paymentMethod   String?                       // culqi, niubiz, bank_transfer, yape, plin
-  externalRef     String?                       // Reference from payment gateway
-  gatewayResponse String?                       // Full gateway response (JSON string)
-  verifiedAt      DateTime?                     // When admin verified the payment
-  verifiedBy      String?                       // Admin user ID who verified
-  notes           String?                       // Admin notes on this payment
+  status          String   @default("pending")   // pending, completed, failed, refunded
+  paymentMethod   String?                        // culqi, niubiz, bank_transfer, yape, plin
+  externalRef     String?                        // Reference from payment gateway
+  gatewayResponse String?                        // Full gateway response (JSON string)
+  verifiedAt      DateTime?                      // When admin verified the payment
+  verifiedBy      String?                        // Admin user ID who verified
+  notes           String?                        // Admin notes on this payment
   createdAt       DateTime @default(now())
 
   subscriptionId String
@@ -132,6 +155,12 @@ model Payment {
 
   planId String
   plan   Plan @relation(fields: [planId], references: [id])
+
+  @@index([userId])                               // User's payments
+  @@index([storeId])                              // Store's payments
+  @@index([status])                               // Payment status filter
+  @@index([createdAt(sort: Desc)])                // Recent payments
+  @@index([externalRef])                          // Gateway reference lookup
 }
 
 model PlatformSetting {
@@ -139,4 +168,6 @@ model PlatformSetting {
   key       String   @unique
   value     String
   updatedAt DateTime @updatedAt
+
+  @@index([key])                                  // Settings lookup
 }

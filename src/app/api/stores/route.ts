@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server'
 import { authenticateRequest, requireRole } from '@/lib/auth'
 import { validateBody, createStoreSchema, updateStoreSchema } from '@/lib/validations'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
+import { sanitizeBasic, sanitizeHtml } from '@/lib/sanitize'
 
 // GET /api/stores - Public (store browsing by slug) or admin-only (list all)
 export async function GET(request: NextRequest) {
@@ -134,8 +135,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Generate unique slug from name
-    const baseSlug = name
+    // Sanitize user-generated content
+    const sanitizedName = sanitizeBasic(name)
+    const sanitizedDescription = sanitizeHtml(description || '')
+    const sanitizedCategory = sanitizeBasic(category || 'general')
+
+    // Generate unique slug from sanitized name
+    const baseSlug = sanitizedName
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
@@ -148,15 +154,15 @@ export async function POST(request: NextRequest) {
     const store = await db.store.create({
       data: {
         ownerId: auth.user.userId,
-        name,
+        name: sanitizedName,
         slug,
-        description: description || '',
+        description: sanitizedDescription,
         logo: logo || '',
         primaryColor: primaryColor || '#7C3AED',
         secondaryColor: secondaryColor || '#10B981',
         whatsappNumber: whatsappNumber || '',
         template: template || 'moderna',
-        category: category || 'general',
+        category: sanitizedCategory,
       },
       include: { owner: { select: { id: true, name: true, email: true } } },
     })
@@ -187,6 +193,11 @@ export async function PUT(request: NextRequest) {
 
     // Prevent changing ownership via this endpoint
     delete (data as Record<string, unknown>).ownerId
+
+    // Sanitize user-generated content
+    if (data.name) data.name = sanitizeBasic(data.name)
+    if (data.description) data.description = sanitizeHtml(data.description)
+    if (data.category) data.category = sanitizeBasic(data.category)
 
     // Check ownership (unless admin)
     if (!requireRole(auth.user, ['super_admin'])) {

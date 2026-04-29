@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { authenticateRequest, hashPassword, requireRole } from '@/lib/auth'
 import { validateBody, registerSchema, updateUserSchema } from '@/lib/validations'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
+import { auditLog, getClientIp } from '@/lib/env'
 
 // GET /api/users - List users (admin only)
 export async function GET(request: NextRequest) {
@@ -70,6 +71,8 @@ export async function POST(request: NextRequest) {
 
     // Remove password from response
     const { password: _, ...safeUser } = user
+
+    auditLog({ action: 'REGISTER', userId: user.id, userEmail: user.email, ip: getClientIp(request), details: { name }, success: true, statusCode: 201 })
 
     return apiSuccess(safeUser, 201, request)
   } catch (error: unknown) {

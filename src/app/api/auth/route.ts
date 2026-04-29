@@ -1,8 +1,9 @@
 import { db } from '@/lib/db'
 import { NextResponse } from 'next/server'
-import { hashPassword, verifyPassword, generateToken, verifyToken, getTokenFromHeader } from '@/lib/auth'
+import { verifyPassword, generateToken, verifyToken } from '@/lib/auth'
 import { validateBody, loginSchema } from '@/lib/validations'
-import { apiError, apiSuccess, handleCorsPreflight, corsHeaders } from '@/lib/api-response'
+import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
+import { auditLog, getClientIp } from '@/lib/env'
 
 // POST /api/auth - Login
 export async function POST(request: Request) {
@@ -13,14 +14,17 @@ export async function POST(request: Request) {
       return apiError(validation.error, 400, undefined, request)
     }
     const { email, password } = validation.data
+    const clientIp = getClientIp(request)
 
     const user = await db.user.findUnique({ where: { email: email.toLowerCase() } })
 
     if (!user) {
+      auditLog({ action: 'LOGIN_FAILED', userEmail: email.toLowerCase(), ip: clientIp, details: { reason: 'user_not_found' }, success: false, statusCode: 401 })
       return apiError('Usuario no encontrado', 401, undefined, request)
     }
 
     if (!user.isActive) {
+      auditLog({ action: 'LOGIN_FAILED', userId: user.id, userEmail: user.email, ip: clientIp, details: { reason: 'account_disabled' }, success: false, statusCode: 403 })
       return apiError('Cuenta desactivada. Contacta soporte.', 403, undefined, request)
     }
 
@@ -32,6 +36,7 @@ export async function POST(request: Request) {
     }
 
     if (!isMatch) {
+      auditLog({ action: 'LOGIN_FAILED', userId: user.id, userEmail: user.email, ip: clientIp, details: { reason: 'wrong_password' }, success: false, statusCode: 401 })
       return apiError('Contrasena incorrecta', 401, undefined, request)
     }
 
@@ -43,6 +48,8 @@ export async function POST(request: Request) {
       email: user.email,
       role: user.role,
     })
+
+    auditLog({ action: 'LOGIN_SUCCESS', userId: user.id, userEmail: user.email, ip: clientIp, details: { role: user.role }, success: true, statusCode: 200 })
 
     return apiSuccess(
       {
