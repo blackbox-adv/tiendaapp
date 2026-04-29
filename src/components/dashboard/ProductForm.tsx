@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { toast } from 'sonner'
 
 export function ProductForm({ productId }: { productId?: string }) {
   const { currentStore, products, navigate, addProduct, updateProduct } = useAppStore()
@@ -76,8 +77,14 @@ export function ProductForm({ productId }: { productId?: string }) {
 
     if (isEditing && productId) {
       await updateProduct(productId, productData)
+      toast.success('Producto actualizado', {
+        description: `"${name.trim()}" fue actualizado correctamente.`,
+      })
     } else {
       await addProduct(productData)
+      toast.success('Producto creado', {
+        description: `"${name.trim()}" fue agregado a tu tienda.`,
+      })
     }
 
     navigate({ page: 'dashboard-products' })

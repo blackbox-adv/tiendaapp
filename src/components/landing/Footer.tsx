@@ -88,6 +88,7 @@ export function Footer() {
               <li><button onClick={() => navigate({ page: 'about' })} className="text-sm text-gray-500 hover:text-violet-600 transition-colors">Sobre nosotros</button></li>
               <li><button onClick={() => navigate({ page: 'contact' })} className="text-sm text-gray-500 hover:text-violet-600 transition-colors">Contacto</button></li>
               <li><button onClick={() => navigate({ page: 'terms' })} className="text-sm text-gray-500 hover:text-violet-600 transition-colors">Términos y condiciones</button></li>
+              <li><button onClick={() => navigate({ page: 'privacy' })} className="text-sm text-gray-500 hover:text-violet-600 transition-colors">Política de privacidad</button></li>
             </ul>
           </div>
 

@@ -95,6 +95,44 @@ export function StoreView({ slug }: { slug: string }) {
   const displayStore = store || apiStore
   const displayProducts = store ? storeProducts : apiProducts
 
+  // SEO: Update document title and meta description
+  useEffect(() => {
+    if (!displayStore) return
+    const title = `${displayStore.name} | TiendApp`
+    const description = displayStore.description
+      ? `${displayStore.description} - Visita la tienda online de ${displayStore.name} en TiendApp.`
+      : `Visita la tienda online de ${displayStore.name} en TiendApp. Productos y precios increibles.`
+
+    document.title = title
+    // Update meta description
+    let metaDesc = document.querySelector('meta[name="description"]')
+    if (!metaDesc) {
+      metaDesc = document.createElement('meta')
+      metaDesc.setAttribute('name', 'description')
+      document.head.appendChild(metaDesc)
+    }
+    metaDesc.setAttribute('content', description)
+
+    // Update Open Graph
+    const setMeta = (prop: string, content: string) => {
+      let el = document.querySelector(`meta[property="${prop}"]`) as HTMLMetaElement | null
+      if (!el) {
+        el = document.createElement('meta')
+        el.setAttribute('property', prop)
+        document.head.appendChild(el)
+      }
+      el.content = content
+    }
+    setMeta('og:title', title)
+    setMeta('og:description', description)
+    setMeta('og:type', 'website')
+
+    return () => {
+      document.title = 'TiendApp | Crea tu tienda online en Perú'
+      if (metaDesc) metaDesc.setAttribute('content', 'Crea tu tienda online en minutos con TiendApp. La plataforma #1 en Perú para emprendedores.')
+    }
+  }, [displayStore])
+
   if (!displayStore && !apiLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-4">

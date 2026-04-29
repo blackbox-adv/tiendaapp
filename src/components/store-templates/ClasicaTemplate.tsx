@@ -1,20 +1,31 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CATEGORIES } from '@/lib/mock-data'
-import { MessageCircle, ShoppingBag, Heart } from 'lucide-react'
+import { MessageCircle, ShoppingBag, Heart, Search, X } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { useAppStore } from '@/lib/store'
 import type { Store, Product } from '@/lib/types'
 
 export function ClasicaTemplate({ store, products, storeSlug }: { store: Store; products: Product[]; storeSlug: string }) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const [searchQuery, setSearchQuery] = useState('')
   const navigate = useAppStore((s) => s.navigate)
 
-  const filteredProducts = selectedCategory === 'all'
-    ? products
-    : products.filter((p) => p.categoryId === selectedCategory)
+  const filteredProducts = useMemo(() => {
+    let result = selectedCategory === 'all'
+      ? products
+      : products.filter((p) => p.categoryId === selectedCategory)
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase()
+      result = result.filter(
+        (p) => p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q)
+      )
+    }
+    return result
+  }, [products, selectedCategory, searchQuery])
 
   const storeCategories = [...new Set(products.map((p) => p.categoryId))]
 
@@ -91,7 +102,29 @@ export function ClasicaTemplate({ store, products, storeSlug }: { store: Store; 
           borderBottomColor: '#EDE0CC',
         }}
       >
-        <div className="max-w-4xl mx-auto px-6 py-3 flex items-center gap-2 overflow-x-auto scrollbar-hide">
+        <div className="max-w-4xl mx-auto px-6 py-3 space-y-3">
+          {/* Search input */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#A88B6E' }} />
+            <input
+              type="text"
+              placeholder="Buscar productos..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-10 py-2.5 text-sm rounded-lg border-2 focus:outline-none transition-all"
+              style={{ backgroundColor: '#FFFBF0', borderColor: '#E8D5B7', color: '#3E2A17' }}
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors"
+              >
+                <X className="w-3 h-3 text-gray-500" />
+              </button>
+            )}
+          </div>
+          {/* Category buttons */}
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
           <button
             onClick={() => setSelectedCategory('all')}
             className={`px-5 py-2 text-sm font-medium whitespace-nowrap transition-all border-2 ${
@@ -139,8 +172,17 @@ export function ClasicaTemplate({ store, products, storeSlug }: { store: Store; 
           <div className="text-center py-20">
             <ShoppingBag className="w-14 h-14 mx-auto mb-4" style={{ color: '#D4B896' }} />
             <p style={{ fontFamily: 'Georgia, serif', color: '#A88B6E' }}>
-              No hay productos en esta categoria
+              {searchQuery ? `Sin resultados para "${searchQuery}"` : 'No hay productos en esta categoria'}
             </p>
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="mt-2 text-xs underline"
+                style={{ color: '#A88B6E' }}
+              >
+                Limpiar busqueda
+              </button>
+            )}
           </div>
         ) : (
           <div className="space-y-5">

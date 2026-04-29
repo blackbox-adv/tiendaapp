@@ -9,6 +9,7 @@ export type PageRoute =
   | { page: 'about' }
   | { page: 'contact' }
   | { page: 'terms' }
+  | { page: 'privacy' }
   | { page: 'dashboard' }
   | { page: 'dashboard-products' }
   | { page: 'dashboard-product-form'; productId?: string }

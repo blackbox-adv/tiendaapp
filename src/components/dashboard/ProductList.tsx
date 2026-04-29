@@ -13,6 +13,7 @@ import {
   AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
   AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { toast } from 'sonner'
 
 export function ProductList() {
   const { currentStore, products, navigate, deleteProduct } = useAppStore()
@@ -27,8 +28,12 @@ export function ProductList() {
 
   const handleDelete = () => {
     if (deleteTarget) {
+      const product = products.find(p => p.id === deleteTarget)
       deleteProduct(deleteTarget)
       setDeleteTarget(null)
+      toast.success('Producto eliminado', {
+        description: product ? `"${product.name}" fue eliminado correctamente.` : 'El producto fue eliminado correctamente.',
+      })
     }
   }
 

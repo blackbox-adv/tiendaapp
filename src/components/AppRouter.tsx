@@ -21,6 +21,7 @@ import { ResetPasswordPage } from '@/components/auth/ResetPasswordPage'
 import { AboutPage } from '@/components/info/AboutPage'
 import { ContactPage } from '@/components/info/ContactPage'
 import { TermsPage } from '@/components/info/TermsPage'
+import { PrivacyPage } from '@/components/info/PrivacyPage'
 
 // Wizard
 import { StoreWizard } from '@/components/wizard/StoreWizard'
@@ -122,6 +123,13 @@ export default function AppRouter() {
         return (
           <motion.div key="terms" variants={pageVariants} initial="initial" animate="animate" exit="exit" className="min-h-screen">
             <TermsPage />
+          </motion.div>
+        )
+
+      case 'privacy':
+        return (
+          <motion.div key="privacy" variants={pageVariants} initial="initial" animate="animate" exit="exit" className="min-h-screen">
+            <PrivacyPage />
           </motion.div>
         )
 

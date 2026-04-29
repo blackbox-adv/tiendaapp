@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CATEGORIES } from '@/lib/mock-data'
-import { MessageCircle, ShoppingBag } from 'lucide-react'
+import { MessageCircle, ShoppingBag, Search, X } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { useAppStore } from '@/lib/store'
 import type { Store, Product } from '@/lib/types'
@@ -17,11 +17,22 @@ function hexToRgb(hex: string) {
 
 export function VibranteTemplate({ store, products, storeSlug }: { store: Store; products: Product[]; storeSlug: string }) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const [searchQuery, setSearchQuery] = useState('')
   const navigate = useAppStore((s) => s.navigate)
 
-  const filteredProducts = selectedCategory === 'all'
-    ? products
-    : products.filter((p) => p.categoryId === selectedCategory)
+  const filteredProducts = useMemo(() => {
+    let result = selectedCategory === 'all'
+      ? products
+      : products.filter((p) => p.categoryId === selectedCategory)
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase()
+      result = result.filter(
+        (p) => p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q)
+      )
+    }
+    return result
+  }, [products, selectedCategory, searchQuery])
 
   const storeCategories = [...new Set(products.map((p) => p.categoryId))]
   const primaryRgb = hexToRgb(store.colors.primary)
@@ -101,7 +112,7 @@ export function VibranteTemplate({ store, products, storeSlug }: { store: Store;
         </div>
       </header>
 
-      {/* Category Chips — colorful with secondary bg */}
+      {/* Search bar + Category Chips */}
       <nav
         className="sticky top-[53px] z-30 backdrop-blur-lg"
         style={{
@@ -109,7 +120,29 @@ export function VibranteTemplate({ store, products, storeSlug }: { store: Store;
           borderBottom: `1px solid rgba(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}, 0.1)`,
         }}
       >
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-2 overflow-x-auto scrollbar-hide">
+        <div className="max-w-6xl mx-auto px-4 py-3 space-y-3">
+          {/* Search input */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Buscar productos..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-10 py-2.5 text-sm rounded-xl border-0 bg-white/80 focus:outline-none focus:ring-2 focus:ring-white shadow-sm transition-all"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors"
+              >
+                <X className="w-3 h-3 text-gray-500" />
+              </button>
+            )}
+          </div>
+
+          {/* Category chips */}
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={() => setSelectedCategory('all')}
@@ -163,8 +196,20 @@ export function VibranteTemplate({ store, products, storeSlug }: { store: Store;
         {filteredProducts.length === 0 ? (
           <div className="text-center py-20">
             <ShoppingBag className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-            <p className="text-gray-400 font-semibold">No hay productos aqui</p>
-            <p className="text-gray-300 text-sm mt-1">Prueba otra categoria</p>
+            <p className="text-gray-400 font-semibold">
+              {searchQuery ? `Sin resultados para "${searchQuery}"` : 'No hay productos aqui'}
+            </p>
+            <p className="text-gray-300 text-sm mt-1">
+              {searchQuery ? 'Intenta con otra busqueda' : 'Prueba otra categoria'}
+            </p>
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="mt-2 text-xs text-gray-500 hover:text-gray-700 underline"
+              >
+                Limpiar busqueda
+              </button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
