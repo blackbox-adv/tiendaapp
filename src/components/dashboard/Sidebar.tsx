@@ -1,13 +1,15 @@
 'use client'
 
+import { useState } from 'react'
 import { useAppStore } from '@/lib/store'
 import { PLANS } from '@/lib/mock-data'
 import {
   LayoutDashboard, Package, Settings, Palette, CreditCard,
-  LogOut, ExternalLink, Store, ChevronLeft
+  LogOut, ExternalLink, Store, Menu, X
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
 import type { PageRoute } from '@/lib/types'
 
 const navItems: { page: PageRoute['page']; label: string; icon: React.ElementType }[] = [
@@ -18,7 +20,7 @@ const navItems: { page: PageRoute['page']; label: string; icon: React.ElementTyp
   { page: 'dashboard-plan', label: 'Plan', icon: CreditCard },
 ]
 
-export function Sidebar() {
+function SidebarContent({ onClose }: { onClose?: () => void }) {
   const { currentUser, currentStore, navigate, logout } = useAppStore()
   const route = useAppStore((s) => s.route)
 
@@ -26,8 +28,18 @@ export function Sidebar() {
 
   const currentPlan = PLANS.find((p) => p.id === currentUser.planId)
 
+  const handleNav = (page: PageRoute['page']) => {
+    navigate({ page } as PageRoute)
+    onClose?.()
+  }
+
+  const handleLogout = () => {
+    logout()
+    onClose?.()
+  }
+
   return (
-    <aside className="w-64 min-h-screen bg-[#1e1b4b] text-white flex flex-col flex-shrink-0">
+    <div className="flex flex-col h-full bg-[#1e1b4b] text-white">
       {/* Logo */}
       <div className="px-5 py-5 flex items-center gap-2">
         <div className="w-8 h-8 rounded-lg bg-violet-500 flex items-center justify-center">
@@ -56,7 +68,7 @@ export function Sidebar() {
           return (
             <button
               key={item.page}
-              onClick={() => navigate({ page: item.page } as PageRoute)}
+              onClick={() => handleNav(item.page)}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                 isActive
                   ? 'bg-violet-600 text-white shadow-lg shadow-violet-600/30'
@@ -98,13 +110,50 @@ export function Sidebar() {
         )}
         <Button
           variant="ghost"
-          onClick={logout}
+          onClick={handleLogout}
           className="w-full text-violet-300 hover:text-white hover:bg-white/10 justify-start gap-3"
         >
           <LogOut className="w-4 h-4" />
           <span className="text-sm">Cerrar sesión</span>
         </Button>
       </div>
-    </aside>
+    </div>
+  )
+}
+
+export function Sidebar() {
+  const { currentUser } = useAppStore()
+  const [open, setOpen] = useState(false)
+
+  if (!currentUser) return null
+
+  return (
+    <>
+      {/* Desktop sidebar */}
+      <aside className="hidden md:flex w-64 min-h-screen flex-col flex-shrink-0">
+        <SidebarContent />
+      </aside>
+
+      {/* Mobile menu button */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-[#1e1b4b] px-4 py-3 flex items-center gap-3">
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon" className="text-white hover:bg-white/10">
+              <Menu className="w-5 h-5" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-72 p-0 bg-[#1e1b4b] border-violet-800">
+            <SheetTitle className="sr-only">Menu de navegacion</SheetTitle>
+            <SidebarContent onClose={() => setOpen(false)} />
+          </SheetContent>
+        </Sheet>
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-violet-500 flex items-center justify-center">
+            <Store className="w-4 h-4 text-white" />
+          </div>
+          <span className="text-base font-bold text-white">TiendApp</span>
+        </div>
+      </div>
+    </>
   )
 }

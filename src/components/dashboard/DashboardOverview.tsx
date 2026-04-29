@@ -5,6 +5,7 @@ import { PLANS, CATEGORIES } from '@/lib/mock-data'
 import { Package, Eye, ShoppingBag, TrendingUp, ArrowRight } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export function DashboardOverview() {
   const { currentUser, currentStore, products, navigate } = useAppStore()
@@ -15,7 +16,6 @@ export function DashboardOverview() {
   const currentPlan = PLANS.find((p) => p.id === currentUser.planId)
   const recentProducts = storeProducts.slice(-4)
 
-  // Compute visit count from store data if available, otherwise use products count as a proxy
   const visitDisplay = (currentStore as unknown as Record<string, unknown>)?.visitCount
     ? String((currentStore as unknown as Record<string, unknown>).visitCount)
     : String(storeProducts.length)
@@ -104,12 +104,14 @@ export function DashboardOverview() {
                 const category = CATEGORIES.find((c) => c.id === product.categoryId)
                 return (
                   <div key={product.id} className="group rounded-xl border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
-                    <div className="h-32 bg-gray-100">
+                    <div className="h-32 bg-gray-100 relative">
                       <img
                         src={product.imageUrl}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        onError={(e) => { (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect fill="%23f3f0ff" width="400" height="400"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="40">📦</text></svg>' }}
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none'
+                        }}
                       />
                     </div>
                     <div className="p-3">

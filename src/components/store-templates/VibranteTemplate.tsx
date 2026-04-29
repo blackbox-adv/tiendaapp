@@ -255,40 +255,6 @@ export function VibranteTemplate({ store, products, storeSlug }: { store: Store;
         )}
       </main>
 
-      {/* Floating WhatsApp Button — always visible */}
-      <motion.button
-        onClick={async () => {
-          try {
-            const res = await fetch('/api/whatsapp', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ storeId: store.id }),
-            })
-            const data = await res.json()
-            if (data.whatsappUrl) {
-              window.open(data.whatsappUrl, '_blank')
-              return
-            }
-          } catch {
-            // Fallback to direct link
-          }
-          window.open(`https://wa.me/${store.whatsappNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Hola, quiero mas informacion sobre sus productos')}`, '_blank')
-        }}
-        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-5 py-3 rounded-full text-white font-bold text-sm shadow-2xl"
-        style={{ backgroundColor: '#25D366' }}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
-        animate={{
-          y: [0, -8, 0],
-        }}
-        transition={{
-          y: { repeat: Infinity, duration: 2, ease: 'easeInOut' },
-        }}
-        aria-label="Contactar por WhatsApp"
-      >
-        <MessageCircle className="w-5 h-5" />
-        <span className="hidden sm:inline">Chatea con nosotros</span>
-      </motion.button>
     </div>
   )
 }

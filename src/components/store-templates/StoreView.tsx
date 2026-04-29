@@ -112,8 +112,40 @@ export function StoreView({ slug }: { slug: string }) {
 
   if (apiLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-400">Cargando tienda...</div>
+      <div className="min-h-screen bg-white">
+        {/* Top nav skeleton */}
+        <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
+          <div className="w-20 h-4 bg-gray-200 rounded animate-pulse" />
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
+            <div className="w-24 h-4 bg-gray-200 rounded animate-pulse" />
+          </div>
+          <div className="w-16" />
+        </div>
+        {/* Store header skeleton */}
+        <div className="max-w-5xl mx-auto px-6 pt-12 pb-8 text-center">
+          <div className="w-14 h-14 rounded-full bg-gray-200 animate-pulse mx-auto mb-4" />
+          <div className="w-48 h-6 bg-gray-200 rounded animate-pulse mx-auto mb-2" />
+          <div className="w-72 h-3 bg-gray-200 rounded animate-pulse mx-auto" />
+        </div>
+        {/* Category pills skeleton */}
+        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center gap-2 overflow-hidden">
+          {[1,2,3,4,5].map(i => (
+            <div key={i} className="w-16 h-8 bg-gray-200 rounded-full animate-pulse" />
+          ))}
+        </div>
+        {/* Product grid skeleton */}
+        <div className="max-w-5xl mx-auto px-6 py-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            {[1,2,3,4,5,6,7,8].map(i => (
+              <div key={i} className="space-y-3">
+                <div className="aspect-square bg-gray-100 rounded-lg animate-pulse" />
+                <div className="w-24 h-3 bg-gray-200 rounded animate-pulse" />
+                <div className="w-16 h-4 bg-gray-200 rounded animate-pulse" />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     )
   }

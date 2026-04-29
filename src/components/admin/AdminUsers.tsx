@@ -7,6 +7,15 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel,
+  AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
+  AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
+} from '@/components/ui/dialog'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface ApiUser {
   id: string; name: string; email: string; role: string; phone: string | null; avatar: string | null
@@ -15,12 +24,44 @@ interface ApiUser {
   subscriptions: { status: string; plan: { id: string; name: string; price: number } }[]
 }
 
+function UserCardSkeleton() {
+  return (
+    <Card className="overflow-hidden">
+      <CardContent className="p-5 space-y-4">
+        <div className="flex items-center gap-3">
+          <Skeleton className="w-10 h-10 rounded-full" />
+          <div className="space-y-2 flex-1">
+            <Skeleton className="h-4 w-28" />
+            <Skeleton className="h-3 w-36" />
+          </div>
+        </div>
+        <div className="space-y-3">
+          {[1,2,3,4,5].map(i => (
+            <div key={i} className="flex items-center justify-between">
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-4 w-16" />
+            </div>
+          ))}
+        </div>
+        <Skeleton className="h-8 w-full rounded-md" />
+      </CardContent>
+    </Card>
+  )
+}
+
 export function AdminUsers() {
   const { navigate } = useAppStore()
   const [users, setUsers] = useState<ApiUser[]>([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const [togglingId, setTogglingId] = useState<string | null>(null)
+
+  // Delete confirmation dialog
+  const [resetDialogOpen, setResetDialogOpen] = useState(false)
+  const [resetTarget, setResetTarget] = useState<{ id: string; email: string } | null>(null)
+  const [newPassword, setNewPassword] = useState('')
+  const [passwordError, setPasswordError] = useState('')
+  const [resetSuccess, setResetSuccess] = useState(false)
 
   useEffect(() => { loadUsers() }, [])
 
@@ -48,18 +89,37 @@ export function AdminUsers() {
     finally { setTogglingId(null) }
   }
 
-  async function resetPassword(userId: string, userEmail: string) {
-    const newPassword = prompt(`Nueva contraseña para ${userEmail}:`)
-    if (!newPassword || newPassword.length < 6) { if (newPassword) alert('Mínimo 6 caracteres') ; return }
+  function openResetDialog(userId: string, userEmail: string) {
+    setResetTarget({ id: userId, email: userEmail })
+    setNewPassword('')
+    setPasswordError('')
+    setResetSuccess(false)
+    setResetDialogOpen(true)
+  }
+
+  async function confirmResetPassword() {
+    if (!resetTarget) return
+    if (newPassword.length < 6) {
+      setPasswordError('Minimo 6 caracteres')
+      return
+    }
     try {
       const token = localStorage.getItem('tiendapp_token')
       const res = await fetch('/api/users', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ id: userId, password: newPassword }),
+        body: JSON.stringify({ id: resetTarget.id, password: newPassword }),
       })
-      if (res.ok) alert('Contraseña actualizada correctamente')
-    } catch (err) { console.error(err) }
+      if (res.ok) {
+        setResetSuccess(true)
+        setTimeout(() => setResetDialogOpen(false), 1500)
+      } else {
+        setPasswordError('Error al actualizar la contraseña')
+      }
+    } catch (err) {
+      console.error(err)
+      setPasswordError('Error de conexion')
+    }
   }
 
   const filteredUsers = users.filter(u =>
@@ -67,7 +127,20 @@ export function AdminUsers() {
     u.email.toLowerCase().includes(search.toLowerCase())
   )
 
-  if (loading) return <div className="flex items-center justify-center py-20"><div className="animate-spin w-8 h-8 border-4 border-violet-200 border-t-violet-600 rounded-full" /></div>
+  if (loading) {
+    return (
+      <div className="space-y-6 animate-fadeIn">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-40" />
+          <Skeleton className="h-4 w-48" />
+        </div>
+        <Skeleton className="h-10 max-w-md w-full rounded-md" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[1,2,3,4,5,6].map(i => <UserCardSkeleton key={i} />)}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6 animate-fadeIn">
@@ -132,7 +205,7 @@ export function AdminUsers() {
                   </div>
                 </div>
                 <div className="flex gap-2 mt-3 pt-3 border-t border-gray-50">
-                  <Button variant="outline" size="sm" className="flex-1 text-xs h-7" onClick={() => resetPassword(user.id, user.email)}>
+                  <Button variant="outline" size="sm" className="flex-1 text-xs h-7" onClick={() => openResetDialog(user.id, user.email)}>
                     <KeyRound className="w-3 h-3 mr-1" /> Reset password
                   </Button>
                 </div>
@@ -144,6 +217,46 @@ export function AdminUsers() {
       {filteredUsers.length === 0 && (
         <Card><CardContent className="py-12 text-center text-gray-400"><Users className="w-12 h-12 mx-auto mb-3 text-gray-300" /><p>No se encontraron usuarios</p></CardContent></Card>
       )}
+
+      {/* Reset Password Dialog */}
+      <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Restablecer contraseña</DialogTitle>
+            <DialogDescription>
+              Nueva contraseña para <span className="font-semibold text-gray-900">{resetTarget?.email}</span>
+            </DialogDescription>
+          </DialogHeader>
+          {resetSuccess ? (
+            <div className="py-6 text-center">
+              <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-3">
+                <svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+              </div>
+              <p className="text-sm font-medium text-green-700">Contraseña actualizada correctamente</p>
+            </div>
+          ) : (
+            <>
+              <div className="space-y-4 py-2">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Nueva contraseña</label>
+                  <Input
+                    type="password"
+                    placeholder="Minimo 6 caracteres"
+                    value={newPassword}
+                    onChange={(e) => { setNewPassword(e.target.value); setPasswordError('') }}
+                    onKeyDown={(e) => { if (e.key === 'Enter') confirmResetPassword() }}
+                  />
+                  {passwordError && <p className="text-xs text-red-500">{passwordError}</p>}
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setResetDialogOpen(false)}>Cancelar</Button>
+                <Button onClick={confirmResetPassword} disabled={!newPassword || newPassword.length < 6}>Guardar</Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -165,7 +165,7 @@ export default function AppRouter() {
         return (
           <motion.div key="dashboard" variants={pageVariants} initial="initial" animate="animate" exit="exit" className="min-h-screen flex">
             <Sidebar />
-            <main className="flex-1 bg-gray-50 p-4 md:p-8 overflow-auto">
+            <main className="flex-1 bg-gray-50 p-4 pt-16 md:pt-8 md:p-8 overflow-auto">
               {dashboardContent()}
             </main>
           </motion.div>

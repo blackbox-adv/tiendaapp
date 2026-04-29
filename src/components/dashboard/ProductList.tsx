@@ -8,10 +8,16 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel,
+  AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
+  AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 export function ProductList() {
   const { currentStore, products, navigate, deleteProduct } = useAppStore()
   const [search, setSearch] = useState('')
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
 
   if (!currentStore) return null
 
@@ -19,11 +25,14 @@ export function ProductList() {
     (p) => p.storeId === currentStore.id && p.isActive && p.name.toLowerCase().includes(search.toLowerCase())
   )
 
-  const handleDelete = (id: string) => {
-    if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
-      deleteProduct(id)
+  const handleDelete = () => {
+    if (deleteTarget) {
+      deleteProduct(deleteTarget)
+      setDeleteTarget(null)
     }
   }
+
+  const productToDelete = deleteTarget ? products.find(p => p.id === deleteTarget) : null
 
   return (
     <div className="space-y-6 animate-fadeIn">
@@ -119,7 +128,7 @@ export function ProductList() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleDelete(product.id)}
+                      onClick={() => setDeleteTarget(product.id)}
                       className="text-red-500 border-red-200 hover:bg-red-50"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -131,6 +140,24 @@ export function ProductList() {
           })}
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eliminar producto</AlertDialogTitle>
+            <AlertDialogDescription>
+              ¿Estás seguro de que deseas eliminar <span className="font-semibold text-gray-900">{productToDelete?.name}</span>? Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-500 hover:bg-red-600 text-white">
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
