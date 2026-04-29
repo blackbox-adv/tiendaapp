@@ -1,0 +1,269 @@
+'use client'
+
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { CATEGORIES } from '@/lib/mock-data'
+import { MessageCircle, ShoppingBag, Heart } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { useAppStore } from '@/lib/store'
+import type { Store, Product } from '@/lib/types'
+
+export function ClasicaTemplate({ store, products, storeSlug }: { store: Store; products: Product[]; storeSlug: string }) {
+  const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const navigate = useAppStore((s) => s.navigate)
+
+  const filteredProducts = selectedCategory === 'all'
+    ? products
+    : products.filter((p) => p.categoryId === selectedCategory)
+
+  const storeCategories = [...new Set(products.map((p) => p.categoryId))]
+
+  const openWhatsApp = async (product: Product) => {
+    try {
+      const res = await fetch('/api/whatsapp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          storeId: store.id,
+          productName: product.name,
+          productPrice: product.price,
+        }),
+      })
+      const data = await res.json()
+      if (data.whatsappUrl) {
+        window.open(data.whatsappUrl, '_blank')
+        return
+      }
+    } catch {
+      // Fallback to direct link
+    }
+    const msg = encodeURIComponent(`Hola, me interesa: ${product.name}`)
+    window.open(
+      `https://wa.me/${store.whatsappNumber.replace(/[^0-9]/g, '')}?text=${msg}`,
+      '_blank'
+    )
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#FFF9F0' }}>
+      {/* Header — Elegant serif, warm tones */}
+      <header
+        className="border-b"
+        style={{
+          backgroundColor: '#FFF5E6',
+          borderBottomColor: '#E8D5B7',
+        }}
+      >
+        <div className="max-w-4xl mx-auto px-6 py-10 text-center">
+          <div
+            className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center text-4xl border-2"
+            style={{
+              backgroundColor: '#FFFBF0',
+              borderColor: store.colors.primary + '40',
+            }}
+          >
+            {store.logo}
+          </div>
+          <h1
+            className="text-3xl font-bold tracking-wide"
+            style={{ fontFamily: 'Georgia, "Times New Roman", serif', color: '#5D3A1A' }}
+          >
+            {store.name}
+          </h1>
+          <div
+            className="w-16 h-0.5 mx-auto mt-4 mb-3"
+            style={{ backgroundColor: store.colors.primary + '50' }}
+          />
+          <p
+            className="max-w-md mx-auto leading-relaxed"
+            style={{ fontFamily: 'Georgia, "Times New Roman", serif', color: '#8B6F5C' }}
+          >
+            {store.description}
+          </p>
+        </div>
+      </header>
+
+      {/* Category Buttons — Rectangular with border, not pills */}
+      <nav
+        className="sticky top-[53px] z-30 border-b"
+        style={{
+          backgroundColor: '#FFFAF2',
+          borderBottomColor: '#EDE0CC',
+        }}
+      >
+        <div className="max-w-4xl mx-auto px-6 py-3 flex items-center gap-2 overflow-x-auto scrollbar-hide">
+          <button
+            onClick={() => setSelectedCategory('all')}
+            className={`px-5 py-2 text-sm font-medium whitespace-nowrap transition-all border-2 ${
+              selectedCategory === 'all'
+                ? 'text-white'
+                : 'bg-white hover:bg-amber-50'
+            }`}
+            style={
+              selectedCategory === 'all'
+                ? { backgroundColor: store.colors.primary, borderColor: store.colors.primary }
+                : { borderColor: '#D4B896', color: '#6B4F3A' }
+            }
+          >
+            Todos ({products.length})
+          </button>
+          {storeCategories.map((catId) => {
+            const cat = CATEGORIES.find((c) => c.id === catId)
+            if (!cat) return null
+            const count = products.filter((p) => p.categoryId === catId).length
+            return (
+              <button
+                key={catId}
+                onClick={() => setSelectedCategory(catId)}
+                className={`px-5 py-2 text-sm font-medium whitespace-nowrap transition-all border-2 ${
+                  selectedCategory === catId
+                    ? 'text-white'
+                    : 'bg-white hover:bg-amber-50'
+                }`}
+                style={
+                  selectedCategory === catId
+                    ? { backgroundColor: store.colors.primary, borderColor: store.colors.primary }
+                    : { borderColor: '#D4B896', color: '#6B4F3A' }
+                }
+              >
+                {cat.name} ({count})
+              </button>
+            )
+          })}
+        </div>
+      </nav>
+
+      {/* Product List — Horizontal layout (image left, text right) */}
+      <main className="flex-1 max-w-4xl mx-auto px-6 py-8 w-full">
+        {filteredProducts.length === 0 ? (
+          <div className="text-center py-20">
+            <ShoppingBag className="w-14 h-14 mx-auto mb-4" style={{ color: '#D4B896' }} />
+            <p style={{ fontFamily: 'Georgia, serif', color: '#A88B6E' }}>
+              No hay productos en esta categoria
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-5">
+            <AnimatePresence mode="popLayout">
+              {filteredProducts.map((product, i) => (
+                <motion.div
+                  key={product.id}
+                  layout
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 30 }}
+                  transition={{ duration: 0.35, delay: i * 0.04 }}
+                  className="group flex flex-col sm:flex-row gap-0 bg-white rounded-xl border-2 overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg"
+                  style={{ borderColor: '#EDE0CC' }}
+                  onClick={() => navigate({ page: 'product-detail', slug: storeSlug, productId: product.id })}
+                >
+                  {/* Image — left side on desktop, top on mobile */}
+                  <div
+                    className="w-full sm:w-44 lg:w-52 flex-shrink-0 overflow-hidden relative"
+                    style={{ backgroundColor: '#FFF8ED' }}
+                  >
+                    <img
+                      src={product.imageUrl}
+                      alt={product.name}
+                      className="w-full h-48 sm:h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src =
+                          'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300"><rect fill="%23FFF5E6" width="300" height="300"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="48">🏷️</text></svg>'
+                      }}
+                    />
+                    {/* Hover "Ver detalle" overlay */}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
+                      <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white text-xs font-semibold px-3 py-1.5 rounded-lg bg-black/30 backdrop-blur-sm">
+                        Ver detalle
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Text — right side */}
+                  <div className="flex-1 p-5 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-start justify-between gap-3">
+                        <h3
+                          className="text-lg font-bold leading-snug"
+                          style={{ fontFamily: 'Georgia, serif', color: '#3E2A17' }}
+                        >
+                          {product.name}
+                        </h3>
+                        {product.originalPrice && (
+                          <Badge
+                            className="text-xs font-semibold border-0 flex-shrink-0 rounded-md"
+                            style={{ backgroundColor: '#FEE2E2', color: '#DC2626' }}
+                          >
+                            -
+                            {Math.round(
+                              ((product.originalPrice - product.price) / product.originalPrice) *
+                                100
+                            )}
+                            %
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-sm mt-2 line-clamp-2 leading-relaxed" style={{ color: '#8B7355' }}>
+                        {product.description}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-between mt-4 pt-3 border-t" style={{ borderColor: '#F0E6D6' }}>
+                      <div className="flex items-baseline gap-2">
+                        <span
+                          className="text-xl font-bold"
+                          style={{ fontFamily: 'Georgia, serif', color: store.colors.primary }}
+                        >
+                          S/{product.price.toFixed(2)}
+                        </span>
+                        {product.originalPrice && (
+                          <span className="text-sm line-through" style={{ color: '#C4A882' }}>
+                            S/{product.originalPrice.toFixed(2)}
+                          </span>
+                        )}
+                      </div>
+                      {/* Small WhatsApp button */}
+                      <motion.button
+                        whileTap={{ scale: 0.9 }}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          openWhatsApp(product)
+                        }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-white text-xs font-semibold shadow-sm transition-colors"
+                        style={{ backgroundColor: '#25D366' }}
+                      >
+                        <MessageCircle className="w-3.5 h-3.5" />
+                        Pedir
+                      </motion.button>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
+      </main>
+
+      {/* Footer */}
+      <footer
+        className="border-t py-8 mt-8"
+        style={{ backgroundColor: '#FFF5E6', borderTopColor: '#E8D5B7' }}
+      >
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <p style={{ fontFamily: 'Georgia, serif', color: '#A88B6E' }} className="text-sm">
+            {store.name}
+          </p>
+          <div className="flex items-center justify-center gap-1.5 mt-2">
+            <Heart className="w-3.5 h-3.5" style={{ color: store.colors.primary }} />
+            <p
+              style={{ fontFamily: 'Georgia, serif', color: '#A88B6E' }}
+              className="text-xs"
+            >
+              Creado con TiendApp
+            </p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  )
+}

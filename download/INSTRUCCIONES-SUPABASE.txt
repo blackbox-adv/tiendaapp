@@ -1,0 +1,43 @@
+# ==========================================
+# INSTRUCCIONES PARA CONECTAR A SUPABASE
+# ==========================================
+
+## Paso 1: Ejecutar SQL en Supabase
+1. Ve a https://supabase.com → Tu proyecto
+2. Click en **SQL Editor** (menú izquierdo)
+3. Copia TODO el contenido del archivo `supabase-setup.sql`
+4. Pégalo en el editor y click **Run**
+5. Esto creará todas las tablas, datos iniciales y políticas de seguridad
+
+## Paso 2: Configurar variables de entorno
+### En Vercel:
+1. Ve a tu proyecto en Vercel → Settings → Environment Variables
+2. Agrega:
+   - `DATABASE_URL` = `postgresql://postgres.pkppcravmaymeberzvfg:Mimamamemima123@db.pkppcravmaymeberzvfg.supabase.co:5432/postgres`
+   - `DIRECT_URL` = `postgresql://postgres.pkppcravmaymeberzvfg:Mimamamemima123@db.pkppcravmaymeberzvfg.supabase.co:5432/postgres`
+
+### Localmente:
+1. Cambia el archivo `.env`:
+   ```
+   DATABASE_URL="postgresql://postgres.pkppcravmaymeberzvfg:Mimamamemima123@db.pkppcravmaymeberzvfg.supabase.co:5432/postgres"
+   DIRECT_URL="postgresql://postgres.pkppcravmaymeberzvfg:Mimamamemima123@db.pkppcravmaymeberzvfg.supabase.co:5432/postgres"
+   ```
+2. Ejecuta: `npx prisma generate`
+3. Reinicia: `npm run dev`
+
+## Paso 3: (Opcional) Si necesitas migrar con Prisma
+```
+npx prisma db push
+```
+
+## Datos del proyecto Supabase:
+- URL: https://pkppcravmaymeberzvfg.supabase.co
+- Anon Key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+- Admin: admin@belen.com / admin123
+
+## Nota sobre imágenes:
+Las imágenes están en `/public/uploads/`. Para Supabase Storage:
+1. Ve a Supabase → Storage
+2. Crea un bucket llamado "products"
+3. Sube las imágenes ahí
+4. Actualiza las URLs en la tabla ProductImage

@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("store_owner")
+  plan      String   @default("free")
+  store     Store?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Store {
+  id             String   @id @default(cuid())
+  name           String
+  slug           String   @unique
+  description    String?
+  logo           String?
+  phone          String?
+  whatsapp       String?
+  email          String?
+  address        String?
+  instagram      String?
+  facebook       String?
+  tiktok         String?
+  primaryColor   String   @default("#1a1a2e")
+  secondaryColor String   @default("#c8a456")
+  template       String   @default("minimal")
+  category       String   @default("general")
+  isActive       Boolean  @default(true)
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  products       Product[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Product {
+  id            String      @id @default(cuid())
+  name          String
+  description   String?
+  price         Float
+  originalPrice Float?
+  currency      String      @default("PEN")
+  images        StoreImage[]
+  isActive      Boolean     @default(true)
+  isFeatured    Boolean     @default(false)
+  order         Int         @default(0)
+  storeId       String
+  store         Store       @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model StoreImage {
+  id        String  @id @default(cuid())
+  url       String
+  alt       String?
+  order     Int     @default(0)
+  isPrimary Boolean @default(false)
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}

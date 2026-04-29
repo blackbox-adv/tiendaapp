@@ -1,0 +1,133 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./local.db"
+}
+
+// ---- TiendApp SaaS Models ----
+
+model Plan {
+  id          String   @id @default(cuid())
+  type        String   @unique
+  name        String
+  price       Float    @default(0)
+  currency    String   @default("PEN")
+  maxProducts Int      @default(10)
+  description String   @default("")
+  features    String   @default("[]")
+  popular     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  subscriptions Subscription[]
+  payments     Payment[]
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("store_owner")
+  phone     String?
+  avatar    String?
+  isActive  Boolean  @default(true)
+  lastLogin DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  stores       Store[]
+  subscriptions Subscription[]
+  payments     Payment[]
+}
+
+model Store {
+  id             String   @id @default(cuid())
+  name           String
+  slug           String   @unique
+  description    String   @default("")
+  logo           String   @default("🛍️")
+  primaryColor   String   @default("#7C3AED")
+  secondaryColor String   @default("#10B981")
+  whatsappNumber String?
+  template       String   @default("moderna")
+  category       String   @default("otros")
+  isActive       Boolean  @default(true)
+  visitCount     Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  ownerId       String
+  owner         User     @relation(fields: [ownerId], references: [id])
+
+  products      StoreProduct[]
+  subscriptions Subscription[]
+  payments     Payment[]
+}
+
+model StoreProduct {
+  id            String   @id @default(cuid())
+  name          String
+  description   String   @default("")
+  price         Float
+  originalPrice Float?
+  imageUrl      String   @default("")
+  category      String   @default("")
+  color         String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
+}
+
+model Subscription {
+  id              String    @id @default(cuid())
+  status          String    @default("active")   // active, past_due, cancelled, expired
+  startDate       DateTime  @default(now())
+  endDate         DateTime?                    // Set when cancelled or expired
+  nextBillingDate DateTime?                    // When the next payment is due
+  billingCycle    String    @default("monthly") // monthly, yearly
+  amountPaid      Float     @default(0)        // Last amount paid
+
+  userId String
+  user   User @relation(fields: [userId], references: [id])
+
+  storeId String
+  store   Store @relation(fields: [storeId], references: [id])
+
+  planId String
+  plan   Plan @relation(fields: [planId], references: [id])
+
+  payments Payment[]
+}
+
+model Payment {
+  id              String   @id @default(cuid())
+  amount          Float
+  currency        String   @default("PEN")
+  status          String   @default("pending") // pending, completed, failed, refunded
+  paymentMethod   String?                       // culqi, niubiz, bank_transfer, yape, plin
+  externalRef     String?                       // Reference from payment gateway
+  gatewayResponse String?                       // Full gateway response (JSON string)
+  verifiedAt      DateTime?                     // When admin verified the payment
+  verifiedBy      String?                       // Admin user ID who verified
+  notes           String?                       // Admin notes on this payment
+  createdAt       DateTime @default(now())
+
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User @relation(fields: [userId], references: [id])
+
+  storeId String
+  store   Store @relation(fields: [storeId], references: [id])
+
+  planId String
+  plan   Plan @relation(fields: [planId], references: [id])
+}
