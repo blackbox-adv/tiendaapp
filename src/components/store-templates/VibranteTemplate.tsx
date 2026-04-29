@@ -189,6 +189,7 @@ export function VibranteTemplate({ store, products, storeSlug }: { store: Store;
             )
           })}
         </div>
+        </div>
       </nav>
 
       {/* Products — Large tall cards, bouncy */}
