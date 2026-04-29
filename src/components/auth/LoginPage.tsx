@@ -103,6 +103,16 @@ export function LoginPage() {
                   </>
                 )}
               </Button>
+
+              <p className="text-center text-sm">
+                <button
+                  type="button"
+                  onClick={() => navigate({ page: 'reset-password' })}
+                  className="text-violet-600 hover:text-violet-700 font-medium"
+                >
+                  ¿Olvidaste tu contraseña?
+                </button>
+              </p>
             </form>
 
             <p className="text-center text-sm text-gray-500 mt-6">

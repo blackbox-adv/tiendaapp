@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
-    const { storeId, name, description, price, originalPrice, imageUrl, category, color, isActive } = body
+    const { storeId, name, description, price, originalPrice, imageUrl, category, color, isActive, featured, rating } = body
 
     if (!storeId || !name || price === undefined) {
       return NextResponse.json(
@@ -80,6 +80,8 @@ export async function POST(request: NextRequest) {
         category: category || '',
         color: color || null,
         isActive: isActive !== undefined ? isActive : true,
+        featured: featured === true,
+        rating: rating ? parseFloat(rating) : 0,
       },
     })
 

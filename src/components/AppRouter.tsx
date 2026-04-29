@@ -15,6 +15,12 @@ import { Footer } from '@/components/landing/Footer'
 // Auth
 import { LoginPage } from '@/components/auth/LoginPage'
 import { RegisterPage } from '@/components/auth/RegisterPage'
+import { ResetPasswordPage } from '@/components/auth/ResetPasswordPage'
+
+// Info
+import { AboutPage } from '@/components/info/AboutPage'
+import { ContactPage } from '@/components/info/ContactPage'
+import { TermsPage } from '@/components/info/TermsPage'
 
 // Wizard
 import { StoreWizard } from '@/components/wizard/StoreWizard'
@@ -27,6 +33,7 @@ import { ProductForm } from '@/components/dashboard/ProductForm'
 import { StoreSettings } from '@/components/dashboard/StoreSettings'
 import { TemplateGallery } from '@/components/dashboard/TemplateGallery'
 import { PlanManager } from '@/components/dashboard/PlanManager'
+import { StoreQRCode } from '@/components/dashboard/StoreQRCode'
 
 // Store templates
 import { StoreView } from '@/components/store-templates/StoreView'
@@ -87,6 +94,34 @@ export default function AppRouter() {
         return (
           <motion.div key="register" variants={pageVariants} initial="initial" animate="animate" exit="exit" className="min-h-screen bg-gray-50">
             <RegisterPage />
+          </motion.div>
+        )
+
+      case 'reset-password':
+        return (
+          <motion.div key="reset-password" variants={pageVariants} initial="initial" animate="animate" exit="exit" className="min-h-screen bg-gray-50">
+            <ResetPasswordPage />
+          </motion.div>
+        )
+
+      case 'about':
+        return (
+          <motion.div key="about" variants={pageVariants} initial="initial" animate="animate" exit="exit" className="min-h-screen">
+            <AboutPage />
+          </motion.div>
+        )
+
+      case 'contact':
+        return (
+          <motion.div key="contact" variants={pageVariants} initial="initial" animate="animate" exit="exit" className="min-h-screen">
+            <ContactPage />
+          </motion.div>
+        )
+
+      case 'terms':
+        return (
+          <motion.div key="terms" variants={pageVariants} initial="initial" animate="animate" exit="exit" className="min-h-screen">
+            <TermsPage />
           </motion.div>
         )
 

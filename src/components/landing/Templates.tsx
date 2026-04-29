@@ -144,7 +144,7 @@ export function Templates() {
                   className="gap-2 border-violet-200 text-violet-600 hover:bg-violet-50"
                 >
                   <Eye className="w-4 h-4" />
-                  Vista previa
+                  Ver demo
                 </Button>
               </div>
             </motion.div>

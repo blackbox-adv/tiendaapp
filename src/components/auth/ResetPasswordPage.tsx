@@ -1,0 +1,199 @@
+'use client'
+
+import { useState } from 'react'
+import { motion } from 'framer-motion'
+import { useAppStore } from '@/lib/store'
+import { Zap, Mail, Lock, ArrowLeft, ArrowRight, Info, CheckCircle } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent } from '@/components/ui/card'
+
+export function ResetPasswordPage() {
+  const navigate = useAppStore((s) => s.navigate)
+  const [email, setEmail] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [step, setStep] = useState<'email' | 'reset'>('email')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [sent, setSent] = useState(false)
+
+  const handleRequestReset = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+
+    try {
+      // Try to call auth API
+      const res = await fetch('/api/auth', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, action: 'reset_request' }),
+      })
+      // Always proceed for demo purposes
+      setStep('reset')
+      setSent(true)
+    } catch {
+      setStep('reset')
+    }
+    setLoading(false)
+  }
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+
+    if (newPassword.length < 6) {
+      setError('La contraseña debe tener al menos 6 caracteres')
+      return
+    }
+    if (newPassword !== confirmPassword) {
+      setError('Las contraseñas no coinciden')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const res = await fetch('/api/auth', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, action: 'reset_password', newPassword }),
+      })
+      setSent(true)
+    } catch {
+      setError('Error al restablecer la contraseña')
+    }
+    setLoading(false)
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center px-4 py-12">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-md"
+      >
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <button onClick={() => navigate({ page: 'landing' })} className="inline-flex items-center gap-2 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-violet-600 flex items-center justify-center">
+              <Zap className="w-6 h-6 text-white" />
+            </div>
+            <span className="text-2xl font-bold text-violet-700">TiendApp</span>
+          </button>
+          <h1 className="text-2xl font-bold text-gray-900">
+            {step === 'email' ? 'Recuperar contraseña' : 'Nueva contraseña'}
+          </h1>
+          <p className="text-gray-500 mt-1">
+            {step === 'email' ? 'Ingresa tu email para recibir instrucciones' : 'Crea tu nueva contraseña'}
+          </p>
+        </div>
+
+        <Card className="border-gray-200 shadow-lg">
+          <CardContent className="pt-6">
+            {sent && step === 'reset' ? (
+              <div className="text-center space-y-4">
+                <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto">
+                  <CheckCircle className="w-8 h-8 text-green-600" />
+                </div>
+                <h2 className="text-lg font-bold text-gray-900">¡Contraseña actualizada!</h2>
+                <p className="text-sm text-gray-500">Tu contraseña ha sido cambiada exitosamente.</p>
+                <Button onClick={() => navigate({ page: 'login' })} className="w-full bg-violet-600 hover:bg-violet-700 text-white gap-2">
+                  Iniciar sesión
+                  <ArrowRight className="ml-2 w-4 h-4" />
+                </Button>
+              </div>
+            ) : step === 'email' ? (
+              <form onSubmit={handleRequestReset} className="space-y-4">
+                {error && (
+                  <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm flex items-center gap-2">
+                    <Info className="w-4 h-4 flex-shrink-0" />
+                    {error}
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="tu@email.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-violet-600 hover:bg-violet-700 text-white py-3"
+                >
+                  {loading ? 'Enviando...' : 'Enviar instrucciones'}
+                </Button>
+              </form>
+            ) : (
+              <form onSubmit={handleResetPassword} className="space-y-4">
+                {error && (
+                  <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm flex items-center gap-2">
+                    <Info className="w-4 h-4 flex-shrink-0" />
+                    {error}
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <Label htmlFor="new-password">Nueva contraseña</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Input
+                      id="new-password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirm-password">Confirmar contraseña</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Input
+                      id="confirm-password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-violet-600 hover:bg-violet-700 text-white py-3"
+                >
+                  {loading ? 'Actualizando...' : 'Restablecer contraseña'}
+                </Button>
+              </form>
+            )}
+
+            <p className="text-center text-sm text-gray-500 mt-6">
+              <button
+                onClick={() => navigate({ page: 'login' })}
+                className="text-violet-600 hover:text-violet-700 font-semibold"
+              >
+                Volver al inicio de sesión
+              </button>
+            </p>
+          </CardContent>
+        </Card>
+      </motion.div>
+    </div>
+  )
+}

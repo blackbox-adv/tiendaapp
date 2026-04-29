@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import { useAppStore } from '@/lib/store'
 import { CATEGORIES } from '@/lib/mock-data'
-import { ArrowLeft, Save } from 'lucide-react'
+import { ArrowLeft, Save, Star } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -20,7 +20,7 @@ export function ProductForm({ productId }: { productId?: string }) {
   )
 
   const formDefaults = useMemo(() => {
-    if (!editProduct) return { name: '', description: '', price: '', originalPrice: '', categoryId: '', imageUrl: '' }
+    if (!editProduct) return { name: '', description: '', price: '', originalPrice: '', categoryId: '', imageUrl: '', featured: false, rating: 0 }
     return {
       name: editProduct.name,
       description: editProduct.description,
@@ -28,6 +28,8 @@ export function ProductForm({ productId }: { productId?: string }) {
       originalPrice: editProduct.originalPrice?.toString() || '',
       categoryId: editProduct.categoryId,
       imageUrl: editProduct.imageUrl,
+      featured: editProduct.featured,
+      rating: editProduct.rating,
     }
   }, [editProduct])
 
@@ -37,6 +39,8 @@ export function ProductForm({ productId }: { productId?: string }) {
   const [originalPrice, setOriginalPrice] = useState(formDefaults.originalPrice)
   const [categoryId, setCategoryId] = useState(formDefaults.categoryId)
   const [imageUrl, setImageUrl] = useState(formDefaults.imageUrl)
+  const [featured, setFeatured] = useState(formDefaults.featured)
+  const [rating, setRating] = useState(formDefaults.rating)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const validate = () => {
@@ -50,7 +54,7 @@ export function ProductForm({ productId }: { productId?: string }) {
     return Object.keys(errs).length === 0
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!validate() || !currentStore) return
 
@@ -62,13 +66,15 @@ export function ProductForm({ productId }: { productId?: string }) {
       categoryId,
       imageUrl: imageUrl.trim(),
       isActive: true,
+      featured,
+      rating,
       storeId: currentStore.id,
     }
 
     if (isEditing && productId) {
-      updateProduct(productId, productData)
+      await updateProduct(productId, productData)
     } else {
-      addProduct(productData)
+      await addProduct(productData)
     }
 
     navigate({ page: 'dashboard-products' })
@@ -203,6 +209,51 @@ export function ProductForm({ productId }: { productId?: string }) {
                 />
               </div>
             )}
+
+            {/* Featured Toggle */}
+            <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50">
+              <div>
+                <Label className="text-sm font-semibold text-gray-900">Producto destacado</Label>
+                <p className="text-xs text-gray-500 mt-0.5">Los productos destacados aparecen primero en tu tienda</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setFeatured(!featured)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  featured ? 'bg-violet-600' : 'bg-gray-300'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    featured ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Rating */}
+            <div className="space-y-2">
+              <Label>Valoración</Label>
+              <div className="flex items-center gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setRating(star)}
+                    className="transition-transform hover:scale-110"
+                  >
+                    <Star
+                      className={`w-7 h-7 ${
+                        star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
+                      }`}
+                    />
+                  </button>
+                ))}
+                <span className="text-sm text-gray-500 ml-2">
+                  {rating > 0 ? `${rating} de 5 estrellas` : 'Sin valoración'}
+                </span>
+              </div>
+            </div>
 
             {/* Actions */}
             <div className="flex gap-3 pt-2">

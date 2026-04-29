@@ -84,12 +84,10 @@ export function Footer() {
           {/* Empresa */}
           <div>
             <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Empresa</h4>
-            {/* TODO: Create real pages for these links */}
             <ul className="space-y-3">
-              <li><a href="#" className="text-sm text-gray-500 hover:text-violet-600 transition-colors">Sobre nosotros</a></li>
-              <li><a href="#" className="text-sm text-gray-500 hover:text-violet-600 transition-colors">Blog</a></li>
-              <li><a href="#" className="text-sm text-gray-500 hover:text-violet-600 transition-colors">Contacto</a></li>
-              <li><a href="#" className="text-sm text-gray-500 hover:text-violet-600 transition-colors">Trabaja con nosotros</a></li>
+              <li><button onClick={() => navigate({ page: 'about' })} className="text-sm text-gray-500 hover:text-violet-600 transition-colors">Sobre nosotros</button></li>
+              <li><button onClick={() => navigate({ page: 'contact' })} className="text-sm text-gray-500 hover:text-violet-600 transition-colors">Contacto</button></li>
+              <li><button onClick={() => navigate({ page: 'terms' })} className="text-sm text-gray-500 hover:text-violet-600 transition-colors">Términos y condiciones</button></li>
             </ul>
           </div>
 

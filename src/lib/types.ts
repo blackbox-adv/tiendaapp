@@ -2,9 +2,13 @@ export type PageRoute =
   | { page: 'landing' }
   | { page: 'login' }
   | { page: 'register' }
+  | { page: 'reset-password' }
   | { page: 'wizard'; step?: number }
   | { page: 'store'; slug: string }
   | { page: 'product-detail'; slug: string; productId: string }
+  | { page: 'about' }
+  | { page: 'contact' }
+  | { page: 'terms' }
   | { page: 'dashboard' }
   | { page: 'dashboard-products' }
   | { page: 'dashboard-product-form'; productId?: string }
@@ -54,6 +58,8 @@ export interface Product {
   categoryId: string
   imageUrl: string
   isActive: boolean
+  featured: boolean
+  rating: number
   storeId: string
   createdAt: string
 }

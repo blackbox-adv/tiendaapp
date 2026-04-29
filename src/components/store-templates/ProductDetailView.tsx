@@ -13,9 +13,11 @@ import {
   Truck,
   ShieldCheck,
   RotateCcw,
+  Star,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { ProductBadges } from './ProductBadges'
 import type { Product, Store } from '@/lib/types'
 
 export function ProductDetailView({ slug, productId }: { slug: string; productId: string }) {
@@ -47,6 +49,13 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0
   const savings = product.originalPrice ? product.originalPrice - product.price : 0
+
+  const isNewProduct = (() => {
+    const created = new Date(product.createdAt)
+    const now = new Date()
+    const diffDays = (now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24)
+    return diffDays <= 7
+  })()
 
   // Related products (same store, same category, different product)
   const relatedProducts = products.filter(
@@ -97,6 +106,22 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
 
   const imgFallback =
     'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"><rect fill="%23fafafa" width="600" height="600"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="16" fill="%23ccc">Imagen no disponible</text></svg>'
+
+  const renderStars = (rating: number) => {
+    return (
+      <div className="flex items-center gap-0.5">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            className={`w-4 h-4 ${
+              star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'
+            }`}
+          />
+        ))}
+        <span className="text-xs text-gray-500 ml-1.5">{rating > 0 ? `${rating}.0` : ''}</span>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -161,14 +186,8 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
                   ;(e.target as HTMLImageElement).src = imgFallback
                 }}
               />
-              {discount > 0 && (
-                <Badge
-                  className="absolute top-4 left-4 text-white text-sm font-bold border-0 rounded-lg px-3 py-1.5 shadow-lg"
-                  style={{ backgroundColor: store.colors.primary }}
-                >
-                  -{discount}% OFF
-                </Badge>
-              )}
+              {/* Badges */}
+              <ProductBadges product={product} primaryColor={store.colors.primary} />
             </div>
           </div>
 
@@ -192,22 +211,19 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
               {product.name}
             </h1>
 
-            {/* Rating placeholder & share */}
-            <div className="flex items-center gap-3 mt-3">
-              <div className="flex items-center gap-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <svg
-                    key={star}
-                    className="w-4 h-4"
-                    fill="#FBBF24"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                ))}
-                <span className="text-xs text-gray-400 ml-1">Nuevo producto</span>
-              </div>
+            {/* Rating & Featured Badge */}
+            <div className="flex items-center gap-3 mt-3 flex-wrap">
+              {renderStars(product.rating)}
+              {product.featured && (
+                <Badge className="bg-amber-100 text-amber-700 text-xs font-semibold border-0">
+                  Destacado
+                </Badge>
+              )}
+              {isNewProduct && (
+                <Badge className="bg-green-100 text-green-700 text-xs font-semibold border-0">
+                  Nuevo
+                </Badge>
+              )}
             </div>
 
             {/* Price */}
@@ -308,7 +324,7 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
                   className="group cursor-pointer"
                   onClick={() => navigate({ page: 'product-detail', slug, productId: rp.id })}
                 >
-                  <div className="aspect-square bg-gray-50 rounded-xl overflow-hidden border border-gray-100">
+                  <div className="relative aspect-square bg-gray-50 rounded-xl overflow-hidden border border-gray-100">
                     <img
                       src={rp.imageUrl}
                       alt={rp.name}
@@ -317,21 +333,15 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
                         ;(e.target as HTMLImageElement).src = imgFallback
                       }}
                     />
-                    {rp.originalPrice && (
-                      <Badge
-                        className="absolute top-2 left-2 text-white text-[10px] font-semibold border-0 rounded-md"
-                        style={{ backgroundColor: store.colors.primary }}
-                      >
-                        -
-                        {Math.round(
-                          ((rp.originalPrice - rp.price) / rp.originalPrice) * 100
-                        )}
-                        %
-                      </Badge>
-                    )}
+                    <ProductBadges product={rp} primaryColor={store.colors.primary} />
                   </div>
                   <div className="mt-2.5 px-0.5">
                     <h3 className="text-sm font-medium text-gray-800 truncate">{rp.name}</h3>
+                    {rp.rating > 0 && (
+                      <div className="mt-1">
+                        {renderStars(rp.rating)}
+                      </div>
+                    )}
                     <div className="flex items-center gap-2 mt-1">
                       <span
                         className="text-sm font-semibold"

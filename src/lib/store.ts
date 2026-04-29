@@ -62,6 +62,8 @@ function transformApiProduct(apiProduct: Record<string, unknown>): Product {
     categoryId: (apiProduct.category as string) || '',
     imageUrl: (apiProduct.imageUrl as string) || '',
     isActive: (apiProduct.isActive as boolean) ?? true,
+    featured: (apiProduct.featured as boolean) ?? false,
+    rating: (apiProduct.rating as number) || 0,
     storeId: (apiProduct.storeId as string) || '',
     createdAt: (apiProduct.createdAt as string) || new Date().toISOString(),
   }
@@ -183,8 +185,8 @@ interface AppState {
   setWizardStep: (step: number) => void
   updateWizardData: (data: Partial<AppState['wizardData']>) => void
   completeWizard: () => void
-  addProduct: (product: Omit<Product, 'id' | 'createdAt'>) => void
-  updateProduct: (id: string, data: Partial<Product>) => void
+  addProduct: (product: Omit<Product, 'id' | 'createdAt'>) => Promise<void>
+  updateProduct: (id: string, data: Partial<Product>) => Promise<void>
   deleteProduct: (id: string) => void
   updateStoreSettings: (data: Partial<Store>) => void
   changePlan: (planId: string) => void
@@ -369,19 +371,71 @@ export const useAppStore = create<AppState>((set, get) => ({
     }))
   },
 
-  addProduct: (product) => {
+  addProduct: async (product) => {
     const newProduct: Product = {
       ...product,
       id: `product-${Date.now()}`,
       createdAt: new Date().toISOString(),
     }
     set((state) => ({ products: [...state.products, newProduct] }))
+    // Persist to API
+    try {
+      const token = getToken()
+      const res = await fetch('/api/store-products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({
+          storeId: product.storeId,
+          name: product.name,
+          description: product.description,
+          price: product.price,
+          originalPrice: product.originalPrice,
+          imageUrl: product.imageUrl,
+          category: product.categoryId,
+          isActive: product.isActive,
+          featured: product.featured,
+          rating: product.rating,
+        }),
+      })
+      if (res.ok) {
+        const saved = await res.json()
+        set((state) => ({
+          products: state.products.map((p) => (p.id === newProduct.id ? { ...p, id: saved.id } : p)),
+        }))
+      }
+    } catch { /* fallback to local state */ }
   },
 
-  updateProduct: (id, data) =>
+  updateProduct: async (id, data) => {
     set((state) => ({
       products: state.products.map((p) => (p.id === id ? { ...p, ...data } : p)),
-    })),
+    }))
+    // Persist to API
+    try {
+      const token = getToken()
+      const res = await fetch('/api/store-products', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ id, ...data, category: data.categoryId }),
+      })
+      if (res.ok) {
+        const saved = await res.json()
+        set((state) => ({
+          products: state.products.map((p) => (p.id === id ? {
+            ...p,
+            name: saved.name ?? p.name,
+            description: saved.description ?? p.description,
+            price: saved.price ?? p.price,
+            originalPrice: saved.originalPrice ?? p.originalPrice,
+            imageUrl: saved.imageUrl ?? p.imageUrl,
+            featured: saved.featured ?? p.featured,
+            rating: saved.rating ?? p.rating,
+            isActive: saved.isActive ?? p.isActive,
+          } : p)),
+        }))
+      }
+    } catch { /* fallback to local state */ }
+  },
 
   deleteProduct: (id) =>
     set((state) => ({
