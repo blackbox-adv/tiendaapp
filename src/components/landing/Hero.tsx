@@ -59,7 +59,7 @@ export function Hero() {
                 const el = document.querySelector('#templates')
                 el?.scrollIntoView({ behavior: 'smooth' })
               }}
-              className="border-white/30 text-white hover:bg-white/10 px-8 py-6 text-lg rounded-xl"
+              className="border-2 border-white text-white hover:bg-white hover:text-violet-700 font-semibold px-8 py-6 text-lg rounded-xl transition-all"
             >
               Ver plantillas
             </Button>

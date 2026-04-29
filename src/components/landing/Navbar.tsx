@@ -29,7 +29,9 @@ export function Navbar() {
       initial={{ y: 0 }}
       animate={{ y: 0 }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'bg-white/80 backdrop-blur-lg shadow-lg border-b border-violet-100' : 'bg-transparent'
+        scrolled
+          ? 'bg-white/80 backdrop-blur-lg shadow-lg border-b border-violet-100'
+          : 'bg-white/70 backdrop-blur-md border-b border-white/20'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -44,16 +46,16 @@ export function Navbar() {
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-8">
-            <button onClick={() => handleNav('#features')} className="text-sm font-medium text-gray-600 hover:text-violet-600 transition-colors">
+            <button onClick={() => handleNav('#features')} className="text-sm font-medium text-gray-700 hover:text-violet-600 transition-colors">
               Funciones
             </button>
-            <button onClick={() => handleNav('#pricing')} className="text-sm font-medium text-gray-600 hover:text-violet-600 transition-colors">
+            <button onClick={() => handleNav('#pricing')} className="text-sm font-medium text-gray-700 hover:text-violet-600 transition-colors">
               Precios
             </button>
-            <button onClick={() => handleNav('#templates')} className="text-sm font-medium text-gray-600 hover:text-violet-600 transition-colors">
+            <button onClick={() => handleNav('#templates')} className="text-sm font-medium text-gray-700 hover:text-violet-600 transition-colors">
               Plantillas
             </button>
-            <button onClick={() => handleNav('#testimonials')} className="text-sm font-medium text-gray-600 hover:text-violet-600 transition-colors">
+            <button onClick={() => handleNav('#testimonials')} className="text-sm font-medium text-gray-700 hover:text-violet-600 transition-colors">
               Testimonios
             </button>
           </div>
@@ -69,7 +71,7 @@ export function Navbar() {
               </Button>
             ) : (
               <>
-                <Button variant="ghost" onClick={() => navigate({ page: 'login' })} className="text-violet-600 hover:text-violet-700 hover:bg-violet-50">
+                <Button variant="outline" onClick={() => navigate({ page: 'login' })} className="border-violet-200 text-violet-700 hover:bg-violet-50 hover:text-violet-800">
                   Iniciar sesión
                 </Button>
                 <Button onClick={() => navigate({ page: 'register' })} className="bg-violet-600 hover:bg-violet-700 text-white">
