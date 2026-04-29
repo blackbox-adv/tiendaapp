@@ -3,13 +3,12 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 // ---- TiendApp SaaS Models ----
-// Note: When migrating to PostgreSQL, change provider to "postgresql"
-// and update DATABASE_URL. All indexes and relations are compatible.
+// Supabase PostgreSQL - ensure DATABASE_URL points to your Supabase project
 
 model Plan {
   id          String   @id @default(cuid())
