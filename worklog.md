@@ -76,3 +76,42 @@ Stage Summary:
 - Key finding: TiendApp has good UI foundation but NOT production-ready for multi-store business
 - 6 critical security issues must be fixed before launch (JWT exposure, no webhook auth, etc.)
 - SQLite and SPA architecture are scalability blockers for hundreds of stores
+---
+Task ID: 2
+Agent: Main Agent
+Task: Fase 2 - Correcciones de Alta Prioridad (seguridad, validacion, CORS, aislamiento)
+
+Work Log:
+- Creo src/lib/api-response.ts: CORS configurado con origins permitidos, errores unificados con codigo HTTP, helpers apiError/apiSuccess/handleCorsPreflight
+- Amplio src/lib/validations.ts con schemas Zod v4 para: createStoreSchema, updateStoreSchema, createProductSchema, updateProductSchema, paymentIntentSchema, webhookSchema, createSubscriptionSchema, updateSubscriptionSchema, settingsSchema, whatsappSchema, updateUserSchema
+- Agrego whitelist ALLOWED_SETTING_KEYS para prevenir inyeccion de keys arbitrarias en settings
+- Reescribo 11 endpoints API (auth, users, stores, store-products, settings, subscriptions, payments, whatsapp, download-zip, plans, seed) con:
+  - Validacion Zod en todos los body requests
+  - CORS headers en todas las respuestas
+  - Errores unificados con codigo HTTP + error code string
+  - Aislamiento de datos: ownership checks en stores, products, subscriptions
+  - Prevent non-admin from setting role/isActive fields
+- Cambio seed endpoint de GET a POST (mas seguro - GET nunca deberia mutar data)
+- Seed ahora incluye Payment model y PlatformSettings defaults
+- Creo src/app/api/upload/route.ts con seguridad:
+  - Validacion MIME type por magic bytes (JPEG, PNG, GIF, WebP, BMP, SVG)
+  - Validacion de extension vs MIME type (double check)
+  - Limite de tamano 5MB, minimo 1 byte
+  - Sanitizacion de nombre de archivo (basename, replace non-alphanumeric)
+  - Filenames unicos con timestamp+random
+- Creo directorio public/uploads/.gitkeep
+- Amplio middleware.ts rate limiting:
+  - Upload: 10 req/min
+  - Seed: 3 req/hora (operacion destructiva)
+  - WhatsApp: 20 req/min
+  - CORS preflight (OPTIONS) global para todas las rutas API
+- Build exitoso: 20 rutas API, 0 errores TypeScript
+- Commit e15ea9a push a GitHub
+
+Stage Summary:
+- 16 archivos modificados, 1080 lineas agregadas, 414 eliminadas
+- 2 archivos nuevos: api-response.ts, upload/route.ts
+- Todos los endpoints API ahora tienen: validacion Zod, CORS, errores unificados, ownership checks
+- Upload seguro con magic byte validation
+- Rate limiting extendido a 6 endpoints (login, register, webhook, whatsapp, upload, seed)
+- NEXT: Fase 3 (media priority) - mejoras de escalabilidad, SSR para store pages, migracion a PostgreSQL
