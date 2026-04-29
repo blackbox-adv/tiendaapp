@@ -1,32 +1,47 @@
 import { db } from '@/lib/db'
-import { NextRequest, NextResponse } from 'next/server'
-import { authenticateRequest } from '@/lib/auth'
+import { NextRequest } from 'next/server'
+import { authenticateRequest, requireRole } from '@/lib/auth'
+import { validateBody, paymentIntentSchema } from '@/lib/validations'
+import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 
 // POST /api/payments/create-intent - Create a payment intent
 export async function POST(request: NextRequest) {
   const auth = authenticateRequest(request)
   if (auth.error) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status })
+    return apiError(auth.error, auth.status, undefined, request)
   }
-  if (!auth.user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
+  if (!auth.user) return apiError('No autenticado', 401, undefined, request)
 
   try {
     const body = await request.json()
-    const { planId, storeId, paymentMethod } = body
-
-    if (!planId) {
-      return NextResponse.json({ error: 'planId es requerido' }, { status: 400 })
+    const validation = validateBody(paymentIntentSchema, body)
+    if (!validation.success) {
+      return apiError(validation.error, 400, undefined, request)
     }
+
+    const { planId, storeId, paymentMethod } = validation.data
 
     const plan = await db.plan.findUnique({ where: { id: planId } })
     if (!plan) {
-      return NextResponse.json({ error: 'Plan no encontrado' }, { status: 404 })
+      return apiError('Plan no encontrado', 404, undefined, request)
+    }
+
+    // Verify store ownership if storeId provided
+    if (storeId) {
+      const store = await db.store.findUnique({ where: { id: storeId }, select: { ownerId: true } })
+      if (!store) {
+        return apiError('Tienda no encontrada', 404, undefined, request)
+      }
+      if (!requireRole(auth.user, ['super_admin']) && store.ownerId !== auth.user.userId) {
+        return apiError('Acceso denegado', 403, undefined, request)
+      }
     }
 
     let targetStoreId = storeId
     if (!targetStoreId) {
       const userStores = await db.store.findMany({
         where: { ownerId: auth.user.userId },
+        select: { id: true },
       })
       if (userStores.length > 0) {
         targetStoreId = userStores[0].id
@@ -46,73 +61,75 @@ export async function POST(request: NextRequest) {
       },
     }
 
-    return NextResponse.json({
+    return apiSuccess({
       success: true,
       paymentIntent,
       message: `Pago preparado: S/${plan.price.toFixed(2)} por plan ${plan.name}`,
-    })
+    }, 200, request)
   } catch {
-    return NextResponse.json({ error: 'Error creando pago' }, { status: 500 })
+    return apiError('Error creando pago', 500, undefined, request)
   }
 }
 
 // GET /api/payments/plans - List available plans with pricing
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const plans = await db.plan.findMany({
       where: { type: { not: 'free' } },
       orderBy: { price: 'asc' },
     })
 
-    return NextResponse.json({
-      plans,
-      currency: 'PEN',
-      currencySymbol: 'S/',
-      countryCode: 'PE',
-      paymentMethods: ['visa', 'mastercard', 'american_express', 'diners_club'],
-      gateway: 'culqi',
-    })
+    return apiSuccess(
+      {
+        plans,
+        currency: 'PEN',
+        currencySymbol: 'S/',
+        countryCode: 'PE',
+        paymentMethods: ['visa', 'mastercard', 'american_express', 'diners_club'],
+        gateway: 'culqi',
+      },
+      200,
+      request
+    )
   } catch {
-    return NextResponse.json({ error: 'Error obteniendo planes de pago' }, { status: 500 })
+    return apiError('Error obteniendo planes de pago', 500, undefined, request)
   }
 }
 
 // PUT /api/payments/webhook - Webhook endpoint for Culqi/Niubiz
-// SECURITY: Requires WEBHOOK_SECRET for signature verification
 export async function PUT(request: NextRequest) {
   // ── 1. Verify webhook signature ──
   const webhookSecret = process.env.WEBHOOK_SECRET
   if (!webhookSecret) {
     console.error('[PAYMENTS] WEBHOOK_SECRET not configured. Rejecting webhook.')
-    return NextResponse.json({ error: 'Webhook not configured' }, { status: 503 })
+    return apiError('Webhook not configured', 503, undefined, request)
   }
 
-  const signature = request.headers.get('x-webhook-signature') || request.headers.get('x-culqi-signature')
+  const signature =
+    request.headers.get('x-webhook-signature') || request.headers.get('x-culqi-signature')
   if (!signature) {
-    return NextResponse.json({ error: 'Missing signature' }, { status: 401 })
+    return apiError('Missing signature', 401, undefined, request)
   }
 
-  // Simple HMAC verification (adapt per gateway docs)
   const crypto = await import('crypto')
   const rawBody = await request.text()
-  const expectedSig = crypto
-    .createHmac('sha256', webhookSecret)
-    .update(rawBody)
-    .digest('hex')
+  const expectedSig = crypto.createHmac('sha256', webhookSecret).update(rawBody).digest('hex')
 
   if (signature !== expectedSig) {
     console.warn('[PAYMENTS] Invalid webhook signature')
-    return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
+    return apiError('Invalid signature', 401, undefined, request)
   }
 
-  // ── 2. Process verified webhook ──
+  // ── 2. Validate body ──
   try {
     const body = JSON.parse(rawBody)
-    const { userId, planId, storeId, status, externalRef } = body
-
-    if (!userId || !planId) {
-      return NextResponse.json({ error: 'Datos de pago incompletos' }, { status: 400 })
+    const { webhookSchema } = await import('@/lib/validations')
+    const validation = webhookSchema.safeParse(body)
+    if (!validation.success) {
+      return apiError('Datos de webhook invalidos', 400, undefined, request)
     }
+
+    const { userId, planId, storeId, status, externalRef } = validation.data
 
     if (status === 'succeeded' || status === 'paid') {
       const existing = await db.subscription.findFirst({
@@ -128,7 +145,7 @@ export async function PUT(request: NextRequest) {
         await db.subscription.create({
           data: {
             userId,
-            storeId: storeId || null,
+            storeId: storeId || '',
             planId,
             status: 'active',
             startDate: new Date(),
@@ -136,7 +153,7 @@ export async function PUT(request: NextRequest) {
         })
       }
 
-      // Log the webhook event
+      // Log the payment event
       await db.payment.create({
         data: {
           amount: 0,
@@ -149,11 +166,16 @@ export async function PUT(request: NextRequest) {
         },
       })
 
-      return NextResponse.json({ success: true, message: 'Suscripcion activada' })
+      return apiSuccess({ success: true, message: 'Suscripcion activada' }, 200, request)
     }
 
-    return NextResponse.json({ success: false, message: 'Pago no completado' }, { status: 400 })
+    return apiSuccess({ success: false, message: 'Pago no completado' }, 400, request)
   } catch {
-    return NextResponse.json({ error: 'Error procesando webhook' }, { status: 500 })
+    return apiError('Error procesando webhook', 500, undefined, request)
   }
+}
+
+// OPTIONS /api/payments - CORS preflight
+export async function OPTIONS(request: NextRequest) {
+  return handleCorsPreflight(request)
 }

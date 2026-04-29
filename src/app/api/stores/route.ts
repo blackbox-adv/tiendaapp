@@ -1,43 +1,69 @@
 import { db } from '@/lib/db'
-import { NextRequest, NextResponse } from 'next/server'
-import { authenticateRequest } from '@/lib/auth'
+import { NextRequest } from 'next/server'
+import { authenticateRequest, requireRole } from '@/lib/auth'
+import { validateBody, createStoreSchema, updateStoreSchema } from '@/lib/validations'
+import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 
-// GET /api/stores - Public (store browsing)
+// GET /api/stores - Public (store browsing by slug) or admin-only (list all)
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const slug = searchParams.get('slug')
 
     if (slug) {
+      // Sanitize slug: only allow alphanumeric and hyphens
+      if (!/^[a-z0-9-]+$/.test(slug)) {
+        return apiError('Slug invalido', 400, undefined, request)
+      }
+
       const store = await db.store.findUnique({
         where: { slug },
         include: {
-          products: { where: { isActive: true }, orderBy: { createdAt: 'desc' } },
+          products: {
+            where: { isActive: true },
+            orderBy: { createdAt: 'desc' },
+            select: {
+              id: true,
+              name: true,
+              description: true,
+              price: true,
+              originalPrice: true,
+              imageUrl: true,
+              category: true,
+              isActive: true,
+              featured: true,
+              rating: true,
+              createdAt: true,
+            },
+          },
           owner: { select: { id: true, name: true, email: true } },
         },
       })
 
       if (!store) {
-        return NextResponse.json({ error: 'Tienda no encontrada' }, { status: 404 })
+        return apiError('Tienda no encontrada', 404, undefined, request)
       }
 
-      await db.store.update({
-        where: { id: store.id },
-        data: { visitCount: { increment: 1 } },
-      })
+      // Increment visit count (fire-and-forget, don't block response)
+      db.store
+        .update({
+          where: { id: store.id },
+          data: { visitCount: { increment: 1 } },
+        })
+        .catch(() => {})
 
-      return NextResponse.json(store)
+      return apiSuccess(store, 200, request)
     }
 
-    // Auth required for listing all stores
+    // List all stores - admin only
     const auth = authenticateRequest(request)
     if (auth.error) {
-      return NextResponse.json({ error: auth.error }, { status: auth.status })
+      return apiError(auth.error, auth.status, undefined, request)
     }
-    if (!auth.user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
+    if (!auth.user) return apiError('No autenticado', 401, undefined, request)
 
-    if (auth.user.role !== 'super_admin') {
-      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 })
+    if (!requireRole(auth.user, ['super_admin'])) {
+      return apiError('Acceso denegado', 403, undefined, request)
     }
 
     const stores = await db.store.findMany({
@@ -49,46 +75,79 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'desc' },
     })
 
-    return NextResponse.json(stores)
+    return apiSuccess(stores, 200, request)
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Error fetching stores'
-    return NextResponse.json({ error: message }, { status: 500 })
+    console.error('[STORES] GET error:', error instanceof Error ? error.message : String(error))
+    return apiError('Error obteniendo tiendas', 500, undefined, request)
   }
 }
 
-// POST /api/stores - Auth required
+// POST /api/stores - Create store (auth required)
 export async function POST(request: NextRequest) {
   const auth = authenticateRequest(request)
   if (auth.error) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status })
+    return apiError(auth.error, auth.status, undefined, request)
   }
-  if (!auth.user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
+  if (!auth.user) return apiError('No autenticado', 401, undefined, request)
 
   try {
     const body = await request.json()
-    const {
-      ownerId, name, description, logo, primaryColor, secondaryColor,
-      whatsappNumber, template, category,
-    } = body
 
-    if (!name) {
-      return NextResponse.json({ error: 'name es requerido' }, { status: 400 })
+    // Remove ownerId from body - users cannot set this
+    const { ownerId: _removedOwnerId, ...cleanBody } = body
+    delete (cleanBody as Record<string, unknown>).ownerId
+
+    const validation = validateBody(createStoreSchema, cleanBody)
+    if (!validation.success) {
+      return apiError(validation.error, 400, undefined, request)
     }
 
-    // User can only create stores for themselves (unless admin)
-    const effectiveOwnerId = ownerId || auth.user.userId
-    if (auth.user.role !== 'super_admin' && auth.user.userId !== ownerId) {
-      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 })
+    const { name, description, category, logo, primaryColor, secondaryColor, whatsappNumber, template } =
+      validation.data
+
+    // Check store limit per plan (owner gets 1 store on free, up to 3 on premium)
+    const existingStores = await db.store.count({
+      where: { ownerId: auth.user.userId },
+    })
+
+    // Check user's plan for store limit
+    const userSubs = await db.subscription.findMany({
+      where: { userId: auth.user.userId, status: 'active' },
+      include: { plan: true },
+      orderBy: { startDate: 'desc' },
+      take: 1,
+    })
+
+    let maxStores = 1 // Default: 1 store
+    if (userSubs.length > 0 && userSubs[0].plan) {
+      const planType = userSubs[0].plan.type
+      if (planType === 'premium') maxStores = 3
+      else if (planType === 'pro') maxStores = 1
     }
 
-    const slug =
-      name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') +
-      '-' + Date.now().toString(36)
+    if (existingStores >= maxStores) {
+      return apiError(
+        `Has alcanzado el limite de ${maxStores} tienda(s). Actualiza tu plan para mas.`,
+        403,
+        undefined,
+        request
+      )
+    }
+
+    // Generate unique slug from name
+    const baseSlug = name
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '')
+      .slice(0, 60)
+
+    const slug = `${baseSlug}-${Date.now().toString(36)}`
 
     const store = await db.store.create({
       data: {
-        ownerId: effectiveOwnerId,
+        ownerId: auth.user.userId,
         name,
         slug,
         description: description || '',
@@ -102,34 +161,41 @@ export async function POST(request: NextRequest) {
       include: { owner: { select: { id: true, name: true, email: true } } },
     })
 
-    return NextResponse.json(store, { status: 201 })
+    return apiSuccess(store, 201, request)
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Error creating store'
-    return NextResponse.json({ error: message }, { status: 500 })
+    console.error('[STORES] POST error:', error instanceof Error ? error.message : String(error))
+    return apiError('Error creando tienda', 500, undefined, request)
   }
 }
 
-// PUT /api/stores - Auth required
+// PUT /api/stores - Update store (auth required + ownership check)
 export async function PUT(request: NextRequest) {
   const auth = authenticateRequest(request)
   if (auth.error) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status })
+    return apiError(auth.error, auth.status, undefined, request)
   }
-  if (!auth.user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
+  if (!auth.user) return apiError('No autenticado', 401, undefined, request)
 
   try {
     const body = await request.json()
-    const { id, ...data } = body
-
-    if (!id) {
-      return NextResponse.json({ error: 'id es requerido' }, { status: 400 })
+    const validation = validateBody(updateStoreSchema, body)
+    if (!validation.success) {
+      return apiError(validation.error, 400, undefined, request)
     }
 
+    const { id, ...data } = validation.data
+
+    // Prevent changing ownership via this endpoint
+    delete (data as Record<string, unknown>).ownerId
+
     // Check ownership (unless admin)
-    if (auth.user.role !== 'super_admin') {
+    if (!requireRole(auth.user, ['super_admin'])) {
       const store = await db.store.findUnique({ where: { id } })
-      if (!store || store.ownerId !== auth.user.userId) {
-        return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 })
+      if (!store) {
+        return apiError('Tienda no encontrada', 404, undefined, request)
+      }
+      if (store.ownerId !== auth.user.userId) {
+        return apiError('Acceso denegado. No eres dueno de esta tienda.', 403, undefined, request)
       }
     }
 
@@ -139,9 +205,14 @@ export async function PUT(request: NextRequest) {
       include: { owner: { select: { id: true, name: true, email: true } } },
     })
 
-    return NextResponse.json(store)
+    return apiSuccess(store, 200, request)
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Error updating store'
-    return NextResponse.json({ error: message }, { status: 500 })
+    console.error('[STORES] PUT error:', error instanceof Error ? error.message : String(error))
+    return apiError('Error actualizando tienda', 500, undefined, request)
   }
+}
+
+// OPTIONS /api/stores - CORS preflight
+export async function OPTIONS(request: NextRequest) {
+  return handleCorsPreflight(request)
 }

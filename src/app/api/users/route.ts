@@ -1,18 +1,19 @@
 import { db } from '@/lib/db'
 import { NextRequest, NextResponse } from 'next/server'
-import { authenticateRequest, hashPassword } from '@/lib/auth'
-import { validateBody, registerSchema } from '@/lib/validations'
+import { authenticateRequest, hashPassword, requireRole } from '@/lib/auth'
+import { validateBody, registerSchema, updateUserSchema } from '@/lib/validations'
+import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 
 // GET /api/users - List users (admin only)
 export async function GET(request: NextRequest) {
   const auth = authenticateRequest(request)
   if (auth.error) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status })
+    return apiError(auth.error, auth.status, undefined, request)
   }
-  if (!auth.user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
+  if (!auth.user) return apiError('No autenticado', 401, undefined, request)
 
-  if (auth.user.role !== 'super_admin') {
-    return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 })
+  if (!requireRole(auth.user, ['super_admin'])) {
+    return apiError('Acceso denegado. Solo administradores.', 403, undefined, request)
   }
 
   try {
@@ -28,11 +29,10 @@ export async function GET(request: NextRequest) {
 
     // Remove password from response
     const safeUsers = users.map(({ password: _, ...user }) => user)
-
-    return NextResponse.json(safeUsers)
+    return apiSuccess(safeUsers, 200, request)
   } catch (error: unknown) {
     console.error('[USERS] GET error:', error instanceof Error ? error.message : String(error))
-    return NextResponse.json({ error: 'Error obteniendo usuarios' }, { status: 500 })
+    return apiError('Error obteniendo usuarios', 500, undefined, request)
   }
 }
 
@@ -42,21 +42,21 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validation = validateBody(registerSchema, body)
     if (!validation.success) {
-      return NextResponse.json({ error: validation.error }, { status: 400 })
+      return apiError(validation.error, 400, undefined, request)
     }
     const { email, password, name, phone } = validation.data
 
     // Check duplicate
-    const existing = await db.user.findUnique({ where: { email } })
+    const existing = await db.user.findUnique({ where: { email: email.toLowerCase() } })
     if (existing) {
-      return NextResponse.json({ error: 'El email ya está registrado' }, { status: 409 })
+      return apiError('El email ya esta registrado', 409, undefined, request)
     }
 
     const hashedPassword = await hashPassword(password)
 
     const user = await db.user.create({
       data: {
-        email,
+        email: email.toLowerCase(),
         password: hashedPassword,
         name,
         role: 'store_owner',
@@ -71,10 +71,10 @@ export async function POST(request: NextRequest) {
     // Remove password from response
     const { password: _, ...safeUser } = user
 
-    return NextResponse.json(safeUser, { status: 201 })
+    return apiSuccess(safeUser, 201, request)
   } catch (error: unknown) {
     console.error('[USERS] POST error:', error instanceof Error ? error.message : String(error))
-    return NextResponse.json({ error: 'Error creando usuario' }, { status: 500 })
+    return apiError('Error creando usuario', 500, undefined, request)
   }
 }
 
@@ -82,31 +82,45 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   const auth = authenticateRequest(request)
   if (auth.error) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status })
+    return apiError(auth.error, auth.status, undefined, request)
   }
-  if (!auth.user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
+  if (!auth.user) return apiError('No autenticado', 401, undefined, request)
 
   try {
     const body = await request.json()
-    const { id, password, ...data } = body
-
-    if (!id) {
-      return NextResponse.json({ error: 'id es requerido' }, { status: 400 })
+    const validation = validateBody(updateUserSchema, body)
+    if (!validation.success) {
+      return apiError(validation.error, 400, undefined, request)
     }
+
+    const { id, password, email, ...data } = validation.data
 
     // Only admin or self can update
-    if (auth.user.role !== 'super_admin' && auth.user.userId !== id) {
-      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 })
+    if (!requireRole(auth.user, ['super_admin']) && auth.user.userId !== id) {
+      return apiError('Acceso denegado. Solo puedes actualizar tu propia cuenta.', 403, undefined, request)
     }
+
+    // Prevent non-admin from changing role or isActive
+    if (!requireRole(auth.user, ['super_admin'])) {
+      delete (data as Record<string, unknown>).isActive
+    }
+
+    // Build update data
+    const updateData: Record<string, unknown> = { ...data }
 
     // Hash password if provided
     if (password) {
-      data.password = await hashPassword(password)
+      updateData.password = await hashPassword(password)
+    }
+
+    // Normalize email if provided
+    if (email) {
+      updateData.email = email.toLowerCase()
     }
 
     const user = await db.user.update({
       where: { id },
-      data,
+      data: updateData,
       include: {
         stores: true,
         subscriptions: true,
@@ -116,9 +130,14 @@ export async function PUT(request: NextRequest) {
     // Remove password from response
     const { password: _, ...safeUser } = user
 
-    return NextResponse.json(safeUser)
+    return apiSuccess(safeUser, 200, request)
   } catch (error: unknown) {
     console.error('[USERS] PUT error:', error instanceof Error ? error.message : String(error))
-    return NextResponse.json({ error: 'Error actualizando usuario' }, { status: 500 })
+    return apiError('Error actualizando usuario', 500, undefined, request)
   }
+}
+
+// OPTIONS /api/users - CORS preflight
+export async function OPTIONS(request: NextRequest) {
+  return handleCorsPreflight(request)
 }

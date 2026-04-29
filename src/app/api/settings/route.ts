@@ -1,12 +1,12 @@
 import { db } from '@/lib/db'
-import { NextRequest, NextResponse } from 'next/server'
-import { authenticateRequest } from '@/lib/auth'
+import { NextRequest } from 'next/server'
+import { authenticateRequest, requireRole } from '@/lib/auth'
+import { validateBody, settingsSchema, ALLOWED_SETTING_KEYS } from '@/lib/validations'
+import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 
 // GET /api/settings - Public
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    // Try to get from database (PlatformSettings table)
-    // Fallback to defaults if table doesn't exist yet
     let settings: Record<string, string> = {}
 
     try {
@@ -28,18 +28,21 @@ export async function GET() {
       countryCode: 'PE',
     }
 
-    // Merge: defaults as base, DB overrides
-    return NextResponse.json({ ...defaults, ...settings })
+    return apiSuccess({ ...defaults, ...settings }, 200, request)
   } catch {
-    return NextResponse.json({
-      name: 'TiendApp',
-      defaultPlanId: 'free',
-      maintenanceMode: 'false',
-      registrationsEnabled: 'true',
-      whatsappSupport: '+51999999999',
-      currency: 'PEN',
-      countryCode: 'PE',
-    })
+    return apiSuccess(
+      {
+        name: 'TiendApp',
+        defaultPlanId: 'free',
+        maintenanceMode: 'false',
+        registrationsEnabled: 'true',
+        whatsappSupport: '+51999999999',
+        currency: 'PEN',
+        countryCode: 'PE',
+      },
+      200,
+      request
+    )
   }
 }
 
@@ -47,21 +50,31 @@ export async function GET() {
 export async function PUT(request: NextRequest) {
   const auth = authenticateRequest(request)
   if (auth.error) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status })
+    return apiError(auth.error, auth.status, undefined, request)
   }
-  if (!auth.user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
+  if (!auth.user) return apiError('No autenticado', 401, undefined, request)
 
-  if (auth.user.role !== 'super_admin') {
-    return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 })
+  if (!requireRole(auth.user, ['super_admin'])) {
+    return apiError('Acceso denegado. Solo administradores.', 403, undefined, request)
   }
 
   try {
     const body = await request.json()
-    const entries = Object.entries(body) as [string, string][]
+    const validation = validateBody(settingsSchema, body)
+    if (!validation.success) {
+      return apiError(validation.error, 400, undefined, request)
+    }
 
-    for (const [key, value] of entries) {
-      if (typeof key !== 'string' || typeof value !== 'string') continue
+    const entries = Object.entries(validation.data)
 
+    // Only allow whitelisted keys
+    const filteredEntries = entries.filter(([key]) => ALLOWED_SETTING_KEYS.has(key))
+
+    if (filteredEntries.length === 0) {
+      return apiError('No se proporcionaron configuraciones validas', 400, undefined, request)
+    }
+
+    for (const [key, value] of filteredEntries) {
       await db.platformSetting.upsert({
         where: { key },
         update: { value },
@@ -69,8 +82,13 @@ export async function PUT(request: NextRequest) {
       })
     }
 
-    return NextResponse.json({ success: true })
+    return apiSuccess({ success: true, updated: filteredEntries.length }, 200, request)
   } catch {
-    return NextResponse.json({ error: 'Error actualizando configuracion' }, { status: 500 })
+    return apiError('Error actualizando configuracion', 500, undefined, request)
   }
+}
+
+// OPTIONS /api/settings - CORS preflight
+export async function OPTIONS(request: NextRequest) {
+  return handleCorsPreflight(request)
 }

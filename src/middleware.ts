@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { corsHeaders } from '@/lib/api-response'
 
 // ── Simple in-memory rate limiter (per IP) ──
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
@@ -35,36 +36,78 @@ if (typeof setInterval !== 'undefined') {
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+  const method = request.method
+
+  // Handle CORS preflight for ALL API routes
+  if (method === 'OPTIONS' && pathname.startsWith('/api/')) {
+    return new NextResponse(null, {
+      status: 204,
+      headers: corsHeaders(request),
+    })
+  }
 
   // Rate limit: Login endpoint (max 10 requests per minute per IP)
-  if (pathname === '/api/auth' && request.method === 'POST') {
+  if (pathname === '/api/auth' && method === 'POST') {
     const key = getRateLimitKey(request, 'login')
     if (isRateLimited(key, 10, 60 * 1000)) {
       return NextResponse.json(
-        { error: 'Demasiados intentos. Intenta de nuevo en 1 minuto.' },
-        { status: 429 }
+        { error: 'Demasiados intentos. Intenta de nuevo en 1 minuto.', code: 'RATE_LIMITED' },
+        { status: 429, headers: corsHeaders(request) }
       )
     }
   }
 
   // Rate limit: Register endpoint (max 5 requests per minute per IP)
-  if (pathname === '/api/users' && request.method === 'POST') {
+  if (pathname === '/api/users' && method === 'POST') {
     const key = getRateLimitKey(request, 'register')
     if (isRateLimited(key, 5, 60 * 1000)) {
       return NextResponse.json(
-        { error: 'Demasiados registros. Intenta de nuevo en 1 minuto.' },
-        { status: 429 }
+        { error: 'Demasiados registros. Intenta de nuevo en 1 minuto.', code: 'RATE_LIMITED' },
+        { status: 429, headers: corsHeaders(request) }
       )
     }
   }
 
   // Rate limit: Payment webhook (max 30 requests per minute per IP)
-  if (pathname === '/api/payments' && request.method === 'PUT') {
+  if (pathname === '/api/payments' && method === 'PUT') {
     const key = getRateLimitKey(request, 'webhook')
     if (isRateLimited(key, 30, 60 * 1000)) {
       return NextResponse.json(
-        { error: 'Rate limit exceeded' },
-        { status: 429 }
+        { error: 'Rate limit exceeded', code: 'RATE_LIMITED' },
+        { status: 429, headers: corsHeaders(request) }
+      )
+    }
+  }
+
+  // Rate limit: WhatsApp endpoint (max 20 requests per minute per IP)
+  if (pathname === '/api/whatsapp' && method === 'POST') {
+    const key = getRateLimitKey(request, 'whatsapp')
+    if (isRateLimited(key, 20, 60 * 1000)) {
+      return NextResponse.json(
+        { error: 'Demasiadas solicitudes. Intenta de nuevo en 1 minuto.', code: 'RATE_LIMITED' },
+        { status: 429, headers: corsHeaders(request) }
+      )
+    }
+  }
+
+  // Rate limit: Upload endpoint (max 10 requests per minute per IP)
+  if (pathname === '/api/upload' && method === 'POST') {
+    const key = getRateLimitKey(request, 'upload')
+    if (isRateLimited(key, 10, 60 * 1000)) {
+      return NextResponse.json(
+        { error: 'Demasiadas subidas. Intenta de nuevo en 1 minuto.', code: 'RATE_LIMITED' },
+        { status: 429, headers: corsHeaders(request) }
+      )
+    }
+  }
+
+  // Rate limit: Seed endpoint (max 3 requests per hour per IP - this is dangerous)
+  if (pathname === '/api/seed' && method === 'POST') {
+    const key = getRateLimitKey(request, 'seed')
+    if (isRateLimited(key, 3, 60 * 60 * 1000)) {
+      return NextResponse.json(
+        { error: 'Limite de seed alcanzado. Espera 1 hora.', code: 'RATE_LIMITED' },
+        { status: 429, headers: corsHeaders(request) }
       )
     }
   }
@@ -77,5 +120,14 @@ export const config = {
     '/api/auth',
     '/api/users',
     '/api/payments',
+    '/api/whatsapp',
+    '/api/seed',
+    '/api/stores',
+    '/api/store-products',
+    '/api/settings',
+    '/api/subscriptions',
+    '/api/download-zip',
+    '/api/plans',
+    '/api/upload',
   ],
 }
