@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useAppStore } from '@/lib/store'
 import { CATEGORIES } from '@/lib/mock-data'
-import { Save, Eye, Store } from 'lucide-react'
+import { Save, Eye, Store, LayoutTemplate } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -18,6 +18,8 @@ export function StoreSettings() {
   const [description, setDescription] = useState(currentStore?.description || '')
   const [whatsapp, setWhatsapp] = useState(currentStore?.whatsappNumber || '')
   const [primaryColor, setPrimaryColor] = useState(currentStore?.colors.primary || '#7C3AED')
+  const [template, setTemplate] = useState<string>(currentStore?.template || 'moderna')
+  const [category, setCategory] = useState(currentStore?.categoryId || '')
 
   if (!currentStore) return null
 
@@ -31,6 +33,8 @@ export function StoreSettings() {
       description,
       whatsappNumber: whatsapp,
       colors: { primary: primaryColor, secondary: primaryColor + '80' },
+      template: template as 'moderna' | 'vibrante' | 'clasica',
+      categoryId: category,
     })
     toast.success('Tienda actualizada', { description: 'Los cambios se guardaron correctamente.' })
   }
@@ -72,6 +76,35 @@ export function StoreSettings() {
                   placeholder="+51999888777"
                 />
                 <p className="text-xs text-gray-400">Este número se mostrará en tu tienda para que los clientes te contacten.</p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Categoría</Label>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  >
+                    <option value="">Seleccionar...</option>
+                    {CATEGORIES.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Plantilla</Label>
+                  <select
+                    value={template}
+                    onChange={(e) => setTemplate(e.target.value)}
+                    className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  >
+                    <option value="moderna">Moderna</option>
+                    <option value="vibrante">Vibrante</option>
+                    <option value="clasica">Clásica</option>
+                  </select>
+                </div>
               </div>
             </CardContent>
           </Card>

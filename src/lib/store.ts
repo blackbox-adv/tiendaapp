@@ -86,67 +86,85 @@ async function syncFromAPI() {
     const headers: Record<string, string> = {}
     if (token) headers['Authorization'] = `Bearer ${token}`
 
-    // Fetch stores
-    const storesRes = await fetch('/api/stores', { headers })
-    if (storesRes.ok) {
-      const apiStores = await storesRes.json()
-      if (Array.isArray(apiStores) && apiStores.length > 0) {
-        const transformedStores = apiStores.map(transformApiStore)
-        // Merge with mock fallback stores that aren't in the API
-        const existingSlugs = new Set(transformedStores.map((s: Store) => s.slug))
-        const fallbackStores = MOCK_STORES.filter((s) => !existingSlugs.has(s.slug))
-        useAppStore.setState({ stores: [...transformedStores, ...fallbackStores] })
-      }
-    }
+    // 1) Restore user session from localStorage token
+    if (token) {
+      try {
+        const authRes = await fetch('/api/auth', { headers })
+        if (authRes.ok) {
+          const { user: apiUser } = await authRes.json()
+          const user = transformApiUser({ ...apiUser, role: apiUser.role })
+          useAppStore.setState({ currentUser: user })
 
-    // Fetch products (need store IDs to fetch)
-    const currentStores = useAppStore.getState().stores
-    if (currentStores.length > 0) {
-      const allProducts: Product[] = []
-      // Fetch products for each store
-      for (const store of currentStores) {
-        const productsRes = await fetch(`/api/store-products?storeId=${store.id}`, { headers })
-        if (productsRes.ok) {
-          const apiProducts = await productsRes.json()
-          if (Array.isArray(apiProducts)) {
-            allProducts.push(...apiProducts.map(transformApiProduct))
+          // 2) Fetch THIS user's stores (owner or admin)
+          const storesRes = await fetch('/api/stores', { headers })
+          if (storesRes.ok) {
+            const apiStores = await storesRes.json()
+            if (Array.isArray(apiStores)) {
+              const transformedStores = apiStores.map(transformApiStore)
+
+              // Set currentStore to the first store (owner typically has 1)
+              if (transformedStores.length > 0 && !useAppStore.getState().currentStore) {
+                useAppStore.setState({ currentStore: transformedStores[0] })
+              }
+
+              // Replace stores entirely (no mock data mixing)
+              useAppStore.setState({ stores: transformedStores })
+
+              // 3) Fetch products for user's stores
+              const allProducts: Product[] = []
+              for (const store of transformedStores) {
+                const productsRes = await fetch(`/api/store-products?storeId=${store.id}`, { headers })
+                if (productsRes.ok) {
+                  const apiProducts = await productsRes.json()
+                  if (Array.isArray(apiProducts)) {
+                    allProducts.push(...apiProducts.map(transformApiProduct))
+                  }
+                }
+              }
+              useAppStore.setState({ products: allProducts })
+            }
+          }
+
+          // 4) If admin, also fetch all users
+          if (user.role === 'admin') {
+            const usersRes = await fetch('/api/users', { headers })
+            if (usersRes.ok) {
+              const apiUsers = await usersRes.json()
+              if (Array.isArray(apiUsers) && apiUsers.length > 0) {
+                useAppStore.setState({ users: apiUsers.map(transformApiUser) })
+              }
+            }
+
+            // 5) Load platform settings from API
+            const settingsRes = await fetch('/api/settings')
+            if (settingsRes.ok) {
+              const settingsData = await settingsRes.json()
+              if (settingsData && typeof settingsData === 'object') {
+                useAppStore.setState({
+                  platformSettings: {
+                    name: settingsData.name || 'TiendApp',
+                    defaultPlanId: settingsData.defaultPlanId || 'free',
+                    maintenanceMode: settingsData.maintenanceMode === 'true',
+                    registrationsEnabled: settingsData.registrationsEnabled !== 'false',
+                  },
+                })
+              }
+            }
           }
         }
-      }
-      if (allProducts.length > 0) {
-        useAppStore.setState({ products: allProducts })
-      }
-    }
-
-    // Fetch users (admin only, may fail for non-admin)
-    const usersRes = await fetch('/api/users', { headers })
-    if (usersRes.ok) {
-      const apiUsers = await usersRes.json()
-      if (Array.isArray(apiUsers) && apiUsers.length > 0) {
-        const transformedUsers = apiUsers.map(transformApiUser)
-        // Keep the admin user from mock data
-        const mockAdmin = MOCK_USERS.find((u) => u.role === 'admin')
-        const hasAdmin = apiUsers.some((u: Record<string, unknown>) => u.role === 'super_admin')
-        if (mockAdmin && !hasAdmin) {
-          transformedUsers.unshift(mockAdmin)
+      } catch (err) {
+        // Token expired or invalid — clear it
+        console.warn('[Zustand] Token invalid, clearing session:', err)
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('tiendapp_token')
+          localStorage.removeItem('tiendapp_user')
         }
-        useAppStore.setState({ users: transformedUsers })
-      }
-    }
-
-    // Restore user session from localStorage if token exists
-    if (token) {
-      const authRes = await fetch('/api/auth', { headers })
-      if (authRes.ok) {
-        const { user: apiUser } = await authRes.json()
-        const user = transformApiUser({ ...apiUser, role: apiUser.role })
-        useAppStore.setState({ currentUser: user })
       }
     }
 
     console.log('[Zustand] Synced from API successfully')
   } catch (error) {
-    console.warn('[Zustand] API sync failed, using mock data fallback:', error)
+    console.warn('[Zustand] API sync failed, using defaults:', error)
   }
 }
 
@@ -271,16 +289,32 @@ export const useAppStore = create<AppState>((set, get) => ({
         createdAt: new Date().toISOString(),
       }
 
-      // Fetch store for this user
+      // Fetch stores for this user (GET /api/stores now returns owner's own stores)
       let store: Store | null = null
       const storesRes = await fetch('/api/stores', {
         headers: { Authorization: `Bearer ${token}` },
       })
       if (storesRes.ok) {
-        const stores = await storesRes.json()
-        const myStore = Array.isArray(stores) ? stores.find((s: { ownerId: string }) => s.ownerId === apiUser.id) : null
-        if (myStore) {
-          store = transformApiStore(myStore)
+        const apiStores = await storesRes.json()
+        if (Array.isArray(apiStores) && apiStores.length > 0) {
+          const transformedStores = apiStores.map(transformApiStore)
+          store = transformedStores[0]
+          set({ stores: transformedStores })
+
+          // Fetch products for the store
+          const allProducts: Product[] = []
+          for (const s of transformedStores) {
+            const productsRes = await fetch(`/api/store-products?storeId=${s.id}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            })
+            if (productsRes.ok) {
+              const apiProducts = await productsRes.json()
+              if (Array.isArray(apiProducts)) {
+                allProducts.push(...apiProducts.map(transformApiProduct))
+              }
+            }
+          }
+          set({ products: allProducts })
         }
       }
 
@@ -511,6 +545,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       if (data.description !== undefined) apiData.description = data.description
       if (data.whatsappNumber !== undefined) apiData.whatsappNumber = data.whatsappNumber
       if (data.template !== undefined) apiData.template = data.template
+      if (data.categoryId !== undefined) apiData.category = data.categoryId
       if (data.colors) {
         apiData.primaryColor = data.colors.primary
         apiData.secondaryColor = data.colors.secondary

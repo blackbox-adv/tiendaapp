@@ -56,18 +56,29 @@ export async function GET(request: NextRequest) {
       return apiSuccess(store, 200, request)
     }
 
-    // List all stores - admin only
+    // Auth check (required for any store listing)
     const auth = authenticateRequest(request)
     if (auth.error) {
       return apiError(auth.error, auth.status, undefined, request)
     }
     if (!auth.user) return apiError('No autenticado', 401, undefined, request)
 
-    if (!requireRole(auth.user, ['super_admin'])) {
-      return apiError('Acceso denegado', 403, undefined, request)
+    // Admin gets all stores; owner gets only their own
+    if (requireRole(auth.user, ['super_admin'])) {
+      const stores = await db.store.findMany({
+        include: {
+          owner: { select: { id: true, name: true, email: true } },
+          _count: { select: { products: true } },
+          subscriptions: true,
+        },
+        orderBy: { createdAt: 'desc' },
+      })
+      return apiSuccess(stores, 200, request)
     }
 
-    const stores = await db.store.findMany({
+    // Regular owner: return their own stores
+    const myStores = await db.store.findMany({
+      where: { ownerId: auth.user.userId },
       include: {
         owner: { select: { id: true, name: true, email: true } },
         _count: { select: { products: true } },
@@ -76,7 +87,7 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'desc' },
     })
 
-    return apiSuccess(stores, 200, request)
+    return apiSuccess(myStores, 200, request)
   } catch (error: unknown) {
     console.error('[STORES] GET error:', error instanceof Error ? error.message : String(error))
     return apiError('Error obteniendo tiendas', 500, undefined, request)
