@@ -184,7 +184,7 @@ interface AppState {
   getToken: () => string
   setWizardStep: (step: number) => void
   updateWizardData: (data: Partial<AppState['wizardData']>) => void
-  completeWizard: () => void
+  completeWizard: () => Promise<void>
   addProduct: (product: Omit<Product, 'id' | 'createdAt'>) => Promise<void>
   updateProduct: (id: string, data: Partial<Product>) => Promise<void>
   deleteProduct: (id: string) => void
@@ -339,11 +339,12 @@ export const useAppStore = create<AppState>((set, get) => ({
       wizardData: { ...state.wizardData, ...data },
     })),
 
-  completeWizard: () => {
+  completeWizard: async () => {
     const { currentUser, wizardData } = get()
     if (!currentUser) return
 
-    const newStore: Store = {
+    // Optimistic local store for instant UI
+    const tempStore: Store = {
       id: `store-${Date.now()}`,
       name: wizardData.storeName,
       slug: wizardData.storeName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
@@ -360,15 +361,49 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
 
     set((state) => ({
-      stores: [...state.stores, newStore],
-      currentStore: newStore,
-      currentUser: { ...currentUser, storeId: newStore.id, planId: wizardData.planId },
+      stores: [...state.stores, tempStore],
+      currentStore: tempStore,
+      currentUser: { ...currentUser, storeId: tempStore.id, planId: wizardData.planId },
       users: state.users.map((u) =>
-        u.id === currentUser.id ? { ...u, storeId: newStore.id, planId: wizardData.planId } : u
+        u.id === currentUser.id ? { ...u, storeId: tempStore.id, planId: wizardData.planId } : u
       ),
       route: { page: 'dashboard' },
       history: [{ page: 'dashboard' }],
     }))
+
+    // Persist to API
+    try {
+      const token = getToken()
+      const res = await fetch('/api/stores', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({
+          name: wizardData.storeName,
+          description: wizardData.storeDescription,
+          category: wizardData.storeCategory || 'general',
+          logo: wizardData.storeLogo || '🏪',
+          primaryColor: wizardData.storeColors.primary,
+          secondaryColor: wizardData.storeColors.secondary || '#10B981',
+          whatsappNumber: wizardData.storeWhatsapp,
+          template: wizardData.template,
+        }),
+      })
+      if (res.ok) {
+        const saved = await res.json()
+        const realStore = transformApiStore(saved)
+        // Replace temp store with real one from API
+        set((state) => ({
+          stores: state.stores.map((s) => s.id === tempStore.id ? realStore : s),
+          currentStore: realStore,
+          currentUser: { ...state.currentUser!, storeId: realStore.id },
+        }))
+      } else {
+        const data = await res.json().catch(() => ({}))
+        console.warn('[Store] Failed to create store on server:', data.error)
+      }
+    } catch (error) {
+      console.warn('[Store] Error creating store:', error)
+    }
   },
 
   addProduct: async (product) => {
@@ -458,15 +493,46 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
   },
 
-  updateStoreSettings: (data) =>
-    set((state) => {
-      const storeId = state.currentStore?.id
-      if (!storeId) return state
-      return {
-        currentStore: state.currentStore ? { ...state.currentStore, ...data } : null,
-        stores: state.stores.map((s) => (s.id === storeId ? { ...s, ...data } : s)),
+  updateStoreSettings: (data) => {
+    const storeId = get().currentStore?.id
+    if (!storeId) return
+
+    // Update local state immediately (optimistic)
+    set((state) => ({
+      currentStore: state.currentStore ? { ...state.currentStore, ...data } : null,
+      stores: state.stores.map((s) => (s.id === storeId ? { ...s, ...data } : s)),
+    }))
+
+    // Persist to API
+    try {
+      const token = getToken()
+      const apiData: Record<string, unknown> = { id: storeId }
+      if (data.name !== undefined) apiData.name = data.name
+      if (data.description !== undefined) apiData.description = data.description
+      if (data.whatsappNumber !== undefined) apiData.whatsappNumber = data.whatsappNumber
+      if (data.template !== undefined) apiData.template = data.template
+      if (data.colors) {
+        apiData.primaryColor = data.colors.primary
+        apiData.secondaryColor = data.colors.secondary
       }
-    }),
+      if (data.logo !== undefined) apiData.logo = data.logo
+
+      fetch('/api/stores', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify(apiData),
+      }).then(async (res) => {
+        if (res.ok) {
+          const saved = await res.json()
+          const realStore = transformApiStore(saved)
+          set((state) => ({
+            currentStore: realStore,
+            stores: state.stores.map((s) => (s.id === storeId ? realStore : s)),
+          }))
+        }
+      }).catch(() => { /* fallback to local state */ })
+    } catch { /* fallback to local state */ }
+  },
 
   changePlan: (planId) =>
     set((state) => {

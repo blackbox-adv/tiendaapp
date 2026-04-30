@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useAppStore } from '@/lib/store'
 import { Settings, Save, Info } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -18,13 +19,37 @@ export function AdminSettings() {
   const [maintenanceMode, setMaintenanceMode] = useState(platformSettings.maintenanceMode)
   const [registrationsEnabled, setRegistrationsEnabled] = useState(platformSettings.registrationsEnabled)
 
-  const handleSave = () => {
-    updatePlatformSettings({
-      name,
-      defaultPlanId,
-      maintenanceMode,
-      registrationsEnabled,
-    })
+  const [saving, setSaving] = useState(false)
+
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      const token = localStorage.getItem('tiendapp_token')
+      const res = await fetch('/api/settings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          name,
+          defaultPlanId,
+          maintenanceMode: String(maintenanceMode),
+          registrationsEnabled: String(registrationsEnabled),
+        }),
+      })
+      if (res.ok) {
+        updatePlatformSettings({ name, defaultPlanId, maintenanceMode, registrationsEnabled })
+        toast.success('Configuración guardada', { description: 'Los cambios se aplicaron correctamente.' })
+      } else {
+        const data = await res.json().catch(() => ({}))
+        toast.error('Error al guardar', { description: data.error || 'No se pudo guardar la configuración.' })
+      }
+    } catch {
+      toast.error('Error de conexión', { description: 'No se pudo conectar al servidor.' })
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -107,9 +132,9 @@ export function AdminSettings() {
       </Card>
 
       {/* Save */}
-      <Button onClick={handleSave} className="bg-violet-600 hover:bg-violet-700 text-white gap-2">
+      <Button onClick={handleSave} disabled={saving} className="bg-violet-600 hover:bg-violet-700 text-white gap-2">
         <Save className="w-4 h-4" />
-        Guardar cambios
+        {saving ? 'Guardando...' : 'Guardar cambios'}
       </Button>
     </div>
   )
