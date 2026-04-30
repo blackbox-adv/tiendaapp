@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useAppStore } from '@/lib/store'
 import { CATEGORIES } from '@/lib/mock-data'
@@ -25,6 +26,47 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
 
   const store = stores.find((s) => s.slug === slug && s.isActive)
   const product = products.find((p) => p.id === productId && p.isActive)
+
+  // SEO: Update document title and meta description
+  useEffect(() => {
+    if (!store || !product) return
+    const title = `${product.name} | ${store.name}`
+    const description = product.description
+      ? `${product.description.substring(0, 160)} - ${store.name} en TiendApp.`
+      : `Compra ${product.name} por S/${product.price.toFixed(2)} en ${store.name}. Visita la tienda en TiendApp.`
+
+    document.title = title
+    // Update meta description
+    let metaDesc = document.querySelector('meta[name="description"]') as HTMLMetaElement | null
+    if (!metaDesc) {
+      metaDesc = document.createElement('meta')
+      metaDesc.setAttribute('name', 'description')
+      document.head.appendChild(metaDesc)
+    }
+    metaDesc.setAttribute('content', description)
+
+    // Update Open Graph
+    const setMeta = (prop: string, content: string) => {
+      let el = document.querySelector(`meta[property="${prop}"]`) as HTMLMetaElement | null
+      if (!el) {
+        el = document.createElement('meta')
+        el.setAttribute('property', prop)
+        document.head.appendChild(el)
+      }
+      el.content = content
+    }
+    setMeta('og:title', title)
+    setMeta('og:description', description)
+    setMeta('og:image', product.imageUrl)
+    setMeta('og:type', 'product')
+    setMeta('product:price:amount', product.price.toString())
+    setMeta('product:price:currency', 'PEN')
+
+    return () => {
+      document.title = 'TiendApp | Crea tu tienda online en Perú'
+      if (metaDesc) metaDesc.setAttribute('content', 'Crea tu tienda online en minutos con TiendApp. La plataforma #1 en Perú para emprendedores.')
+    }
+  }, [store, product])
 
   if (!store || !product) {
     return (

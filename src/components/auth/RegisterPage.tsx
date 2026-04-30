@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useAppStore } from '@/lib/store'
 import { Zap, Mail, Lock, User, ArrowRight, Info, Check } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -41,11 +42,14 @@ export function RegisterPage() {
     setLoading(true)
     await new Promise((r) => setTimeout(r, 500))
 
-    const success = register(name, email, password)
+    const success = await register(name, email, password)
     setLoading(false)
 
-    if (!success) {
+    if (success) {
+      toast.success('Cuenta creada', { description: 'Bienvenido a TiendApp. Configura tu tienda.' })
+    } else {
       setError('Este email ya está registrado.')
+      toast.error('Error al registrarse', { description: 'Este email ya está registrado.' })
     }
   }
 

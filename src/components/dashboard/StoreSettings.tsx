@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useAppStore } from '@/lib/store'
 import { CATEGORIES } from '@/lib/mock-data'
 import { Save, Eye, Store } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -21,12 +22,17 @@ export function StoreSettings() {
   if (!currentStore) return null
 
   const handleSave = () => {
+    if (!name.trim()) {
+      toast.error('Error', { description: 'El nombre de la tienda es obligatorio.' })
+      return
+    }
     updateStoreSettings({
       name,
       description,
       whatsappNumber: whatsapp,
       colors: { primary: primaryColor, secondary: primaryColor + '80' },
     })
+    toast.success('Tienda actualizada', { description: 'Los cambios se guardaron correctamente.' })
   }
 
   const presetColors = ['#7C3AED', '#EC4899', '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4']

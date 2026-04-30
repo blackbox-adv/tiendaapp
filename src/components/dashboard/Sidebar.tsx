@@ -7,6 +7,7 @@ import {
   LayoutDashboard, Package, Settings, Palette, CreditCard,
   LogOut, ExternalLink, Store, Menu, X
 } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
@@ -36,6 +37,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
   const handleLogout = () => {
     logout()
     onClose?.()
+    toast.info('Sesión cerrada', { description: 'Has cerrado sesión correctamente.' })
   }
 
   return (

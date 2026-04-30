@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useAppStore } from '@/lib/store'
 import { Zap, Mail, Lock, ArrowRight, Info } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -25,8 +26,11 @@ export function LoginPage() {
     const success = await login(email, password)
     setLoading(false)
 
-    if (!success) {
+    if (success) {
+      toast.success('Sesión iniciada', { description: 'Bienvenido de vuelta a TiendApp.' })
+    } else {
       setError('Credenciales inválidas. Verifica tu email y contraseña.')
+      toast.error('Error de inicio de sesión', { description: 'Credenciales inválidas.' })
     }
   }
 
