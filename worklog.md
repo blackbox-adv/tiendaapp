@@ -115,3 +115,25 @@ Stage Summary:
 - Upload seguro con magic byte validation
 - Rate limiting extendido a 6 endpoints (login, register, webhook, whatsapp, upload, seed)
 - NEXT: Fase 3 (media priority) - mejoras de escalabilidad, SSR para store pages, migracion a PostgreSQL
+---
+Task ID: 7
+Agent: Main Agent
+Task: Phase 7 - Persistencia completa a la base de datos
+
+Work Log:
+- Analizado el flujo completo de datos: wizard, store settings, admin settings, products
+- Descubierto que wizard (completeWizard) y store settings (updateStoreSettings) YA persistían a la API
+- Descubierto que admin settings (AdminSettings.tsx) YA persistía a PUT /api/settings
+- El problema real: GET /api/stores solo devolvía tiendas para super_admin
+- GET /api/stores modificado: owners ahora reciben sus propias tiendas
+- syncFromAPI reescrito: restaura sesión completa (user → store → products → admin settings)
+- Login mejorado: carga stores + productos del usuario tras autenticarse
+- StoreSettings: agregados campos de Categoría y Plantilla editables
+- updateStoreSettings: ahora envía categoryId (como category) y template a PUT /api/stores
+- Eliminada mezcla de datos mock con datos reales de Supabase
+- Build exitoso, push a GitHub
+
+Stage Summary:
+- Commit: 034ab3d - "Phase 7: Persistencia completa a la base de datos"
+- Archivos modificados: src/app/api/stores/route.ts, src/lib/store.ts, src/components/dashboard/StoreSettings.tsx
+- La app ahora persiste y restaura correctamente todos los datos desde Supabase al hacer refresh
