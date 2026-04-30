@@ -20,12 +20,28 @@ export function ContactPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (!name.trim() || !email.trim() || !subject.trim() || !message.trim()) {
+      setSent(false)
+      return
+    }
+
+    // Send via WhatsApp to TiendApp support
+    const whatsappMsg = encodeURIComponent(
+      `Hola TiendApp! Nuevo mensaje de contacto:\n\n` +
+      `Nombre: ${name}\n` +
+      `Email: ${email}\n` +
+      `Asunto: ${subject}\n` +
+      `Mensaje: ${message}`
+    )
+    window.open(`https://wa.me/51999888777?text=${whatsappMsg}`, '_blank')
+
     setSent(true)
     setName('')
     setEmail('')
     setSubject('')
     setMessage('')
-    setTimeout(() => setSent(false), 5000)
+    setTimeout(() => setSent(false), 8000)
   }
 
   return (
@@ -99,10 +115,13 @@ export function ContactPage() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="md:col-span-3">
             <Card>
               <CardContent className="pt-6">
-                <h2 className="text-lg font-bold text-gray-900 mb-4">Envíanos un mensaje</h2>
+                <h2 className="text-lg font-bold text-gray-900 mb-4">Envianos un mensaje</h2>
+                <p className="text-sm text-gray-400 mb-4">
+                  Al enviar, se abrira WhatsApp con tu mensaje para una respuesta rapida.
+                </p>
                 {sent && (
                   <div className="p-3 rounded-lg bg-green-50 border border-green-200 text-green-600 text-sm mb-4">
-                    ¡Mensaje enviado con éxito! Te responderemos pronto.
+                    WhatsApp abierto con tu mensaje. Te responderemos lo antes posible.
                   </div>
                 )}
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -126,7 +145,7 @@ export function ContactPage() {
                   </div>
                   <Button type="submit" className="w-full bg-violet-600 hover:bg-violet-700 text-white gap-2">
                     <Send className="w-4 h-4" />
-                    Enviar mensaje
+                    Enviar por WhatsApp
                   </Button>
                 </form>
               </CardContent>
