@@ -11,6 +11,8 @@ import type { Store, Product } from '@/lib/types'
 export function ModernaTemplate({ store, products, storeSlug }: { store: Store; products: Product[]; storeSlug: string }) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
+  const [priceRange, setPriceRange] = useState<{ min: number | null; max: number | null }>({ min: null, max: null })
+  const [sortBy, setSortBy] = useState<string>('newest')
   const navigate = useAppStore((s) => s.navigate)
 
   const filteredProducts = useMemo(() => {
@@ -24,8 +26,34 @@ export function ModernaTemplate({ store, products, storeSlug }: { store: Store; 
         (p) => p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q)
       )
     }
+
+    // Price range filter
+    if (priceRange.min !== null) {
+      result = result.filter((p) => p.price >= priceRange.min!)
+    }
+    if (priceRange.max !== null) {
+      result = result.filter((p) => p.price <= priceRange.max!)
+    }
+
+    // Sort
+    switch (sortBy) {
+      case 'price-asc':
+        result = [...result].sort((a, b) => a.price - b.price)
+        break
+      case 'price-desc':
+        result = [...result].sort((a, b) => b.price - a.price)
+        break
+      case 'name':
+        result = [...result].sort((a, b) => a.name.localeCompare(b.name))
+        break
+      case 'newest':
+      default:
+        result = [...result].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        break
+    }
+
     return result
-  }, [products, selectedCategory, searchQuery])
+  }, [products, selectedCategory, searchQuery, priceRange, sortBy])
 
   const storeCategories = [...new Set(products.map((p) => p.categoryId))]
 
@@ -110,6 +138,51 @@ export function ModernaTemplate({ store, products, storeSlug }: { store: Store; 
                 </button>
               )
             })}
+          </div>
+
+          {/* Filters row */}
+          <div className="flex items-center gap-3 flex-wrap">
+            {/* Price range */}
+            <div className="flex items-center gap-1.5 text-xs text-gray-500">
+              <span>S/</span>
+              <input
+                type="number"
+                placeholder="Min"
+                value={priceRange.min ?? ''}
+                onChange={(e) => setPriceRange(prev => ({ ...prev, min: e.target.value ? Number(e.target.value) : null }))}
+                className="w-20 px-2 py-1.5 rounded-md border border-gray-200 bg-gray-50 text-xs focus:outline-none focus:ring-1 focus:ring-gray-200"
+              />
+              <span>-</span>
+              <input
+                type="number"
+                placeholder="Max"
+                value={priceRange.max ?? ''}
+                onChange={(e) => setPriceRange(prev => ({ ...prev, max: e.target.value ? Number(e.target.value) : null }))}
+                className="w-20 px-2 py-1.5 rounded-md border border-gray-200 bg-gray-50 text-xs focus:outline-none focus:ring-1 focus:ring-gray-200"
+              />
+            </div>
+
+            {/* Sort */}
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="px-2.5 py-1.5 rounded-md border border-gray-200 bg-gray-50 text-xs text-gray-600 focus:outline-none focus:ring-1 focus:ring-gray-200"
+            >
+              <option value="newest">Más recientes</option>
+              <option value="price-asc">Precio: menor a mayor</option>
+              <option value="price-desc">Precio: mayor a menor</option>
+              <option value="name">Nombre A-Z</option>
+            </select>
+
+            {/* Clear filters */}
+            {(searchQuery || selectedCategory !== 'all' || priceRange.min || priceRange.max) && (
+              <button
+                onClick={() => { setSearchQuery(''); setSelectedCategory('all'); setPriceRange({ min: null, max: null }); setSortBy('newest') }}
+                className="text-xs text-gray-400 hover:text-gray-600 underline"
+              >
+                Limpiar filtros
+              </button>
+            )}
           </div>
         </div>
       </nav>

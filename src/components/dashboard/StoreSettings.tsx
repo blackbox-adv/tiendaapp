@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useAppStore } from '@/lib/store'
 import { CATEGORIES } from '@/lib/mock-data'
-import { Save, Eye, Store, LayoutTemplate } from 'lucide-react'
+import { Save, Eye, Store, LayoutTemplate, Upload } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -20,6 +20,54 @@ export function StoreSettings() {
   const [primaryColor, setPrimaryColor] = useState(currentStore?.colors.primary || '#7C3AED')
   const [template, setTemplate] = useState<string>(currentStore?.template || 'moderna')
   const [category, setCategory] = useState(currentStore?.categoryId || '')
+  const [logo, setLogo] = useState(currentStore?.logo || '')
+  const [uploadingLogo, setUploadingLogo] = useState(false)
+
+  const handleLogoUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Formato no válido', { description: 'Solo se permiten JPG, PNG, WebP y GIF' })
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Archivo muy grande', { description: 'El logo no debe superar los 5MB' })
+      return
+    }
+
+    setUploadingLogo(true)
+
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const token = localStorage.getItem('tiendapp_token')
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        if (data.url) {
+          setLogo(data.url)
+        } else {
+          toast.error('Error al subir', { description: 'No se recibió la URL del logo' })
+        }
+      } else {
+        const data = await res.json().catch(() => ({}))
+        toast.error('Error al subir', { description: data.error || 'Error al subir el logo' })
+      }
+    } catch {
+      toast.error('Error de conexión', { description: 'No se pudo subir el logo' })
+    } finally {
+      setUploadingLogo(false)
+    }
+  }, [])
 
   if (!currentStore) return null
 
@@ -32,6 +80,7 @@ export function StoreSettings() {
       name,
       description,
       whatsappNumber: whatsapp,
+      logo,
       colors: { primary: primaryColor, secondary: primaryColor + '80' },
       template: template as 'moderna' | 'vibrante' | 'clasica',
       categoryId: category,
@@ -51,6 +100,33 @@ export function StoreSettings() {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Form */}
         <div className="lg:col-span-3 space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Logo de la tienda</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-4">
+                {/* Preview */}
+                <div className="w-20 h-20 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden bg-gray-50">
+                  {logo && !logo.startsWith('http') && !logo.startsWith('/') ? (
+                    <span className="text-3xl">{logo}</span>
+                  ) : logo ? (
+                    <img src={logo} alt="Logo" className="w-full h-full object-cover" />
+                  ) : (
+                    <Store className="w-8 h-8 text-gray-300" />
+                  )}
+                </div>
+                <div>
+                  <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleLogoUpload} className="hidden" id="settings-logo-upload" />
+                  <label htmlFor="settings-logo-upload" className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+                    {uploadingLogo ? 'Subiendo...' : <><Upload className="w-4 h-4" /> Subir logo</>}
+                  </label>
+                  <p className="text-xs text-gray-400 mt-1">JPG, PNG, WebP. Max 5MB</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Información general</CardTitle>

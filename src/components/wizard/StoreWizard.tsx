@@ -1,14 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAppStore } from '@/lib/store'
 import { PLANS, CATEGORIES } from '@/lib/mock-data'
-import { Zap, Crown, Gift, ArrowLeft, ArrowRight, Check, Store, Palette, LayoutTemplate } from 'lucide-react'
+import { Zap, Crown, Gift, ArrowLeft, ArrowRight, Check, Store, Palette, LayoutTemplate, Upload } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { toast } from 'sonner'
 import { Card, CardContent } from '@/components/ui/card'
 
 const iconMap: Record<string, React.ElementType> = { Gift, Zap, Crown }
@@ -16,6 +17,53 @@ const iconMap: Record<string, React.ElementType> = { Gift, Zap, Crown }
 export function StoreWizard() {
   const { wizardStep, setWizardStep, wizardData, updateWizardData, completeWizard, navigate } = useAppStore()
   const [selectedTemplate, setSelectedTemplate] = useState<'moderna' | 'vibrante' | 'clasica'>(wizardData.template)
+  const [uploadingLogo, setUploadingLogo] = useState(false)
+
+  const handleLogoUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Formato no válido', { description: 'Solo se permiten JPG, PNG, WebP y GIF' })
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Archivo muy grande', { description: 'El logo no debe superar los 5MB' })
+      return
+    }
+
+    setUploadingLogo(true)
+
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const token = localStorage.getItem('tiendapp_token')
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        if (data.url) {
+          updateWizardData({ storeLogo: data.url })
+        } else {
+          toast.error('Error al subir', { description: 'No se recibió la URL del logo' })
+        }
+      } else {
+        const data = await res.json().catch(() => ({}))
+        toast.error('Error al subir', { description: data.error || 'Error al subir el logo' })
+      }
+    } catch {
+      toast.error('Error de conexión', { description: 'No se pudo subir el logo' })
+    } finally {
+      setUploadingLogo(false)
+    }
+  }, [updateWizardData])
 
   const steps = [
     { num: 1, title: 'Plan', icon: Crown },
@@ -127,6 +175,31 @@ export function StoreWizard() {
             {wizardStep === 2 && (
               <Card className="border-gray-200">
                 <CardContent className="p-6 space-y-5">
+                  {/* Logo Upload */}
+                  <div className="space-y-3">
+                    <Label>Logo de la tienda</Label>
+                    <div className="flex items-center gap-4">
+                      {/* Preview */}
+                      <div className="w-20 h-20 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden bg-gray-50">
+                        {wizardData.storeLogo && !wizardData.storeLogo.includes('/') ? (
+                          <span className="text-3xl">{wizardData.storeLogo}</span>
+                        ) : wizardData.storeLogo ? (
+                          <img src={wizardData.storeLogo} alt="Logo" className="w-full h-full object-cover" />
+                        ) : (
+                          <Store className="w-8 h-8 text-gray-300" />
+                        )}
+                      </div>
+                      {/* Upload button */}
+                      <div>
+                        <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleLogoUpload} className="hidden" id="wizard-logo-upload" />
+                        <label htmlFor="wizard-logo-upload" className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+                          {uploadingLogo ? 'Subiendo...' : <><Upload className="w-4 h-4" /> Subir logo</>}
+                        </label>
+                        <p className="text-xs text-gray-400 mt-1">JPG, PNG, WebP. Max 5MB</p>
+                      </div>
+                    </div>
+                  </div>
+
                   <h2 className="text-lg font-semibold text-gray-900">Datos de tu tienda</h2>
 
                   <div className="space-y-2">

@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CATEGORIES } from '@/lib/mock-data'
-import { MessageCircle, ShoppingBag, Search, X } from 'lucide-react'
+import { MessageCircle, ShoppingBag, Search, X, SlidersHorizontal } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { useAppStore } from '@/lib/store'
 import type { Store, Product } from '@/lib/types'
@@ -18,6 +18,8 @@ function hexToRgb(hex: string) {
 export function VibranteTemplate({ store, products, storeSlug }: { store: Store; products: Product[]; storeSlug: string }) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
+  const [priceRange, setPriceRange] = useState<{ min: number | null; max: number | null }>({ min: null, max: null })
+  const [sortBy, setSortBy] = useState<string>('newest')
   const navigate = useAppStore((s) => s.navigate)
 
   const filteredProducts = useMemo(() => {
@@ -31,8 +33,34 @@ export function VibranteTemplate({ store, products, storeSlug }: { store: Store;
         (p) => p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q)
       )
     }
+
+    // Price range filter
+    if (priceRange.min !== null) {
+      result = result.filter((p) => p.price >= priceRange.min!)
+    }
+    if (priceRange.max !== null) {
+      result = result.filter((p) => p.price <= priceRange.max!)
+    }
+
+    // Sort
+    switch (sortBy) {
+      case 'price-asc':
+        result = [...result].sort((a, b) => a.price - b.price)
+        break
+      case 'price-desc':
+        result = [...result].sort((a, b) => b.price - a.price)
+        break
+      case 'name':
+        result = [...result].sort((a, b) => a.name.localeCompare(b.name))
+        break
+      case 'newest':
+      default:
+        result = [...result].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        break
+    }
+
     return result
-  }, [products, selectedCategory, searchQuery])
+  }, [products, selectedCategory, searchQuery, priceRange, sortBy])
 
   const storeCategories = [...new Set(products.map((p) => p.categoryId))]
   const primaryRgb = hexToRgb(store.colors.primary)
@@ -189,6 +217,52 @@ export function VibranteTemplate({ store, products, storeSlug }: { store: Store;
             )
           })}
         </div>
+
+          {/* Filters row */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <SlidersHorizontal className="w-4 h-4 text-gray-400" />
+            {/* Price range */}
+            <div className="flex items-center gap-1.5 text-xs text-gray-500 font-semibold">
+              <span>S/</span>
+              <input
+                type="number"
+                placeholder="Min"
+                value={priceRange.min ?? ''}
+                onChange={(e) => setPriceRange(prev => ({ ...prev, min: e.target.value ? Number(e.target.value) : null }))}
+                className="w-20 px-2 py-1.5 rounded-xl border border-gray-200 bg-white/80 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-white shadow-sm"
+              />
+              <span>-</span>
+              <input
+                type="number"
+                placeholder="Max"
+                value={priceRange.max ?? ''}
+                onChange={(e) => setPriceRange(prev => ({ ...prev, max: e.target.value ? Number(e.target.value) : null }))}
+                className="w-20 px-2 py-1.5 rounded-xl border border-gray-200 bg-white/80 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-white shadow-sm"
+              />
+            </div>
+
+            {/* Sort */}
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="px-3 py-1.5 rounded-xl border border-gray-200 bg-white/80 text-xs font-semibold text-gray-600 focus:outline-none focus:ring-2 focus:ring-white shadow-sm"
+            >
+              <option value="newest">Más recientes</option>
+              <option value="price-asc">Precio: menor a mayor</option>
+              <option value="price-desc">Precio: mayor a menor</option>
+              <option value="name">Nombre A-Z</option>
+            </select>
+
+            {/* Clear filters */}
+            {(searchQuery || selectedCategory !== 'all' || priceRange.min || priceRange.max) && (
+              <button
+                onClick={() => { setSearchQuery(''); setSelectedCategory('all'); setPriceRange({ min: null, max: null }); setSortBy('newest') }}
+                className="text-xs text-gray-400 hover:text-gray-600 font-bold underline"
+              >
+                Limpiar filtros
+              </button>
+            )}
+          </div>
         </div>
       </nav>
 
