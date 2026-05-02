@@ -35,10 +35,12 @@ model User {
   role      String   @default("store_owner")      // super_admin, store_owner
   phone     String?
   avatar    String?
-  isActive  Boolean  @default(true)
-  lastLogin DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  isActive          Boolean  @default(true)
+  lastLogin         DateTime?
+  resetToken        String?
+  resetTokenExpires DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   stores       Store[]
   subscriptions Subscription[]

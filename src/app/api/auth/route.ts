@@ -1,9 +1,11 @@
 import { db } from '@/lib/db'
 import { NextResponse } from 'next/server'
-import { verifyPassword, generateToken, verifyToken } from '@/lib/auth'
+import { verifyPassword, generateToken, verifyToken, hashPassword } from '@/lib/auth'
 import { validateBody, loginSchema } from '@/lib/validations'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 import { auditLog, getClientIp } from '@/lib/env'
+import { sendPasswordResetEmail } from '@/lib/email'
+import { v4 as uuidv4 } from 'uuid'
 
 // POST /api/auth - Login
 export async function POST(request: Request) {
@@ -101,6 +103,99 @@ export async function GET(request: Request) {
   } catch (err) {
     console.error('[AUTH] Token verify error:', err instanceof Error ? err.message : String(err))
     return apiError('Error verificando token', 500, undefined, request)
+  }
+}
+
+// PUT /api/auth - Password reset request & reset password
+export async function PUT(request: Request) {
+  try {
+    const body = await request.json()
+    const { action } = body
+
+    if (action === 'reset_request') {
+      // Step 1: User requests password reset - send email with token
+      const { email } = body
+      if (!email || typeof email !== 'string') {
+        return apiError('Email es requerido', 400, undefined, request)
+      }
+
+      const clientIp = getClientIp(request)
+      const user = await db.user.findUnique({ where: { email: email.toLowerCase() } })
+
+      if (!user) {
+        // Don't reveal if user exists - return success anyway
+        return apiSuccess({ message: 'Si el email existe, recibiras instrucciones.' }, 200, request)
+      }
+
+      // Generate reset token (UUID)
+      const resetToken = uuidv4()
+      const resetTokenExpires = new Date(Date.now() + 60 * 60 * 1000) // 1 hour
+
+      await db.user.update({
+        where: { id: user.id },
+        data: { resetToken, resetTokenExpires },
+      })
+
+      // Send email
+      try {
+        await sendPasswordResetEmail(user.name, user.email, resetToken)
+      } catch (emailError) {
+        console.error('[AUTH] Failed to send reset email:', emailError)
+        // Still return success to not reveal info, but log the issue
+      }
+
+      auditLog({ action: 'PASSWORD_RESET', userId: user.id, userEmail: user.email, ip: clientIp, success: true, statusCode: 200 })
+
+      return apiSuccess({ message: 'Si el email existe, recibiras instrucciones.' }, 200, request)
+    }
+
+    if (action === 'reset_password') {
+      // Step 2: User resets password with token
+      const { token, newPassword } = body
+
+      if (!token || !newPassword) {
+        return apiError('Token y nueva contrasena son requeridos', 400, undefined, request)
+      }
+
+      if (newPassword.length < 6) {
+        return apiError('La contrasena debe tener al menos 6 caracteres', 400, undefined, request)
+      }
+
+      const clientIp = getClientIp(request)
+
+      // Find user by reset token
+      const user = await db.user.findFirst({
+        where: {
+          resetToken: token,
+          resetTokenExpires: { gt: new Date() }, // Token not expired
+        },
+      })
+
+      if (!user) {
+        auditLog({ action: 'PASSWORD_RESET', userEmail: 'unknown', ip: clientIp, details: { reason: 'invalid_or_expired_token' }, success: false, statusCode: 400 })
+        return apiError('Token invalido o expirado. Solicita un nuevo enlace.', 400, undefined, request)
+      }
+
+      // Hash new password and clear reset token
+      const hashedPassword = await hashPassword(newPassword)
+      await db.user.update({
+        where: { id: user.id },
+        data: {
+          password: hashedPassword,
+          resetToken: null,
+          resetTokenExpires: null,
+        },
+      })
+
+      auditLog({ action: 'PASSWORD_RESET', userId: user.id, userEmail: user.email, ip: clientIp, success: true, statusCode: 200 })
+
+      return apiSuccess({ message: 'Contrasena actualizada exitosamente.' }, 200, request)
+    }
+
+    return apiError('Accion no valida', 400, undefined, request)
+  } catch (err) {
+    console.error('[AUTH] Password reset error:', err instanceof Error ? err.message : String(err))
+    return apiError('Error al restablecer contrasena', 500, undefined, request)
   }
 }
 

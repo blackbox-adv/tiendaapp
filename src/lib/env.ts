@@ -28,6 +28,12 @@ const ENV_CONFIG: EnvVarConfig[] = [
     validator: (v) => v.length >= 16,
   },
   {
+    name: 'RESEND_API_KEY',
+    required: false,
+    description: 'API Key de Resend para enviar emails transaccionales (empieza con re_)',
+    validator: (v) => v.startsWith('re_'),
+  },
+  {
     name: 'SUPABASE_URL',
     required: true,
     description: 'URL del proyecto Supabase para Storage y autenticacion',

@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useAppStore } from '@/lib/store'
 import { Zap, Mail, Lock, ArrowLeft, ArrowRight, Info, CheckCircle } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -14,10 +15,21 @@ export function ResetPasswordPage() {
   const [email, setEmail] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [resetToken, setResetToken] = useState<string | null>(null)
   const [step, setStep] = useState<'email' | 'reset'>('email')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
+
+  // Check if user arrived with a token from email link
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const token = params.get('token')
+    if (token) {
+      setResetToken(token)
+      setStep('reset')
+    }
+  }, [])
 
   const handleRequestReset = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -25,17 +37,25 @@ export function ResetPasswordPage() {
     setLoading(true)
 
     try {
-      // Try to call auth API
       const res = await fetch('/api/auth', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, action: 'reset_request' }),
       })
-      // Always proceed for demo purposes
-      setStep('reset')
-      setSent(true)
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data.error || 'Error al enviar el email')
+      } else {
+        setStep('reset')
+        setSent(false) // Will show the "check your email" message
+        toast.success('Email enviado', {
+          description: 'Revisa tu bandeja de entrada y haz clic en el enlace.',
+        })
+      }
     } catch {
-      setStep('reset')
+      setError('Error de conexion. Intenta de nuevo.')
     }
     setLoading(false)
   }
@@ -53,16 +73,31 @@ export function ResetPasswordPage() {
       return
     }
 
+    if (!resetToken) {
+      setError('No se encontro el token de restablecimiento. Solicita un nuevo enlace.')
+      return
+    }
+
     setLoading(true)
     try {
       const res = await fetch('/api/auth', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, action: 'reset_password', newPassword }),
+        body: JSON.stringify({ action: 'reset_password', token: resetToken, newPassword }),
       })
-      setSent(true)
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data.error || 'Error al restablecer la contraseña')
+      } else {
+        setSent(true)
+        toast.success('Contraseña actualizada', {
+          description: 'Ya puedes iniciar sesión con tu nueva contraseña.',
+        })
+      }
     } catch {
-      setError('Error al restablecer la contraseña')
+      setError('Error de conexion. Intenta de nuevo.')
     }
     setLoading(false)
   }
@@ -150,7 +185,7 @@ export function ResetPasswordPage() {
                     <Input
                       id="new-password"
                       type="password"
-                      placeholder="••••••••"
+                      placeholder="Mínimo 6 caracteres"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       className="pl-10"
@@ -165,7 +200,7 @@ export function ResetPasswordPage() {
                     <Input
                       id="confirm-password"
                       type="password"
-                      placeholder="••••••••"
+                      placeholder="Repite tu contraseña"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       className="pl-10"
@@ -180,6 +215,19 @@ export function ResetPasswordPage() {
                 >
                   {loading ? 'Actualizando...' : 'Restablecer contraseña'}
                 </Button>
+
+                {!resetToken && (
+                  <p className="text-xs text-gray-500 text-center">
+                    ¿No recibiste el email?{' '}
+                    <button
+                      type="button"
+                      onClick={() => { setStep('email'); setResetToken(null) }}
+                      className="text-violet-600 hover:text-violet-700 font-semibold"
+                    >
+                      Enviar de nuevo
+                    </button>
+                  </p>
+                )}
               </form>
             )}
 
