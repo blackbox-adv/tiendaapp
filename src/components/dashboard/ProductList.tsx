@@ -13,6 +13,7 @@ import {
   AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
   AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from 'sonner'
 
 export function ProductList() {
@@ -20,7 +21,33 @@ export function ProductList() {
   const [search, setSearch] = useState('')
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
 
-  if (!currentStore) return null
+  if (!currentStore) {
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <Skeleton className="h-8 w-32 mb-2" />
+            <Skeleton className="h-4 w-48" />
+          </div>
+          <Skeleton className="h-10 w-36 rounded-lg" />
+        </div>
+        <Skeleton className="h-10 max-w-md rounded-lg" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="rounded-xl border border-gray-100 overflow-hidden">
+              <Skeleton className="h-44 w-full" />
+              <div className="p-4 space-y-2">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-1/2" />
+                <Skeleton className="h-5 w-20" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   const storeProducts = products.filter(
     (p) => p.storeId === currentStore.id && p.isActive && p.name.toLowerCase().includes(search.toLowerCase())

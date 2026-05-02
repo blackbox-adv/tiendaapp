@@ -3,6 +3,7 @@
 import { useAppStore } from '@/lib/store'
 import { Check, LayoutTemplate, Palette, Sparkles, Sun } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 
 const templateList = [
@@ -35,7 +36,32 @@ const templateList = [
 export function TemplateGallery() {
   const { currentStore, navigate, updateStoreSettings } = useAppStore()
 
-  if (!currentStore) return null
+  if (!currentStore) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <Skeleton className="h-8 w-32 mb-2" />
+          <Skeleton className="h-4 w-72" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="rounded-xl border border-gray-100 overflow-hidden">
+              <Skeleton className="h-48 w-full" />
+              <div className="p-5 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-5 w-5 rounded" />
+                  <Skeleton className="h-5 w-24" />
+                </div>
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-4/5" />
+                <Skeleton className="h-10 w-full rounded-lg" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   const handleSelect = (templateId: 'moderna' | 'vibrante' | 'clasica') => {
     updateStoreSettings({ template: templateId })

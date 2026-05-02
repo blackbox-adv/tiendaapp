@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export function StoreSettings() {
   const { currentStore, navigate, updateStoreSettings } = useAppStore()
@@ -69,7 +70,62 @@ export function StoreSettings() {
     }
   }, [])
 
-  if (!currentStore) return null
+  if (!currentStore) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <Skeleton className="h-8 w-64 mb-2" />
+          <Skeleton className="h-4 w-80" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          <div className="lg:col-span-3 space-y-6">
+            <div className="rounded-xl border border-gray-100 p-6 space-y-4">
+              <Skeleton className="h-6 w-40" />
+              <div className="flex items-center gap-4">
+                <Skeleton className="w-20 h-20 rounded-xl" />
+                <div className="space-y-2">
+                  <Skeleton className="h-10 w-32 rounded-lg" />
+                  <Skeleton className="h-3 w-40" />
+                </div>
+              </div>
+            </div>
+            <div className="rounded-xl border border-gray-100 p-6 space-y-4">
+              <Skeleton className="h-6 w-40" />
+              <Skeleton className="h-10 w-full rounded-md" />
+              <Skeleton className="h-20 w-full rounded-md" />
+              <Skeleton className="h-10 w-full rounded-md" />
+              <div className="grid grid-cols-2 gap-4">
+                <Skeleton className="h-10 w-full rounded-md" />
+                <Skeleton className="h-10 w-full rounded-md" />
+              </div>
+            </div>
+            <div className="rounded-xl border border-gray-100 p-6 space-y-4">
+              <Skeleton className="h-6 w-40" />
+              <div className="flex items-center gap-3">
+                <Skeleton className="w-10 h-10 rounded-lg" />
+                <Skeleton className="h-10 max-w-[200px] rounded-md" />
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                  <Skeleton key={i} className="w-8 h-8 rounded-full" />
+                ))}
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Skeleton className="h-10 w-36 rounded-lg" />
+              <Skeleton className="h-10 w-32 rounded-lg" />
+            </div>
+          </div>
+          <div className="lg:col-span-2">
+            <div className="rounded-xl border border-gray-100 p-6 sticky top-8">
+              <Skeleton className="h-4 w-24 mb-4" />
+              <div className="rounded-xl border h-48" />
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   const handleSave = () => {
     if (!name.trim()) {

@@ -4,6 +4,7 @@ import { useAppStore } from '@/lib/store'
 import { PLANS } from '@/lib/mock-data'
 import { Check, Crown, Zap, Gift, ArrowRight } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 
 const iconMap: Record<string, React.ElementType> = { Gift, Zap, Crown }
@@ -11,7 +12,41 @@ const iconMap: Record<string, React.ElementType> = { Gift, Zap, Crown }
 export function PlanManager() {
   const { currentUser, products, currentStore, navigate, changePlan } = useAppStore()
 
-  if (!currentUser) return null
+  if (!currentUser) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <Skeleton className="h-8 w-32 mb-2" />
+          <Skeleton className="h-4 w-72" />
+        </div>
+        <div className="rounded-xl border border-violet-200 p-6">
+          <div className="flex items-center gap-4">
+            <Skeleton className="w-14 h-14 rounded-xl" />
+            <div className="space-y-2">
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-7 w-32" />
+              <Skeleton className="h-3 w-48" />
+            </div>
+          </div>
+        </div>
+        <div className="rounded-xl border border-gray-100 p-6">
+          <Skeleton className="h-6 w-36 mb-6" />
+          <div className="space-y-0">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+              <div key={i} className="flex items-center border-b border-gray-50 py-3 gap-4">
+                <Skeleton className="h-4 w-40" />
+                <div className="flex-1 flex justify-around">
+                  {[1, 2, 3].map((j) => (
+                    <Skeleton key={j} className="h-5 w-5 rounded" />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   const currentPlanId = currentUser.planId
   const currentPlan = PLANS.find((p) => p.id === currentPlanId)

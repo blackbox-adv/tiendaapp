@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useAppStore } from '@/lib/store'
 import { CATEGORIES } from '@/lib/mock-data'
 import {
@@ -15,6 +15,8 @@ import {
   ShieldCheck,
   RotateCcw,
   Star,
+  QrCode,
+  ChevronDown,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -23,6 +25,7 @@ import type { Product, Store } from '@/lib/types'
 
 export function ProductDetailView({ slug, productId }: { slug: string; productId: string }) {
   const { stores, products, navigate, goBack } = useAppStore()
+  const [showYape, setShowYape] = useState(false)
 
   const store = stores.find((s) => s.slug === slug && s.isActive)
   const product = products.find((p) => p.id === productId && p.isActive)
@@ -329,6 +332,98 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
               <p className="text-xs text-center text-gray-400">
                 Se abrira WhatsApp para coordinar la compra con el vendedor
               </p>
+            </div>
+
+            {/* Yape/Plin Payment Option */}
+            <div className="mt-4">
+              <button
+                type="button"
+                onClick={() => setShowYape(!showYape)}
+                className="w-full flex items-center justify-between p-4 rounded-2xl border-2 border-purple-200 hover:border-purple-300 bg-purple-50/50 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
+                    <QrCode className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-gray-900">Pagar con Yape / Plin</p>
+                    <p className="text-xs text-gray-500">Escanea el QR y confirma tu pago</p>
+                  </div>
+                </div>
+                <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${showYape ? 'rotate-180' : ''}`} />
+              </button>
+
+              <AnimatePresence>
+                {showYape && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="p-6 mt-2 rounded-2xl border border-purple-100 bg-white space-y-4">
+                      {/* QR Code */}
+                      <div className="text-center">
+                        <div className="inline-block p-3 bg-white rounded-2xl shadow-sm border border-gray-100">
+                          <img
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(store.whatsappNumber)}&bgcolor=ffffff&color=7C3AED`}
+                            alt="QR Yape/Plin"
+                            className="w-48 h-48"
+                          />
+                        </div>
+                        <p className="text-xs text-gray-400 mt-3">Escanea con Yape o Plin</p>
+                      </div>
+
+                      {/* Amount to pay */}
+                      <div className="text-center p-4 rounded-xl bg-purple-50">
+                        <p className="text-xs text-gray-500 mb-1">Monto a transferir</p>
+                        <p className="text-2xl font-bold" style={{ color: store.colors.primary }}>
+                          S/{product.price.toFixed(2)}
+                        </p>
+                        <p className="text-xs text-gray-400 mt-1">por {product.name}</p>
+                      </div>
+
+                      {/* Steps */}
+                      <div className="space-y-3">
+                        <div className="flex items-start gap-3">
+                          <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <span className="text-xs font-bold text-purple-600">1</span>
+                          </div>
+                          <p className="text-sm text-gray-600">Abre <b>Yape</b> o <b>Plin</b> en tu celular</p>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <span className="text-xs font-bold text-purple-600">2</span>
+                          </div>
+                          <p className="text-sm text-gray-600">Escanea el codigo QR y transfiere <b>S/{product.price.toFixed(2)}</b></p>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <span className="text-xs font-bold text-purple-600">3</span>
+                          </div>
+                          <p className="text-sm text-gray-600">Confirma tu pago enviando el comprobante por WhatsApp</p>
+                        </div>
+                      </div>
+
+                      {/* Confirm via WhatsApp */}
+                      <Button
+                        className="w-full text-white gap-3 rounded-2xl py-5 text-sm font-bold shadow-lg hover:opacity-90 transition-opacity"
+                        style={{ backgroundColor: '#25D366' }}
+                        onClick={() => {
+                          const msg = encodeURIComponent(
+                            `Hola! Acabo de realizar el pago por Yape/Plin de S/${product.price.toFixed(2)} por: ${product.name}\nPor favor confirmar mi pedido.`
+                          )
+                          window.open(`https://wa.me/${store.whatsappNumber.replace(/[^0-9]/g, '')}?text=${msg}`, '_blank')
+                        }}
+                      >
+                        <MessageCircle className="w-5 h-5" />
+                        Enviar comprobante por WhatsApp
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* Store info */}

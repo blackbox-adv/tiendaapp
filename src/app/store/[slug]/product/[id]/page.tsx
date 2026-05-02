@@ -100,5 +100,54 @@ export default async function ProductPage({ params }: Props) {
     notFound()
   }
 
-  return <ProductPublicClient store={store} product={product} relatedProducts={relatedProducts} />
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            generateProductJsonLd(
+              {
+                id: product.id as string,
+                name: product.name as string,
+                description: (product.description as string) || '',
+                price: product.price as number,
+                imageUrl: (product.imageUrl as string) || '',
+                createdAt: (product.createdAt as string) || undefined,
+              },
+              {
+                name: store.name as string,
+                slug: store.slug as string,
+              }
+            )
+          ),
+        }}
+      />
+      <ProductPublicClient store={store} product={product} relatedProducts={relatedProducts} />
+    </>
+  )
+}
+
+function generateProductJsonLd(
+  product: { id: string; name: string; description: string; price: number; imageUrl: string; createdAt?: string },
+  store: { name: string; slug: string }
+) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    description: product.description || `Producto disponible en ${store.name}`,
+    image: product.imageUrl,
+    url: `https://tiendapp.pe/store/${store.slug}/product/${product.id}`,
+    offers: {
+      '@type': 'Offer',
+      price: product.price,
+      priceCurrency: 'PEN',
+      availability: 'https://schema.org/InStock',
+      seller: {
+        '@type': 'Store',
+        name: store.name,
+      },
+    },
+  }
 }

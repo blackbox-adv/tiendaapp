@@ -86,5 +86,45 @@ export default async function StorePage({ params }: Props) {
     notFound()
   }
 
-  return <StorePublicClient store={store} products={products} />
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            generateStoreJsonLd({
+              name: store.name as string,
+              description: (store.description as string) || '',
+              slug: store.slug as string,
+              primaryColor: (store.primaryColor as string) || undefined,
+              createdAt: (store.createdAt as string) || undefined,
+            })
+          ),
+        }}
+      />
+      <StorePublicClient store={store} products={products} />
+    </>
+  )
+}
+
+function generateStoreJsonLd(store: {
+  name: string
+  description: string
+  slug: string
+  primaryColor?: string
+  createdAt?: string
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Store',
+    name: store.name,
+    description: store.description,
+    url: `https://tiendapp.pe/store/${store.slug}`,
+    image: `https://tiendapp.pe/api/og/store/${store.slug}`,
+    address: {
+      '@type': 'PostalAddress',
+      addressCountry: 'PE',
+    },
+    priceRange: '$$',
+  }
 }
