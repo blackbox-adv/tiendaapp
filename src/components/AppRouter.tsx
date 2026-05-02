@@ -49,9 +49,10 @@ import { AdminPlans } from '@/components/admin/AdminPlans'
 import { AdminSettings } from '@/components/admin/AdminSettings'
 
 const pageVariants = {
-  initial: { opacity: 1, y: 0 },
+  initial: { opacity: 0, y: 12 },
   animate: { opacity: 1, y: 0 },
   exit: { opacity: 0, y: -12 },
+  transition: { duration: 0.3, ease: "easeInOut" },
 }
 
 export default function AppRouter() {

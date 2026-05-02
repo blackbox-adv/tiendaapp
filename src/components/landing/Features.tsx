@@ -19,16 +19,16 @@ const features = [
 ]
 
 const container = {
-  hidden: { opacity: 1 },
+  hidden: { opacity: 0 },
   show: {
     opacity: 1,
-    transition: { staggerChildren: 0.1 },
+    transition: { staggerChildren: 0.15 },
   },
 }
 
 const item = {
-  hidden: { opacity: 1, y: 0 },
-  show: { opacity: 1, y: 0 },
+  hidden: { opacity: 0, y: 30 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
 }
 
 export function Features() {
@@ -36,9 +36,10 @@ export function Features() {
     <section id="features" className="py-20 sm:py-28 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
-          initial={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
           className="text-center mb-16"
         >
           <span className="text-sm font-semibold text-violet-600 uppercase tracking-wider">Funciones</span>
@@ -54,7 +55,7 @@ export function Features() {
           variants={container}
           initial="hidden"
           whileInView="show"
-          viewport={{ once: true }}
+          viewport={{ once: true, amount: 0.1 }}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
         >
           {features.map((feature) => (

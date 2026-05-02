@@ -165,12 +165,15 @@ export function StoreWizard() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label>Número de WhatsApp</Label>
+                      <Label htmlFor="wizard-whatsapp">Número de WhatsApp</Label>
                       <Input
-                        placeholder="+51999888777"
+                        id="wizard-whatsapp"
+                        placeholder="+51 912 345 678"
+                        type="tel"
                         value={wizardData.storeWhatsapp}
                         onChange={(e) => updateWizardData({ storeWhatsapp: e.target.value })}
                       />
+                      <p className="text-xs text-gray-400">Formato: +51 9XX XXX XXX</p>
                     </div>
                   </div>
 

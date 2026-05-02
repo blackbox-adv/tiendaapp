@@ -20,9 +20,9 @@ export function Hero() {
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-24">
         <motion.div
-          initial={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
         >
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 backdrop-blur-sm text-white/90 text-sm font-medium mb-8">
@@ -74,9 +74,9 @@ export function Hero() {
             ].map((stat, i) => (
               <motion.div
                 key={stat.label}
-                initial={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.8 + i * 0.15 }}
+                transition={{ duration: 0.5, delay: 0.8 + i * 0.15, ease: "easeOut" }}
                 className="text-center"
               >
                 <div className="flex items-center justify-center mb-2">

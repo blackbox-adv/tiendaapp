@@ -27,6 +27,18 @@ const ENV_CONFIG: EnvVarConfig[] = [
     description: 'Clave secreta para verificar webhooks de pagos (min 16 caracteres)',
     validator: (v) => v.length >= 16,
   },
+  {
+    name: 'SUPABASE_URL',
+    required: true,
+    description: 'URL del proyecto Supabase para Storage y autenticacion',
+    validator: (v) => v.startsWith('https://') && v.includes('.supabase.co'),
+  },
+  {
+    name: 'SUPABASE_SERVICE_ROLE_KEY',
+    required: true,
+    description: 'Service Role Key de Supabase (server-side only, con acceso admin)',
+    validator: (v) => v.length >= 20,
+  },
 ]
 
 export function validateEnvironment(): { valid: boolean; warnings: string[]; errors: string[] } {

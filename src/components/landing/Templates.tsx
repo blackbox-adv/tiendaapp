@@ -87,9 +87,10 @@ export function Templates() {
     <section id="templates" className="py-20 sm:py-28 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
-          initial={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
           className="text-center mb-16"
         >
           <span className="text-sm font-semibold text-violet-600 uppercase tracking-wider">Plantillas</span>
@@ -105,10 +106,10 @@ export function Templates() {
           {templates.map((tpl, i) => (
             <motion.div
               key={tpl.id}
-              initial={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.15 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.6, delay: i * 0.15, ease: "easeOut" }}
               className="group"
             >
               {/* Browser frame */}

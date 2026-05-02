@@ -1,5 +1,28 @@
 import { z } from 'zod'
 
+// ── Peru WhatsApp validation helper ──
+// Validates and normalizes Peru mobile numbers to format: 519XXXXXXXX
+export const PERU_WHATSAPP_ERROR = 'Ingresa un número válido de WhatsApp Perú (ej: +51 912 345 678)'
+
+export function normalizePeruWhatsapp(raw: string): string {
+  const digits = raw.replace(/[^0-9]/g, '')
+  // Country code + number: 519XXXXXXXX (11 digits)
+  if (digits.startsWith('519') && digits.length === 11) {
+    return digits
+  }
+  // Local 9-digit number starting with 9: prepend country code 51
+  if (digits.startsWith('9') && digits.length === 9) {
+    return `51${digits}`
+  }
+  throw new Error(PERU_WHATSAPP_ERROR)
+}
+
+// Reusable Zod schema for Peru WhatsApp numbers (nullable-friendly)
+export const peruWhatsappString = z
+  .string()
+  .min(1, PERU_WHATSAPP_ERROR)
+  .transform(normalizePeruWhatsapp)
+
 // ── Auth schemas ──
 export const loginSchema = z.object({
   email: z.string().email('Email invalido'),
@@ -52,9 +75,7 @@ export const createStoreSchema = z.object({
     .regex(/^#[0-9A-Fa-f]{6}$/, 'Color secundario invalido (formato: #RRGGBB)')
     .optional()
     .default('#10B981'),
-  whatsappNumber: z
-    .string()
-    .regex(/^[+]?[\d\s-]{7,20}$/, 'Numero de WhatsApp invalido')
+  whatsappNumber: peruWhatsappString
     .optional()
     .or(z.literal('')),
   template: z

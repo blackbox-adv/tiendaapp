@@ -15,9 +15,10 @@ export function Pricing() {
     <section id="pricing" className="py-20 sm:py-28 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
-          initial={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
           className="text-center mb-16"
         >
           <span className="text-sm font-semibold text-violet-600 uppercase tracking-wider">Precios</span>
@@ -35,10 +36,10 @@ export function Pricing() {
             return (
               <motion.div
                 key={plan.id}
-                initial={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.15 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.6, delay: i * 0.15, ease: "easeOut" }}
                 className={`relative rounded-2xl p-8 flex flex-col ${
                   plan.isPopular
                     ? 'bg-violet-600 text-white shadow-2xl shadow-violet-200 scale-105 z-10'

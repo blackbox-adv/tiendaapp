@@ -69,13 +69,15 @@ export function StoreSettings() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Número de WhatsApp</Label>
+                <Label htmlFor="store-whatsapp">Número de WhatsApp</Label>
                 <Input
+                  id="store-whatsapp"
                   value={whatsapp}
                   onChange={(e) => setWhatsapp(e.target.value)}
-                  placeholder="+51999888777"
+                  placeholder="+51 912 345 678"
+                  type="tel"
                 />
-                <p className="text-xs text-gray-400">Este número se mostrará en tu tienda para que los clientes te contacten.</p>
+                <p className="text-xs text-gray-400">Formato: +51 9XX XXX XXX — Se mostrará en tu tienda para que los clientes te contacten.</p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

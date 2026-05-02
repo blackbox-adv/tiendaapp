@@ -1,6 +1,6 @@
 import { db } from '@/lib/db'
 import { NextRequest } from 'next/server'
-import { validateBody, whatsappSchema } from '@/lib/validations'
+import { validateBody, whatsappSchema, normalizePeruWhatsapp, PERU_WHATSAPP_ERROR } from '@/lib/validations'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 
 // POST /api/whatsapp - Generate WhatsApp link and log the contact
@@ -28,12 +28,13 @@ export async function POST(request: NextRequest) {
       return apiError('Esta tienda esta desactivada temporalmente', 403, undefined, request)
     }
 
-    // Clean WhatsApp number (remove all non-digits)
-    const cleanNumber = store.whatsappNumber.replace(/[^0-9]/g, '')
-
-    if (cleanNumber.length < 10) {
-      console.error('[WHATSAPP] Invalid phone number format for store:', storeId)
-      return apiError('Numero de WhatsApp de la tienda invalido', 500, undefined, request)
+    // Validate and normalize WhatsApp number for Peru format
+    let cleanNumber: string
+    try {
+      cleanNumber = normalizePeruWhatsapp(store.whatsappNumber)
+    } catch {
+      console.error('[WHATSAPP] Invalid Peru WhatsApp number format for store:', storeId)
+      return apiError(PERU_WHATSAPP_ERROR, 400, undefined, request)
     }
 
     // Build the WhatsApp message

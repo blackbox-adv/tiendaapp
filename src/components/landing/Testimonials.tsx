@@ -9,9 +9,10 @@ export function Testimonials() {
     <section id="testimonials" className="py-20 sm:py-28 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
-          initial={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
           className="text-center mb-16"
         >
           <span className="text-sm font-semibold text-violet-600 uppercase tracking-wider">Testimonios</span>
@@ -27,10 +28,10 @@ export function Testimonials() {
           {TESTIMONIALS.map((t, i) => (
             <motion.div
               key={t.id}
-              initial={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.5, delay: i * 0.15, ease: "easeOut" }}
               className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-lg hover:border-violet-100 transition-all duration-300 relative"
             >
               <Quote className="absolute top-4 right-4 w-8 h-8 text-violet-100" />
