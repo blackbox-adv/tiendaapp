@@ -10,6 +10,7 @@ export const db =
   globalForPrisma.prisma ??
   new PrismaClient({
     log: isDev ? ['warn', 'error'] : ['error'],
+    datasourceUrl: process.env.DIRECT_URL || process.env.DATABASE_URL,
   })
 
 if (isDev) globalForPrisma.prisma = db
