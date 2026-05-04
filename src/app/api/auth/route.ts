@@ -119,8 +119,12 @@ export async function PUT(request: Request) {
         return apiError('Email es requerido', 400, undefined, request)
       }
 
+      console.log('[AUTH] reset_request for:', email)
+
       const clientIp = getClientIp(request)
       const user = await db.user.findUnique({ where: { email: email.toLowerCase() } })
+
+      console.log('[AUTH] user found:', !!user)
 
       if (!user) {
         // Don't reveal if user exists - return success anyway
@@ -131,18 +135,22 @@ export async function PUT(request: Request) {
       const resetToken = uuidv4()
       const resetTokenExpires = new Date(Date.now() + 60 * 60 * 1000) // 1 hour
 
+      console.log('[AUTH] saving reset token to DB...')
       await db.user.update({
         where: { id: user.id },
         data: { resetToken, resetTokenExpires },
       })
+      console.log('[AUTH] reset token saved')
 
       // Send email
+      console.log('[AUTH] sending reset email...')
       const emailResult = await sendPasswordResetEmail(user.name, user.email, resetToken)
+      console.log('[AUTH] email result:', !!emailResult)
       if (!emailResult) {
         auditLog({ action: 'PASSWORD_RESET', userId: user.id, userEmail: user.email, ip: clientIp, details: { reason: 'email_send_failed' }, success: false, statusCode: 200 })
       }
 
-      auditLog({ action: 'PASSWORD_RESET', userId: user.id, userEmail: user.email, ip: clientIp, success: true, statusCode: 200 })
+      auditLog({ action: 'PASSWORD_RESET', userId: user.id, userEmail: user.email, ip: clientIp, success: emailResult !== null, statusCode: 200 })
 
       return apiSuccess({ message: 'Si el email existe, recibiras instrucciones.' }, 200, request)
     }
@@ -192,8 +200,10 @@ export async function PUT(request: Request) {
 
     return apiError('Accion no valida', 400, undefined, request)
   } catch (err) {
-    console.error('[AUTH] Password reset error:', err instanceof Error ? err.message : String(err))
-    return apiError('Error al restablecer contrasena', 500, undefined, request)
+    const errMsg = err instanceof Error ? err.message : String(err)
+    console.error('[AUTH] Password reset error:', errMsg)
+    console.error('[AUTH] Error stack:', err instanceof Error ? err.stack : 'no stack')
+    return apiError(`Error al restablecer contrasena [${errMsg}]`, 500, undefined, request)
   }
 }
 
