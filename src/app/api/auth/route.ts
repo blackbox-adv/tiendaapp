@@ -124,8 +124,6 @@ export async function PUT(request: Request) {
       const clientIp = getClientIp(request)
       const user = await db.user.findUnique({ where: { email: email.toLowerCase() } })
 
-      console.log('[AUTH] user found:', !!user)
-
       if (!user) {
         // Don't reveal if user exists - return success anyway
         return apiSuccess({ message: 'Si el email existe, recibiras instrucciones.' }, 200, request)
@@ -135,12 +133,11 @@ export async function PUT(request: Request) {
       const resetToken = uuidv4()
       const resetTokenExpires = new Date(Date.now() + 60 * 60 * 1000) // 1 hour
 
-      console.log('[AUTH] saving reset token to DB...')
+      console.log('[AUTH] saving reset token...')
       await db.user.update({
         where: { id: user.id },
         data: { resetToken, resetTokenExpires },
       })
-      console.log('[AUTH] reset token saved')
 
       // Send email
       console.log('[AUTH] sending reset email...')
@@ -203,7 +200,7 @@ export async function PUT(request: Request) {
     const errMsg = err instanceof Error ? err.message : String(err)
     console.error('[AUTH] Password reset error:', errMsg)
     console.error('[AUTH] Error stack:', err instanceof Error ? err.stack : 'no stack')
-    return apiError(`Error al restablecer contrasena [${errMsg}]`, 500, undefined, request)
+    return apiError('Error al restablecer contrasena', 500, undefined, request)
   }
 }
 
