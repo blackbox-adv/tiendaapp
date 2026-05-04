@@ -1,22 +1,28 @@
 ---
 Task ID: 1
-Agent: Super Z (main)
-Task: Fase 9 completa de TiendaApp - Upload Supabase Storage, Validación WhatsApp Perú, Animaciones fade-in
+Agent: main
+Task: Build complete SaaS feature set for TiendaApp
 
 Work Log:
-- Diagnosticado estado de git: repo limpio, sin rebase en curso, sin remote configurado
-- Configurado remote de GitHub con token de acceso
-- Sincronizado repo local con origin/main (reset --hard a cefe775)
-- Explorado código existente de TiendaApp (Fases 1-8) para planificar Fase 9
-- Implementadas las 3 features de Fase 9 en paralelo mediante subagentes
-- Lint verificado: sin errores
-- Commit y push exitoso a GitHub
+- Created POST /api/upload with Supabase Storage (auto bucket creation, 5MB limit, image validation)
+- Rewrote PlanManager component with real payment flow (Yape/Transfer instructions dialog, voucher number submission)
+- Created GET/PUT /api/admin/payments for admin payment listing and verification (approve/reject)
+- Added sendSubscriptionEmail() with 3 templates: activated, cancelled, downgraded
+- Rewrote Pricing component to fetch plans from /api/plans API instead of mock data
+- Cleaned Zustand store: removed mock data initialization (users/stores/products start empty)
+- Generated og-image.png, apple-touch-icon.png, favicon.ico
+- Fixed .gitignore: changed upload/ to /upload/ to allow api/upload route
+- Added /api/admin/payments to middleware matcher
+- Type check passes (zero errors)
+- Pushed commit fc05d2c to GitHub
 
 Stage Summary:
-- Git sincronizado y empujado exitosamente
-- Fase 9A: Upload imágenes a Supabase Storage implementado (API route, cliente, validación)
-- Fase 9B: Validación WhatsApp Perú implementada (regex, normalización, UI hints)
-- Fase 9C: Animaciones fade-in on scroll activadas (7 componentes landing + AppRouter)
-- Commit: a555200 pushed to origin/main
-- Archivos nuevos: src/lib/supabase.ts, src/app/api/upload/route.ts
-- 19 archivos modificados, 135 inserciones, 47 eliminaciones
+- All 9 tasks completed
+- Upload API: Supabase Storage with auto bucket creation
+- Payment flow: Yape/Transfer instructions + admin verification endpoint
+- PlanManager: connects to real API (POST /api/payments + PUT for voucher)
+- Admin payments: listing with pagination + approve/reject with subscription upsert
+- Subscription emails: 3 templates (activated/cancelled/downgraded)
+- Landing pricing: dynamic from DB
+- Mock data: removed from Zustand (empty arrays, synced via API)
+- Branding assets: OG image, apple touch icon, favicon generated
