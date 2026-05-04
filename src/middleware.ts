@@ -178,6 +178,7 @@ export const config = {
     '/api/download-zip',
     '/api/plans',
     '/api/upload',
+    '/api/admin/payments',
     // Page routes (for security headers)
     '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)',
   ],

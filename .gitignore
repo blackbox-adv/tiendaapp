@@ -5,7 +5,7 @@ db/*.db
 .env
 .env.local
 .env.production
-upload/
+/upload/
 dev.log
 server.log
 mini-services/

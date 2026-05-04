@@ -230,9 +230,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   history: [{ page: 'landing' }],
   currentUser: null,
   currentStore: null,
-  users: [...MOCK_USERS],
-  stores: [...MOCK_STORES],
-  products: [...MOCK_PRODUCTS],
+  users: [],
+  stores: [],
+  products: [],
   wizardStep: 1,
   wizardData: { ...defaultWizardData },
   platformSettings: {
