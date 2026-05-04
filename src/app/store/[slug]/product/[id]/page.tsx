@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { ProductPublicClient } from './ProductPublicClient'
 
+export const dynamic = 'force-dynamic'
+
 interface Props {
   params: Promise<{ slug: string; id: string }>
 }

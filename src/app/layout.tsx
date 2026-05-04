@@ -5,16 +5,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 
-// ── Validate environment variables at startup ──
-import { validateEnvironment } from "@/lib/env";
-const envCheck = validateEnvironment();
-if (!envCheck.valid) {
-  console.error("[STARTUP] Environment validation FAILED:", envCheck.errors.join(" | "));
-}
-for (const w of envCheck.warnings) {
-  console.warn(`[STARTUP] ${w}`);
-}
-
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
