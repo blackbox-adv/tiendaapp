@@ -64,7 +64,6 @@ export default function AppRouter() {
   // Deep-link detection: sync Zustand route with actual browser URL
   useEffect(() => {
     const pathname = window.location.pathname
-    const params = new URLSearchParams(window.location.search)
 
     const routeMap: Record<string, () => void> = {
       '/reset-password': () => navigate({ page: 'reset-password' }),

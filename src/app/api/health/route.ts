@@ -18,6 +18,9 @@ export async function GET() {
   // Check RESEND_API_KEY
   checks['RESEND_API_KEY'] = process.env.RESEND_API_KEY?.startsWith('re_') ? 'OK' : 'MISSING'
 
+  // Check NEXT_PUBLIC_APP_URL
+  checks['NEXT_PUBLIC_APP_URL'] = process.env.NEXT_PUBLIC_APP_URL ? `SET (${process.env.NEXT_PUBLIC_APP_URL})` : 'NOT SET'
+
   // Check JWT_SECRET
   checks['JWT_SECRET'] = process.env.JWT_SECRET && process.env.JWT_SECRET.length >= 16 ? 'OK' : 'MISSING OR WEAK'
 

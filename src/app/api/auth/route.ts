@@ -137,11 +137,9 @@ export async function PUT(request: Request) {
       })
 
       // Send email
-      try {
-        await sendPasswordResetEmail(user.name, user.email, resetToken)
-      } catch (emailError) {
-        console.error('[AUTH] Failed to send reset email:', emailError)
-        // Still return success to not reveal info, but log the issue
+      const emailResult = await sendPasswordResetEmail(user.name, user.email, resetToken)
+      if (!emailResult) {
+        auditLog({ action: 'PASSWORD_RESET', userId: user.id, userEmail: user.email, ip: clientIp, details: { reason: 'email_send_failed' }, success: false, statusCode: 200 })
       }
 
       auditLog({ action: 'PASSWORD_RESET', userId: user.id, userEmail: user.email, ip: clientIp, success: true, statusCode: 200 })

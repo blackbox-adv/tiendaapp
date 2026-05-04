@@ -122,23 +122,28 @@ function welcomeTemplate(name: string, loginUrl: string) {
 // ── Public API ──
 
 export async function sendPasswordResetEmail(name: string, email: string, token: string) {
-  const resend = getResend()
-  const template = passwordResetTemplate(name, `${APP_URL}/reset-password?token=${token}`)
+  try {
+    const resend = getResend()
+    const template = passwordResetTemplate(name, `${APP_URL}/reset-password?token=${token}`)
 
-  const { data, error } = await resend.emails.send({
-    from: FROM_EMAIL,
-    to: email,
-    subject: template.subject,
-    html: template.html,
-  })
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: email,
+      subject: template.subject,
+      html: template.html,
+    })
 
-  if (error) {
-    console.error('[EMAIL] Error sending password reset:', error)
-    throw new Error('Error al enviar email de restablecimiento')
+    if (error) {
+      console.error('[EMAIL] Error sending password reset:', error)
+      return null
+    }
+
+    console.log(`[EMAIL] Password reset sent to ${email}, id: ${data?.id}`)
+    return data
+  } catch (err) {
+    console.error('[EMAIL] Password reset failed:', err)
+    return null
   }
-
-  console.log(`[EMAIL] Password reset sent to ${email}, id: ${data?.id}`)
-  return data
 }
 
 export async function sendWelcomeEmail(name: string, email: string) {
