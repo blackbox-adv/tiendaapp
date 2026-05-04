@@ -10,16 +10,17 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
 
+type Step = 'email' | 'check_email' | 'reset' | 'success'
+
 export function ResetPasswordPage() {
   const navigate = useAppStore((s) => s.navigate)
   const [email, setEmail] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [resetToken, setResetToken] = useState<string | null>(null)
-  const [step, setStep] = useState<'email' | 'reset'>('email')
+  const [step, setStep] = useState<Step>('email')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [sent, setSent] = useState(false)
 
   // Check if user arrived with a token from email link
   useEffect(() => {
@@ -48,8 +49,7 @@ export function ResetPasswordPage() {
       if (!res.ok) {
         setError(data.error || 'Error al enviar el email')
       } else {
-        setStep('reset')
-        setSent(false) // Will show the "check your email" message
+        setStep('check_email')
         toast.success('Email enviado', {
           description: 'Revisa tu bandeja de entrada y haz clic en el enlace.',
         })
@@ -91,7 +91,7 @@ export function ResetPasswordPage() {
       if (!res.ok) {
         setError(data.error || 'Error al restablecer la contraseña')
       } else {
-        setSent(true)
+        setStep('success')
         toast.success('Contraseña actualizada', {
           description: 'Ya puedes iniciar sesión con tu nueva contraseña.',
         })
@@ -118,28 +118,71 @@ export function ResetPasswordPage() {
             <span className="text-2xl font-bold text-violet-700">TiendApp</span>
           </button>
           <h1 className="text-2xl font-bold text-gray-900">
-            {step === 'email' ? 'Recuperar contraseña' : 'Nueva contraseña'}
+            {step === 'email' && 'Recuperar contraseña'}
+            {step === 'check_email' && 'Revisa tu email'}
+            {step === 'reset' && 'Nueva contraseña'}
+            {step === 'success' && 'Contraseña actualizada'}
           </h1>
           <p className="text-gray-500 mt-1">
-            {step === 'email' ? 'Ingresa tu email para recibir instrucciones' : 'Crea tu nueva contraseña'}
+            {step === 'email' && 'Ingresa tu email para recibir instrucciones'}
+            {step === 'check_email' && `Enviamos un enlace a ${email || 'tu bandeja'}`}
+            {step === 'reset' && 'Crea tu nueva contraseña'}
+            {step === 'success' && 'Tu contraseña ha sido cambiada exitosamente'}
           </p>
         </div>
 
         <Card className="border-gray-200 shadow-lg">
           <CardContent className="pt-6">
-            {sent && step === 'reset' ? (
+
+            {/* ── SUCCESS ── */}
+            {step === 'success' && (
               <div className="text-center space-y-4">
                 <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto">
                   <CheckCircle className="w-8 h-8 text-green-600" />
                 </div>
                 <h2 className="text-lg font-bold text-gray-900">¡Contraseña actualizada!</h2>
-                <p className="text-sm text-gray-500">Tu contraseña ha sido cambiada exitosamente.</p>
+                <p className="text-sm text-gray-500">Ya puedes iniciar sesión con tu nueva contraseña.</p>
                 <Button onClick={() => navigate({ page: 'login' })} className="w-full bg-violet-600 hover:bg-violet-700 text-white gap-2">
                   Iniciar sesión
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
               </div>
-            ) : step === 'email' ? (
+            )}
+
+            {/* ── CHECK EMAIL ── */}
+            {step === 'check_email' && (
+              <div className="text-center space-y-4">
+                <div className="w-16 h-16 rounded-full bg-violet-100 flex items-center justify-center mx-auto">
+                  <Mail className="w-8 h-8 text-violet-600" />
+                </div>
+                <div className="space-y-2">
+                  <h2 className="text-lg font-bold text-gray-900">Email enviado</h2>
+                  <p className="text-sm text-gray-500">
+                    Si existe una cuenta con <strong>{email}</strong>, recibirás un enlace para restablecer tu contraseña.
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    El enlace expira en 1 hora. Revisa también tu carpeta de spam.
+                  </p>
+                </div>
+                <div className="space-y-2 pt-2">
+                  <Button
+                    onClick={handleRequestReset}
+                    disabled={loading}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    {loading ? 'Enviando...' : 'Reenviar email'}
+                  </Button>
+                  <Button onClick={() => navigate({ page: 'login' })} className="w-full bg-violet-600 hover:bg-violet-700 text-white gap-2">
+                    <ArrowLeft className="mr-2 w-4 h-4" />
+                    Volver al inicio de sesión
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* ── EMAIL FORM ── */}
+            {step === 'email' && (
               <form onSubmit={handleRequestReset} className="space-y-4">
                 {error && (
                   <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm flex items-center gap-2">
@@ -170,7 +213,10 @@ export function ResetPasswordPage() {
                   {loading ? 'Enviando...' : 'Enviar instrucciones'}
                 </Button>
               </form>
-            ) : (
+            )}
+
+            {/* ── RESET PASSWORD FORM ── */}
+            {step === 'reset' && (
               <form onSubmit={handleResetPassword} className="space-y-4">
                 {error && (
                   <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm flex items-center gap-2">
@@ -216,29 +262,30 @@ export function ResetPasswordPage() {
                   {loading ? 'Actualizando...' : 'Restablecer contraseña'}
                 </Button>
 
-                {!resetToken && (
-                  <p className="text-xs text-gray-500 text-center">
-                    ¿No recibiste el email?{' '}
-                    <button
-                      type="button"
-                      onClick={() => { setStep('email'); setResetToken(null) }}
-                      className="text-violet-600 hover:text-violet-700 font-semibold"
-                    >
-                      Enviar de nuevo
-                    </button>
-                  </p>
-                )}
+                <p className="text-xs text-gray-500 text-center">
+                  ¿No recibiste el email?{' '}
+                  <button
+                    type="button"
+                    onClick={() => { setStep('email'); setResetToken(null) }}
+                    className="text-violet-600 hover:text-violet-700 font-semibold"
+                  >
+                    Solicitar nuevo enlace
+                  </button>
+                </p>
               </form>
             )}
 
-            <p className="text-center text-sm text-gray-500 mt-6">
-              <button
-                onClick={() => navigate({ page: 'login' })}
-                className="text-violet-600 hover:text-violet-700 font-semibold"
-              >
-                Volver al inicio de sesión
-              </button>
-            </p>
+            {/* Back link (only on email step) */}
+            {step === 'email' && (
+              <p className="text-center text-sm text-gray-500 mt-6">
+                <button
+                  onClick={() => navigate({ page: 'login' })}
+                  className="text-violet-600 hover:text-violet-700 font-semibold"
+                >
+                  Volver al inicio de sesión
+                </button>
+              </p>
+            )}
           </CardContent>
         </Card>
       </motion.div>

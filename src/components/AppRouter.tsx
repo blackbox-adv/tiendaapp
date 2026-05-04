@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAppStore } from '@/lib/store'
 
@@ -59,6 +60,27 @@ export default function AppRouter() {
   const route = useAppStore((s) => s.route)
   const currentUser = useAppStore((s) => s.currentUser)
   const navigate = useAppStore((s) => s.navigate)
+
+  // Deep-link detection: sync Zustand route with actual browser URL
+  useEffect(() => {
+    const pathname = window.location.pathname
+    const params = new URLSearchParams(window.location.search)
+
+    const routeMap: Record<string, () => void> = {
+      '/reset-password': () => navigate({ page: 'reset-password' }),
+      '/login': () => navigate({ page: 'login' }),
+      '/register': () => navigate({ page: 'register' }),
+      '/about': () => navigate({ page: 'about' }),
+      '/contact': () => navigate({ page: 'contact' }),
+      '/terms': () => navigate({ page: 'terms' }),
+      '/privacy': () => navigate({ page: 'privacy' }),
+    }
+
+    const handler = routeMap[pathname]
+    if (handler) {
+      handler()
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Route guards
   const requiresAuth = route.page.startsWith('dashboard') || route.page === 'wizard'
