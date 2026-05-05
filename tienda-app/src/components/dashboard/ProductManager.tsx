@@ -9,8 +9,20 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
-import { Search, Plus, Pencil, Trash2, Upload, X, Star, Eye, EyeOff, Loader2, Package } from 'lucide-react'
+import { Search, Plus, Pencil, Trash2, Upload, X, Star, Eye, EyeOff, Loader2, Package, Lock } from 'lucide-react'
 import DashboardLayout from '../DashboardLayout'
+
+const PRODUCT_LIMITS: Record<string, number> = {
+  free: 5,
+  pro: 20,
+  premium: 500,
+}
+
+const PLAN_LABELS: Record<string, string> = {
+  free: 'Gratis',
+  pro: 'Pro',
+  premium: 'Premium',
+}
 
 export default function ProductManager() {
   const { navigate, currentUser } = useStore()
@@ -20,9 +32,16 @@ export default function ProductManager() {
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [limitError, setLimitError] = useState<string | null>(null)
 
   const [form, setForm] = useState({ name: '', description: '', price: '', originalPrice: '', isActive: true, isFeatured: false })
   const [images, setImages] = useState<{ url: string; alt: string; isPrimary: boolean }[]>([])
+
+  const plan = currentUser?.plan || 'free'
+  const limit = PRODUCT_LIMITS[plan] || 5
+  const planLabel = PLAN_LABELS[plan] || 'Gratis'
+  const isAtLimit = products.length >= limit
+  const isPremium = plan === 'premium'
 
   const fetchProducts = async () => {
     if (!currentUser) return
@@ -53,11 +72,24 @@ export default function ProductManager() {
   const handleSave = async () => {
     if (!currentUser) return
     setSaving(true)
+    setLimitError(null)
     const body = { ...form, price: parseFloat(form.price), originalPrice: form.originalPrice ? parseFloat(form.originalPrice) : null, storeId: currentUser.id, images }
     const url = editId ? `/api/products/${editId}` : '/api/products'
     const method = editId ? 'PUT' : 'POST'
-    await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-    setEditId(null); setSaving(false); fetchProducts()
+    try {
+      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      const data = await res.json()
+      if (!res.ok && data.error === 'Límite alcanzado') {
+        setLimitError(data.message)
+        setEditId(null)
+      } else {
+        setEditId(null)
+        fetchProducts()
+      }
+    } catch {
+      setLimitError('Error al guardar el producto')
+    }
+    setSaving(false)
   }
 
   const handleDelete = async () => {
@@ -72,9 +104,58 @@ export default function ProductManager() {
     <DashboardLayout activePage="products">
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <h1 className="text-2xl font-bold text-gray-900">Productos</h1>
-          <Button onClick={() => setEditId('new')} className="bg-violet-600 hover:bg-violet-700 text-white"><Plus className="h-4 w-4 mr-1.5" /> Nuevo producto</Button>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Productos</h1>
+            <p className="text-sm text-gray-500 mt-1">
+              {products.length} de {isPremium ? '∞' : limit} productos
+              {isAtLimit && !isPremium && <span className="text-amber-600 font-medium ml-1">— límite alcanzado</span>}
+            </p>
+          </div>
+          <Button
+            onClick={() => setEditId('new')}
+            disabled={isAtLimit && !isPremium}
+            className="bg-violet-600 hover:bg-violet-700 text-white"
+          >
+            {isAtLimit && !isPremium ? (
+              <><Lock className="h-4 w-4 mr-1.5" /> Límite alcanzado</>
+            ) : (
+              <><Plus className="h-4 w-4 mr-1.5" /> Nuevo producto</>
+            )}
+          </Button>
         </div>
+
+        {/* Progress bar */}
+        {!isPremium && (
+          <div className="space-y-1.5">
+            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${isAtLimit ? 'bg-amber-500' : products.length >= limit * 0.8 ? 'bg-amber-400' : 'bg-violet-500'}`}
+                style={{ width: `${Math.min((products.length / limit) * 100, 100)}%` }}
+              />
+            </div>
+            <p className="text-xs text-gray-400">
+              Plan <span className="font-medium text-gray-600">{planLabel}</span> — {products.length}/{limit} productos usados
+              {isAtLimit && (
+                <button onClick={() => navigate({ page: 'dashboard-plan' })} className="text-violet-600 hover:text-violet-700 font-medium ml-1">
+                  Mejorar plan →
+                </button>
+              )}
+            </p>
+          </div>
+        )}
+
+        {/* Limit error toast */}
+        {limitError && (
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
+            <Lock className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-amber-800">{limitError}</p>
+              <button onClick={() => navigate({ page: 'dashboard-plan' })} className="text-sm text-violet-600 hover:text-violet-700 font-medium mt-1">
+                Mejorar mi plan →
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="relative max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />

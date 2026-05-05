@@ -23,17 +23,17 @@ const templates = [
 const plans = [
   {
     name: 'Gratis', price: 'S/ 0', period: '/mes', color: 'bg-white', borderColor: 'border-gray-200', dark: false,
-    features: ['10 productos', '3 plantillas', 'Catálogo básico', 'Subir imágenes', 'Vista móvil'],
+    features: ['5 productos', '1 plantilla', 'Buscador no incluido', 'WhatsApp no incluido', 'Con marca de agua'],
     cta: 'Comenzar gratis', popular: false
   },
   {
     name: 'Pro', price: 'S/ 49', period: '/mes', color: 'bg-gradient-to-br from-violet-600 to-indigo-600', borderColor: 'border-violet-600', dark: true,
-    features: ['100 productos', '6 plantillas', 'Botón WhatsApp', 'Colores personalizados', 'Dominio personalizado', 'Sin marca de agua'],
+    features: ['20 productos', '3 plantillas', 'Buscador de productos', 'Botón WhatsApp', 'Estrellas y valoraciones', 'Sin marca de agua'],
     cta: 'Comenzar Pro', popular: true
   },
   {
     name: 'Premium', price: 'S/ 99', period: '/mes', color: 'bg-gradient-to-br from-amber-500 to-orange-500', borderColor: 'border-amber-500', dark: true,
-    features: ['Productos ilimitados', 'Todas las plantillas', 'WhatsApp + redes sociales', 'Dominio custom', 'Soporte prioritario', 'SEO avanzado', 'Estadísticas'],
+    features: ['500 productos', '7 plantillas exclusivas', 'Todo lo de Pro', 'Botón compartir', 'Soporte prioritario', 'SEO avanzado'],
     cta: 'Ir Premium', popular: false
   },
 ]
