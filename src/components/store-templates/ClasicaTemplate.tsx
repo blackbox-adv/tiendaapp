@@ -13,7 +13,7 @@ const CATEGORIES = [
   { id: 'juguetes', name: 'Juguetes' },
   { id: 'otros', name: 'Otros' },
 ]
-import { MessageCircle, ShoppingBag, Heart, Search, X } from 'lucide-react'
+import { Star, MessageCircle, ShoppingBag, Heart, Search, X } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { useAppStore } from '@/lib/store'
 import type { Store, Product } from '@/lib/types'
@@ -313,12 +313,30 @@ export function ClasicaTemplate({ store, products, storeSlug }: { store: Store; 
                   <div className="flex-1 p-5 flex flex-col justify-between">
                     <div>
                       <div className="flex items-start justify-between gap-3">
-                        <h3
-                          className="text-lg font-bold leading-snug"
-                          style={{ fontFamily: 'Georgia, serif', color: '#3E2A17' }}
-                        >
-                          {product.name}
-                        </h3>
+                        <div>
+                          <h3
+                            className="text-lg font-bold leading-snug"
+                            style={{ fontFamily: 'Georgia, serif', color: '#3E2A17' }}
+                          >
+                            {product.name}
+                          </h3>
+                          {product.rating > 0 && (
+                            <div className="flex items-center gap-1 mt-1">
+                              <div className="flex">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <Star
+                                    key={star}
+                                    size={12}
+                                    className={star <= Math.round(product.rating)
+                                      ? 'fill-yellow-500 text-yellow-500'
+                                      : 'text-gray-300'}
+                                  />
+                                ))}
+                              </div>
+                              <span className="text-xs" style={{ color: '#A88B6E' }}>{product.rating}</span>
+                            </div>
+                          )}
+                        </div>
                         {product.originalPrice && (
                           <Badge
                             className="text-xs font-semibold border-0 flex-shrink-0 rounded-md"

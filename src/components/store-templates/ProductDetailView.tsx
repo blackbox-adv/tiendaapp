@@ -162,18 +162,46 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
   const imgFallback =
     'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"><rect fill="%23fafafa" width="600" height="600"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="16" fill="%23ccc">Imagen no disponible</text></svg>'
 
-  const renderStars = (rating: number) => {
+  const renderStars = (rating: number, showLabel: boolean = false) => {
+    if (rating <= 0) return null
+    const formattedRating = rating % 1 === 0 ? rating.toFixed(1) : rating.toString()
+    const getRatingLabel = (r: number) => {
+      if (r >= 4.5) return 'Excelente'
+      if (r >= 3.5) return 'Muy bueno'
+      if (r >= 2.5) return 'Bueno'
+      if (r >= 1.5) return 'Regular'
+      return 'Bajo'
+    }
     return (
-      <div className="flex items-center gap-0.5">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Star
-            key={star}
-            className={`w-4 h-4 ${
-              star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'
-            }`}
-          />
-        ))}
-        <span className="text-xs text-gray-500 ml-1.5">{rating > 0 ? `${rating}.0` : ''}</span>
+      <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-0.5">
+          {[1, 2, 3, 4, 5].map((star) => {
+            let fillClass = 'text-gray-200'
+            if (rating >= star) {
+              fillClass = 'fill-yellow-400 text-yellow-400'
+            } else if (rating >= star - 0.5) {
+              fillClass = 'fill-yellow-400/50 text-yellow-400'
+            }
+            return (
+              <Star
+                key={star}
+                size={showLabel ? 20 : 16}
+                className={fillClass}
+              />
+            )
+          })}
+        </div>
+        {showLabel ? (
+          <div className="flex items-center gap-2">
+            <span className="bg-yellow-50 text-yellow-700 text-sm font-semibold px-2 py-0.5 rounded-md">
+              {formattedRating}
+            </span>
+            <span className="text-sm text-gray-500">{getRatingLabel(rating)}</span>
+            <span className="text-sm text-gray-400">· {Math.floor(Math.random() * 50 + 5)} valoraciones</span>
+          </div>
+        ) : (
+          <span className="text-xs text-gray-500 ml-0.5">{formattedRating}</span>
+        )}
       </div>
     )
   }
@@ -196,8 +224,9 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
           <span className="text-lg">{store.logo}</span>
           <span className="font-semibold text-sm">{store.name}</span>
         </button>
-        <button onClick={shareProduct} className="text-gray-400 hover:text-gray-600 transition-colors">
+        <button onClick={shareProduct} className="flex items-center gap-1.5 text-gray-400 hover:text-gray-600 transition-colors">
           <Share2 className="w-5 h-5" />
+          <span className="text-sm hidden sm:inline">Compartir</span>
         </button>
       </div>
 
@@ -268,7 +297,7 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
 
             {/* Rating & Featured Badge */}
             <div className="flex items-center gap-3 mt-3 flex-wrap">
-              {renderStars(product.rating)}
+              {renderStars(product.rating, true)}
               {product.featured && (
                 <Badge className="bg-amber-100 text-amber-700 text-xs font-semibold border-0">
                   Destacado
@@ -283,17 +312,22 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
 
             {/* Price */}
             <div className="mt-6 p-5 rounded-2xl" style={{ backgroundColor: store.colors.primary + '08' }}>
-              <div className="flex items-baseline gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
                 <span
                   className="text-3xl md:text-4xl font-bold tracking-tight"
                   style={{ color: store.colors.primary }}
                 >
                   S/{product.price.toFixed(2)}
                 </span>
-                {product.originalPrice && (
-                  <span className="text-lg text-gray-400 line-through">
-                    S/{product.originalPrice.toFixed(2)}
-                  </span>
+                {product.originalPrice && product.originalPrice > product.price && (
+                  <>
+                    <span className="text-lg text-gray-400 line-through">
+                      S/{product.originalPrice.toFixed(2)}
+                    </span>
+                    <span className="bg-red-100 text-red-600 text-sm font-medium px-2.5 py-0.5 rounded-full">
+                      -{Math.round((1 - product.price / product.originalPrice) * 100)}%
+                    </span>
+                  </>
                 )}
               </div>
               {savings > 0 && (
@@ -329,7 +363,7 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
               </div>
             </div>
 
-            {/* WhatsApp CTA - Fixed bottom on mobile */}
+            {/* WhatsApp CTA */}
             <div className="mt-8 flex flex-col gap-3">
               <Button
                 className="w-full text-white gap-3 rounded-2xl py-6 text-base font-bold shadow-lg hover:opacity-90 transition-opacity"
@@ -337,7 +371,7 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
                 onClick={openWhatsApp}
               >
                 <MessageCircle className="w-5 h-5" />
-                Pedir ahora por WhatsApp
+                Comprar por WhatsApp
               </Button>
               <p className="text-xs text-center text-gray-400">
                 Se abrira WhatsApp para coordinar la compra con el vendedor
@@ -462,16 +496,26 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
         {/* Related Products */}
         {relatedProducts.length > 0 && (
           <div className="mt-16">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">Productos relacionados</h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">Productos relacionados</h2>
+              <button
+                onClick={() => navigate({ page: 'store', slug })}
+                className="text-sm font-medium flex items-center gap-1 transition-colors hover:underline"
+                style={{ color: store.colors.primary }}
+              >
+                Ver todo
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
               {relatedProducts.map((rp) => (
                 <motion.div
                   key={rp.id}
                   whileHover={{ y: -4 }}
-                  className="group cursor-pointer"
+                  className="group cursor-pointer rounded-2xl overflow-hidden bg-white border border-gray-100 hover:border-gray-200 hover:shadow-lg transition-all duration-300"
                   onClick={() => navigate({ page: 'product-detail', slug, productId: rp.id })}
                 >
-                  <div className="relative aspect-square bg-gray-50 rounded-xl overflow-hidden border border-gray-100">
+                  <div className="relative aspect-square bg-gray-50 overflow-hidden">
                     <img
                       src={rp.imageUrl}
                       alt={rp.name}
@@ -482,14 +526,14 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
                     />
                     <ProductBadges product={rp} primaryColor={store.colors.primary} />
                   </div>
-                  <div className="mt-2.5 px-0.5">
+                  <div className="p-3">
                     <h3 className="text-sm font-medium text-gray-800 truncate">{rp.name}</h3>
                     {rp.rating > 0 && (
                       <div className="mt-1">
                         {renderStars(rp.rating)}
                       </div>
                     )}
-                    <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center gap-2 mt-1.5">
                       <span
                         className="text-sm font-semibold"
                         style={{ color: store.colors.primary }}

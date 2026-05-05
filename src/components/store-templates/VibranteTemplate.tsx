@@ -13,7 +13,7 @@ const CATEGORIES = [
   { id: 'juguetes', name: 'Juguetes' },
   { id: 'otros', name: 'Otros' },
 ]
-import { MessageCircle, ShoppingBag, Search, X, SlidersHorizontal } from 'lucide-react'
+import { Star, MessageCircle, ShoppingBag, Search, X, SlidersHorizontal } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { useAppStore } from '@/lib/store'
 import type { Store, Product } from '@/lib/types'
@@ -345,6 +345,22 @@ export function VibranteTemplate({ store, products, storeSlug }: { store: Store;
                     <h3 className="text-lg font-extrabold text-gray-900 leading-tight">
                       {product.name}
                     </h3>
+                    {product.rating > 0 && (
+                      <div className="flex items-center gap-1 mt-1.5">
+                        <div className="flex">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              size={12}
+                              className={star <= Math.round(product.rating)
+                                ? 'fill-yellow-400 text-yellow-400'
+                                : 'text-gray-300'}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-xs text-gray-400 font-medium">{product.rating}</span>
+                      </div>
+                    )}
                     <p className="text-sm text-gray-400 mt-1.5 line-clamp-2 leading-relaxed">
                       {product.description}
                     </p>

@@ -13,7 +13,7 @@ const CATEGORIES = [
   { id: 'juguetes', name: 'Juguetes' },
   { id: 'otros', name: 'Otros' },
 ]
-import { ShoppingBag, Search, X } from 'lucide-react'
+import { Star, ShoppingBag, Search, X } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { useAppStore } from '@/lib/store'
 import type { Store, Product } from '@/lib/types'
@@ -267,6 +267,22 @@ export function ModernaTemplate({ store, products, storeSlug }: { store: Store; 
                       <h3 className="text-sm font-medium text-gray-800 truncate tracking-tight">
                         {product.name}
                       </h3>
+                      {product.rating > 0 && (
+                        <div className="flex items-center gap-1 mt-1">
+                          <div className="flex">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                size={11}
+                                className={star <= Math.round(product.rating)
+                                  ? 'fill-yellow-400 text-yellow-400'
+                                  : 'text-gray-200'}
+                              />
+                            ))}
+                          </div>
+                          <span className="text-[11px] text-gray-400">{product.rating}</span>
+                        </div>
+                      )}
                       <div className="flex items-center gap-2 mt-1">
                         <span
                           className="text-sm font-semibold"
