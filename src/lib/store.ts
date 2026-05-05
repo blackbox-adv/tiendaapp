@@ -569,7 +569,8 @@ export const useAppStore = create<AppState>((set, get) => ({
     } catch { /* fallback to local state */ }
   },
 
-  changePlan: (planId) =>
+  changePlan: (planId) => {
+    // Update local state immediately (optimistic)
     set((state) => {
       const userId = state.currentUser?.id
       if (!userId) return state
@@ -577,7 +578,37 @@ export const useAppStore = create<AppState>((set, get) => ({
         currentUser: state.currentUser ? { ...state.currentUser, planId } : null,
         users: state.users.map((u) => (u.id === userId ? { ...u, planId } : u)),
       }
-    }),
+    })
+
+    // Persist to API (create or update subscription)
+    const state = get()
+    const userId = state.currentUser?.id
+    const storeId = state.currentStore?.id
+    if (!userId) return
+
+    ;(async () => {
+      try {
+        const token = getToken()
+        const res = await fetch('/api/subscriptions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+          body: JSON.stringify({
+            userId,
+            storeId: storeId || '',
+            planId,
+            status: 'active',
+          }),
+        })
+        if (res.ok) {
+          console.log('[Store] Plan changed via API:', planId)
+        } else {
+          console.warn('[Store] Failed to change plan via API')
+        }
+      } catch (error) {
+        console.warn('[Store] Error changing plan:', error)
+      }
+    })()
+  },
 
   toggleStoreActive: (storeId) =>
     set((state) => ({

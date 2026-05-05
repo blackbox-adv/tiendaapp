@@ -1,6 +1,7 @@
 import { db } from '@/lib/db'
 import { authenticateRequest } from '@/lib/auth'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
+import { sendSubscriptionEmail } from '@/lib/email'
 
 // ── GET /api/admin/payments ──
 // List all payments with optional status filter, paginated, ordered by newest first.
@@ -65,7 +66,7 @@ export async function PUT(request: Request) {
     // Fetch the payment with its plan info
     const payment = await db.payment.findUnique({
       where: { id: paymentId },
-      include: { plan: { select: { id: true, name: true, type: true } } },
+      include: { plan: { select: { id: true, name: true, type: true, price: true } } },
     })
 
     if (!payment) {
@@ -130,6 +131,15 @@ export async function PUT(request: Request) {
           amountPaid: payment.amount,
         },
       })
+    }
+
+    // 3. Send subscription activation email (non-blocking)
+    const user = await db.user.findUnique({
+      where: { id: payment.userId },
+      select: { name: true, email: true },
+    })
+    if (user) {
+      sendSubscriptionEmail(user.name, user.email, payment.plan.name, payment.plan.price, 'activated').catch(() => {})
     }
 
     return apiSuccess(
