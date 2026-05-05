@@ -1,0 +1,58 @@
+import type { Testimonial } from './types'
+
+export const TESTIMONIALS: Testimonial[] = [
+  {
+    id: 't1',
+    name: 'María Demo',
+    role: 'Dueña de Dulce María Bakery',
+    storeName: 'Dulce María Bakery',
+    comment: 'TiendApp me permitió llevar mi panadería al mundo digital en menos de una hora. ¡Mis pedidos aumentaron un 200% en el primer mes!',
+    rating: 5,
+    avatar: '👩‍💼',
+  },
+  {
+    id: 't2',
+    name: 'Juan Delgado',
+    role: 'Dueño de Pizzería Napoli',
+    storeName: 'Pizzería Napoli',
+    comment: 'La integración con WhatsApp es increíble. Mis clientes pueden hacer pedidos directamente por chat. El soporte es excelente.',
+    rating: 5,
+    avatar: '👨‍🍳',
+  },
+  {
+    id: 't3',
+    name: 'Ana Torres',
+    role: 'Diseñadora',
+    storeName: 'Boutique Élégance',
+    comment: 'Las plantillas son hermosas y muy fáciles de personalizar. No necesito saber programación para tener una tienda profesional.',
+    rating: 5,
+    avatar: '👩‍🎨',
+  },
+  {
+    id: 't4',
+    name: 'Carlos Mendoza',
+    role: 'Emprendedor',
+    storeName: 'TechStore Peru',
+    comment: 'Empecé con el plan gratis y en 2 semanas ya migre a Pro. La diferencia en las herramientas es enorme. Totalmente recomendado.',
+    rating: 5,
+    avatar: '👨‍💻',
+  },
+  {
+    id: 't5',
+    name: 'Lucía Ramírez',
+    role: 'Artesana',
+    storeName: 'Artesanías Ana',
+    comment: 'Vendo mis artesanías en todo el país gracias a TiendApp. La plataforma es intuitiva y el precio muy accesible para emprendedores.',
+    rating: 5,
+    avatar: '👩‍🍳',
+  },
+  {
+    id: 't6',
+    name: 'Diego Vargas',
+    role: 'CEO',
+    storeName: 'DV Electronics',
+    comment: 'Migramos desde otra plataforma y el proceso fue súper sencillo. El equipo de soporte nos ayudó en todo momento. Excelente servicio.',
+    rating: 5,
+    avatar: '👨‍🔧',
+  },
+]

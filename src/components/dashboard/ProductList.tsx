@@ -2,7 +2,17 @@
 
 import { useState } from 'react'
 import { useAppStore } from '@/lib/store'
-import { CATEGORIES } from '@/lib/mock-data'
+const CATEGORIES = [
+  { id: 'ropa', name: 'Ropa' },
+  { id: 'accesorios', name: 'Accesorios' },
+  { id: 'electronica', name: 'Electronica' },
+  { id: 'hogar', name: 'Hogar' },
+  { id: 'belleza', name: 'Belleza' },
+  { id: 'deportes', name: 'Deportes' },
+  { id: 'alimentos', name: 'Alimentos' },
+  { id: 'juguetes', name: 'Juguetes' },
+  { id: 'otros', name: 'Otros' },
+]
 import { Search, Plus, Edit3, Trash2, Package } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

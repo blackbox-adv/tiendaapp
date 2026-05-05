@@ -3,7 +3,17 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAppStore } from '@/lib/store'
-import { CATEGORIES } from '@/lib/mock-data'
+const CATEGORIES = [
+  { id: 'ropa', name: 'Ropa' },
+  { id: 'accesorios', name: 'Accesorios' },
+  { id: 'electronica', name: 'Electronica' },
+  { id: 'hogar', name: 'Hogar' },
+  { id: 'belleza', name: 'Belleza' },
+  { id: 'deportes', name: 'Deportes' },
+  { id: 'alimentos', name: 'Alimentos' },
+  { id: 'juguetes', name: 'Juguetes' },
+  { id: 'otros', name: 'Otros' },
+]
 import {
   ArrowLeft,
   MessageCircle,

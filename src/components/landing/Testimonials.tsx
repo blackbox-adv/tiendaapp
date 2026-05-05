@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { TESTIMONIALS } from '@/lib/mock-data'
+import { TESTIMONIALS } from '@/lib/landing-testimonials'
 import { Star, Quote } from 'lucide-react'
 
 export function Testimonials() {
