@@ -18,7 +18,7 @@ import { Badge } from '@/components/ui/badge'
 import { useAppStore } from '@/lib/store'
 import type { Store, Product } from '@/lib/types'
 
-export function ClasicaTemplate({ store, products, storeSlug }: { store: Store; products: Product[]; storeSlug: string }) {
+export function ClasicaTemplate({ store, products, storeSlug, planId }: { store: Store; products: Product[]; storeSlug: string; planId?: string }) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [priceRange, setPriceRange] = useState<{ min: number | null; max: number | null }>({ min: null, max: null })
@@ -407,7 +407,15 @@ export function ClasicaTemplate({ store, products, storeSlug }: { store: Store; 
               style={{ fontFamily: 'Georgia, serif', color: '#A88B6E' }}
               className="text-xs"
             >
-              Creado con TiendApp
+              {planId === 'free' && (
+                <a
+                  href="/"
+                  className="hover:underline transition-colors"
+                  style={{ color: '#A88B6E' }}
+                >
+                  Creado con TiendApp
+                </a>
+              )}
             </p>
           </div>
         </div>

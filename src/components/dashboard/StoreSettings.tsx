@@ -148,7 +148,7 @@ export function StoreSettings() {
       whatsappNumber: whatsapp,
       logo,
       colors: { primary: primaryColor, secondary: primaryColor + '80' },
-      template: template as 'moderna' | 'vibrante' | 'clasica',
+      template: template as 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist',
       categoryId: category,
     })
     toast.success('Tienda actualizada', { description: 'Los cambios se guardaron correctamente.' })
@@ -247,6 +247,8 @@ export function StoreSettings() {
                     <option value="moderna">Moderna</option>
                     <option value="vibrante">Vibrante</option>
                     <option value="clasica">Clásica</option>
+                    <option value="luxury">Luxury (Premium)</option>
+                    <option value="minimalist">Minimalist (Premium)</option>
                   </select>
                 </div>
               </div>

@@ -45,7 +45,7 @@ export interface Store {
   planId: string
   colors: { primary: string; secondary: string }
   whatsappNumber: string
-  template: 'moderna' | 'vibrante' | 'clasica'
+  template: 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist'
   userId: string
   isActive: boolean
   createdAt: string

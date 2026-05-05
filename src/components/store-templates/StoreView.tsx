@@ -10,6 +10,8 @@ import { WhatsAppButton } from './WhatsAppButton'
 import { ModernaTemplate } from './ModernaTemplate'
 import { VibranteTemplate } from './VibranteTemplate'
 import { ClasicaTemplate } from './ClasicaTemplate'
+import { LuxuryTemplate } from './LuxuryTemplate'
+import { MinimalistTemplate } from './MinimalistTemplate'
 import type { Product, Store as StoreType } from '@/lib/types'
 
 export function StoreView({ slug }: { slug: string }) {
@@ -54,7 +56,7 @@ export function StoreView({ slug }: { slug: string }) {
                 secondary: data.secondaryColor || '#10B981',
               },
               whatsappNumber: data.whatsappNumber || '',
-              template: (data.template as 'moderna' | 'vibrante' | 'clasica') || 'moderna',
+              template: (data.template as 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist') || 'moderna',
               userId: data.ownerId || '',
               isActive: data.isActive ?? true,
               createdAt: data.createdAt || new Date().toISOString(),
@@ -94,6 +96,9 @@ export function StoreView({ slug }: { slug: string }) {
 
   const displayStore = store || apiStore
   const displayProducts = store ? storeProducts : apiProducts
+
+  // Get planId for template branding
+  const storePlanId = displayStore?.planId || ''
 
   // SEO: Update document title and meta description
   useEffect(() => {
@@ -204,9 +209,11 @@ export function StoreView({ slug }: { slug: string }) {
       </div>
 
       {/* Render template */}
-      {displayStore!.template === 'moderna' && <ModernaTemplate store={displayStore!} products={displayProducts} storeSlug={slug} />}
-      {displayStore!.template === 'vibrante' && <VibranteTemplate store={displayStore!} products={displayProducts} storeSlug={slug} />}
-      {displayStore!.template === 'clasica' && <ClasicaTemplate store={displayStore!} products={displayProducts} storeSlug={slug} />}
+      {displayStore!.template === 'moderna' && <ModernaTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} />}
+      {displayStore!.template === 'vibrante' && <VibranteTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} />}
+      {displayStore!.template === 'clasica' && <ClasicaTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} />}
+      {displayStore!.template === 'luxury' && <LuxuryTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} />}
+      {displayStore!.template === 'minimalist' && <MinimalistTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} />}
 
       {/* WhatsApp Float */}
       <WhatsAppButton whatsappNumber={displayStore!.whatsappNumber} />

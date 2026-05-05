@@ -20,7 +20,7 @@ function transformStore(s: Record<string, unknown>): Store {
       secondary: (s.secondaryColor as string) || '#10B981',
     },
     whatsappNumber: (s.whatsappNumber as string) || '',
-    template: (s.template as 'moderna' | 'vibrante' | 'clasica') || 'moderna',
+    template: (s.template as 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist') || 'moderna',
     userId: (s.ownerId as string) || '',
     isActive: (s.isActive as boolean) ?? true,
     createdAt: (s.createdAt as string) || new Date().toISOString(),

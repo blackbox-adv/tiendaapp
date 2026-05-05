@@ -18,7 +18,7 @@ import { Badge } from '@/components/ui/badge'
 import { useAppStore } from '@/lib/store'
 import type { Store, Product } from '@/lib/types'
 
-export function ModernaTemplate({ store, products, storeSlug }: { store: Store; products: Product[]; storeSlug: string }) {
+export function ModernaTemplate({ store, products, storeSlug, planId }: { store: Store; products: Product[]; storeSlug: string; planId?: string }) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [priceRange, setPriceRange] = useState<{ min: number | null; max: number | null }>({ min: null, max: null })
@@ -198,7 +198,7 @@ export function ModernaTemplate({ store, products, storeSlug }: { store: Store; 
       </nav>
 
       {/* Product Grid */}
-      <main className="max-w-5xl mx-auto px-6 py-10">
+      <main className="max-w-5xl mx-auto px-6 py-10 flex-1">
         {filteredProducts.length === 0 ? (
           <div className="text-center py-24">
             <ShoppingBag className="w-12 h-12 mx-auto mb-4 text-gray-200" />
@@ -304,6 +304,17 @@ export function ModernaTemplate({ store, products, storeSlug }: { store: Store; 
           </>
         )}
       </main>
+      {/* Footer */}
+      <footer className="mt-auto py-6 text-center">
+        {planId === 'free' && (
+          <a
+            href="/"
+            className="text-xs text-gray-300 hover:text-gray-500 transition-colors"
+          >
+            Creado con TiendApp
+          </a>
+        )}
+      </footer>
     </div>
   )
 }

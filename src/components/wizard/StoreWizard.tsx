@@ -16,7 +16,7 @@ const iconMap: Record<string, React.ElementType> = { Gift, Zap, Crown }
 
 export function StoreWizard() {
   const { wizardStep, setWizardStep, wizardData, updateWizardData, completeWizard, navigate } = useAppStore()
-  const [selectedTemplate, setSelectedTemplate] = useState<'moderna' | 'vibrante' | 'clasica'>(wizardData.template)
+  const [selectedTemplate, setSelectedTemplate] = useState<'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist'>(wizardData.template)
   const [uploadingLogo, setUploadingLogo] = useState(false)
 
   // Fetch plans from API
