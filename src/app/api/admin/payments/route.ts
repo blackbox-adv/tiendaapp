@@ -110,6 +110,11 @@ export async function PUT(request: Request) {
       },
     })
 
+    // Calculate nextBillingDate: 30 days from now for paid plans
+    const nextBillingDate = payment.plan.type !== 'free'
+      ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+      : null
+
     if (existingSubscription) {
       await db.subscription.update({
         where: { id: existingSubscription.id },
@@ -118,6 +123,7 @@ export async function PUT(request: Request) {
           startDate: new Date(),
           amountPaid: payment.amount,
           status: 'active',
+          nextBillingDate,
         },
       })
     } else {
@@ -129,6 +135,7 @@ export async function PUT(request: Request) {
           status: 'active',
           startDate: new Date(),
           amountPaid: payment.amount,
+          nextBillingDate,
         },
       })
     }

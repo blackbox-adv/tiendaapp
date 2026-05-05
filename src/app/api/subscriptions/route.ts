@@ -76,10 +76,20 @@ export async function POST(request: NextRequest) {
       where: { userId, storeId: storeId || undefined, status: 'active' },
     })
 
+    // Calculate nextBillingDate: 30 days from now for paid plans
+    const nextBillingDate = plan.type !== 'free'
+      ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+      : null
+
     if (existing) {
       const updated = await db.subscription.update({
         where: { id: existing.id },
-        data: { planId, status: status || 'active', startDate: new Date() },
+        data: {
+          planId,
+          status: status || 'active',
+          startDate: new Date(),
+          nextBillingDate,
+        },
         include: {
           user: { select: { id: true, name: true, email: true } },
           store: { select: { id: true, name: true, slug: true } },
@@ -96,6 +106,7 @@ export async function POST(request: NextRequest) {
         planId,
         status: status || 'active',
         startDate: new Date(),
+        nextBillingDate,
       },
       include: {
         user: { select: { id: true, name: true, email: true } },

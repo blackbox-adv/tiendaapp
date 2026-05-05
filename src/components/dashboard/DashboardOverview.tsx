@@ -472,8 +472,8 @@ export function DashboardOverview() {
   }, [])
   const currentPlan = apiPlans.find(p => p.id === currentUser.planId || p.type === currentUser.planId) || null
 
-  const totalRevenue = storeProducts.reduce((sum, p) => sum + p.price, 0)
-  const avgPrice = storeProducts.length > 0 ? totalRevenue / storeProducts.length : 0
+  const inventoryValue = storeProducts.reduce((sum, p) => sum + p.price, 0)
+  const avgPrice = storeProducts.length > 0 ? inventoryValue / storeProducts.length : 0
   const featuredCount = storeProducts.filter((p) => p.featured).length
 
   const visitDisplay = (currentStore as unknown as Record<string, unknown>)?.visitCount
@@ -497,7 +497,7 @@ export function DashboardOverview() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: 'Productos', value: storeProducts.length, icon: Package, color: 'bg-violet-100 text-violet-600', sub: `${featuredCount} destacados` },
-          { label: 'Ingresos totales', value: `S/${totalRevenue.toFixed(0)}`, icon: TrendingUp, color: 'bg-green-100 text-green-600', sub: `Promedio: S/${avgPrice.toFixed(0)}` },
+          { label: 'Valor del inventario', value: `S/${inventoryValue.toFixed(0)}`, icon: TrendingUp, color: 'bg-green-100 text-green-600', sub: `${storeProducts.length} productos` },
           { label: 'Plan', value: currentPlan?.name || 'Gratis', icon: Eye, color: 'bg-amber-100 text-amber-600', sub: currentPlan?.maxProducts === -1 ? 'Ilimitado' : `${storeProducts.length}/${currentPlan?.maxProducts || '?'} productos` },
           { label: 'Visitas', value: visitDisplay, icon: BarChart3, color: 'bg-blue-100 text-blue-600', sub: 'Este mes' },
         ].map((stat) => (

@@ -20,6 +20,63 @@ interface Plan {
   popular: boolean
 }
 
+// Fallback plans in case the API is unavailable
+const FALLBACK_PLANS: Plan[] = [
+  {
+    id: 'free',
+    type: 'free',
+    name: 'Gratis',
+    price: 0,
+    maxProducts: 10,
+    description: 'Perfecto para comenzar',
+    features: [
+      'Hasta 10 productos',
+      '1 tienda online',
+      'Plantilla básica',
+      'Botón de WhatsApp',
+      'Soporte por email',
+    ],
+    popular: false,
+  },
+  {
+    id: 'pro',
+    type: 'pro',
+    name: 'Pro',
+    price: 29.9,
+    maxProducts: 100,
+    description: 'Para tiendas en crecimiento',
+    features: [
+      'Hasta 100 productos',
+      '1 tienda online',
+      'Todas las plantillas',
+      'Botón de WhatsApp',
+      'Dominio personalizado',
+      'Estadísticas avanzadas',
+      'Soporte prioritario',
+    ],
+    popular: true,
+  },
+  {
+    id: 'premium',
+    type: 'premium',
+    name: 'Premium',
+    price: 59.9,
+    maxProducts: -1,
+    description: 'Para negocios establecidos',
+    features: [
+      'Productos ilimitados',
+      'Hasta 3 tiendas',
+      'Todas las plantillas',
+      'Botón de WhatsApp',
+      'Dominio personalizado',
+      'Estadísticas avanzadas',
+      'Soporte 24/7',
+      'Personalización total',
+    ],
+    popular: false,
+  },
+]
+
 export function Pricing() {
   const navigate = useAppStore((s) => s.navigate)
   const [plans, setPlans] = useState<Plan[]>([])
@@ -29,9 +86,17 @@ export function Pricing() {
     fetch('/api/plans')
       .then(res => res.json())
       .then(data => {
-        if (Array.isArray(data)) setPlans(data)
+        if (Array.isArray(data) && data.length > 0) {
+          setPlans(data)
+        } else {
+          // API returned empty or non-array — use fallback
+          setPlans(FALLBACK_PLANS)
+        }
       })
-      .catch(() => { /* fallback: empty */ })
+      .catch(() => {
+        // API failed — use fallback plans
+        setPlans(FALLBACK_PLANS)
+      })
       .finally(() => setLoading(false))
   }, [])
 

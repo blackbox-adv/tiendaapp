@@ -77,6 +77,16 @@ export default async function StorePage({ params }: Props) {
       },
     }) as unknown as Record<string, unknown> | null
 
+    // Increment visit count (fire-and-forget, non-blocking)
+    if (store && store.id) {
+      db.store
+        .update({
+          where: { id: store.id as string },
+          data: { visitCount: { increment: 1 } },
+        })
+        .catch(() => {})
+    }
+
     if (store && store.isActive !== false) {
       products = (store.products as Record<string, unknown>[]) || []
     }
