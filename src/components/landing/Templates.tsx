@@ -203,10 +203,16 @@ export function Templates() {
                     Ver demo
                   </Button>
                 ) : (
-                  <div className="flex items-center justify-center gap-1.5 text-xs text-[#c8a456] font-semibold">
-                    <Crown className="w-3.5 h-3.5" />
-                    Solo Premium
-                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.location.href = `/demo/${tpl.id}`}
+                    className={`gap-1.5 text-xs ${tpl.id === 'luxury' ? 'border-[#c8a456] text-[#c8a456] hover:bg-[#c8a456]/5' : 'border-gray-300 text-gray-600 hover:bg-gray-50'}`}
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                    Ver demo
+                    <Crown className="w-3 h-3 opacity-60" />
+                  </Button>
                 )}
               </div>
             </motion.div>
