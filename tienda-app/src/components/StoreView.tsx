@@ -2,11 +2,54 @@
 
 import { useState, useEffect } from 'react'
 import { useStore } from '@/lib/store'
-import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import MinimalTemplate from './templates/MinimalTemplate'
 import SaborTemplate from './templates/SaborTemplate'
 import EleganceTemplate from './templates/EleganceTemplate'
+
+interface StoreFeatures {
+  showSearch: boolean
+  showWhatsApp: boolean
+  showRatings: boolean
+  showDiscountBadge: boolean
+  showShareButton: boolean
+  showWatermark: boolean
+  showInstagram: boolean
+  animations: boolean
+}
+
+const featuresByPlan: Record<string, StoreFeatures> = {
+  free: {
+    showSearch: false,
+    showWhatsApp: false,
+    showRatings: false,
+    showDiscountBadge: false,
+    showShareButton: false,
+    showWatermark: true,
+    showInstagram: false,
+    animations: false,
+  },
+  pro: {
+    showSearch: true,
+    showWhatsApp: true,
+    showRatings: true,
+    showDiscountBadge: true,
+    showShareButton: false,
+    showWatermark: false,
+    showInstagram: true,
+    animations: true,
+  },
+  premium: {
+    showSearch: true,
+    showWhatsApp: true,
+    showRatings: true,
+    showDiscountBadge: true,
+    showShareButton: true,
+    showWatermark: false,
+    showInstagram: true,
+    animations: true,
+  },
+}
 
 export default function StoreView() {
   const { route } = useStore()
@@ -26,12 +69,13 @@ export default function StoreView() {
   if (loading) return <div className="min-h-screen flex items-center justify-center"><Skeleton className="w-64 h-8" /></div>
   if (!store) return <div className="min-h-screen flex items-center justify-center"><p className="text-gray-400">Tienda no encontrada</p></div>
 
-  const showWhatsApp = store.user && ['pro', 'premium'].includes(store.plan) ? false : false
-  // Check the store owner's plan (passed through user relation)
-  // For simplicity, we'll check if the store has whatsapp set
-  const hasWhatsApp = !!store.whatsapp
+  const plan = store.user?.plan || 'free'
+  const features = featuresByPlan[plan] || featuresByPlan.free
+
+  // WhatsApp: show if the store has a number AND the plan allows it
+  const showWhatsApp = features.showWhatsApp && !!store.whatsapp
 
   const Template = store.template === 'sabor' ? SaborTemplate : store.template === 'elegance' ? EleganceTemplate : MinimalTemplate
 
-  return <Template store={store} products={store.products || []} showWhatsApp={hasWhatsApp} />
+  return <Template store={store} products={store.products || []} showWhatsApp={showWhatsApp} features={features} />
 }

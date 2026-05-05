@@ -12,7 +12,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
           orderBy: { order: 'asc' },
           include: { images: { orderBy: { order: 'asc' } } }
         },
-        user: { select: { name: true } }
+        user: { select: { name: true, plan: true } }
       }
     })
     if (!store) return NextResponse.json({ error: 'Tienda no encontrada' }, { status: 404 })
