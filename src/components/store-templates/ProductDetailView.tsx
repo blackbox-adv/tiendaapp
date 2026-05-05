@@ -37,16 +37,82 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
   const { stores, products, navigate, goBack } = useAppStore()
   const [showYape, setShowYape] = useState(false)
 
-  const store = stores.find((s) => s.slug === slug && s.isActive)
-  const product = products.find((p) => p.id === productId && p.isActive)
+  const zustandStore = stores.find((s) => s.slug === slug && s.isActive)
+  const zustandProduct = products.find((p) => p.id === productId && p.isActive)
+
+  // API fallback: if product not found in Zustand, fetch from API
+  const [apiLoading, setApiLoading] = useState(!zustandStore || !zustandProduct)
+  const [apiStore, setApiStore] = useState<Store | null>(null)
+  const [apiProduct, setApiProduct] = useState<Product | null>(null)
+  const [apiProducts, setApiProducts] = useState<Product[]>([])
+
+  useEffect(() => {
+    if (zustandStore && zustandProduct) return
+    const fetchFromApi = async () => {
+      try {
+        const res = await fetch(`/api/stores?slug=${slug}`)
+        if (res.ok) {
+          const data = await res.json()
+          if (data && data.id) {
+            const mappedStore: Store = {
+              id: data.id,
+              name: data.name,
+              slug: data.slug,
+              description: data.description || '',
+              logo: data.logo || '\uD83D\uDED2',
+              categoryId: data.category || '',
+              planId: '',
+              colors: {
+                primary: data.primaryColor || '#7C3AED',
+                secondary: data.secondaryColor || '#10B981',
+              },
+              whatsappNumber: data.whatsappNumber || '',
+              template: (data.template as 'moderna' | 'vibrante' | 'clasica') || 'moderna',
+              userId: data.ownerId || '',
+              isActive: data.isActive ?? true,
+              createdAt: data.createdAt || new Date().toISOString(),
+            }
+            setApiStore(mappedStore)
+
+            if (data.products && Array.isArray(data.products)) {
+              const mapped: Product[] = data.products.map((p: Record<string, unknown>) => ({
+                id: p.id as string,
+                name: (p.name as string) || '',
+                description: (p.description as string) || '',
+                price: (p.price as number) || 0,
+                originalPrice: (p.originalPrice as number) || null,
+                categoryId: (p.category as string) || '',
+                imageUrl: (p.imageUrl as string) || '',
+                isActive: (p.isActive as boolean) ?? true,
+                featured: (p.featured as boolean) ?? false,
+                rating: (p.rating as number) || 0,
+                storeId: (p.storeId as string) || '',
+                createdAt: (p.createdAt as string) || new Date().toISOString(),
+              }))
+              setApiProducts(mapped)
+              const found = mapped.find((p) => p.id === productId && p.isActive)
+              setApiProduct(found || null)
+            }
+          }
+        }
+      } catch {
+        // API fallback failed
+      }
+      setApiLoading(false)
+    }
+    fetchFromApi()
+  }, [slug, productId, zustandStore, zustandProduct])
+
+  const displayStore = zustandStore || apiStore
+  const displayProduct = zustandProduct || apiProduct
 
   // SEO: Update document title and meta description
   useEffect(() => {
-    if (!store || !product) return
-    const title = `${product.name} | ${store.name}`
-    const description = product.description
-      ? `${product.description.substring(0, 160)} - ${store.name} en TiendApp.`
-      : `Compra ${product.name} por S/${product.price.toFixed(2)} en ${store.name}. Visita la tienda en TiendApp.`
+    if (!displayStore || !displayProduct) return
+    const title = `${displayProduct.name} | ${displayStore.name}`
+    const description = displayProduct.description
+      ? `${displayProduct.description.substring(0, 160)} - ${displayStore.name} en TiendApp.`
+      : `Compra ${displayProduct.name} por S/${displayProduct.price.toFixed(2)} en ${displayStore.name}. Visita la tienda en TiendApp.`
 
     document.title = title
     // Update meta description
@@ -70,27 +136,50 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
     }
     setMeta('og:title', title)
     setMeta('og:description', description)
-    setMeta('og:image', product.imageUrl)
+    setMeta('og:image', displayProduct.imageUrl)
     setMeta('og:type', 'product')
-    setMeta('product:price:amount', product.price.toString())
+    setMeta('product:price:amount', displayProduct.price.toString())
     setMeta('product:price:currency', 'PEN')
 
     return () => {
       document.title = 'TiendApp | Crea tu tienda online en Perú'
       if (metaDesc) metaDesc.setAttribute('content', 'Crea tu tienda online en minutos con TiendApp. La plataforma #1 en Perú para emprendedores.')
     }
-  }, [store, product])
+  }, [displayStore, displayProduct])
 
-  if (!store || !product) {
+  if (apiLoading) {
+    return (
+      <div className="min-h-screen bg-white">
+        <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
+          <div className="w-20 h-4 bg-gray-200 rounded animate-pulse" />
+          <div className="w-24 h-4 bg-gray-200 rounded animate-pulse" />
+          <div className="w-16 h-4 bg-gray-200 rounded animate-pulse" />
+        </div>
+        <div className="max-w-5xl mx-auto px-4 py-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+            <div className="aspect-square bg-gray-100 rounded-2xl animate-pulse" />
+            <div className="space-y-4">
+              <div className="w-16 h-3 bg-gray-200 rounded animate-pulse" />
+              <div className="w-3/4 h-7 bg-gray-200 rounded animate-pulse" />
+              <div className="w-1/2 h-4 bg-gray-200 rounded animate-pulse" />
+              <div className="w-full h-20 bg-gray-100 rounded-xl animate-pulse mt-4" />
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!displayStore || !displayProduct) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-white">
         <ShoppingBag className="w-16 h-16 text-gray-200 mb-4" />
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Producto no encontrado</h1>
         <p className="text-gray-500 mb-6">Este producto no existe o ya no está disponible.</p>
         <Button
-          onClick={() => (store ? navigate({ page: 'store', slug }) : navigate({ page: 'landing' }))}
+          onClick={() => (displayStore ? navigate({ page: 'store', slug }) : navigate({ page: 'landing' }))}
           className="gap-2 rounded-xl"
-          style={{ backgroundColor: store?.colors.primary || '#7C3AED' }}
+          style={{ backgroundColor: displayStore?.colors.primary || '#7C3AED' }}
         >
           <ArrowLeft className="w-4 h-4" />
           Volver a la tienda
@@ -98,6 +187,10 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
       </div>
     )
   }
+
+  // Aliases for cleaner code below
+  const product = displayProduct
+  const store = displayStore
 
   const category = CATEGORIES.find((c) => c.id === product.categoryId)
   const discount = product.originalPrice
@@ -112,8 +205,9 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
     return diffDays <= 7
   })()
 
-  // Related products (same store, same category, different product)
-  const relatedProducts = products.filter(
+  // Related products: try Zustand first, fallback to API products
+  const allProducts = products.length > 0 ? products : apiProducts
+  const relatedProducts = allProducts.filter(
     (p) => p.storeId === store.id && p.isActive && p.categoryId === product.categoryId && p.id !== product.id
   ).slice(0, 4)
 
