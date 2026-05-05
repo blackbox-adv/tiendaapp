@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { motion } from 'framer-motion'
-import { Store, ShoppingCart, Palette, MessageCircle, Check, ArrowRight, Sparkles, Star, Zap } from 'lucide-react'
+import { Store, ShoppingCart, Palette, MessageCircle, Check, ArrowRight, Sparkles, Star, Zap, Mail } from 'lucide-react'
 
 const features = [
   { icon: Store, title: 'Fácil de crear', desc: 'Configura tu tienda en minutos sin conocimientos técnicos' },
@@ -176,14 +176,24 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12 px-4">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center">
-              <Store className="h-4 w-4 text-white" />
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center">
+                <Store className="h-4 w-4 text-white" />
+              </div>
+              <span className="font-bold">TiendaApp</span>
             </div>
-            <span className="font-bold">TiendaApp</span>
+            <div className="flex items-center gap-6">
+              <a href="mailto:hola@tiendapp.pe" className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors">
+                <Mail className="h-4 w-4" />
+                hola@tiendapp.pe
+              </a>
+            </div>
           </div>
-          <p className="text-sm text-gray-400">© {new Date().getFullYear()} TiendaApp. Todos los derechos reservados.</p>
+          <div className="mt-8 pt-6 border-t border-gray-800 text-center">
+            <p className="text-sm text-gray-500">© {new Date().getFullYear()} TiendaApp. Todos los derechos reservados.</p>
+          </div>
         </div>
       </footer>
     </div>
