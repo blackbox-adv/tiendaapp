@@ -22,17 +22,17 @@ const templates = [
 
 const plans = [
   {
-    name: 'Gratis', price: 'S/ 0', period: '/mes', color: 'bg-white', borderColor: 'border-gray-200',
+    name: 'Gratis', price: 'S/ 0', period: '/mes', color: 'bg-white', borderColor: 'border-gray-200', dark: false,
     features: ['10 productos', '3 plantillas', 'Catálogo básico', 'Subir imágenes', 'Vista móvil'],
     cta: 'Comenzar gratis', popular: false
   },
   {
-    name: 'Pro', price: 'S/ 49', period: '/mes', color: 'bg-gradient-to-br from-violet-600 to-indigo-600', borderColor: 'border-violet-600',
+    name: 'Pro', price: 'S/ 49', period: '/mes', color: 'bg-gradient-to-br from-violet-600 to-indigo-600', borderColor: 'border-violet-600', dark: true,
     features: ['100 productos', '6 plantillas', 'Botón WhatsApp', 'Colores personalizados', 'Dominio personalizado', 'Sin marca de agua'],
     cta: 'Comenzar Pro', popular: true
   },
   {
-    name: 'Premium', price: 'S/ 99', period: '/mes', color: 'bg-gradient-to-br from-amber-500 to-orange-500', borderColor: 'border-amber-500',
+    name: 'Premium', price: 'S/ 99', period: '/mes', color: 'bg-gradient-to-br from-amber-500 to-orange-500', borderColor: 'border-amber-500', dark: true,
     features: ['Productos ilimitados', 'Todas las plantillas', 'WhatsApp + redes sociales', 'Dominio custom', 'Soporte prioritario', 'SEO avanzado', 'Estadísticas'],
     cta: 'Ir Premium', popular: false
   },
@@ -143,25 +143,25 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {plans.map((p, i) => (
               <motion.div key={p.name} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
-                <Card className={`relative border-2 ${p.borderColor} overflow-hidden ${p.popular ? 'shadow-xl' : 'shadow-sm'}`}>
+                <Card className={`relative border-2 ${p.borderColor} overflow-hidden ${p.popular ? 'shadow-xl' : 'shadow-sm'} ${p.color}`}>
                   {p.popular && <div className="absolute top-0 right-0 bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-xs font-semibold px-4 py-1.5 rounded-bl-xl"><Star className="h-3 w-3 inline mr-1" />Popular</div>}
                   <CardContent className="p-6">
-                    <h3 className="font-bold text-xl text-gray-900">{p.name}</h3>
+                    <h3 className={`font-bold text-xl ${p.dark ? 'text-white' : 'text-gray-900'}`}>{p.name}</h3>
                     <div className="mt-4 mb-6">
-                      <span className={`text-4xl font-extrabold ${p.popular ? 'text-white' : 'text-gray-900'}`}>{p.price}</span>
-                      <span className="text-gray-400 text-sm">{p.period}</span>
+                      <span className={`text-4xl font-extrabold ${p.dark ? 'text-white' : 'text-gray-900'}`}>{p.price}</span>
+                      <span className={`text-sm ${p.dark ? 'text-white/60' : 'text-gray-400'}`}>{p.period}</span>
                     </div>
                     <ul className="space-y-3 mb-8">
                       {p.features.map(f => (
                         <li key={f} className="flex items-center gap-2 text-sm">
                           <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
-                          <span className={p.popular ? 'text-white/90' : 'text-gray-600'}>{f}</span>
+                          <span className={p.dark ? 'text-white/90' : 'text-gray-600'}>{f}</span>
                         </li>
                       ))}
                     </ul>
                     <Button
-                      variant={p.popular ? 'default' : 'outline'}
-                      className={`w-full rounded-xl h-11 font-semibold ${p.popular ? 'bg-white text-violet-600 hover:bg-white/90' : ''}`}
+                      variant={p.dark ? 'default' : 'outline'}
+                      className={`w-full rounded-xl h-11 font-semibold ${p.dark ? (p.popular ? 'bg-white text-violet-600 hover:bg-white/90' : 'bg-white text-orange-600 hover:bg-white/90') : ''}`}
                       onClick={() => navigate({ page: 'register' })}
                     >
                       {p.cta}
