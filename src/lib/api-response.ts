@@ -4,6 +4,9 @@ import { NextResponse } from 'next/server'
 const ALLOWED_ORIGINS = [
   'https://tiendapp.pe',
   'https://www.tiendapp.pe',
+  'https://tienda.blackboxperu.com',
+  'https://blackboxperu.com',
+  'https://www.blackboxperu.com',
   'http://localhost:3000',
 ]
 

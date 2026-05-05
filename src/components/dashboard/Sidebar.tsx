@@ -1,8 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAppStore } from '@/lib/store'
-import { PLANS } from '@/lib/mock-data'
 import {
   LayoutDashboard, Package, Settings, Palette, CreditCard,
   LogOut, ExternalLink, Store, Menu, X
@@ -27,7 +26,18 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
 
   if (!currentUser) return null
 
-  const currentPlan = PLANS.find((p) => p.id === currentUser.planId)
+  // Fetch plan name from API
+  const [planName, setPlanName] = useState('')
+  useEffect(() => {
+    fetch('/api/plans').then(r => r.ok ? r.json() : []).then(data => {
+      if (Array.isArray(data)) {
+        const plan = data.find((p: { id: string; type: string; name: string }) => p.id === currentUser.planId || p.type === currentUser.planId)
+        if (plan) setPlanName(plan.name)
+      }
+    }).catch(() => setPlanName('Gratis'))
+  }, [currentUser.planId])
+
+  const currentPlan = planName ? { name: planName, price: 0, productLimit: -1 } : null
 
   const handleNav = (page: PageRoute['page']) => {
     navigate({ page } as PageRoute)

@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAppStore } from '@/lib/store'
-import { PLANS, CATEGORIES } from '@/lib/mock-data'
+// Plans and categories are now fetched from the API
 import { Zap, Crown, Gift, ArrowLeft, ArrowRight, Check, Store, Palette, LayoutTemplate, Upload } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -18,6 +18,38 @@ export function StoreWizard() {
   const { wizardStep, setWizardStep, wizardData, updateWizardData, completeWizard, navigate } = useAppStore()
   const [selectedTemplate, setSelectedTemplate] = useState<'moderna' | 'vibrante' | 'clasica'>(wizardData.template)
   const [uploadingLogo, setUploadingLogo] = useState(false)
+
+  // Fetch plans from API
+  const [plans, setPlans] = useState<Array<{ id: string; name: string; price: number; description: string; features: string[]; popular: boolean; maxProducts: number; type: string }>>([])
+  const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([])
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const plansRes = await fetch('/api/plans')
+        if (plansRes.ok) {
+          const data = await plansRes.json()
+          if (Array.isArray(data)) setPlans(data)
+        }
+      } catch {
+        // Fallback: if API fails, use minimal defaults
+      }
+    }
+    fetchData()
+  }, [])
+
+  // Categories are a static list (no API endpoint needed for now)
+  const allCategories = categories.length > 0 ? categories : [
+    { id: 'ropa', name: 'Ropa' },
+    { id: 'accesorios', name: 'Accesorios' },
+    { id: 'electronica', name: 'Electronica' },
+    { id: 'hogar', name: 'Hogar' },
+    { id: 'belleza', name: 'Belleza' },
+    { id: 'deportes', name: 'Deportes' },
+    { id: 'alimentos', name: 'Alimentos' },
+    { id: 'juguetes', name: 'Juguetes' },
+    { id: 'otros', name: 'Otros' },
+  ]
 
   const handleLogoUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -127,8 +159,8 @@ export function StoreWizard() {
               <div className="space-y-4">
                 <h2 className="text-lg font-semibold text-gray-900 mb-6">Elige tu plan</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {PLANS.map((plan) => {
-                    const Icon = iconMap[plan.icon] || Gift
+                  {plans.length > 0 ? plans.map((plan) => {
+                    const Icon = iconMap[plan.type] || Gift
                     const isSelected = wizardData.planId === plan.id
                     return (
                       <Card
@@ -137,6 +169,8 @@ export function StoreWizard() {
                         className={`cursor-pointer transition-all ${
                           isSelected
                             ? 'border-violet-500 ring-2 ring-violet-200 shadow-lg'
+                            : plan.popular
+                            ? 'border-violet-300 hover:border-violet-400'
                             : 'border-gray-200 hover:border-violet-200'
                         }`}
                       >
@@ -148,10 +182,10 @@ export function StoreWizard() {
                           </div>
                           <h3 className="font-bold text-gray-900">{plan.name}</h3>
                           <p className="text-2xl font-extrabold text-violet-600 my-2">
-                            S/{plan.price.toFixed(2)}<span className="text-sm text-gray-400 font-normal">/mes</span>
+                            {plan.price === 0 ? 'Gratis' : <>S/{plan.price.toFixed(2)}<span className="text-sm text-gray-400 font-normal">/mes</span></>}
                           </p>
                           <ul className="space-y-1.5">
-                            {plan.features.slice(0, 4).map((f) => (
+                            {plan.features.slice(0, 4).map((f: string) => (
                               <li key={f} className="text-xs text-gray-500 flex items-start gap-1.5">
                                 <Check className="w-3 h-3 text-violet-500 mt-0.5 flex-shrink-0" />
                                 {f}
@@ -166,7 +200,8 @@ export function StoreWizard() {
                         </CardContent>
                       </Card>
                     )
-                  })}
+                  })
+                  : <p className="col-span-3 text-center text-gray-400 py-8">Cargando planes...</p>}
                 </div>
               </div>
             )}
@@ -231,7 +266,7 @@ export function StoreWizard() {
                         className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
                       >
                         <option value="">Seleccionar...</option>
-                        {CATEGORIES.map((c) => (
+                        {allCategories.map((c) => (
                           <option key={c.id} value={c.id}>{c.name}</option>
                         ))}
                       </select>

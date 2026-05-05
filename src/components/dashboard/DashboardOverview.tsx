@@ -1,8 +1,19 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAppStore } from '@/lib/store'
-import { PLANS, CATEGORIES } from '@/lib/mock-data'
+// CATEGORIES is used for chart labels - defined inline below
+const CATEGORIES = [
+  { id: 'ropa', name: 'Ropa' },
+  { id: 'accesorios', name: 'Accesorios' },
+  { id: 'electronica', name: 'Electronica' },
+  { id: 'hogar', name: 'Hogar' },
+  { id: 'belleza', name: 'Belleza' },
+  { id: 'deportes', name: 'Deportes' },
+  { id: 'alimentos', name: 'Alimentos' },
+  { id: 'juguetes', name: 'Juguetes' },
+  { id: 'otros', name: 'Otros' },
+]
 import {
   Package, Eye, ShoppingBag, TrendingUp, ArrowRight,
   QrCode, Copy, Check, Download, Bell, Star, MessageSquare, BarChart3
@@ -450,8 +461,16 @@ export function DashboardOverview() {
   }
 
   const storeProducts = products.filter((p) => p.storeId === currentStore.id && p.isActive)
-  const currentPlan = PLANS.find((p) => p.id === currentUser.planId)
   const recentProducts = storeProducts.slice(-4)
+
+  // Fetch plan info from API
+  const [apiPlans, setApiPlans] = useState<Array<{ id: string; name: string; price: number; maxProducts: number; type: string }>>([])
+  useEffect(() => {
+    fetch('/api/plans').then(r => r.ok ? r.json() : []).then(data => {
+      if (Array.isArray(data)) setApiPlans(data)
+    }).catch(() => {})
+  }, [])
+  const currentPlan = apiPlans.find(p => p.id === currentUser.planId || p.type === currentUser.planId) || null
 
   const totalRevenue = storeProducts.reduce((sum, p) => sum + p.price, 0)
   const avgPrice = storeProducts.length > 0 ? totalRevenue / storeProducts.length : 0
@@ -479,7 +498,7 @@ export function DashboardOverview() {
         {[
           { label: 'Productos', value: storeProducts.length, icon: Package, color: 'bg-violet-100 text-violet-600', sub: `${featuredCount} destacados` },
           { label: 'Ingresos totales', value: `S/${totalRevenue.toFixed(0)}`, icon: TrendingUp, color: 'bg-green-100 text-green-600', sub: `Promedio: S/${avgPrice.toFixed(0)}` },
-          { label: 'Plan', value: currentPlan?.name || 'Gratis', icon: Eye, color: 'bg-amber-100 text-amber-600', sub: currentPlan?.productLimit === -1 ? 'Ilimitado' : `${storeProducts.length}/${currentPlan?.productLimit} productos` },
+          { label: 'Plan', value: currentPlan?.name || 'Gratis', icon: Eye, color: 'bg-amber-100 text-amber-600', sub: currentPlan?.maxProducts === -1 ? 'Ilimitado' : `${storeProducts.length}/${currentPlan?.maxProducts || '?'} productos` },
           { label: 'Visitas', value: visitDisplay, icon: BarChart3, color: 'bg-blue-100 text-blue-600', sub: 'Este mes' },
         ].map((stat) => (
           <Card key={stat.label}>
@@ -514,7 +533,7 @@ export function DashboardOverview() {
                 <p className="text-sm text-violet-600 font-medium">Plan actual</p>
                 <p className="text-xl font-bold text-gray-900">{currentPlan.name} - S/{currentPlan.price.toFixed(2)}/mes</p>
                 <p className="text-sm text-gray-500 mt-1">
-                  {currentPlan.productLimit === -1 ? 'Productos ilimitados' : `${storeProducts.length}/${currentPlan.productLimit} productos usados`}
+                  {currentPlan.maxProducts === -1 ? 'Productos ilimitados' : `${storeProducts.length}/${currentPlan.maxProducts} productos usados`}
                 </p>
               </div>
               <Button

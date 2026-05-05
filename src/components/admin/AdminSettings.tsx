@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAppStore } from '@/lib/store'
 import { Settings, Save, Info } from 'lucide-react'
 import { toast } from 'sonner'
@@ -9,7 +9,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
-import { PLANS } from '@/lib/mock-data'
 
 export function AdminSettings() {
   const { platformSettings, updatePlatformSettings } = useAppStore()
@@ -20,6 +19,14 @@ export function AdminSettings() {
   const [registrationsEnabled, setRegistrationsEnabled] = useState(platformSettings.registrationsEnabled)
 
   const [saving, setSaving] = useState(false)
+
+  // Fetch plans for the dropdown
+  const [plans, setPlans] = useState<Array<{ id: string; name: string; price: number }>>([])
+  useEffect(() => {
+    fetch('/api/plans').then(r => r.ok ? r.json() : []).then(data => {
+      if (Array.isArray(data)) setPlans(data)
+    }).catch(() => {})
+  }, [])
 
   const handleSave = async () => {
     setSaving(true)
@@ -80,9 +87,9 @@ export function AdminSettings() {
               onChange={(e) => setDefaultPlanId(e.target.value)}
               className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
             >
-              {PLANS.map((plan) => (
+              {plans.length > 0 ? plans.map((plan) => (
                 <option key={plan.id} value={plan.id}>{plan.name} - S/{plan.price.toFixed(2)}/mes</option>
-              ))}
+              )) : <option>Cargando planes...</option>}
             </select>
           </div>
         </CardContent>

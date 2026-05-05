@@ -227,18 +227,17 @@ export function PlanManager() {
     try {
       setSubmittingPayment(true)
       const token = getToken()
-      const res = await fetch('/api/payments', {
-        method: 'PUT',
+      const res = await fetch('/api/payments/submit', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
-          userId: currentUser.id,
           planId: selectedPlan.id,
           storeId: currentStore.id,
-          status: 'pending_verification',
           externalRef: voucherNumber.trim(),
+          paymentMethod: 'yape',
         }),
       })
 
