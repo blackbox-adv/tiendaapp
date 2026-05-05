@@ -20,6 +20,7 @@ export type PageRoute =
   | { page: 'admin-stores' }
   | { page: 'admin-users' }
   | { page: 'admin-plans' }
+  | { page: 'admin-payments' }
   | { page: 'admin-settings' }
 
 export interface User {

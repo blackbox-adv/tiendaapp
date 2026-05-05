@@ -1,28 +1,23 @@
 ---
 Task ID: 1
-Agent: main
-Task: Build complete SaaS feature set for TiendaApp
+Agent: Main
+Task: Fix critical bugs and continue TiendaApp development
 
 Work Log:
-- Created POST /api/upload with Supabase Storage (auto bucket creation, 5MB limit, image validation)
-- Rewrote PlanManager component with real payment flow (Yape/Transfer instructions dialog, voucher number submission)
-- Created GET/PUT /api/admin/payments for admin payment listing and verification (approve/reject)
-- Added sendSubscriptionEmail() with 3 templates: activated, cancelled, downgraded
-- Rewrote Pricing component to fetch plans from /api/plans API instead of mock data
-- Cleaned Zustand store: removed mock data initialization (users/stores/products start empty)
-- Generated og-image.png, apple-touch-icon.png, favicon.ico
-- Fixed .gitignore: changed upload/ to /upload/ to allow api/upload route
-- Added /api/admin/payments to middleware matcher
-- Type check passes (zero errors)
-- Pushed commit fc05d2c to GitHub
+- Restored /api/upload route (was accidentally deleted)
+- Fixed CORS: added tienda.blackboxperu.com and blackboxperu.com to allowed origins
+- Created POST /api/payments/submit endpoint for manual Yape/Transfer voucher submission
+- Updated PlanManager to call /api/payments/submit instead of webhook PUT endpoint
+- Replaced all PLANS mock-data imports with API fetches (StoreWizard, DashboardOverview, Sidebar, AdminSettings)
+- Replaced all CATEGORIES mock-data imports with inline constants (7 files)
+- Moved TESTIMONIALS to dedicated landing-testimonials.ts
+- Verified build passes successfully
+- Verified plans exist in DB (free, pro, premium)
+- Verified deployed app health check passes all checks
+- Pushed 3 commits to GitHub
 
 Stage Summary:
-- All 9 tasks completed
-- Upload API: Supabase Storage with auto bucket creation
-- Payment flow: Yape/Transfer instructions + admin verification endpoint
-- PlanManager: connects to real API (POST /api/payments + PUT for voucher)
-- Admin payments: listing with pagination + approve/reject with subscription upsert
-- Subscription emails: 3 templates (activated/cancelled/downgraded)
-- Landing pricing: dynamic from DB
-- Mock data: removed from Zustand (empty arrays, synced via API)
-- Branding assets: OG image, apple touch icon, favicon generated
+- Payment flow now works: user selects plan → sees Yape/Transfer info → submits voucher number → payment saved as "pending" for admin verification
+- Zero mock-data imports remain in active components
+- App deployed and healthy at https://tienda.blackboxperu.com
+- Git: 3 commits pushed (4cc1de1, 1ac89dd)

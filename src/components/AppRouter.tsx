@@ -48,6 +48,7 @@ import { AdminStores } from '@/components/admin/AdminStores'
 import { AdminUsers } from '@/components/admin/AdminUsers'
 import { AdminPlans } from '@/components/admin/AdminPlans'
 import { AdminSettings } from '@/components/admin/AdminSettings'
+import { AdminPaymentsPage } from '@/components/admin/AdminPaymentsPage'
 
 const pageVariants = {
   initial: { opacity: 0, y: 12 },
@@ -206,6 +207,7 @@ export default function AppRouter() {
       case 'admin-stores':
       case 'admin-users':
       case 'admin-plans':
+      case 'admin-payments':
       case 'admin-settings': {
         const adminContent = () => {
           switch (route.page) {
@@ -213,6 +215,7 @@ export default function AppRouter() {
             case 'admin-stores': return <AdminStores />
             case 'admin-users': return <AdminUsers />
             case 'admin-plans': return <AdminPlans />
+            case 'admin-payments': return <AdminPaymentsPage />
             case 'admin-settings': return <AdminSettings />
           }
         }

@@ -72,7 +72,7 @@ export function AdminOverview() {
                 </p>
               </div>
               <Button size="sm" variant="outline" className="ml-auto border-red-300 text-red-700 hover:bg-red-100"
-                onClick={() => navigate({ page: 'admin-plans' })}>
+                onClick={() => navigate({ page: 'admin-payments' })}>
                 Ver pagos
               </Button>
             </div>
