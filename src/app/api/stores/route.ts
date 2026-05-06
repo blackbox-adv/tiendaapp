@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
         include: {
           owner: { select: { id: true, name: true, email: true } },
           _count: { select: { products: true } },
-          subscriptions: true,
+          subscriptions: { include: { plan: { select: { id: true, name: true, price: true } } } },
         },
         orderBy: { createdAt: 'desc' },
       })
@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
       include: {
         owner: { select: { id: true, name: true, email: true } },
         _count: { select: { products: true } },
-        subscriptions: true,
+        subscriptions: { include: { plan: { select: { id: true, name: true, price: true } } } },
       },
       orderBy: { createdAt: 'desc' },
     })

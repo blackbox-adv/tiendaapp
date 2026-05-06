@@ -1,6 +1,8 @@
 import type { MetadataRoute } from 'next'
 import { db } from '@/lib/db'
 
+const BUILD_DATE = '2026-05-06'
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://tiendapp.pe'
 
@@ -8,19 +10,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
-      lastModified: new Date(),
+      lastModified: new Date(BUILD_DATE),
       changeFrequency: 'daily',
       priority: 1,
     },
     {
       url: `${baseUrl}/register`,
-      lastModified: new Date(),
+      lastModified: new Date(BUILD_DATE),
       changeFrequency: 'monthly',
       priority: 0.9,
     },
     {
       url: `${baseUrl}/login`,
-      lastModified: new Date(),
+      lastModified: new Date(BUILD_DATE),
       changeFrequency: 'monthly',
       priority: 0.8,
     },

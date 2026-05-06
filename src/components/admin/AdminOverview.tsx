@@ -65,10 +65,10 @@ export function AdminOverview() {
               <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0" />
               <div>
                 <p className="text-sm font-semibold text-red-800">
-                  {b!.pastDueSubscriptions.length} suscripción(es) vencida(s)
+                  {b?.pastDueSubscriptions?.length || 0} suscripción(es) vencida(s)
                 </p>
                 <p className="text-xs text-red-600 mt-1">
-                  {b!.pastDueSubscriptions.map(ps => `${ps.user.name} (${ps.store.name}) - S/${ps.plan.price}`).join(' | ')}
+                  {b?.pastDueSubscriptions?.map((ps: any) => `${ps.user.name} (${ps.store.name}) - S/${ps.plan.price}`).join(' | ')}
                 </p>
               </div>
               <Button size="sm" variant="outline" className="ml-auto border-red-300 text-red-700 hover:bg-red-100"

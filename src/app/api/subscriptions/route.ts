@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
       include: {
         user: { select: { id: true, name: true, email: true } },
         store: { select: { id: true, name: true, slug: true } },
-        plan: { select: { id: true, name: true, price: true } },
+        plan: { select: { id: true, name: true, price: true, type: true } },
       },
       orderBy: { startDate: 'desc' },
     })
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
         include: {
           user: { select: { id: true, name: true, email: true } },
           store: { select: { id: true, name: true, slug: true } },
-          plan: { select: { id: true, name: true, price: true } },
+          plan: { select: { id: true, name: true, price: true, type: true } },
         },
       })
       return apiSuccess(updated, 200, request)
@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
       include: {
         user: { select: { id: true, name: true, email: true } },
         store: { select: { id: true, name: true, slug: true } },
-        plan: { select: { id: true, name: true, price: true } },
+        plan: { select: { id: true, name: true, price: true, type: true } },
       },
     })
 
@@ -172,7 +172,7 @@ export async function PUT(request: NextRequest) {
       include: {
         user: { select: { id: true, name: true, email: true } },
         store: { select: { id: true, name: true, slug: true } },
-        plan: { select: { id: true, name: true, price: true } },
+        plan: { select: { id: true, name: true, price: true, type: true } },
       },
     })
 

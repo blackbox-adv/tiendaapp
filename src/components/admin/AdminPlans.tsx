@@ -20,9 +20,14 @@ interface SubscriptionRecord {
   plan: { id: string; name: string; price: number; type: string }
 }
 
+interface PlanOption {
+  id: string; type: string; name: string; price: number
+}
+
 export function AdminPlans() {
   const [payments, setPayments] = useState<PaymentRecord[]>([])
   const [subscriptions, setSubscriptions] = useState<SubscriptionRecord[]>([])
+  const [plans, setPlans] = useState<PlanOption[]>([])
   const [tab, setTab] = useState<'subscriptions' | 'payments' | 'verify'>('subscriptions')
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
@@ -37,13 +42,15 @@ export function AdminPlans() {
       const token = typeof window !== 'undefined' ? localStorage.getItem('tiendapp_token') : null
       const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {}
 
-      const [payRes, subRes] = await Promise.all([
-        fetch('/api/payments', { headers }),
+      const [payRes, subRes, plansRes] = await Promise.all([
+        fetch('/api/admin/payments', { headers }),
         fetch('/api/subscriptions', { headers }),
+        fetch('/api/plans', { headers }),
       ])
 
-      if (payRes.ok) { const d = await payRes.json(); setPayments(d.payments || []) }
+      if (payRes.ok) { const d = await payRes.json(); setPayments(d.data || d.payments || []) }
       if (subRes.ok) setSubscriptions(await subRes.json())
+      if (plansRes.ok) setPlans(await plansRes.json())
     } catch (err) {
       console.error('Error loading plans:', err)
     } finally {
@@ -51,14 +58,14 @@ export function AdminPlans() {
     }
   }
 
-  async function verifyPayment(paymentId: string, status: string, notes?: string) {
+  async function verifyPayment(paymentId: string, action: string, notes?: string) {
     setActionLoading(paymentId)
     try {
       const token = localStorage.getItem('tiendapp_token')
-      const res = await fetch('/api/payments', {
+      const res = await fetch('/api/admin/payments', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ id: paymentId, status, notes }),
+        body: JSON.stringify({ paymentId, action, notes }),
       })
       if (res.ok) {
         await loadData()
@@ -92,10 +99,7 @@ export function AdminPlans() {
     setActionLoading(subId)
     try {
       const token = localStorage.getItem('tiendapp_token')
-      // Get the free plan
-      const plansRes = await fetch('/api/plans')
-      const plans = await plansRes.json()
-      const freePlan = plans.find((p: any) => p.type === 'free')
+      const freePlan = plans.find(p => p.type === 'free')
       if (!freePlan) return
 
       const res = await fetch('/api/subscriptions', {
@@ -132,7 +136,7 @@ export function AdminPlans() {
     }
   }
 
-  const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
+  const statusConfig: Record<string, { label: string; color: string; icon: typeof CheckCircle2 }> = {
     active: { label: 'Activo', color: 'bg-green-100 text-green-700', icon: CheckCircle2 },
     past_due: { label: 'Vencido', color: 'bg-orange-100 text-orange-700', icon: Clock },
     expired: { label: 'Expirado', color: 'bg-red-100 text-red-700', icon: XCircle },
@@ -197,7 +201,7 @@ export function AdminPlans() {
           { key: 'payments', label: `Historial de pagos (${payments.length})` },
           { key: 'verify', label: `Verificar pagos (${pendingPaymentsCount})` },
         ].map(t => (
-          <button key={t.key} onClick={() => setTab(t.key as any)}
+          <button key={t.key} onClick={() => setTab(t.key as typeof tab)}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
               tab === t.key ? 'border-violet-600 text-violet-600' : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}>
@@ -247,9 +251,9 @@ export function AdminPlans() {
                                 value={sub.plan.id}
                                 onChange={e => changeSubscription(sub.id, e.target.value)}
                                 disabled={!!actionLoading}>
-                                <option value="free">Free (S/0)</option>
-                                <option value="pro">Pro (S/29.99)</option>
-                                <option value="premium">Premium (S/79.99)</option>
+                                {plans.map(p => (
+                                  <option key={p.id} value={p.id}>{p.name} (S/{p.price.toFixed(2)})</option>
+                                ))}
                               </select>
                               <Button size="sm" variant="ghost" className="text-red-600 h-7 text-xs"
                                 onClick={() => cancelSubscription(sub.id)}>Cancelar</Button>
@@ -288,9 +292,9 @@ export function AdminPlans() {
                     return (
                       <tr key={pay.id} className="border-b border-gray-50">
                         <td className="py-3 px-4 text-gray-500 text-xs">{new Date(pay.createdAt).toLocaleDateString('es-PE')}</td>
-                        <td className="py-3 px-4 font-medium text-gray-900">{pay.user.name}</td>
-                        <td className="py-3 px-4 text-gray-600">{pay.store.name}</td>
-                        <td className="py-3 px-4"><Badge variant="outline">{pay.plan.name}</Badge></td>
+                        <td className="py-3 px-4 font-medium text-gray-900">{pay.user?.name || 'N/A'}</td>
+                        <td className="py-3 px-4 text-gray-600">{pay.store?.name || 'N/A'}</td>
+                        <td className="py-3 px-4"><Badge variant="outline">{pay.plan?.name || 'N/A'}</Badge></td>
                         <td className="py-3 px-4 text-right font-semibold">S/{pay.amount.toFixed(2)}</td>
                         <td className="py-3 px-4 text-gray-500 text-xs">{pay.paymentMethod || 'Manual'}</td>
                         <td className="py-3 px-4">
@@ -324,20 +328,20 @@ export function AdminPlans() {
                 {payments.filter(p => p.status === 'pending').map(pay => (
                   <div key={pay.id} className="border rounded-lg p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <div className="space-y-1">
-                      <p className="font-medium text-gray-900">{pay.user.name} - {pay.store.name}</p>
-                      <p className="text-sm text-gray-500">{pay.user.email}</p>
-                      <p className="text-sm">Plan: <strong>{pay.plan.name}</strong> - <strong>S/{pay.amount.toFixed(2)}</strong></p>
+                      <p className="font-medium text-gray-900">{pay.user?.name || 'N/A'} - {pay.store?.name || 'N/A'}</p>
+                      <p className="text-sm text-gray-500">{pay.user?.email}</p>
+                      <p className="text-sm">Plan: <strong>{pay.plan?.name || 'N/A'}</strong> - <strong>S/{pay.amount.toFixed(2)}</strong></p>
                       {pay.notes && <p className="text-xs text-gray-400">{pay.notes}</p>}
                       <p className="text-xs text-gray-400">Registrado: {new Date(pay.createdAt).toLocaleString('es-PE')}</p>
                     </div>
                     <div className="flex gap-2 flex-shrink-0">
                       <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white"
-                        onClick={() => verifyPayment(pay.id, 'completed', 'Pago verificado por administrador')}
+                        onClick={() => verifyPayment(pay.id, 'approve', 'Pago verificado por administrador')}
                         disabled={!!actionLoading}>
                         <CheckCircle2 className="w-4 h-4 mr-1" /> Aprobar
                       </Button>
                       <Button size="sm" variant="outline" className="border-red-300 text-red-600"
-                        onClick={() => verifyPayment(pay.id, 'failed', 'Pago rechazado por administrador')}
+                        onClick={() => verifyPayment(pay.id, 'reject', 'Pago rechazado por administrador')}
                         disabled={!!actionLoading}>
                         <XCircle className="w-4 h-4 mr-1" /> Rechazar
                       </Button>

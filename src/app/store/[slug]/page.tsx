@@ -32,6 +32,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ? `${store.description} - Visita la tienda online de ${store.name} en TiendApp.`
       : `Visita la tienda online de ${store.name} en TiendApp. Productos y precios increibles.`
 
+    const ogImage = store.logo || 'https://tiendapp.pe/og-image.png'
+
     return {
       title,
       description,
@@ -40,11 +42,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         description,
         type: 'website',
         siteName: 'TiendApp',
+        images: [{ url: ogImage, width: 1200, height: 630 }],
       },
       twitter: {
         card: 'summary_large_image',
         title,
         description,
+        images: [ogImage],
       },
       alternates: {
         canonical: `/store/${slug}`,
@@ -132,7 +136,7 @@ function generateStoreJsonLd(store: {
     name: store.name,
     description: store.description,
     url: `https://tiendapp.pe/store/${store.slug}`,
-    image: `https://tiendapp.pe/api/og/store/${store.slug}`,
+    image: 'https://tiendapp.pe/og-image.png',
     address: {
       '@type': 'PostalAddress',
       addressCountry: 'PE',
