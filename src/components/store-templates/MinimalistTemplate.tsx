@@ -94,8 +94,15 @@ export function MinimalistTemplate({ store, products, storeSlug, planId }: Minim
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
+      {/* Banner */}
+      {store.bannerUrl && (
+        <div className="relative h-44 md:h-56 overflow-hidden">
+          <img src={store.bannerUrl} alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-black/20" />
+        </div>
+      )}
       {/* Store Header — Clean, left-aligned, lots of whitespace */}
-      <header className="pt-16 pb-10">
+      <header className={store.bannerUrl ? 'pt-8 pb-8' : 'pt-16 pb-10'}>
         <div className="max-w-6xl mx-auto px-8 md:px-12">
           <motion.div
             initial={{ opacity: 0, x: -10 }}

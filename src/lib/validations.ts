@@ -65,6 +65,7 @@ export const createStoreSchema = z.object({
     .optional()
     .default('otros'),
   logo: z.string().max(500).optional().default(''),
+  bannerUrl: z.string().max(100000).optional().default(''),
   primaryColor: z
     .string()
     .regex(/^#[0-9A-Fa-f]{6}$/, 'Color primario invalido (formato: #RRGGBB)')

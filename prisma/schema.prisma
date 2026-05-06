@@ -62,6 +62,7 @@ model Store {
   secondaryColor String   @default("#10B981")
   whatsappNumber String?
   template       String   @default("moderna")     // moderna, vibrante, clasica
+  bannerUrl      String   @default("")
   category       String   @default("otros")
   isActive       Boolean  @default(true)
   visitCount     Int      @default(0)

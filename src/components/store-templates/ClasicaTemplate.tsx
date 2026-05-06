@@ -96,6 +96,13 @@ export function ClasicaTemplate({ store, products, storeSlug, planId }: { store:
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#FFF9F0' }}>
+      {/* Banner */}
+      {store.bannerUrl && (
+        <div className="relative h-48 md:h-56 overflow-hidden">
+          <img src={store.bannerUrl} alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/50" />
+        </div>
+      )}
       {/* Header — Elegant serif, warm tones */}
       <header
         className="border-b"

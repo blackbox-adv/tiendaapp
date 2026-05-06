@@ -113,15 +113,23 @@ export function VibranteTemplate({ store, products, storeSlug, planId }: { store
       {/* BIG Banner Header with gradient using store colors */}
       <header
         className="relative overflow-hidden"
-        style={{
+        style={store.bannerUrl ? {
+          backgroundImage: `url(${store.bannerUrl})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        } : {
           background: `linear-gradient(135deg, ${store.colors.primary}, ${store.colors.secondary})`,
         }}
       >
+        {/* Dark overlay when banner is present */}
+        {store.bannerUrl && <div className="absolute inset-0 bg-black/40" />}
         {/* Decorative circles */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-white/10 blur-2xl" />
-          <div className="absolute -bottom-10 -left-10 w-48 h-48 rounded-full bg-black/10 blur-xl" />
-        </div>
+        {!store.bannerUrl && (
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-white/10 blur-2xl" />
+            <div className="absolute -bottom-10 -left-10 w-48 h-48 rounded-full bg-black/10 blur-xl" />
+          </div>
+        )}
 
         <div className="max-w-6xl mx-auto px-4 py-12 md:py-16 text-center relative z-10">
           <motion.div

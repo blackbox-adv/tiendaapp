@@ -101,8 +101,17 @@ export function LuxuryTemplate({ store, products, storeSlug, planId }: LuxuryTem
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: DARK_BG }}>
+      {/* Banner */}
+      {store.bannerUrl && (
+        <div className="relative h-48 md:h-64 overflow-hidden">
+          <img src={store.bannerUrl} alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-black/50" />
+          {/* Gold gradient line at bottom of banner */}
+          <div className="absolute bottom-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${GOLD}, transparent)` }} />
+        </div>
+      )}
       {/* Elegant Header — centered, gold accents */}
-      <header className="relative pt-14 pb-10 text-center">
+      <header className={`relative text-center ${store.bannerUrl ? 'pt-8 pb-8' : 'pt-14 pb-10'}`}>
         {/* Subtle gold gradient line at top */}
         <div className="absolute top-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${GOLD}, transparent)` }} />
 

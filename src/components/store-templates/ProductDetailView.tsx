@@ -69,6 +69,7 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
               },
               whatsappNumber: data.whatsappNumber || '',
               template: (data.template as 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist') || 'moderna',
+              bannerUrl: data.bannerUrl || '',
               userId: data.ownerId || '',
               isActive: data.isActive ?? true,
               createdAt: data.createdAt || new Date().toISOString(),

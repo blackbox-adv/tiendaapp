@@ -70,8 +70,15 @@ export function ModernaTemplate({ store, products, storeSlug, planId }: { store:
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Banner */}
+      {store.bannerUrl && (
+        <div className="relative h-48 md:h-64 overflow-hidden">
+          <img src={store.bannerUrl} alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-black/30" />
+        </div>
+      )}
       {/* Header — ultra-minimal, centered */}
-      <header className="pt-16 pb-12 text-center">
+      <header className={`text-center ${store.bannerUrl ? 'pt-8 pb-10' : 'pt-16 pb-12'}`}>
         <div className="max-w-xl mx-auto px-6">
           {store.logo && (
             <div className="w-14 h-14 rounded-full mx-auto mb-5 flex items-center justify-center text-2xl grayscale opacity-80">

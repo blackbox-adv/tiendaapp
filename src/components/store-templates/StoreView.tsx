@@ -58,6 +58,7 @@ export function StoreView({ slug }: { slug: string }) {
               },
               whatsappNumber: data.whatsappNumber || '',
               template: (data.template as 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist') || 'moderna',
+              bannerUrl: data.bannerUrl || '',
               userId: data.ownerId || '',
               isActive: data.isActive ?? true,
               createdAt: data.createdAt || new Date().toISOString(),

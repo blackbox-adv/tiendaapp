@@ -23,6 +23,7 @@ function transformApiStore(apiStore: Record<string, unknown>): Store {
     },
     whatsappNumber: (apiStore.whatsappNumber as string) || '',
     template: (apiStore.template as 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist') || 'moderna',
+    bannerUrl: (apiStore.bannerUrl as string) || '',
     userId: apiStore.ownerId as string,
     isActive: (apiStore.isActive as boolean) ?? true,
     createdAt: (apiStore.createdAt as string) || new Date().toISOString(),
@@ -389,6 +390,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       colors: wizardData.storeColors,
       whatsappNumber: wizardData.storeWhatsapp,
       template: wizardData.template,
+      bannerUrl: '',
       userId: currentUser.id,
       isActive: true,
       createdAt: new Date().toISOString(),
@@ -551,6 +553,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         apiData.secondaryColor = data.colors.secondary
       }
       if (data.logo !== undefined) apiData.logo = data.logo
+      if (data.bannerUrl !== undefined) apiData.bannerUrl = data.bannerUrl
 
       fetch('/api/stores', {
         method: 'PUT',

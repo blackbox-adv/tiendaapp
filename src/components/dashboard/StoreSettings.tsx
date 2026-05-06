@@ -13,13 +13,13 @@ const CATEGORIES = [
   { id: 'juguetes', name: 'Juguetes' },
   { id: 'otros', name: 'Otros' },
 ]
-import { Save, Eye, Store, LayoutTemplate, Upload } from 'lucide-react'
+import { Save, Eye, Store, LayoutTemplate, Upload, X, ImageIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export function StoreSettings() {
@@ -33,6 +33,8 @@ export function StoreSettings() {
   const [category, setCategory] = useState(currentStore?.categoryId || '')
   const [logo, setLogo] = useState(currentStore?.logo || '')
   const [uploadingLogo, setUploadingLogo] = useState(false)
+  const [bannerUrl, setBannerUrl] = useState(currentStore?.bannerUrl || '')
+  const [uploadingBanner, setUploadingBanner] = useState(false)
 
   const handleLogoUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -77,6 +79,52 @@ export function StoreSettings() {
       toast.error('Error de conexión', { description: 'No se pudo subir el logo' })
     } finally {
       setUploadingLogo(false)
+    }
+  }, [])
+
+  const handleBannerUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Formato no válido', { description: 'Solo se permiten JPG, PNG y WebP para el banner' })
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Archivo muy grande', { description: 'El banner no debe superar los 5MB' })
+      return
+    }
+
+    setUploadingBanner(true)
+
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const token = localStorage.getItem('tiendapp_token')
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        if (data.url) {
+          setBannerUrl(data.url)
+        } else {
+          toast.error('Error al subir', { description: 'No se recibió la URL del banner' })
+        }
+      } else {
+        const data = await res.json().catch(() => ({}))
+        toast.error('Error al subir', { description: data.error || 'Error al subir el banner' })
+      }
+    } catch {
+      toast.error('Error de conexión', { description: 'No se pudo subir el banner' })
+    } finally {
+      setUploadingBanner(false)
     }
   }, [])
 
@@ -147,6 +195,7 @@ export function StoreSettings() {
       description,
       whatsappNumber: whatsapp,
       logo,
+      bannerUrl,
       colors: { primary: primaryColor, secondary: primaryColor + '80' },
       template: template as 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist',
       categoryId: category,
@@ -189,6 +238,42 @@ export function StoreSettings() {
                   </label>
                   <p className="text-xs text-gray-400 mt-1">JPG, PNG, WebP. Max 5MB. Recomendado: 128 × 128 px (cuadrada)</p>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Banner */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Banner de la tienda</CardTitle>
+              <CardDescription className="text-sm text-gray-500">Imagen de fondo que se muestra en el encabezado de tu tienda</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {bannerUrl ? (
+                <div className="relative rounded-xl overflow-hidden border border-gray-200 h-36 bg-gray-100">
+                  <img src={bannerUrl} alt="Banner" className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => setBannerUrl('')}
+                    className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5 text-white" />
+                  </button>
+                </div>
+              ) : (
+                <div className="rounded-xl border-2 border-dashed border-gray-200 h-36 flex items-center justify-center bg-gray-50">
+                  <div className="text-center">
+                    <ImageIcon className="w-8 h-8 text-gray-300 mx-auto" />
+                    <p className="text-xs text-gray-400 mt-1">Sin banner</p>
+                  </div>
+                </div>
+              )}
+              <div className="flex items-center gap-3">
+                <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleBannerUpload} className="hidden" id="settings-banner-upload" />
+                <label htmlFor="settings-banner-upload" className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+                  {uploadingBanner ? 'Subiendo...' : <><Upload className="w-4 h-4" /> Subir banner</>}
+                </label>
+                <p className="text-xs text-gray-400">JPG, PNG, WebP. Max 5MB. <span className="text-violet-500 font-medium">Recomendado: 1200 × 400 px</span></p>
               </div>
             </CardContent>
           </Card>

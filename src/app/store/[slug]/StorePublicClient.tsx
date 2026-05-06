@@ -21,6 +21,7 @@ function transformStore(s: Record<string, unknown>): Store {
     },
     whatsappNumber: (s.whatsappNumber as string) || '',
     template: (s.template as 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist') || 'moderna',
+    bannerUrl: (s.bannerUrl as string) || '',
     userId: (s.ownerId as string) || '',
     isActive: (s.isActive as boolean) ?? true,
     createdAt: (s.createdAt as string) || new Date().toISOString(),
