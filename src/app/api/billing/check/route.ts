@@ -20,10 +20,10 @@ export async function POST(request: Request) {
     let pastDueCount = 0
 
     // 1. Find active subscriptions past their nextBillingDate
-    const activeSubscriptions = await db.subscription.findMany({
-      where: { status: 'active', nextBillingDate: { lte: now } },
+    const allSubs = await db.subscription.findMany({
       include: { user: true, store: true, plan: true },
     })
+    const activeSubscriptions = allSubs.filter(s => s.status === 'active' && s.nextBillingDate && s.nextBillingDate <= now)
 
     for (const sub of activeSubscriptions) {
       await db.subscription.update({ where: { id: sub.id }, data: { status: 'past_due' } })
@@ -42,10 +42,9 @@ export async function POST(request: Request) {
     const freePlan = await db.plan.findUnique({ where: { type: 'free' } })
     if (!freePlan) return NextResponse.json({ error: 'Plan Free no encontrado' }, { status: 500 })
 
-    const pastDueSubscriptions = await db.subscription.findMany({
-      where: { status: 'past_due', nextBillingDate: { lte: sevenDaysAgo } },
-      include: { plan: true },
-    }).then(subs => subs.filter(sub => sub.plan.type !== 'free'))
+    const pastDueSubscriptions = allSubs.filter(
+      s => s.status === 'past_due' && s.nextBillingDate && s.nextBillingDate <= sevenDaysAgo && s.plan.type !== 'free'
+    )
 
     for (const sub of pastDueSubscriptions) {
       await db.subscription.update({
@@ -90,12 +89,14 @@ export async function GET(request: Request) {
     const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
 
-    const activeCount = await db.subscription.count({ where: { status: 'active' } })
-    const expiringSoon = await db.subscription.count({
-      where: { status: 'active', nextBillingDate: { lte: threeDaysFromNow, gte: now }, plan: { type: { not: 'free' } } },
-    })
-    const pastDue = await db.subscription.findMany({
-      where: { status: 'past_due' },
+    const allSubs = await db.subscription.findMany({ include: { plan: true } })
+    const activeCount = allSubs.filter(s => s.status === 'active').length
+    const expiringSoon = allSubs.filter(
+      s => s.status === 'active' && s.nextBillingDate && s.nextBillingDate <= threeDaysFromNow && s.nextBillingDate >= now && s.plan.type !== 'free'
+    ).length
+    const pastDue = allSubs.filter(s => s.status === 'past_due').map(s => s.id)
+    const pastDueSubscriptions = await db.subscription.findMany({
+      where: { id: { in: pastDue } },
       include: {
         user: { select: { id: true, name: true, email: true } },
         store: { select: { id: true, name: true, slug: true } },

@@ -22,10 +22,12 @@ export async function GET(request: Request) {
     const newUsersThisMonth = await db.user.count({ where: { role: 'store_owner', createdAt: { gte: startOfMonth } } })
     const newStoresThisMonth = await db.store.count({ where: { createdAt: { gte: startOfMonth } } })
 
-    const subscriptions = await db.subscription.findMany({ where: { status: 'active' }, include: { plan: true } })
+    // Fetch all subscriptions without status filter, then filter in JS to avoid Prisma type conversion issues
+    const allSubscriptions = await db.subscription.findMany({ include: { plan: true } })
+    const activeSubscriptions = allSubscriptions.filter(s => s.status === 'active')
     const planDistribution: Record<string, number> = {}
     let mrr = 0
-    for (const sub of subscriptions) {
+    for (const sub of activeSubscriptions) {
       planDistribution[sub.plan.name] = (planDistribution[sub.plan.name] || 0) + 1
       if (sub.plan.type !== 'free') mrr += sub.plan.price
     }
@@ -43,15 +45,15 @@ export async function GET(request: Request) {
     const recentStores = await db.store.findMany({
       include: {
         owner: { select: { name: true, email: true } },
-        subscriptions: { where: { status: 'active' }, include: { plan: { select: { name: true, price: true } } }, take: 1 },
+        subscriptions: { include: { plan: { select: { name: true, price: true } } }, take: 1 },
       },
       orderBy: { createdAt: 'desc' }, take: 5,
     })
 
-    const expiringSubscriptions = await db.subscription.count({
-      where: { status: 'active', nextBillingDate: { lte: threeDaysFromNow }, plan: { type: { not: 'free' } } },
-    })
-    const pastDueCount = await db.subscription.count({ where: { status: 'past_due' } })
+    const expiringSubscriptions = allSubscriptions.filter(
+      s => s.status === 'active' && s.nextBillingDate && s.nextBillingDate <= threeDaysFromNow && s.plan.type !== 'free'
+    ).length
+    const pastDueCount = allSubscriptions.filter(s => s.status === 'past_due').length
 
     return NextResponse.json({
       totalUsers, activeUsers, totalStores, activeStores, totalProducts,
