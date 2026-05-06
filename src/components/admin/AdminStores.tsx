@@ -19,10 +19,11 @@ interface ApiStore {
 
 export function AdminStores() {
   const { navigate } = useAppStore()
-  const [stores, setStores] = useState<ApiStore[]>([])
+  const stores = useAppStore((s) => s.stores)
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const [togglingId, setTogglingId] = useState<string | null>(null)
+  const [apiStores, setApiStores] = useState<ApiStore[] | null>(null)
 
   useEffect(() => { loadStores() }, [])
 
@@ -30,9 +31,21 @@ export function AdminStores() {
     setLoading(true)
     try {
       const token = localStorage.getItem('tiendapp_token')
+      if (!token) { console.warn('[AdminStores] No token found'); setLoading(false); return }
       const res = await fetch('/api/stores', { headers: { Authorization: `Bearer ${token}` } })
-      if (res.ok) setStores(await res.json())
-    } catch (err) { console.error(err) }
+      if (res.ok) {
+        const data = await res.json()
+        if (Array.isArray(data)) {
+          setApiStores(data)
+          console.log('[AdminStores] Loaded', data.length, 'stores from API')
+        } else {
+          console.warn('[AdminStores] API did not return an array:', typeof data)
+        }
+      } else {
+        const errText = await res.text().catch(() => 'unknown')
+        console.error('[AdminStores] API error', res.status, errText)
+      }
+    } catch (err) { console.error('[AdminStores] Fetch error:', err) }
     finally { setLoading(false) }
   }
 
@@ -45,12 +58,25 @@ export function AdminStores() {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ id: storeId, isActive: !currentActive }),
       })
-      if (res.ok) setStores(prev => prev.map(s => s.id === storeId ? { ...s, isActive: !currentActive } : s))
+      if (res.ok) setApiStores(prev => (prev || []).map(s => s.id === storeId ? { ...s, isActive: !currentActive } : s))
     } catch (err) { console.error(err) }
     finally { setTogglingId(null) }
   }
 
-  const filteredStores = stores.filter(s =>
+  // Use API stores if available (admin fetches all), otherwise fall back to Zustand store
+  const displayStores = apiStores && apiStores.length > 0 ? apiStores : (apiStores === null && stores.length > 0
+    ? stores.map(s => ({
+        id: s.id, name: s.name, slug: s.slug, description: s.description, logo: s.logo,
+        primaryColor: s.colors.primary, whatsappNumber: s.whatsappNumber || null, template: s.template,
+        category: s.categoryId, isActive: s.isActive, visitCount: 0, createdAt: s.createdAt,
+        owner: { id: s.userId, name: '', email: '' },
+        _count: { products: 0 },
+        subscriptions: [],
+      } as ApiStore))
+    : []
+  )
+
+  const filteredStores = displayStores.filter(s =>
     s.name.toLowerCase().includes(search.toLowerCase()) ||
     s.slug.toLowerCase().includes(search.toLowerCase()) ||
     s.owner.name.toLowerCase().includes(search.toLowerCase())
@@ -62,7 +88,7 @@ export function AdminStores() {
     <div className="space-y-6 animate-fadeIn">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Tiendas</h1>
-        <p className="text-gray-500 mt-1">{stores.length} tiendas registradas</p>
+        <p className="text-gray-500 mt-1">{displayStores.length} tiendas registradas</p>
       </div>
       <div className="relative max-w-md">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -136,7 +162,13 @@ export function AdminStores() {
             </table>
           </div>
           {filteredStores.length === 0 && (
-            <div className="text-center py-12 text-gray-400"><Store className="w-12 h-12 mx-auto mb-3 text-gray-300" /><p>No se encontraron tiendas</p></div>
+            <div className="text-center py-12 text-gray-400">
+              <Store className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+              <p>{apiStores !== null ? 'No se encontraron tiendas' : 'Cargando tiendas...'}</p>
+              {apiStores !== null && apiStores.length === 0 && (
+                <p className="text-xs mt-1">Si creaste una tienda y no aparece, verifica que tu usuario tenga rol de administrador.</p>
+              )}
+            </div>
           )}
         </CardContent>
       </Card>
