@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAppStore } from '@/lib/store'
+import { StoreLogo } from './StoreLogo'
 const CATEGORIES = [
   { id: 'ropa', name: 'Ropa' },
   { id: 'accesorios', name: 'Accesorios' },
@@ -315,7 +316,7 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
           onClick={() => navigate({ page: 'store', slug })}
           className="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors"
         >
-          <span className="text-lg">{store.logo}</span>
+          <StoreLogo logo={store.logo} size={24} />
           <span className="font-semibold text-sm">{store.name}</span>
         </button>
         <button onClick={shareProduct} className="flex items-center gap-1.5 text-gray-400 hover:text-gray-600 transition-colors">
@@ -567,8 +568,8 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
             {/* Store info */}
             <div className="mt-8 p-4 rounded-xl border border-gray-100 bg-gray-50/50">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-lg">
-                  {store.logo}
+                <div className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center">
+                  <StoreLogo logo={store.logo} size={32} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-gray-900 truncate">{store.name}</p>

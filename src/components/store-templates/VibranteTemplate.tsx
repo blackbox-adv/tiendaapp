@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { StoreLogo } from './StoreLogo'
 const CATEGORIES = [
   { id: 'ropa', name: 'Ropa' },
   { id: 'accesorios', name: 'Accesorios' },
@@ -129,7 +130,7 @@ export function VibranteTemplate({ store, products, storeSlug, planId }: { store
             transition={{ type: 'spring', stiffness: 200, damping: 15 }}
             className="w-24 h-24 rounded-full bg-white/20 backdrop-blur-sm mx-auto mb-5 flex items-center justify-center text-5xl shadow-lg ring-4 ring-white/30"
           >
-            {store.logo}
+            <StoreLogo logo={store.logo} size={56} />
           </motion.div>
           <motion.h1
             initial={{ y: 20, opacity: 0 }}

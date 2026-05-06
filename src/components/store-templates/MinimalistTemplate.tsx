@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { StoreLogo } from './StoreLogo'
 const CATEGORIES = [
   { id: 'ropa', name: 'Ropa' },
   { id: 'accesorios', name: 'Accesorios' },
@@ -102,7 +103,7 @@ export function MinimalistTemplate({ store, products, storeSlug, planId }: Minim
             transition={{ duration: 0.4 }}
           >
             {store.logo && (
-              <div className="text-3xl mb-4">{store.logo}</div>
+              <div className="mb-4 flex justify-center"><StoreLogo logo={store.logo} size={64} /></div>
             )}
             <h1 className="text-3xl md:text-4xl font-light text-gray-900 tracking-tight">
               {store.name}

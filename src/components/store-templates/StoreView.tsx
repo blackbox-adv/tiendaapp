@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 import { WhatsAppButton } from './WhatsAppButton'
+import { StoreLogo } from './StoreLogo'
 import { ModernaTemplate } from './ModernaTemplate'
 import { VibranteTemplate } from './VibranteTemplate'
 import { ClasicaTemplate } from './ClasicaTemplate'
@@ -202,7 +203,7 @@ export function StoreView({ slug }: { slug: string }) {
           <span className="text-sm hidden sm:inline">Volver</span>
         </button>
         <div className="flex items-center gap-2">
-          <span className="text-lg">{displayStore!.logo}</span>
+          <StoreLogo logo={displayStore!.logo} className="rounded-full" size={28} />
           <span className="font-semibold text-gray-900">{displayStore!.name}</span>
         </div>
         <div className="w-16" />

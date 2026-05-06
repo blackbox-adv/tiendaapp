@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { StoreLogo } from './StoreLogo'
 const CATEGORIES = [
   { id: 'ropa', name: 'Ropa' },
   { id: 'accesorios', name: 'Accesorios' },
@@ -74,7 +75,7 @@ export function ModernaTemplate({ store, products, storeSlug, planId }: { store:
         <div className="max-w-xl mx-auto px-6">
           {store.logo && (
             <div className="w-14 h-14 rounded-full mx-auto mb-5 flex items-center justify-center text-2xl grayscale opacity-80">
-              {store.logo}
+              <StoreLogo logo={store.logo} size={56} />
             </div>
           )}
           <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">

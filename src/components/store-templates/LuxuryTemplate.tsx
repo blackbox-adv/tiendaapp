@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { StoreLogo } from './StoreLogo'
 const CATEGORIES = [
   { id: 'ropa', name: 'Ropa' },
   { id: 'accesorios', name: 'Accesorios' },
@@ -119,7 +120,7 @@ export function LuxuryTemplate({ store, products, storeSlug, planId }: LuxuryTem
                   boxShadow: `0 0 30px ${GOLD}15`,
                 }}
               >
-                {store.logo}
+                <StoreLogo logo={store.logo} size={56} />
               </div>
             )}
             <h1

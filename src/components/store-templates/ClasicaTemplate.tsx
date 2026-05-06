@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { StoreLogo } from './StoreLogo'
 const CATEGORIES = [
   { id: 'ropa', name: 'Ropa' },
   { id: 'accesorios', name: 'Accesorios' },
@@ -111,7 +112,7 @@ export function ClasicaTemplate({ store, products, storeSlug, planId }: { store:
               borderColor: store.colors.primary + '40',
             }}
           >
-            {store.logo}
+            <StoreLogo logo={store.logo} size={56} />
           </div>
           <h1
             className="text-3xl font-bold tracking-wide"
