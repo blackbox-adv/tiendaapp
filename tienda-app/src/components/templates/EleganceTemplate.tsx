@@ -16,7 +16,7 @@ function RatingStars({ rating, gold }: { rating?: number; gold: string }) {
   return (
     <div className="flex items-center gap-0.5">
       {Array.from({ length: full }).map((_, i) => <Star key={`f${i}`} className="w-3 h-3" style={{ color: gold }} fill={gold} />)}
-      {half > 0 && <Star key="h" className="w-3 h-3" style={{ color: gold }} fill={gold} style2={{ clipPath: 'inset(0 50% 0 0)' } as any} />}
+      {half > 0 && <Star key="h" className="w-3 h-3" style={{ color: gold, clipPath: 'inset(0 50% 0 0)' }} fill={gold} />}
       {Array.from({ length: empty }).map((_, i) => <Star key={`e${i}`} className="w-3 h-3" style={{ color: gold + '33' }} />)}
     </div>
   )
