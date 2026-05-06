@@ -34,3 +34,26 @@ Commits:
 2. 1ac89dd - refactor: remove all mock-data imports from components
 3. e5797e1 - feat: AdminPaymentsPage - payment verification for Yape/Transfer
 4. 9fb7802 - feat: changePlan connects to API + email on payment approval
+
+---
+Task ID: 2
+Agent: Main
+Task: Fix product image upload not working
+
+Work Log:
+- Investigated image upload flow: ProductForm.tsx, StoreSettings.tsx, StoreWizard.tsx all call /api/upload
+- Found root cause: /api/upload API route did NOT exist (404)
+- No image hosting service was configured (no Cloudinary, no Supabase Storage)
+- Created /api/upload/route.ts with base64 data URL conversion
+- Added file validation: type (JPG, PNG, WebP, GIF), size (max 5MB)
+- Included CORS headers and proper error responses
+- Upload already rate-limited in middleware (10 req/min per IP)
+- CSP already allows data: in img-src (no change needed)
+- Build passed, pushed as commit 05c18fa
+- Verified endpoint live: returns proper 400 for invalid file, ready for real uploads
+
+Stage Summary:
+- /api/upload endpoint now accepts image files via FormData
+- Converts to base64 data URLs stored directly in PostgreSQL StoreImage.url field
+- All 3 upload components (ProductForm, StoreSettings, StoreWizard) will now work
+- Deploy verified at https://tienda.blackboxperu.com/api/upload
