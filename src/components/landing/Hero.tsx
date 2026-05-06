@@ -68,8 +68,8 @@ export function Hero() {
           {/* Stats */}
           <div className="grid grid-cols-3 gap-8 max-w-lg mx-auto">
             {[
-              { icon: ShoppingBag, value: '500+', label: 'Tiendas activas' },
-              { icon: Star, value: '4.9', label: 'Calificación' },
+              { icon: ShoppingBag, value: '5+', label: 'Plantillas' },
+              { icon: Star, value: '4.9', label: 'Calificacion' },
               { icon: Zap, value: '24/7', label: 'Soporte' },
             ].map((stat, i) => (
               <motion.div

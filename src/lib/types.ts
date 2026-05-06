@@ -16,6 +16,7 @@ export type PageRoute =
   | { page: 'dashboard-settings' }
   | { page: 'dashboard-templates' }
   | { page: 'dashboard-plan' }
+  | { page: 'dashboard-qr' }
   | { page: 'admin' }
   | { page: 'admin-stores' }
   | { page: 'admin-users' }

@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAppStore } from '@/lib/store'
+import type { PageRoute } from '@/lib/types'
 
 // Landing
 import { Navbar } from '@/components/landing/Navbar'
@@ -74,6 +75,51 @@ export default function AppRouter() {
       '/contact': () => navigate({ page: 'contact' }),
       '/terms': () => navigate({ page: 'terms' }),
       '/privacy': () => navigate({ page: 'privacy' }),
+    }
+
+    // Deep-link for dashboard sub-routes
+    if (pathname === '/dashboard') {
+      navigate({ page: 'dashboard' })
+      return
+    }
+    if (pathname.startsWith('/dashboard/')) {
+      const sub = pathname.replace('/dashboard/', '')
+      const dashboardRoutes: Record<string, PageRoute['page']> = {
+        'products': 'dashboard-products',
+        'settings': 'dashboard-settings',
+        'templates': 'dashboard-templates',
+        'qr': 'dashboard-qr',
+        'plan': 'dashboard-plan',
+      }
+      if (dashboardRoutes[sub]) {
+        navigate({ page: dashboardRoutes[sub] } as PageRoute)
+        return
+      }
+    }
+
+    // Deep-link for admin sub-routes
+    if (pathname === '/admin') {
+      navigate({ page: 'admin' })
+      return
+    }
+    if (pathname.startsWith('/admin/')) {
+      const sub = pathname.replace('/admin/', '')
+      const adminRoutes: Record<string, PageRoute['page']> = {
+        'stores': 'admin-stores',
+        'users': 'admin-users',
+        'plans': 'admin-plans',
+        'payments': 'admin-payments',
+        'settings': 'admin-settings',
+      }
+      if (adminRoutes[sub]) {
+        navigate({ page: adminRoutes[sub] } as PageRoute)
+        return
+      }
+    }
+
+    // Store/product deep-links (handled by Next.js SSR, skip here)
+    if (pathname.startsWith('/store/') || pathname.startsWith('/demo/')) {
+      return
     }
 
     const handler = routeMap[pathname]
@@ -182,6 +228,7 @@ export default function AppRouter() {
       case 'dashboard-product-form':
       case 'dashboard-settings':
       case 'dashboard-templates':
+      case 'dashboard-qr':
       case 'dashboard-plan': {
         const dashboardContent = () => {
           switch (route.page) {
@@ -190,6 +237,7 @@ export default function AppRouter() {
             case 'dashboard-product-form': return <ProductForm productId={route.productId} />
             case 'dashboard-settings': return <StoreSettings />
             case 'dashboard-templates': return <TemplateGallery />
+            case 'dashboard-qr': return <StoreQRCode />
             case 'dashboard-plan': return <PlanManager />
           }
         }
@@ -239,8 +287,10 @@ export default function AppRouter() {
   }
 
   return (
-    <div style={{ minHeight: '100vh' }}>
-      {renderPage()}
+    <div style={{ minHeight: '100vh' }} role="main">
+      <AnimatePresence mode="wait">
+        {renderPage()}
+      </AnimatePresence>
     </div>
   )
 }

@@ -29,7 +29,7 @@ export function Footer() {
               ¿Listo para crear tu tienda online?
             </h2>
             <p className="text-lg text-violet-100 mb-8 max-w-2xl mx-auto">
-              Únete a más de 500 tiendas que ya confían en TiendApp. Comienza gratis hoy.
+              Unete a cientos de emprendedores que ya venden con TiendApp. Comienza gratis hoy.
             </p>
             <Button
               size="lg"
