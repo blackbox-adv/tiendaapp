@@ -1,44 +1,39 @@
 import { NextResponse } from 'next/server'
+import { authenticateRequest, requireRole } from '@/lib/auth'
+import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 
-// GET /api/health - Check database and env vars status
-export async function GET() {
-  const checks: Record<string, string> = {}
-
-  // Check DATABASE_URL
-  const dbUrl = process.env.DATABASE_URL || ''
-  checks['DATABASE_URL'] = dbUrl.startsWith('postgresql://') ? 'OK' : `MISSING OR INVALID (starts with: "${dbUrl.substring(0, 15)}...")`
-
-  // Check DIRECT_URL
-  const directUrl = process.env.DIRECT_URL || ''
-  checks['DIRECT_URL'] = directUrl.startsWith('postgresql://') ? 'OK' : 'NOT SET'
-
-  // Check SUPABASE_URL
-  checks['SUPABASE_URL'] = process.env.SUPABASE_URL ? 'OK' : 'MISSING'
-
-  // Check RESEND_API_KEY
-  checks['RESEND_API_KEY'] = process.env.RESEND_API_KEY?.startsWith('re_') ? 'OK' : 'MISSING'
-
-  // Check NEXT_PUBLIC_APP_URL
-  checks['NEXT_PUBLIC_APP_URL'] = process.env.NEXT_PUBLIC_APP_URL ? 'OK' : 'NOT SET'
-
-  // Check JWT_SECRET
-  checks['JWT_SECRET'] = process.env.JWT_SECRET && process.env.JWT_SECRET.length >= 16 ? 'OK' : 'MISSING OR WEAK'
-
-  // Test database connection
+export async function GET(request: Request) {
   try {
-    const { db } = await import('@/lib/db')
-    await db.user.count()
-    checks['DATABASE_CONNECTION'] = 'OK'
-  } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err)
-    checks['DATABASE_CONNECTION'] = `FAILED: ${msg.substring(0, 100)}`
+    if (process.env.NODE_ENV === 'production') {
+      const auth = authenticateRequest(request)
+      if (auth.error || !auth.user) {
+        return NextResponse.json({ status: 'ok', timestamp: new Date().toISOString() })
+      }
+      if (!requireRole(auth.user, ['super_admin'])) {
+        return NextResponse.json({ status: 'ok', timestamp: new Date().toISOString() })
+      }
+    }
+    const checks: Record<string, string> = {}
+    checks['DATABASE_URL'] = process.env.DATABASE_URL ? 'OK' : 'MISSING'
+    checks['SUPABASE_URL'] = process.env.SUPABASE_URL ? 'OK' : 'MISSING'
+    checks['RESEND_API_KEY'] = process.env.RESEND_API_KEY ? 'SET' : 'NOT SET'
+    checks['NEXT_PUBLIC_APP_URL'] = process.env.NEXT_PUBLIC_APP_URL ? 'OK' : 'NOT SET'
+    checks['JWT_SECRET'] = process.env.JWT_SECRET && process.env.JWT_SECRET.length >= 16 ? 'OK' : 'WEAK OR MISSING'
+    try {
+      const { db } = await import('@/lib/db')
+      await db.user.count()
+      checks['DATABASE_CONNECTION'] = 'OK'
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err)
+      checks['DATABASE_CONNECTION'] = `FAILED: ${msg.substring(0, 50)}`
+    }
+    const allOk = Object.values(checks).every(v => v === 'OK' || v === 'SET')
+    return apiSuccess({ status: allOk ? 'healthy' : 'unhealthy', timestamp: new Date().toISOString(), checks }, allOk ? 200 : 500, request)
+  } catch {
+    return NextResponse.json({ status: 'ok', timestamp: new Date().toISOString() })
   }
+}
 
-  const allOk = Object.values(checks).every(v => v === 'OK')
-
-  return NextResponse.json({
-    status: allOk ? 'healthy' : 'unhealthy',
-    timestamp: new Date().toISOString(),
-    checks,
-  }, { status: allOk ? 200 : 500 })
+export async function OPTIONS(request: Request) {
+  return handleCorsPreflight(request)
 }

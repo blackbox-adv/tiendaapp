@@ -26,7 +26,7 @@ export const peruWhatsappString = z
 // ── Auth schemas ──
 export const loginSchema = z.object({
   email: z.string().email('Email invalido'),
-  password: z.string().min(6, 'Contrasena debe tener al menos 6 caracteres'),
+  password: z.string().min(8, 'Contrasena debe tener al menos 8 caracteres'),
 })
 
 export const registerSchema = z.object({
@@ -38,7 +38,7 @@ export const registerSchema = z.object({
   email: z.string().email('Email invalido').toLowerCase().trim(),
   password: z
     .string()
-    .min(6, 'Contrasena debe tener al menos 6 caracteres')
+    .min(8, 'Contrasena debe tener al menos 8 caracteres')
     .max(128, 'Contrasena no puede exceder 128 caracteres'),
   phone: z
     .string()
@@ -153,6 +153,7 @@ export const webhookSchema = z.object({
   storeId: z.string().optional(),
   status: z.enum(['succeeded', 'paid', 'failed', 'refunded']),
   externalRef: z.string().optional(),
+  amount: z.number().positive().max(999999).optional(),
 })
 
 // ── Subscription schemas ──
@@ -208,7 +209,7 @@ export const updateUserSchema = z.object({
     .regex(/^[+]?[\d\s-]{7,20}$/, 'Numero de telefono invalido')
     .optional()
     .or(z.literal('')),
-  password: z.string().min(6).max(128).optional(),
+  password: z.string().min(8).max(128).optional(),
   isActive: z.boolean().optional(),
   avatar: z.string().max(500).optional(),
 })

@@ -115,8 +115,15 @@ export async function PUT(request: NextRequest) {
   const rawBody = await request.text()
   const expectedSig = crypto.createHmac('sha256', webhookSecret).update(rawBody).digest('hex')
 
-  if (signature !== expectedSig) {
-    console.warn('[PAYMENTS] Invalid webhook signature')
+  try {
+    const sigBuffer = Buffer.from(signature, 'utf-8')
+    const expectedBuffer = Buffer.from(expectedSig, 'utf-8')
+    if (sigBuffer.length !== expectedBuffer.length || !crypto.timingSafeEqual(sigBuffer, expectedBuffer)) {
+      console.warn('[PAYMENTS] Invalid webhook signature')
+      return apiError('Invalid signature', 401, undefined, request)
+    }
+  } catch {
+    console.warn('[PAYMENTS] Signature comparison error')
     return apiError('Invalid signature', 401, undefined, request)
   }
 
@@ -129,7 +136,7 @@ export async function PUT(request: NextRequest) {
       return apiError('Datos de webhook invalidos', 400, undefined, request)
     }
 
-    const { userId, planId, storeId, status, externalRef } = validation.data
+    const { userId, planId, storeId, status, externalRef, amount } = validation.data
 
     if (status === 'succeeded' || status === 'paid') {
       const existing = await db.subscription.findFirst({
@@ -156,7 +163,7 @@ export async function PUT(request: NextRequest) {
       // Log the payment event
       await db.payment.create({
         data: {
-          amount: 0,
+          amount: amount || 0,
           status: 'completed',
           externalRef: externalRef || `webhook_${Date.now()}`,
           subscriptionId: existing?.id || '',

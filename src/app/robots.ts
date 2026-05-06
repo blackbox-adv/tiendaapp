@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/api/', '/admin/', '/dashboard/', '/wizard/'],
       },
     ],
-    sitemap: 'https://tiendapp.pe/sitemap.xml',
+    sitemap: `${process.env.NEXT_PUBLIC_APP_URL || 'https://tiendapp.pe'}/sitemap.xml`,
   }
 }

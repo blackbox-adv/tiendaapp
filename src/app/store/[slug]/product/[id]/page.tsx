@@ -140,7 +140,7 @@ function generateProductJsonLd(
     name: product.name,
     description: product.description || `Producto disponible en ${store.name}`,
     image: product.imageUrl,
-    url: `https://tiendapp.pe/store/${store.slug}/product/${product.id}`,
+    url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://tiendapp.pe'}/store/${store.slug}/product/${product.id}`,
     offers: {
       '@type': 'Offer',
       price: product.price,

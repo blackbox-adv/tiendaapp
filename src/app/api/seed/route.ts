@@ -5,15 +5,18 @@ import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 import { auditLog, getClientIp } from '@/lib/env'
 
 // POST /api/seed - ADMIN ONLY - Seeds the database
-// NOTE: Changed from GET to POST for security (GET should never mutate data)
+// BLOCKED IN PRODUCTION - Use migrations instead
 export async function POST(request: NextRequest) {
+  // Block in production
+  if (process.env.NODE_ENV === 'production') {
+    return apiError('Seed endpoint is disabled in production. Use database migrations.', 403, undefined, request)
+  }
   // Protect this endpoint!
   const auth = authenticateRequest(request)
   if (auth.error) {
     return apiError(auth.error, auth.status, undefined, request)
   }
   if (!auth.user) return apiError('No autenticado', 401, undefined, request)
-
   if (!requireRole(auth.user, ['super_admin'])) {
     return apiError('Solo administradores pueden usar este endpoint', 403, undefined, request)
   }

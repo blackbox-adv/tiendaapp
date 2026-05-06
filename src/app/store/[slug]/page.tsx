@@ -135,8 +135,8 @@ function generateStoreJsonLd(store: {
     '@type': 'Store',
     name: store.name,
     description: store.description,
-    url: `https://tiendapp.pe/store/${store.slug}`,
-    image: 'https://tiendapp.pe/og-image.png',
+    url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://tiendapp.pe'}/store/${store.slug}`,
+    image: `${process.env.NEXT_PUBLIC_APP_URL || 'https://tiendapp.pe'}/api/og/store/${store.slug}`,
     address: {
       '@type': 'PostalAddress',
       addressCountry: 'PE',

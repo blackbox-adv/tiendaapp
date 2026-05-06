@@ -160,6 +160,21 @@ export function middleware(request: NextRequest) {
     }
   }
 
+  // Rate limit: Store visit endpoint (max 5 per minute per IP)
+  if (pathname === '/api/stores/visit' && method === 'POST') {
+    const key = getRateLimitKey(request, 'visit')
+    if (isRateLimited(key, 5, 60 * 1000)) {
+      return NextResponse.json({ error: 'Demasiadas solicitudes.', code: 'RATE_LIMITED' }, { status: 429, headers: corsHeaders(request) })
+    }
+  }
+  // Rate limit: Password reset (max 3 per hour per IP)
+  if (pathname === '/api/auth' && method === 'PUT') {
+    const key = getRateLimitKey(request, 'reset')
+    if (isRateLimited(key, 3, 60 * 60 * 1000)) {
+      return NextResponse.json({ error: 'Demasiados intentos de reseteo.', code: 'RATE_LIMITED' }, { status: 429, headers: corsHeaders(request) })
+    }
+  }
+
   return response
 }
 
@@ -171,8 +186,7 @@ export const config = {
     '/api/payments',
     '/api/whatsapp',
     '/api/seed',
-    '/api/stores',
-    '/api/store-products',
+    '/api/stores','/api/stores/visit','/api/store-products','/api/health',
     '/api/settings',
     '/api/subscriptions',
     '/api/download-zip',

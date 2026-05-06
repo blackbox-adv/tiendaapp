@@ -29,14 +29,14 @@ export const metadata: Metadata = {
   authors: [{ name: "TiendApp" }],
   creator: "TiendApp",
   publisher: "TiendApp",
-  metadataBase: new URL("https://tiendapp.pe"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://tiendapp.pe"),
   alternates: {
     canonical: "/",
   },
   openGraph: {
     title: "TiendApp | Crea tu tienda online en Perú",
     description: "La plataforma líder en Perú para crear tiendas online. WhatsApp integrado, plantillas profesionales y pagos en soles.",
-    url: "https://tiendapp.pe",
+    url: process.env.NEXT_PUBLIC_APP_URL || "https://tiendapp.pe",
     siteName: "TiendApp",
     images: [
       {

@@ -160,8 +160,8 @@ export async function PUT(request: Request) {
         return apiError('Token y nueva contrasena son requeridos', 400, undefined, request)
       }
 
-      if (newPassword.length < 6) {
-        return apiError('La contrasena debe tener al menos 6 caracteres', 400, undefined, request)
+      if (newPassword.length < 8) {
+        return apiError('La contrasena debe tener al menos 8 caracteres', 400, undefined, request)
       }
 
       const clientIp = getClientIp(request)
