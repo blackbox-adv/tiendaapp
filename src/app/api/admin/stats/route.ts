@@ -1,6 +1,7 @@
 import { db } from '@/lib/db'
 import { NextResponse } from 'next/server'
 import { authenticateRequest } from '@/lib/auth'
+import { Prisma } from '@prisma/client'
 
 // GET /api/admin/stats - Complete platform statistics
 export async function GET(request: Request) {
@@ -14,29 +15,47 @@ export async function GET(request: Request) {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
     const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
 
-    const totalUsers = await db.user.count({ where: { role: 'store_owner' } })
-    const activeUsers = await db.user.count({ where: { role: 'store_owner', isActive: true } })
-    const totalStores = await db.store.count()
-    const activeStores = await db.store.count({ where: { isActive: true } })
-    const totalProducts = await db.storeProduct.count({ where: { isActive: true } })
-    const newUsersThisMonth = await db.user.count({ where: { role: 'store_owner', createdAt: { gte: startOfMonth } } })
-    const newStoresThisMonth = await db.store.count({ where: { createdAt: { gte: startOfMonth } } })
+    // Use raw SQL for all queries involving string status fields to avoid Prisma type conversion issues
+    type CountRow = { count: string }
+    const cnt = (sql: Prisma.Sql) => db.$queryRaw<CountRow[]>(sql).then(r => Number(r[0]?.count ?? 0))
 
-    // Fetch all subscriptions without status filter, then filter in JS to avoid Prisma type conversion issues
-    const allSubscriptions = await db.subscription.findMany({ include: { plan: true } })
-    const activeSubscriptions = allSubscriptions.filter(s => s.status === 'active')
+    const totalUsers = await cnt(Prisma.sql`SELECT COUNT(*)::text as count FROM "User" WHERE role = 'store_owner'`)
+    const activeUsers = await cnt(Prisma.sql`SELECT COUNT(*)::text as count FROM "User" WHERE role = 'store_owner' AND "isActive" = true`)
+    const totalStores = await cnt(Prisma.sql`SELECT COUNT(*)::text as count FROM "Store"`)
+    const activeStores = await cnt(Prisma.sql`SELECT COUNT(*)::text as count FROM "Store" WHERE "isActive" = true`)
+    const totalProducts = await cnt(Prisma.sql`SELECT COUNT(*)::text as count FROM "StoreProduct" WHERE "isActive" = true`)
+    const newUsersThisMonth = await cnt(Prisma.sql`SELECT COUNT(*)::text as count FROM "User" WHERE role = 'store_owner' AND "createdAt" >= ${startOfMonth}`)
+    const newStoresThisMonth = await cnt(Prisma.sql`SELECT COUNT(*)::text as count FROM "Store" WHERE "createdAt" >= ${startOfMonth}`)
+
+    // Subscriptions with plan info
+    type SubRow = { id: string; status: string; planName: string; planType: string; planPrice: string; nextBillingDate: string | null }
+    const subs = await db.$queryRaw<SubRow[]>(
+      Prisma.sql`SELECT s.id, s.status, p.name as "planName", p.type as "planType", p.price::text as "planPrice", s."nextBillingDate"::text as "nextBillingDate"
+       FROM "Subscription" s JOIN "Plan" p ON s."planId" = p.id`
+    )
+
     const planDistribution: Record<string, number> = {}
     let mrr = 0
-    for (const sub of activeSubscriptions) {
-      planDistribution[sub.plan.name] = (planDistribution[sub.plan.name] || 0) + 1
-      if (sub.plan.type !== 'free') mrr += sub.plan.price
+    for (const sub of subs) {
+      planDistribution[sub.planName] = (planDistribution[sub.planName] || 0) + 1
+      if (sub.planType !== 'free' && sub.status === 'active') mrr += parseFloat(sub.planPrice)
     }
 
-    const completedPayments = await db.payment.findMany({ where: { status: 'completed', createdAt: { gte: startOfMonth } } })
-    const monthlyRevenue = completedPayments.reduce((sum, p) => sum + p.amount, 0)
-    const verifiedRevenue = completedPayments.filter(p => p.verifiedAt).reduce((sum, p) => sum + p.amount, 0)
-    const pendingPayments = await db.payment.count({ where: { status: 'pending' } })
+    // Payments
+    type PayRow = { amount: string; verifiedAt: string | null }
+    const completedPayments = await db.$queryRaw<PayRow[]>(
+      Prisma.sql`SELECT amount::text, "verifiedAt"::text FROM "Payment" WHERE status = 'completed' AND "createdAt" >= ${startOfMonth}`
+    )
+    const monthlyRevenue = completedPayments.reduce((sum, p) => sum + parseFloat(p.amount), 0)
+    const verifiedRevenue = completedPayments.filter(p => p.verifiedAt).reduce((sum, p) => sum + parseFloat(p.amount), 0)
+    const pendingPayments = await cnt(Prisma.sql`SELECT COUNT(*)::text as count FROM "Payment" WHERE status = 'pending'`)
 
+    const expiringSubscriptions = subs.filter(
+      s => s.status === 'active' && s.nextBillingDate && new Date(s.nextBillingDate) <= threeDaysFromNow && s.planType !== 'free'
+    ).length
+    const pastDueCount = subs.filter(s => s.status === 'past_due').length
+
+    // Top stores and recent stores use ORM (boolean fields are fine)
     const topStores = await db.store.findMany({
       where: { isActive: true }, orderBy: { visitCount: 'desc' }, take: 5,
       select: { id: true, name: true, slug: true, visitCount: true, _count: { select: { products: true } } },
@@ -50,11 +69,6 @@ export async function GET(request: Request) {
       orderBy: { createdAt: 'desc' }, take: 5,
     })
 
-    const expiringSubscriptions = allSubscriptions.filter(
-      s => s.status === 'active' && s.nextBillingDate && s.nextBillingDate <= threeDaysFromNow && s.plan.type !== 'free'
-    ).length
-    const pastDueCount = allSubscriptions.filter(s => s.status === 'past_due').length
-
     return NextResponse.json({
       totalUsers, activeUsers, totalStores, activeStores, totalProducts,
       newUsersThisMonth, newStoresThisMonth,
@@ -65,6 +79,7 @@ export async function GET(request: Request) {
     })
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error fetching stats'
+    console.error('[ADMIN STATS]', message)
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }
