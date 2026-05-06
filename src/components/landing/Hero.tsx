@@ -54,12 +54,11 @@ export function Hero() {
             </Button>
             <Button
               size="lg"
-              variant="outline"
               onClick={() => {
                 const el = document.querySelector('#templates')
                 el?.scrollIntoView({ behavior: 'smooth' })
               }}
-              className="border-2 border-white text-white hover:bg-white hover:text-violet-700 font-semibold px-8 py-6 text-lg rounded-xl transition-all"
+              className="border-2 border-white/80 bg-white/10 backdrop-blur-sm text-white hover:bg-white hover:text-violet-700 font-semibold px-8 py-6 text-lg rounded-xl transition-all"
             >
               Ver plantillas
             </Button>
