@@ -55,19 +55,49 @@ export async function GET(request: Request) {
     ).length
     const pastDueCount = subs.filter(s => s.status === 'past_due').length
 
-    // Top stores and recent stores use ORM (boolean fields are fine)
-    const topStores = await db.store.findMany({
-      where: { isActive: true }, orderBy: { visitCount: 'desc' }, take: 5,
-      select: { id: true, name: true, slug: true, visitCount: true, _count: { select: { products: true } } },
-    })
+    // Top stores - use raw SQL
+    type TopStoreRow = { id: string; name: string; slug: string; visitCount: string; productCount: string }
+    const topStoreRows = await db.$queryRaw<TopStoreRow[]>(
+      Prisma.sql`SELECT s.id, s.name, s.slug, s."visitCount"::text, COUNT(p.id)::text as "productCount"
+        FROM "Store" s LEFT JOIN "StoreProduct" p ON p."storeId" = s.id AND p."isActive" = true
+        WHERE s."isActive" = true
+        GROUP BY s.id, s.name, s.slug, s."visitCount"
+        ORDER BY s."visitCount" DESC LIMIT 5`
+    )
+    const topStores = topStoreRows.map(r => ({
+      id: r.id, name: r.name, slug: r.slug,
+      visitCount: parseInt(r.visitCount),
+      _count: { products: parseInt(r.productCount) },
+    }))
 
-    const recentStores = await db.store.findMany({
-      include: {
-        owner: { select: { name: true, email: true } },
-        subscriptions: { include: { plan: { select: { name: true, price: true } } }, take: 1 },
-      },
-      orderBy: { createdAt: 'desc' }, take: 5,
-    })
+    // Recent stores - use raw SQL (no subscription include through ORM)
+    type RecentStoreRow = {
+      id: string; name: string; slug: string; createdAt: string;
+      ownerName: string; ownerEmail: string;
+      planName: string; planPrice: string;
+    }
+    const recentStoreRows = await db.$queryRaw<RecentStoreRow[]>(
+      Prisma.sql`SELECT s.id, s.name, s.slug, s."createdAt"::text,
+        u.name as "ownerName", u.email as "ownerEmail",
+        COALESCE(sub_plan.plan_name, 'Free') as "planName",
+        COALESCE(sub_plan.plan_price, '0') as "planPrice"
+        FROM "Store" s
+        JOIN "User" u ON s."ownerId" = u.id
+        LEFT JOIN LATERAL (
+          SELECT p.name as plan_name, p.price::text as plan_price
+          FROM "Subscription" sub
+          JOIN "Plan" p ON sub."planId" = p.id
+          WHERE sub."storeId" = s.id
+          ORDER BY sub."createdAt" DESC LIMIT 1
+        ) sub_plan ON true
+        ORDER BY s."createdAt" DESC LIMIT 5`
+    )
+    const recentStores = recentStoreRows.map(r => ({
+      id: r.id, name: r.name, slug: r.slug,
+      createdAt: r.createdAt,
+      owner: { name: r.ownerName, email: r.ownerEmail },
+      subscriptions: [{ plan: { name: r.planName, price: parseFloat(r.planPrice) } }],
+    }))
 
     return NextResponse.json({
       totalUsers, activeUsers, totalStores, activeStores, totalProducts,
