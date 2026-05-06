@@ -230,7 +230,7 @@ export function StoreWizard() {
                         <label htmlFor="wizard-logo-upload" className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
                           {uploadingLogo ? 'Subiendo...' : <><Upload className="w-4 h-4" /> Subir logo</>}
                         </label>
-                        <p className="text-xs text-gray-400 mt-1">JPG, PNG, WebP. Max 5MB</p>
+                        <p className="text-xs text-gray-400 mt-1">JPG, PNG, WebP. Max 5MB. Recomendado: 128 × 128 px (cuadrada)</p>
                       </div>
                     </div>
                   </div>

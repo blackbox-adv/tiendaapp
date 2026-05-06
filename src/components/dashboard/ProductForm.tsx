@@ -269,6 +269,7 @@ export function ProductForm({ productId }: { productId?: string }) {
                       <div>
                         <p className="text-sm font-medium text-gray-700">Haz clic para subir una imagen</p>
                         <p className="text-xs text-gray-400 mt-0.5">JPG, PNG, WebP o GIF. Máximo 5MB</p>
+                        <p className="text-xs text-violet-500 mt-1 font-medium">Recomendado: 800 × 800 px (cuadrada) ó 800 × 1000 px (vertical)</p>
                       </div>
                     </>
                   )}
