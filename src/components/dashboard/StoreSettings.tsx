@@ -13,7 +13,7 @@ const CATEGORIES = [
   { id: 'juguetes', name: 'Juguetes' },
   { id: 'otros', name: 'Otros' },
 ]
-import { Save, Eye, Store, LayoutTemplate, Upload, X, ImageIcon } from 'lucide-react'
+import { Save, Eye, Store, LayoutTemplate, Upload, X, ImageIcon, Truck, ShieldCheck, RotateCcw } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -35,6 +35,9 @@ export function StoreSettings() {
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const [bannerUrl, setBannerUrl] = useState(currentStore?.bannerUrl || '')
   const [uploadingBanner, setUploadingBanner] = useState(false)
+  const [hasShipping, setHasShipping] = useState(currentStore?.hasShipping ?? false)
+  const [hasSecurePayment, setHasSecurePayment] = useState(currentStore?.hasSecurePayment ?? false)
+  const [hasReturns, setHasReturns] = useState(currentStore?.hasReturns ?? false)
 
   const handleLogoUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -199,6 +202,9 @@ export function StoreSettings() {
       colors: { primary: primaryColor, secondary: primaryColor + '80' },
       template: template as 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist',
       categoryId: category,
+      hasShipping,
+      hasSecurePayment,
+      hasReturns,
     })
     toast.success('Tienda actualizada', { description: 'Los cambios se guardaron correctamente.' })
   }
@@ -371,6 +377,69 @@ export function StoreSettings() {
                     />
                   ))}
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Caracteristicas de la tienda</CardTitle>
+              <CardDescription className="text-sm text-gray-500">Activa o desactiva las caracteristicas que se mostraran en tus productos</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between p-3 rounded-xl bg-gray-50">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-violet-100 flex items-center justify-center">
+                    <Truck className="w-5 h-5 text-violet-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">Envio disponible</p>
+                    <p className="text-xs text-gray-500">Muestra el badge de envio en tus productos</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setHasShipping(!hasShipping)}
+                  className={`relative w-11 h-6 rounded-full transition-colors ${hasShipping ? 'bg-violet-600' : 'bg-gray-300'}`}
+                >
+                  <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${hasShipping ? 'translate-x-5' : ''}`} />
+                </button>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-xl bg-gray-50">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-violet-100 flex items-center justify-center">
+                    <ShieldCheck className="w-5 h-5 text-violet-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">Pago seguro</p>
+                    <p className="text-xs text-gray-500">Muestra el badge de pago seguro en tus productos</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setHasSecurePayment(!hasSecurePayment)}
+                  className={`relative w-11 h-6 rounded-full transition-colors ${hasSecurePayment ? 'bg-violet-600' : 'bg-gray-300'}`}
+                >
+                  <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${hasSecurePayment ? 'translate-x-5' : ''}`} />
+                </button>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-xl bg-gray-50">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-violet-100 flex items-center justify-center">
+                    <RotateCcw className="w-5 h-5 text-violet-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">Devoluciones</p>
+                    <p className="text-xs text-gray-500">Muestra el badge de devoluciones en tus productos</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setHasReturns(!hasReturns)}
+                  className={`relative w-11 h-6 rounded-full transition-colors ${hasReturns ? 'bg-violet-600' : 'bg-gray-300'}`}
+                >
+                  <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${hasReturns ? 'translate-x-5' : ''}`} />
+                </button>
               </div>
             </CardContent>
           </Card>

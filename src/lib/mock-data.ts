@@ -199,6 +199,7 @@ export const MOCK_STORES: Store[] = [
     userId: 'user-1',
     isActive: true,
     createdAt: '2024-03-15T10:00:00.000Z',
+    hasShipping: true, hasSecurePayment: true, hasReturns: false,
   },
   {
     id: 'store-2',
@@ -215,6 +216,7 @@ export const MOCK_STORES: Store[] = [
     userId: 'user-2',
     isActive: true,
     createdAt: '2024-05-20T14:30:00.000Z',
+    hasShipping: true, hasSecurePayment: false, hasReturns: false,
   },
   {
     id: 'store-3',
@@ -231,6 +233,7 @@ export const MOCK_STORES: Store[] = [
     userId: 'user-3',
     isActive: true,
     createdAt: '2024-06-10T09:15:00.000Z',
+    hasShipping: true, hasSecurePayment: true, hasReturns: true,
   },
   {
     id: 'store-4',
@@ -247,6 +250,7 @@ export const MOCK_STORES: Store[] = [
     userId: 'user-4',
     isActive: true,
     createdAt: '2024-07-01T16:45:00.000Z',
+    hasShipping: false, hasSecurePayment: true, hasReturns: false,
   },
 ]
 

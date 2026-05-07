@@ -26,6 +26,7 @@ const demoStores: Record<string, Store> = {
     userId: '',
     isActive: true,
     createdAt: new Date().toISOString(),
+    hasShipping: true, hasSecurePayment: true, hasReturns: false,
   },
   minimalist: {
     id: 'demo-minimalist',
@@ -42,6 +43,7 @@ const demoStores: Record<string, Store> = {
     userId: '',
     isActive: true,
     createdAt: new Date().toISOString(),
+    hasShipping: true, hasSecurePayment: true, hasReturns: true,
   },
   moderna: {
     id: 'demo-moderna',
@@ -58,6 +60,7 @@ const demoStores: Record<string, Store> = {
     userId: '',
     isActive: true,
     createdAt: new Date().toISOString(),
+    hasShipping: true, hasSecurePayment: true, hasReturns: true,
   },
   vibrante: {
     id: 'demo-vibrante',
@@ -74,6 +77,7 @@ const demoStores: Record<string, Store> = {
     userId: '',
     isActive: true,
     createdAt: new Date().toISOString(),
+    hasShipping: true, hasSecurePayment: false, hasReturns: false,
   },
   clasica: {
     id: 'demo-clasica',
@@ -90,6 +94,7 @@ const demoStores: Record<string, Store> = {
     userId: '',
     isActive: true,
     createdAt: new Date().toISOString(),
+    hasShipping: true, hasSecurePayment: true, hasReturns: true,
   },
 }
 

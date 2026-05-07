@@ -88,6 +88,9 @@ export const createStoreSchema = z.object({
 export const updateStoreSchema = createStoreSchema.partial().extend({
   id: z.string().min(1, 'ID de tienda requerido'),
   isActive: z.boolean().optional(),
+  hasShipping: z.boolean().optional(),
+  hasSecurePayment: z.boolean().optional(),
+  hasReturns: z.boolean().optional(),
 })
 
 // ── Product schemas ──

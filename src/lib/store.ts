@@ -27,6 +27,9 @@ function transformApiStore(apiStore: Record<string, unknown>): Store {
     userId: apiStore.ownerId as string,
     isActive: (apiStore.isActive as boolean) ?? true,
     createdAt: (apiStore.createdAt as string) || new Date().toISOString(),
+    hasShipping: (apiStore.hasShipping as boolean) ?? false,
+    hasSecurePayment: (apiStore.hasSecurePayment as boolean) ?? false,
+    hasReturns: (apiStore.hasReturns as boolean) ?? false,
   }
 }
 
@@ -394,6 +397,9 @@ export const useAppStore = create<AppState>((set, get) => ({
       userId: currentUser.id,
       isActive: true,
       createdAt: new Date().toISOString(),
+      hasShipping: false,
+      hasSecurePayment: false,
+      hasReturns: false,
     }
 
     set((state) => ({
@@ -554,6 +560,9 @@ export const useAppStore = create<AppState>((set, get) => ({
       }
       if (data.logo !== undefined) apiData.logo = data.logo
       if (data.bannerUrl !== undefined) apiData.bannerUrl = data.bannerUrl
+      if (data.hasShipping !== undefined) apiData.hasShipping = data.hasShipping
+      if (data.hasSecurePayment !== undefined) apiData.hasSecurePayment = data.hasSecurePayment
+      if (data.hasReturns !== undefined) apiData.hasReturns = data.hasReturns
 
       fetch('/api/stores', {
         method: 'PUT',

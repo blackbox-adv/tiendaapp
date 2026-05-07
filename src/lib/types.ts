@@ -48,6 +48,9 @@ export interface Store {
   whatsappNumber: string
   template: 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist'
   bannerUrl: string
+  hasShipping: boolean
+  hasSecurePayment: boolean
+  hasReturns: boolean
   userId: string
   isActive: boolean
   createdAt: string

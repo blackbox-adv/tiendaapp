@@ -62,6 +62,9 @@ export function StoreView({ slug }: { slug: string }) {
               userId: data.ownerId || '',
               isActive: data.isActive ?? true,
               createdAt: data.createdAt || new Date().toISOString(),
+              hasShipping: data.hasShipping ?? false,
+              hasSecurePayment: data.hasSecurePayment ?? false,
+              hasReturns: data.hasReturns ?? false,
             })
             if (data.products && Array.isArray(data.products)) {
               const mapped: Product[] = data.products.map((p: Record<string, unknown>) => ({

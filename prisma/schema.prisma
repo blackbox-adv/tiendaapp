@@ -64,6 +64,9 @@ model Store {
   template       String   @default("moderna")     // moderna, vibrante, clasica
   bannerUrl      String   @default("")
   category       String   @default("otros")
+  hasShipping      Boolean  @default(false)
+  hasSecurePayment Boolean  @default(false)
+  hasReturns       Boolean  @default(false)
   isActive       Boolean  @default(true)
   visitCount     Int      @default(0)
   createdAt      DateTime @default(now())

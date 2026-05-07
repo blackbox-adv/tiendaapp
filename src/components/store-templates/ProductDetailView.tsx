@@ -73,6 +73,9 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
               userId: data.ownerId || '',
               isActive: data.isActive ?? true,
               createdAt: data.createdAt || new Date().toISOString(),
+              hasShipping: data.hasShipping ?? false,
+              hasSecurePayment: data.hasSecurePayment ?? false,
+              hasReturns: data.hasReturns ?? false,
             }
             setApiStore(mappedStore)
 
@@ -443,21 +446,27 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
               </div>
             </div>
 
-            {/* Features / Benefits */}
-            <div className="mt-6 grid grid-cols-3 gap-3">
-              <div className="flex flex-col items-center text-center p-3 rounded-xl bg-gray-50">
-                <Truck className="w-5 h-5 mb-1.5" style={{ color: store.colors.primary }} />
-                <span className="text-[11px] text-gray-500 font-medium">Envio disponible</span>
-              </div>
-              <div className="flex flex-col items-center text-center p-3 rounded-xl bg-gray-50">
-                <ShieldCheck className="w-5 h-5 mb-1.5" style={{ color: store.colors.primary }} />
-                <span className="text-[11px] text-gray-500 font-medium">Pago seguro</span>
-              </div>
-              <div className="flex flex-col items-center text-center p-3 rounded-xl bg-gray-50">
-                <RotateCcw className="w-5 h-5 mb-1.5" style={{ color: store.colors.primary }} />
-                <span className="text-[11px] text-gray-500 font-medium">Devoluciones</span>
-              </div>
-            </div>
+            {/* Features / Benefits - conditional based on store settings */}
+            {(() => {
+              const features: { icon: typeof Truck; label: string; active: boolean }[] = [
+                { icon: Truck, label: 'Envio disponible', active: store.hasShipping === true },
+                { icon: ShieldCheck, label: 'Pago seguro', active: store.hasSecurePayment === true },
+                { icon: RotateCcw, label: 'Devoluciones', active: store.hasReturns === true },
+              ]
+              const activeFeatures = features.filter((f) => f.active)
+              if (activeFeatures.length === 0) return null
+              const colsClass = activeFeatures.length === 1 ? 'grid-cols-1' : activeFeatures.length === 2 ? 'grid-cols-2' : 'grid-cols-3'
+              return (
+                <div className={`mt-6 grid ${colsClass} gap-3`}>
+                  {activeFeatures.map((f) => (
+                    <div key={f.label} className="flex flex-col items-center text-center p-3 rounded-xl bg-gray-50">
+                      <f.icon className="w-5 h-5 mb-1.5" style={{ color: store.colors.primary }} />
+                      <span className="text-[11px] text-gray-500 font-medium">{f.label}</span>
+                    </div>
+                  ))}
+                </div>
+              )
+            })()}
 
             {/* WhatsApp CTA */}
             <div className="mt-8 flex flex-col gap-3">

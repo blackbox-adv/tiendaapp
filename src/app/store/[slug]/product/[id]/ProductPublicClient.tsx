@@ -24,6 +24,9 @@ function transformStore(s: Record<string, unknown>): Store {
     userId: (s.ownerId as string) || '',
     isActive: (s.isActive as boolean) ?? true,
     createdAt: (s.createdAt as string) || new Date().toISOString(),
+    hasShipping: (s.hasShipping as boolean) ?? false,
+    hasSecurePayment: (s.hasSecurePayment as boolean) ?? false,
+    hasReturns: (s.hasReturns as boolean) ?? false,
   }
 }
 
