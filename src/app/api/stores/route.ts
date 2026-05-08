@@ -34,6 +34,7 @@ export async function GET(request: NextRequest) {
               isActive: true,
               featured: true,
               rating: true,
+              storeId: true,
               createdAt: true,
             },
           },
@@ -75,12 +76,14 @@ export async function GET(request: NextRequest) {
         ownerName: string; ownerEmail: string; productCount: number
         planId: string | null; planName: string | null; planPrice: string | null
         subStatus: string | null
+        hasShipping: boolean; hasSecurePayment: boolean; hasReturns: boolean
       }
       const rows: StoreRow[] = await sql(
         `SELECT s.id, s.name, s.slug, s.description, s.logo,
                 s."primaryColor", s."secondaryColor", s."whatsappNumber",
                 s.template, s.category, s."isActive", s."visitCount"::int,
                 s."createdAt"::text, s."ownerId",
+                s."hasShipping", s."hasSecurePayment", s."hasReturns",
                 u.name as "ownerName", u.email as "ownerEmail",
                 COUNT(p.id)::int as "productCount",
                 sub_plan."planId", sub_plan."planName",
@@ -120,6 +123,9 @@ export async function GET(request: NextRequest) {
         visitCount: r.visitCount,
         createdAt: r.createdAt,
         ownerId: r.ownerId,
+        hasShipping: r.hasShipping,
+        hasSecurePayment: r.hasSecurePayment,
+        hasReturns: r.hasReturns,
         owner: { id: r.ownerId, name: r.ownerName, email: r.ownerEmail },
         _count: { products: r.productCount },
         subscriptions: r.planId ? [{

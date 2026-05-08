@@ -15,6 +15,7 @@ const CATEGORIES = [
   { id: 'otros', name: 'Otros' },
 ]
 import { Star, ShoppingBag, Search, X, ChevronRight } from 'lucide-react'
+import { StoreFeatureBadges } from './StoreFeatureBadges'
 import { useAppStore } from '@/lib/store'
 import type { Store, Product } from '@/lib/types'
 
@@ -118,6 +119,15 @@ export function MinimalistTemplate({ store, products, storeSlug, planId }: Minim
             <p className="text-sm text-gray-400 mt-3 max-w-md font-light leading-relaxed">
               {store.description}
             </p>
+            <div className="mt-4">
+              <StoreFeatureBadges
+                hasShipping={store.hasShipping}
+                hasSecurePayment={store.hasSecurePayment}
+                hasReturns={store.hasReturns}
+                variant="minimalist"
+                primaryColor={store.colors.primary}
+              />
+            </div>
           </motion.div>
         </div>
       </header>

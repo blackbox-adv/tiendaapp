@@ -370,7 +370,7 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
                 }}
               />
               {/* Badges */}
-              <ProductBadges product={product} primaryColor={store.colors.primary} />
+              <ProductBadges product={product} primaryColor={store.colors.primary} store={store} />
             </div>
           </div>
 
@@ -629,7 +629,7 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
                         ;(e.target as HTMLImageElement).src = imgFallback
                       }}
                     />
-                    <ProductBadges product={rp} primaryColor={store.colors.primary} />
+                    <ProductBadges product={rp} primaryColor={store.colors.primary} store={store} />
                   </div>
                   <div className="p-3">
                     <h3 className="text-sm font-medium text-gray-800 truncate">{rp.name}</h3>

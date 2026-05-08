@@ -15,6 +15,7 @@ const CATEGORIES = [
   { id: 'otros', name: 'Otros' },
 ]
 import { Star, MessageCircle, ShoppingBag, Heart, Search, X } from 'lucide-react'
+import { StoreFeatureBadges } from './StoreFeatureBadges'
 import { Badge } from '@/components/ui/badge'
 import { useAppStore } from '@/lib/store'
 import type { Store, Product } from '@/lib/types'
@@ -137,6 +138,15 @@ export function ClasicaTemplate({ store, products, storeSlug, planId }: { store:
           >
             {store.description}
           </p>
+          <div className="mt-4">
+            <StoreFeatureBadges
+              hasShipping={store.hasShipping}
+              hasSecurePayment={store.hasSecurePayment}
+              hasReturns={store.hasReturns}
+              variant="classic"
+              primaryColor={store.colors.primary}
+            />
+          </div>
         </div>
       </header>
 

@@ -15,6 +15,7 @@ const CATEGORIES = [
   { id: 'otros', name: 'Otros' },
 ]
 import { Star, ShoppingBag, Search, X } from 'lucide-react'
+import { StoreFeatureBadges } from './StoreFeatureBadges'
 import { Badge } from '@/components/ui/badge'
 import { useAppStore } from '@/lib/store'
 import type { Store, Product } from '@/lib/types'
@@ -91,6 +92,15 @@ export function ModernaTemplate({ store, products, storeSlug, planId }: { store:
           <p className="text-sm text-gray-400 mt-2 leading-relaxed max-w-sm mx-auto">
             {store.description}
           </p>
+          <div className="mt-4">
+            <StoreFeatureBadges
+              hasShipping={store.hasShipping}
+              hasSecurePayment={store.hasSecurePayment}
+              hasReturns={store.hasReturns}
+              variant="light"
+              primaryColor={store.colors.primary}
+            />
+          </div>
         </div>
       </header>
 

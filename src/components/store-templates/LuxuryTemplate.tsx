@@ -15,6 +15,7 @@ const CATEGORIES = [
   { id: 'otros', name: 'Otros' },
 ]
 import { Star, ShoppingBag, Search, X, Diamond, Crown } from 'lucide-react'
+import { StoreFeatureBadges } from './StoreFeatureBadges'
 import { Badge } from '@/components/ui/badge'
 import { useAppStore } from '@/lib/store'
 import type { Store, Product } from '@/lib/types'
@@ -153,6 +154,15 @@ export function LuxuryTemplate({ store, products, storeSlug, planId }: LuxuryTem
             >
               {store.description}
             </p>
+            <div className="mt-5">
+              <StoreFeatureBadges
+                hasShipping={store.hasShipping}
+                hasSecurePayment={store.hasSecurePayment}
+                hasReturns={store.hasReturns}
+                variant="luxury"
+                primaryColor={store.colors.primary}
+              />
+            </div>
           </motion.div>
         </div>
       </header>

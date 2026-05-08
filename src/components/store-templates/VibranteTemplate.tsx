@@ -15,6 +15,7 @@ const CATEGORIES = [
   { id: 'otros', name: 'Otros' },
 ]
 import { Star, MessageCircle, ShoppingBag, Search, X, SlidersHorizontal } from 'lucide-react'
+import { StoreFeatureBadges } from './StoreFeatureBadges'
 import { Badge } from '@/components/ui/badge'
 import { useAppStore } from '@/lib/store'
 import type { Store, Product } from '@/lib/types'
@@ -156,6 +157,20 @@ export function VibranteTemplate({ store, products, storeSlug, planId }: { store
           >
             {store.description}
           </motion.p>
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
+            className="mt-5"
+          >
+            <StoreFeatureBadges
+              hasShipping={store.hasShipping}
+              hasSecurePayment={store.hasSecurePayment}
+              hasReturns={store.hasReturns}
+              variant="vibrant"
+              primaryColor={store.colors.primary}
+            />
+          </motion.div>
         </div>
       </header>
 
