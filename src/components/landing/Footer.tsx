@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { useAppStore } from '@/lib/store'
 import { Zap, Mail, Phone, MapPin, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 
 export function Footer() {
   const navigate = useAppStore((s) => s.navigate)
@@ -86,10 +87,10 @@ export function Footer() {
           <div>
             <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Empresa</h4>
             <ul className="space-y-3">
-              <li><button onClick={() => navigate({ page: 'about' })} className="text-sm text-gray-500 hover:text-violet-600 transition-colors">Sobre nosotros</button></li>
-              <li><button onClick={() => navigate({ page: 'contact' })} className="text-sm text-gray-500 hover:text-violet-600 transition-colors">Contacto</button></li>
-              <li><button onClick={() => navigate({ page: 'terms' })} className="text-sm text-gray-500 hover:text-violet-600 transition-colors">Términos y condiciones</button></li>
-              <li><button onClick={() => navigate({ page: 'privacy' })} className="text-sm text-gray-500 hover:text-violet-600 transition-colors">Política de privacidad</button></li>
+              <li><Link href="/about" className="text-sm text-gray-500 hover:text-violet-600 transition-colors">Sobre nosotros</Link></li>
+              <li><Link href="/contact" className="text-sm text-gray-500 hover:text-violet-600 transition-colors">Contacto</Link></li>
+              <li><Link href="/terms" className="text-sm text-gray-500 hover:text-violet-600 transition-colors">Términos y condiciones</Link></li>
+              <li><Link href="/privacy" className="text-sm text-gray-500 hover:text-violet-600 transition-colors">Política de privacidad</Link></li>
             </ul>
           </div>
 

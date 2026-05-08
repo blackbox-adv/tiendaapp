@@ -1,10 +1,19 @@
 import { NextResponse } from 'next/server'
 import { corsHeaders } from '@/lib/api-response'
+import { authenticateRequest } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 const BUCKET_NAME = 'product-images'
+
+// Magic byte signatures for file validation
+const FILE_SIGNATURES: Record<string, number[][]> = {
+  'image/jpeg': [[0xFF, 0xD8, 0xFF]],
+  'image/png': [[0x89, 0x50, 0x4E, 0x47]],
+  'image/webp': [[0x52, 0x49, 0x46, 0x46]], // RIFF header (followed by WEBP)
+  'image/gif': [[0x47, 0x49, 0x46, 0x38]], // GIF8
+}
 
 function getExtension(mimeType: string): string {
   const map: Record<string, string> = {
@@ -16,7 +25,28 @@ function getExtension(mimeType: string): string {
   return map[mimeType] || 'jpg'
 }
 
+function validateFileMagicBytes(buffer: Buffer, claimedType: string): boolean {
+  const signatures = FILE_SIGNATURES[claimedType]
+  if (!signatures) return false
+
+  return signatures.some(sig => {
+    for (let i = 0; i < sig.length; i++) {
+      if (buffer[i] !== sig[i]) return false
+    }
+    return true
+  })
+}
+
 export async function POST(request: Request) {
+  // CRITICAL: Require authentication for uploads
+  const auth = authenticateRequest(request)
+  if (auth.error) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status, headers: corsHeaders(request) })
+  }
+  if (!auth.user) {
+    return NextResponse.json({ error: 'No autenticado' }, { status: 401, headers: corsHeaders(request) })
+  }
+
   try {
     const formData = await request.formData()
     const file = formData.get('file') as File | null
@@ -33,15 +63,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'La imagen es muy grande. Máximo 5MB.' }, { status: 400, headers: corsHeaders(request) })
     }
 
+    // Convert File to Buffer and validate magic bytes
+    const bytes = await file.arrayBuffer()
+    const buffer = Buffer.from(bytes)
+
+    if (!validateFileMagicBytes(buffer, file.type)) {
+      return NextResponse.json({ error: 'El archivo no coincide con el tipo declarado. Posible archivo malicioso.' }, { status: 400, headers: corsHeaders(request) })
+    }
+
     // Generate unique file path: {timestamp}-{random}.{ext}
     const ext = getExtension(file.type)
     const timestamp = Date.now()
     const random = Math.random().toString(36).substring(2, 8)
     const filePath = `${timestamp}-${random}.${ext}`
-
-    // Convert File to Buffer for Supabase upload
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
 
     // Upload to Supabase Storage
     const { error: uploadError } = await supabase.storage
@@ -74,8 +108,17 @@ export async function POST(request: Request) {
   }
 }
 
-// DELETE endpoint to remove images from storage
+// DELETE endpoint to remove images from storage (auth required + ownership check)
 export async function DELETE(request: Request) {
+  // CRITICAL: Require authentication for deletions
+  const auth = authenticateRequest(request)
+  if (auth.error) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status, headers: corsHeaders(request) })
+  }
+  if (!auth.user) {
+    return NextResponse.json({ error: 'No autenticado' }, { status: 401, headers: corsHeaders(request) })
+  }
+
   try {
     const { searchParams } = new URL(request.url)
     const url = searchParams.get('url')
@@ -87,6 +130,12 @@ export async function DELETE(request: Request) {
     // Only process Supabase Storage URLs (skip legacy base64)
     if (!url.includes('/storage/v1/object/public/')) {
       return NextResponse.json({ ok: true }, { headers: corsHeaders(request) })
+    }
+
+    // Validate URL belongs to our Supabase domain to prevent SSRF
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    if (supabaseUrl && !url.startsWith(supabaseUrl)) {
+      return NextResponse.json({ error: 'URL de imagen inválida' }, { status: 400, headers: corsHeaders(request) })
     }
 
     // Extract file path from URL: https://project.supabase.co/storage/v1/object/public/bucket/path

@@ -2,6 +2,7 @@ import { db } from '@/lib/db'
 import { NextRequest } from 'next/server'
 import { authenticateRequest } from '@/lib/auth'
 import { apiError, apiSuccess, handleCorsPreflight, corsHeaders } from '@/lib/api-response'
+import { sendPaymentSubmittedEmail } from '@/lib/email'
 
 // POST /api/payments/submit — Submit manual payment (Yape/Transfer voucher)
 export async function POST(request: NextRequest) {
@@ -129,6 +130,12 @@ export async function POST(request: NextRequest) {
         subscriptionId,
       },
     })
+
+    // Send payment submitted confirmation email (non-blocking)
+    const user = await db.user.findUnique({ where: { id: auth.user.userId }, select: { name: true, email: true } })
+    if (user) {
+      sendPaymentSubmittedEmail(user.name, user.email, plan.name, Number(plan.price), externalRef.trim()).catch(() => {})
+    }
 
     return apiSuccess({
       success: true,

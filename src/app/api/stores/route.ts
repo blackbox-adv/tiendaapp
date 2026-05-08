@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
               createdAt: true,
             },
           },
-          owner: { select: { id: true, name: true, email: true } },
+          owner: { select: { id: true, name: true } },  // FIXED: Removed email to prevent PII exposure
         },
       })
 

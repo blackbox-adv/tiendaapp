@@ -15,11 +15,11 @@ model Plan {
   id          String   @id @default(cuid())
   type        String   @unique                    // free, pro, premium
   name        String
-  price       Float    @default(0)
+  price       Decimal  @default(0) @db.Decimal(10,2)   // FIXED: Float → Decimal for monetary values
   currency    String   @default("PEN")
   maxProducts Int      @default(10)
   description String   @default("")
-  features    String   @default("[]")              // JSON array as string
+  features    Json     @default("[]")              // FIXED: String → Json for structured data
   popular     Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -40,6 +40,7 @@ model User {
   lastLogin         DateTime?
   resetToken        String?
   resetTokenExpires DateTime?
+  tokenVersion      Int      @default(0)          // For JWT invalidation on password change
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
@@ -50,6 +51,7 @@ model User {
   @@index([role])                                 // For admin queries
   @@index([isActive])                             // For filtering active users
   @@index([createdAt])                            // For sorting newest users
+  @@index([resetToken])                           // For password reset lookup
 }
 
 model Store {
@@ -61,7 +63,7 @@ model Store {
   primaryColor   String   @default("#7C3AED")
   secondaryColor String   @default("#10B981")
   whatsappNumber String?
-  template       String   @default("moderna")     // moderna, vibrante, clasica
+  template       String   @default("moderna")     // moderna, vibrante, clasica, luxury, minimalist
   bannerUrl      String   @default("")
   category       String   @default("otros")
   hasShipping      Boolean  @default(false)
@@ -73,7 +75,7 @@ model Store {
   updatedAt      DateTime @updatedAt
 
   ownerId       String
-  owner         User     @relation(fields: [ownerId], references: [id])
+  owner         User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
   products      StoreProduct[]
   subscriptions Subscription[]
@@ -90,14 +92,14 @@ model StoreProduct {
   id            String   @id @default(cuid())
   name          String
   description   String   @default("")
-  price         Float
-  originalPrice Float?
+  price         Decimal  @db.Decimal(10,2)        // FIXED: Float → Decimal for monetary values
+  originalPrice Decimal? @db.Decimal(10,2)        // FIXED: Float → Decimal for monetary values
   imageUrl      String   @default("")
   category      String   @default("")
   color         String?
   isActive      Boolean  @default(true)
   featured      Boolean  @default(false)
-  rating        Float    @default(0)
+  rating        Decimal  @default(0) @db.Decimal(2,1) // FIXED: Float → Decimal with 1 decimal
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -118,55 +120,77 @@ model Subscription {
   endDate         DateTime?                      // Set when cancelled or expired
   nextBillingDate DateTime?                      // When the next payment is due
   billingCycle    String    @default("monthly")  // monthly, yearly
-  amountPaid      Float     @default(0)          // Last amount paid
+  amountPaid      Decimal   @default(0) @db.Decimal(10,2) // FIXED: Float → Decimal
 
   userId String
-  user   User @relation(fields: [userId], references: [id])
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   storeId String
-  store   Store @relation(fields: [storeId], references: [id])
+  store   Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
 
   planId String
-  plan   Plan @relation(fields: [planId], references: [id])
+  plan   Plan @relation(fields: [planId], references: [id], onDelete: Restrict)
 
   payments Payment[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])                               // User's subscriptions
   @@index([storeId])                              // Store's subscriptions
   @@index([status])                               // Active subscriptions filter
-  @@unique([userId, storeId, status])             // One active sub per user+store
+  @@index([status, nextBillingDate])              // Billing check queries
+  // REMOVED: @@unique([userId, storeId, status]) — broken on re-subscription
+  // Instead, enforce one active subscription per user+store at application level
 }
 
 model Payment {
   id              String   @id @default(cuid())
-  amount          Float
+  amount          Decimal  @db.Decimal(10,2)      // FIXED: Float → Decimal for monetary values
   currency        String   @default("PEN")
-  status          String   @default("pending")   // pending, completed, failed, refunded
+  status          String   @default("pending")   // pending, completed, failed, rejected, refunded
   paymentMethod   String?                        // culqi, niubiz, bank_transfer, yape, plin
   externalRef     String?                        // Reference from payment gateway
   gatewayResponse String?                        // Full gateway response (JSON string)
+  receiptUrl      String?                        // URL to payment receipt/voucher image
   verifiedAt      DateTime?                      // When admin verified the payment
   verifiedBy      String?                        // Admin user ID who verified
   notes           String?                        // Admin notes on this payment
   createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   subscriptionId String
   subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
 
   userId String
-  user   User @relation(fields: [userId], references: [id])
+  user   User @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   storeId String
-  store   Store @relation(fields: [storeId], references: [id])
+  store   Store @relation(fields: [storeId], references: [id], onDelete: SetNull)
 
   planId String
-  plan   Plan @relation(fields: [planId], references: [id])
+  plan   Plan @relation(fields: [planId], references: [id], onDelete: Restrict)
 
   @@index([userId])                               // User's payments
   @@index([storeId])                              // Store's payments
   @@index([status])                               // Payment status filter
   @@index([createdAt(sort: Desc)])                // Recent payments
-  @@index([externalRef])                          // Gateway reference lookup
+  @@index([externalRef])                          // Gateway reference lookup & idempotency
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  action     String                             // LOGIN_SUCCESS, PAYMENT_APPROVED, etc.
+  userId     String?
+  userEmail  String?
+  ip         String?
+  details    Json?                              // Structured details
+  success    Boolean  @default(true)
+  statusCode Int?
+  createdAt  DateTime @default(now())
+
+  @@index([action])
+  @@index([userId])
+  @@index([createdAt(sort: Desc)])
 }
 
 model PlatformSetting {

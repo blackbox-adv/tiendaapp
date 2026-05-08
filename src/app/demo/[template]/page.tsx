@@ -1,4 +1,5 @@
 import { DemoTemplateClient } from './DemoTemplateClient'
+import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 
 export const dynamic = 'force-dynamic'
@@ -40,11 +41,7 @@ export default async function DemoTemplatePage({ params }: { params: Promise<{ t
   const { template } = await params
 
   if (!templateMeta[template]) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">Plantilla no encontrada</p>
-      </div>
-    )
+    notFound()
   }
 
   return <DemoTemplateClient template={template} />

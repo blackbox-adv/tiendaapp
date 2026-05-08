@@ -339,3 +339,154 @@ export async function sendSubscriptionEmail(
     console.error(`[EMAIL] Subscription email (${action}) failed (non-blocking):`, err)
   }
 }
+
+// ── Payment Submitted Confirmation Email ──
+export async function sendPaymentSubmittedEmail(
+  userName: string,
+  userEmail: string,
+  planName: string,
+  planPrice: number,
+  externalRef: string
+): Promise<void> {
+  try {
+    const resend = getResend()
+
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: userEmail,
+      subject: 'Comprobante de pago recibido - TiendApp',
+      html: `
+        <div style="max-width: 480px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+          <div style="text-align: center; padding: 32px 0 24px;">
+            <div style="display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; background: #7C3AED; border-radius: 12px;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+            </div>
+            <h1 style="margin: 16px 0 8px; font-size: 20px; font-weight: 700; color: #1f2937;">TiendApp</h1>
+          </div>
+
+          <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 32px;">
+            <h2 style="margin: 0 0 16px; font-size: 18px; font-weight: 600; color: #1f2937;">
+              Hola, ${userName}
+            </h2>
+
+            <div style="display: flex; align-items: center; gap: 10px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 14px 16px; margin: 0 0 20px;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+              <span style="font-size: 15px; font-weight: 600; color: #16a34a;">Comprobante recibido</span>
+            </div>
+
+            <p style="margin: 0 0 16px; font-size: 15px; color: #4b5563; line-height: 1.6;">
+              Hemos recibido tu comprobante de pago para el plan <strong>${planName}</strong> (S/${planPrice}/mes).
+            </p>
+
+            <div style="background: #f9fafb; border-radius: 8px; padding: 16px; margin: 16px 0;">
+              <p style="margin: 0; font-size: 14px; color: #374151;">
+                <strong>Referencia:</strong> ${externalRef}
+              </p>
+              <p style="margin: 8px 0 0; font-size: 14px; color: #374151;">
+                <strong>Estado:</strong> Pendiente de verificación
+              </p>
+            </div>
+
+            <p style="margin: 16px 0 0; font-size: 14px; color: #4b5563; line-height: 1.6;">
+              Nuestro equipo verificará tu pago en un plazo máximo de <strong>24 horas</strong>. Recibirás un email de confirmación una vez aprobado.
+            </p>
+          </div>
+
+          <div style="text-align: center; padding: 24px 0; font-size: 12px; color: #9ca3af;">
+            <p style="margin: 0 0 4px;">Enviado por TiendApp - BlackboxPeru</p>
+            <p style="margin: 0;">Crea tu tienda online en minutos</p>
+          </div>
+        </div>
+      `,
+    })
+
+    if (error) {
+      console.error('[EMAIL] Error sending payment submitted email:', error)
+      return
+    }
+
+    console.log(`[EMAIL] Payment submitted email sent to ${userEmail}, id: ${data?.id}`)
+  } catch (err) {
+    console.error('[EMAIL] Payment submitted email failed (non-blocking):', err)
+  }
+}
+
+// ── Payment Rejected Email ──
+export async function sendPaymentRejectedEmail(
+  userName: string,
+  userEmail: string,
+  planName: string,
+  reason?: string
+): Promise<void> {
+  try {
+    const resend = getResend()
+
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: userEmail,
+      subject: 'Comprobante de pago no verificado - TiendApp',
+      html: `
+        <div style="max-width: 480px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+          <div style="text-align: center; padding: 32px 0 24px;">
+            <div style="display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; background: #7C3AED; border-radius: 12px;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+            </div>
+            <h1 style="margin: 16px 0 8px; font-size: 20px; font-weight: 700; color: #1f2937;">TiendApp</h1>
+          </div>
+
+          <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 32px;">
+            <h2 style="margin: 0 0 16px; font-size: 18px; font-weight: 600; color: #1f2937;">
+              Hola, ${userName}
+            </h2>
+
+            <div style="display: flex; align-items: center; gap: 10px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 14px 16px; margin: 0 0 20px;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="15" y1="9" x2="9" y2="15"/>
+                <line x1="9" y1="9" x2="15" y2="15"/>
+              </svg>
+              <span style="font-size: 15px; font-weight: 600; color: #dc2626;">Pago no verificado</span>
+            </div>
+
+            <p style="margin: 0 0 16px; font-size: 15px; color: #4b5563; line-height: 1.6;">
+              No pudimos verificar tu comprobante de pago para el plan <strong>${planName}</strong>.
+              ${reason ? `<br><strong>Motivo:</strong> ${reason}` : ''}
+            </p>
+
+            <p style="margin: 16px 0 0; font-size: 14px; color: #4b5563; line-height: 1.6;">
+              Puedes volver a enviar tu comprobante desde tu panel de suscripción. Si crees que es un error, contáctanos por WhatsApp o email.
+            </p>
+
+            <div style="text-align: center; margin: 24px 0;">
+              <a href="${APP_URL}/dashboard"
+                 style="display: inline-block; background: #7C3AED; color: #ffffff; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: 600; font-size: 15px;">
+                Ir a mi panel
+              </a>
+            </div>
+          </div>
+
+          <div style="text-align: center; padding: 24px 0; font-size: 12px; color: #9ca3af;">
+            <p style="margin: 0 0 4px;">Enviado por TiendApp - BlackboxPeru</p>
+            <p style="margin: 0;">Crea tu tienda online en minutos</p>
+          </div>
+        </div>
+      `,
+    })
+
+    if (error) {
+      console.error('[EMAIL] Error sending payment rejected email:', error)
+      return
+    }
+
+    console.log(`[EMAIL] Payment rejected email sent to ${userEmail}, id: ${data?.id}`)
+  } catch (err) {
+    console.error('[EMAIL] Payment rejected email failed (non-blocking):', err)
+  }
+}

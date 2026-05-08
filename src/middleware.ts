@@ -46,9 +46,10 @@ const securityHeaders: Record<string, string> = {
 }
 
 // Content Security Policy
+// FIXED: Removed unsafe-eval and unsafe-inline from script-src to prevent XSS
 const CSP_POLICY = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+  "script-src 'self'",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com",
   "img-src 'self' data: blob: https://images.unsplash.com https://*.tile.openstreetmap.org https://lh3.googleusercontent.com",
@@ -138,6 +139,17 @@ export function middleware(request: NextRequest) {
     }
   }
 
+  // Rate limit: Payment submission (max 5 requests per minute per IP)
+  if (pathname === '/api/payments/submit' && method === 'POST') {
+    const key = getRateLimitKey(request, 'payment-submit')
+    if (isRateLimited(key, 5, 60 * 1000)) {
+      return NextResponse.json(
+        { error: 'Demasiados intentos de pago. Intenta de nuevo en 1 minuto.', code: 'RATE_LIMITED' },
+        { status: 429, headers: corsHeaders(request) }
+      )
+    }
+  }
+
   // Rate limit: Upload endpoint (max 10 requests per minute per IP)
   if (pathname === '/api/upload' && method === 'POST') {
     const key = getRateLimitKey(request, 'upload')
@@ -184,6 +196,7 @@ export const config = {
     '/api/auth',
     '/api/users',
     '/api/payments',
+    '/api/payments/submit',
     '/api/whatsapp',
     '/api/seed',
     '/api/stores','/api/stores/visit','/api/store-products','/api/health',

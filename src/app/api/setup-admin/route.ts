@@ -1,14 +1,26 @@
 import { db } from '@/lib/db'
-import { hashPassword } from '@/lib/auth'
+import { hashPassword, authenticateRequest, requireRole } from '@/lib/auth'
 import { NextRequest } from 'next/server'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
+import { auditLog, getClientIp } from '@/lib/env'
 
-// POST /api/setup-admin - Reset admin password (emergency only)
+// POST /api/setup-admin - Reset admin password (REQUIRES super_admin auth)
 export async function POST(request: NextRequest) {
+  // CRITICAL: Require super_admin authentication
+  const auth = authenticateRequest(request)
+  if (auth.error) {
+    return apiError(auth.error, auth.status, undefined, request)
+  }
+  if (!auth.user) return apiError('No autenticado', 401, undefined, request)
+
+  if (!requireRole(auth.user, ['super_admin'])) {
+    return apiError('Acceso denegado. Solo super_admin puede usar este endpoint.', 403, undefined, request)
+  }
+
   try {
-    // Only works if no admin exists or with correct current password
     const body = await request.json()
     const { email, newPassword } = body
+    const clientIp = getClientIp(request)
 
     if (!email || !newPassword) {
       return apiError('Email y nueva contraseña son requeridos', 400, undefined, request)
@@ -34,6 +46,8 @@ export async function POST(request: NextRequest) {
       where: { id: user.id },
       data: { password: hashedPassword },
     })
+
+    auditLog({ action: 'ADMIN_PASSWORD_RESET', userId: auth.user.userId, userEmail: auth.user.email, ip: clientIp, details: { targetUser: user.email }, success: true, statusCode: 200 })
 
     return apiSuccess({ message: `Contraseña actualizada para ${user.email}` }, 200, request)
   } catch (error: unknown) {

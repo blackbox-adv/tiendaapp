@@ -1,13 +1,12 @@
-import { db } from '@/lib/db'
-import { NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
+import { apiError, handleCorsPreflight } from '@/lib/api-response'
 
-// One-time migration: add bannerUrl column to Store table
-export async function POST() {
-  try {
-    await db.$executeRawUnsafe(`ALTER TABLE "Store" ADD COLUMN IF NOT EXISTS "bannerUrl" TEXT NOT NULL DEFAULT ''`)
-    return NextResponse.json({ success: true, message: 'Columna bannerUrl agregada correctamente' })
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : String(error)
-    return NextResponse.json({ success: false, error: msg }, { status: 500 })
-  }
+// DISABLED: This endpoint has been removed for security.
+// Use Prisma migrations instead: npx prisma migrate dev
+export async function POST(request: NextRequest) {
+  return apiError('Este endpoint ha sido deshabilitado. Usa prisma migrate dev para migraciones.', 410, undefined, request)
+}
+
+export async function OPTIONS(request: NextRequest) {
+  return handleCorsPreflight(request)
 }

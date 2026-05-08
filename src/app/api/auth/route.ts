@@ -1,6 +1,6 @@
 import { db } from '@/lib/db'
 import { NextResponse } from 'next/server'
-import { verifyPassword, generateToken, verifyToken, hashPassword } from '@/lib/auth'
+import { verifyPassword, generateToken, verifyToken, hashPassword, safeComparePassword } from '@/lib/auth'
 import { validateBody, loginSchema } from '@/lib/validations'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 import { auditLog, getClientIp } from '@/lib/env'
@@ -20,9 +20,12 @@ export async function POST(request: Request) {
 
     const user = await db.user.findUnique({ where: { email: email.toLowerCase() } })
 
+    // TIMING-SAFE LOGIN: Always run bcrypt comparison, even when user doesn't exist.
+    // This prevents user enumeration via response timing.
     if (!user) {
-      auditLog({ action: 'LOGIN_FAILED', userEmail: email.toLowerCase(), ip: clientIp, details: { reason: 'user_not_found' }, success: false, statusCode: 401 })
-      return apiError('Usuario no encontrado', 401, undefined, request)
+      await safeComparePassword(password, null) // Waste time with dummy comparison
+      auditLog({ action: 'LOGIN_FAILED', userEmail: email.toLowerCase(), ip: clientIp, details: { reason: 'invalid_credentials' }, success: false, statusCode: 401 })
+      return apiError('Credenciales incorrectas', 401, undefined, request)
     }
 
     if (!user.isActive) {
@@ -34,12 +37,12 @@ export async function POST(request: Request) {
     try {
       isMatch = await verifyPassword(password, user.password)
     } catch {
-      return apiError('Error de autenticacion', 500, undefined, request)
+      return apiError('Error de autenticación', 500, undefined, request)
     }
 
     if (!isMatch) {
-      auditLog({ action: 'LOGIN_FAILED', userId: user.id, userEmail: user.email, ip: clientIp, details: { reason: 'wrong_password' }, success: false, statusCode: 401 })
-      return apiError('Contrasena incorrecta', 401, undefined, request)
+      auditLog({ action: 'LOGIN_FAILED', userId: user.id, userEmail: user.email, ip: clientIp, details: { reason: 'invalid_credentials' }, success: false, statusCode: 401 })
+      return apiError('Credenciales incorrectas', 401, undefined, request)
     }
 
     // Update last login
@@ -49,6 +52,7 @@ export async function POST(request: Request) {
       userId: user.id,
       email: user.email,
       role: user.role,
+      tokenVersion: (user as Record<string, unknown>).tokenVersion as number || 0,
     })
 
     auditLog({ action: 'LOGIN_SUCCESS', userId: user.id, userEmail: user.email, ip: clientIp, details: { role: user.role }, success: true, statusCode: 200 })

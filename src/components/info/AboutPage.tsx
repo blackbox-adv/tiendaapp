@@ -53,7 +53,7 @@ export function AboutPage() {
               { icon: Heart, title: 'Pasión por el emprendimiento', desc: 'Apoyamos a cada emprendedor con dedicación y entusiasmo, porque sabemos que detrás de cada tienda hay un sueño.' },
               { icon: Users, title: 'Comunidad primero', desc: 'Construimos juntos. Cada función de TiendApp nace de escuchar las necesidades reales de nuestros usuarios.' },
               { icon: Globe, title: 'Innovación local', desc: 'Diseñamos soluciones pensadas para el mercado peruano, con integración a métodos de pago y logística local.' },
-              { icon: Zap, title: 'Simplicidad', desc: 'La tecnología debe ser simple. Eliminamos la complejidad para que anyone pueda tener su tienda online.' },
+              { icon: Zap, title: 'Simplicidad', desc: 'La tecnología debe ser simple. Eliminamos la complejidad para que cualquiera pueda tener su tienda online.' },
             ].map((value, i) => (
               <div key={i} className="p-6 rounded-xl border border-gray-100 hover:border-violet-200 hover:shadow-md transition-all">
                 <value.icon className="w-8 h-8 text-violet-600 mb-3" />
@@ -67,10 +67,10 @@ export function AboutPage() {
         {/* Stats */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
           {[
-            { value: '500+', label: 'Tiendas activas' },
-            { value: '10,000+', label: 'Productos publicados' },
-            { value: '50,000+', label: 'Pedidos gestionados' },
-            { value: '98%', label: 'Clientes satisfechos' },
+            { value: '5+', label: 'Plantillas profesionales' },
+            { value: '24/7', label: 'Soporte disponible' },
+            { value: '100%', label: 'Hecho en Perú' },
+            { value: 'Gratis', label: 'Para empezar' },
           ].map((stat, i) => (
             <div key={i} className="text-center p-6 rounded-xl bg-gray-50">
               <div className="text-2xl sm:text-3xl font-bold text-violet-600">{stat.value}</div>

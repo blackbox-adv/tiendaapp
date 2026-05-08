@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server'
 import { authenticateRequest, requireRole } from '@/lib/auth'
 import { validateBody, createSubscriptionSchema, updateSubscriptionSchema } from '@/lib/validations'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
+import { sendSubscriptionEmail } from '@/lib/email'
 
 // GET /api/subscriptions - Admin only
 export async function GET(request: NextRequest) {
@@ -33,7 +34,9 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/subscriptions - Auth required (users manage own, admin manages all)
+// POST /api/subscriptions - Auth required
+// Users can ONLY create free plan subscriptions.
+// Paid plan subscriptions are created ONLY via admin approval or webhook.
 export async function POST(request: NextRequest) {
   const auth = authenticateRequest(request)
   if (auth.error) {
@@ -48,7 +51,7 @@ export async function POST(request: NextRequest) {
       return apiError(validation.error, 400, undefined, request)
     }
 
-    const { userId, storeId, planId, status } = validation.data
+    const { userId, storeId, planId } = validation.data
 
     // Users can only manage their own subscriptions (unless admin)
     if (!requireRole(auth.user, ['super_admin']) && auth.user.userId !== userId) {
@@ -61,6 +64,17 @@ export async function POST(request: NextRequest) {
       return apiError('Plan no encontrado', 404, undefined, request)
     }
 
+    // CRITICAL FIX: Non-admin users CANNOT activate paid plans directly.
+    // Paid plans must go through the payment flow (admin approval or webhook).
+    if (plan.type !== 'free' && !requireRole(auth.user, ['super_admin'])) {
+      return apiError(
+        'No puedes activar un plan de pago directamente. Realiza el pago a través del flujo de suscripción.',
+        403,
+        undefined,
+        request
+      )
+    }
+
     // Verify store ownership if storeId provided
     if (storeId) {
       const store = await db.store.findUnique({ where: { id: storeId }, select: { ownerId: true } })
@@ -68,7 +82,7 @@ export async function POST(request: NextRequest) {
         return apiError('Tienda no encontrada', 404, undefined, request)
       }
       if (!requireRole(auth.user, ['super_admin']) && store.ownerId !== auth.user.userId) {
-        return apiError('Acceso denegado. No eres dueno de esta tienda.', 403, undefined, request)
+        return apiError('Acceso denegado. No eres dueño de esta tienda.', 403, undefined, request)
       }
     }
 
@@ -76,9 +90,9 @@ export async function POST(request: NextRequest) {
       where: { userId, storeId: storeId || undefined, status: 'active' },
     })
 
-    // Calculate nextBillingDate: 30 days from now for paid plans
+    // Calculate nextBillingDate based on billing cycle for paid plans
     const nextBillingDate = plan.type !== 'free'
-      ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+      ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // Default 30 days
       : null
 
     if (existing) {
@@ -86,7 +100,7 @@ export async function POST(request: NextRequest) {
         where: { id: existing.id },
         data: {
           planId,
-          status: status || 'active',
+          status: 'active',
           startDate: new Date(),
           nextBillingDate,
         },
@@ -96,6 +110,15 @@ export async function POST(request: NextRequest) {
           plan: { select: { id: true, name: true, price: true, type: true } },
         },
       })
+
+      // Send email notification for free plan downgrade
+      if (plan.type === 'free' && existing.planId !== planId) {
+        const user = await db.user.findUnique({ where: { id: userId }, select: { name: true, email: true } })
+        if (user) {
+          sendSubscriptionEmail(user.name, user.email, plan.name, plan.price, 'downgraded').catch(() => {})
+        }
+      }
+
       return apiSuccess(updated, 200, request)
     }
 
@@ -104,7 +127,7 @@ export async function POST(request: NextRequest) {
         userId,
         storeId: storeId || '',
         planId,
-        status: status || 'active',
+        status: 'active',
         startDate: new Date(),
         nextBillingDate,
       },
@@ -118,7 +141,7 @@ export async function POST(request: NextRequest) {
     return apiSuccess(subscription, 201, request)
   } catch (error: unknown) {
     console.error('[SUBSCRIPTIONS] POST error:', error instanceof Error ? error.message : String(error))
-    return apiError('Error creando suscripcion', 500, undefined, request)
+    return apiError('Error creando suscripción', 500, undefined, request)
   }
 }
 
@@ -142,11 +165,11 @@ export async function PUT(request: NextRequest) {
     // Fetch subscription to check ownership
     const subscription = await db.subscription.findUnique({
       where: { id },
-      include: { user: { select: { id: true } } },
+      include: { user: { select: { id: true, name: true, email: true } }, plan: { select: { id: true, name: true, price: true, type: true } } },
     })
 
     if (!subscription) {
-      return apiError('Suscripcion no encontrada', 404, undefined, request)
+      return apiError('Suscripción no encontrada', 404, undefined, request)
     }
 
     // Only admin or subscription owner can update
@@ -156,7 +179,7 @@ export async function PUT(request: NextRequest) {
 
     // Non-admin users can only cancel their own subscription
     if (!requireRole(auth.user, ['super_admin']) && status && status !== 'cancelled') {
-      return apiError('Solo puedes cancelar tu suscripcion. Contacta soporte para otros cambios.', 403, undefined, request)
+      return apiError('Solo puedes cancelar tu suscripción. Contacta soporte para otros cambios.', 403, undefined, request)
     }
 
     const data: Record<string, unknown> = {}
@@ -176,10 +199,21 @@ export async function PUT(request: NextRequest) {
       },
     })
 
+    // Send cancellation email
+    if (status === 'cancelled' && subscription.user) {
+      sendSubscriptionEmail(
+        subscription.user.name,
+        subscription.user.email,
+        subscription.plan.name,
+        subscription.plan.price,
+        'cancelled'
+      ).catch(() => {})
+    }
+
     return apiSuccess(updated, 200, request)
   } catch (error: unknown) {
     console.error('[SUBSCRIPTIONS] PUT error:', error instanceof Error ? error.message : String(error))
-    return apiError('Error actualizando suscripcion', 500, undefined, request)
+    return apiError('Error actualizando suscripción', 500, undefined, request)
   }
 }
 

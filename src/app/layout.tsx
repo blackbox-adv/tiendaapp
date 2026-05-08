@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
+import { CookieConsent } from "@/components/CookieConsent";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -67,7 +68,7 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: "tiendapp",
+    // google: "REPLACE_WITH_REAL_GOOGLE_VERIFICATION_CODE",
   },
   icons: {
     icon: "/favicon.ico",
@@ -86,7 +87,7 @@ export default function RootLayout({
         <meta name="geo.region" content="PE" />
         <meta name="geo.placename" content="Perú" />
         <meta name="language" content="es-PE" />
-        <link rel="preconnect" href="https://wa.me" />
+        <link rel="preconnect" href="https://web.whatsapp.com" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
@@ -102,7 +103,7 @@ export default function RootLayout({
                 name: 'TiendApp',
                 url: 'https://tiendapp.pe',
                 logo: 'https://tiendapp.pe/logo.svg',
-                description: 'La plataforma lider en Peru para crear tiendas online sin conocimientos tecnicos. WhatsApp integrado, plantillas profesionales y pagos en soles.',
+                description: 'La plataforma líder en Perú para crear tiendas online sin conocimientos técnicos. WhatsApp integrado, plantillas profesionales y pagos en soles.',
                 email: 'hola@tiendapp.pe',
                 telephone: '+51999888777',
                 address: {
@@ -133,26 +134,26 @@ export default function RootLayout({
                 mainEntity: [
                   {
                     '@type': 'Question',
-                    name: 'Como crear una tienda online en Peru con TiendApp?',
+                    name: 'Cómo crear una tienda online en Perú con TiendApp?',
                     acceptedAnswer: {
                       '@type': 'Answer',
-                      text: 'Registrate gratis en TiendApp, completa el asistente de configuracion, elige tu plantilla favorita y agrega tus productos. En menos de 5 minutos tu tienda estara lista para recibir pedidos via WhatsApp.',
+                      text: 'Regístrate gratis en TiendApp, completa el asistente de configuración, elige tu plantilla favorita y agrega tus productos. En menos de 5 minutos tu tienda estará lista para recibir pedidos vía WhatsApp.',
                     },
                   },
                   {
                     '@type': 'Question',
-                    name: 'Cuanto cuesta TiendApp?',
+                    name: 'Cuánto cuesta TiendApp?',
                     acceptedAnswer: {
                       '@type': 'Answer',
-                      text: 'TiendApp tiene un plan gratuito con hasta 5 productos. El plan Pro cuesta S/29.90/mes con hasta 20 productos, y el plan Premium cuesta S/59.90/mes con hasta 500 productos y funciones avanzadas como codigo QR y comparticion en redes sociales.',
+                      text: 'TiendApp tiene un plan gratuito con hasta 10 productos. El plan Pro cuesta S/29.90/mes con hasta 50 productos, y el plan Premium cuesta S/79.90/mes con productos ilimitados y funciones avanzadas como código QR y compartición en redes sociales.',
                     },
                   },
                   {
                     '@type': 'Question',
-                    name: 'Necesito conocimientos tecnicos para usar TiendApp?',
+                    name: 'Necesito conocimientos técnicos para usar TiendApp?',
                     acceptedAnswer: {
                       '@type': 'Answer',
-                      text: 'No. TiendApp esta disenada para emprendedores sin conocimientos tecnicos. Solo necesitas llenar formularios simples, elegir una plantilla y agregar tus productos. Todo se configura de forma visual e intuitiva.',
+                      text: 'No. TiendApp está diseñada para emprendedores sin conocimientos técnicos. Solo necesitas llenar formularios simples, elegir una plantilla y agregar tus productos. Todo se configura de forma visual e intuitiva.',
                     },
                   },
                   {
@@ -160,21 +161,23 @@ export default function RootLayout({
                     name: 'Puedo integrar WhatsApp con mi tienda online?',
                     acceptedAnswer: {
                       '@type': 'Answer',
-                      text: 'Si. TiendApp integra WhatsApp directamente en tu tienda. Tus clientes pueden contactarte y realizar pedidos con un solo clic desde cualquier producto de tu catalogo.',
+                      text: 'Sí. TiendApp integra WhatsApp directamente en tu tienda. Tus clientes pueden contactarte y realizar pedidos con un solo clic desde cualquier producto de tu catálogo.',
                     },
                   },
                   {
                     '@type': 'Question',
-                    name: 'Que metodos de pago acepta TiendApp?',
+                    name: 'Qué métodos de pago acepta TiendApp?',
                     acceptedAnswer: {
                       '@type': 'Answer',
-                      text: 'Para pagar la suscripcion de TiendApp puedes usar Yape, transferencia bancaria, tarjeta de credito o debito a traves de Culqi o Niubiz. Los pagos de tus clientes se coordinan directamente contigo via WhatsApp.',
+                      text: 'Para pagar la suscripción de TiendApp puedes usar Yape, transferencia bancaria, tarjeta de crédito o débito a través de Culqi o Niubiz. Los pagos de tus clientes se coordinan directamente contigo vía WhatsApp.',
                     },
                   },
                 ],
               }),
             }}
           />
+          {/* Cookie Consent Banner */}
+          <CookieConsent />
           {children}
           <Toaster />
           <SonnerToaster position="top-right" richColors closeButton />

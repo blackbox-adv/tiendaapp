@@ -11,6 +11,7 @@ export interface JwtPayload {
   userId: string
   email: string
   role: string
+  tokenVersion: number
 }
 
 export async function hashPassword(password: string): Promise<string> {
@@ -61,4 +62,12 @@ export function authenticateRequest(request: Request): { user: JwtPayload; error
 // Role-based authorization
 export function requireRole(user: JwtPayload, allowedRoles: string[]): boolean {
   return allowedRoles.includes(user.role)
+}
+
+// Dummy hash for timing-safe login (prevents user enumeration)
+const DUMMY_HASH = '$2a$12$KIXGz7Z6X5Y3N2P8B9D0DeFgHiJkLmNoPqRsTuVwXyZaBcDeFgHiJ'
+
+export async function safeComparePassword(password: string, hash: string | null): Promise<boolean> {
+  const targetHash = hash || DUMMY_HASH
+  return bcrypt.compare(password, targetHash)
 }

@@ -1,6 +1,7 @@
 import { db } from '@/lib/db'
 import { NextResponse } from 'next/server'
 import { authenticateRequest } from '@/lib/auth'
+import { sendSubscriptionEmail } from '@/lib/email'
 
 // POST /api/billing/check - Check and expire past-due subscriptions
 // Called by cron job daily. Requires admin auth.
@@ -19,22 +20,48 @@ export async function POST(request: Request) {
     let expiredCount = 0
     let pastDueCount = 0
 
+    // FIXED: Use targeted queries instead of loading ALL subscriptions
     // 1. Find active subscriptions past their nextBillingDate
-    const allSubs = await db.subscription.findMany({
+    const activeSubscriptions = await db.subscription.findMany({
+      where: {
+        status: 'active',
+        nextBillingDate: { lte: now },
+        plan: { type: { not: 'free' } },
+      },
       include: { user: true, store: true, plan: true },
     })
-    const activeSubscriptions = allSubs.filter(s => s.status === 'active' && s.nextBillingDate && s.nextBillingDate <= now)
 
     for (const sub of activeSubscriptions) {
-      await db.subscription.update({ where: { id: sub.id }, data: { status: 'past_due' } })
-      await db.payment.create({
-        data: {
-          amount: sub.plan.price, currency: 'PEN', status: 'pending',
-          notes: `Facturación automática - ${sub.plan.name} - Vencida`,
-          subscriptionId: sub.id, userId: sub.userId, storeId: sub.storeId, planId: sub.planId,
-        },
-      })
-      pastDueCount++
+      // FIXED: Wrap each subscription's operations in a transaction
+      try {
+        await db.$transaction([
+          db.subscription.update({
+            where: { id: sub.id },
+            data: { status: 'past_due' },
+          }),
+          db.payment.create({
+            data: {
+              amount: sub.plan.price,
+              currency: 'PEN',
+              status: 'pending',
+              notes: `Facturación automática - ${sub.plan.name} - Vencida`,
+              subscriptionId: sub.id,
+              userId: sub.userId,
+              storeId: sub.storeId,
+              planId: sub.planId,
+            },
+          }),
+        ])
+        pastDueCount++
+
+        // Send past_due notification email
+        if (sub.user) {
+          sendSubscriptionEmail(sub.user.name, sub.user.email, sub.plan.name, Number(sub.plan.price), 'downgraded').catch(() => {})
+        }
+      } catch (txError) {
+        console.error(`[BILLING] Transaction failed for subscription ${sub.id}:`, txError)
+        // Continue processing other subscriptions
+      }
     }
 
     // 2. Subscriptions past_due for 7+ days → expire and downgrade to Free
@@ -42,28 +69,57 @@ export async function POST(request: Request) {
     const freePlan = await db.plan.findUnique({ where: { type: 'free' } })
     if (!freePlan) return NextResponse.json({ error: 'Plan Free no encontrado' }, { status: 500 })
 
-    const pastDueSubscriptions = allSubs.filter(
-      s => s.status === 'past_due' && s.nextBillingDate && s.nextBillingDate <= sevenDaysAgo && s.plan.type !== 'free'
-    )
+    const pastDueSubscriptions = await db.subscription.findMany({
+      where: {
+        status: 'past_due',
+        nextBillingDate: { lte: sevenDaysAgo },
+        plan: { type: { not: 'free' } },
+      },
+      include: { user: true, store: true, plan: true },
+    })
 
     for (const sub of pastDueSubscriptions) {
-      await db.subscription.update({
-        where: { id: sub.id }, data: { status: 'expired', endDate: now },
-      })
-      await db.subscription.create({
-        data: {
-          userId: sub.userId, storeId: sub.storeId, planId: freePlan.id,
-          status: 'active', startDate: now, billingCycle: 'monthly', amountPaid: 0,
-        },
-      })
-      await db.payment.create({
-        data: {
-          amount: sub.plan.price, currency: 'PEN', status: 'failed',
-          notes: 'Suscripción expirada por falta de pago (7 días). Degradado a Free.',
-          subscriptionId: sub.id, userId: sub.userId, storeId: sub.storeId, planId: sub.planId,
-        },
-      })
-      expiredCount++
+      // FIXED: Wrap all operations in a transaction
+      try {
+        await db.$transaction([
+          db.subscription.update({
+            where: { id: sub.id },
+            data: { status: 'expired', endDate: now },
+          }),
+          db.subscription.create({
+            data: {
+              userId: sub.userId,
+              storeId: sub.storeId,
+              planId: freePlan.id,
+              status: 'active',
+              startDate: now,
+              billingCycle: 'monthly',
+              amountPaid: 0,
+            },
+          }),
+          db.payment.create({
+            data: {
+              amount: sub.plan.price,
+              currency: 'PEN',
+              status: 'failed',
+              notes: 'Suscripción expirada por falta de pago (7 días). Degradado a Free.',
+              subscriptionId: sub.id,
+              userId: sub.userId,
+              storeId: sub.storeId,
+              planId: sub.planId,
+            },
+          }),
+        ])
+        expiredCount++
+
+        // Send downgrade email
+        if (sub.user) {
+          sendSubscriptionEmail(sub.user.name, sub.user.email, 'Free', 0, 'downgraded').catch(() => {})
+        }
+      } catch (txError) {
+        console.error(`[BILLING] Transaction failed for expired subscription ${sub.id}:`, txError)
+        // Continue processing other subscriptions
+      }
     }
 
     return NextResponse.json({
@@ -89,29 +145,35 @@ export async function GET(request: Request) {
     const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
 
-    const allSubs = await db.subscription.findMany({ include: { plan: true } })
-    const activeCount = allSubs.filter(s => s.status === 'active').length
-    const expiringSoon = allSubs.filter(
-      s => s.status === 'active' && s.nextBillingDate && s.nextBillingDate <= threeDaysFromNow && s.nextBillingDate >= now && s.plan.type !== 'free'
-    ).length
-    const pastDue = allSubs.filter(s => s.status === 'past_due').map(s => s.id)
-    const pastDueSubscriptions = await db.subscription.findMany({
-      where: { id: { in: pastDue } },
-      include: {
-        user: { select: { id: true, name: true, email: true } },
-        store: { select: { id: true, name: true, slug: true } },
-        plan: { select: { id: true, name: true, price: true } },
-      },
-      orderBy: { nextBillingDate: 'asc' },
-    })
-    const expiredCount = await db.subscription.count({ where: { status: 'expired' } })
-    const pendingPayments = await db.payment.count({ where: { status: 'pending' } })
-    const completedPayments = await db.payment.findMany({ where: { status: 'completed', createdAt: { gte: startOfMonth } } })
-    const monthlyRevenue = completedPayments.reduce((sum, p) => sum + p.amount, 0)
-    const monthlyRevenueVerified = completedPayments.filter(p => p.verifiedAt).reduce((sum, p) => sum + p.amount, 0)
+    // FIXED: Use targeted queries instead of loading all subscriptions
+    const [activeCount, expiringSoon, pastDueList, expiredCount, pendingPayments, completedPayments] = await Promise.all([
+      db.subscription.count({ where: { status: 'active' } }),
+      db.subscription.count({
+        where: {
+          status: 'active',
+          nextBillingDate: { lte: threeDaysFromNow, gte: now },
+          plan: { type: { not: 'free' } },
+        },
+      }),
+      db.subscription.findMany({
+        where: { status: 'past_due' },
+        include: {
+          user: { select: { id: true, name: true, email: true } },
+          store: { select: { id: true, name: true, slug: true } },
+          plan: { select: { id: true, name: true, price: true } },
+        },
+        orderBy: { nextBillingDate: 'asc' },
+      }),
+      db.subscription.count({ where: { status: 'expired' } }),
+      db.payment.count({ where: { status: 'pending' } }),
+      db.payment.findMany({ where: { status: 'completed', createdAt: { gte: startOfMonth } } }),
+    ])
+
+    const monthlyRevenue = completedPayments.reduce((sum, p) => sum + Number(p.amount), 0)
+    const monthlyRevenueVerified = completedPayments.filter(p => p.verifiedAt).reduce((sum, p) => sum + Number(p.amount), 0)
 
     return NextResponse.json({
-      activeCount, expiringSoon, pastDueCount: pastDue.length, pastDueSubscriptions: pastDue,
+      activeCount, expiringSoon, pastDueCount: pastDueList.length, pastDueSubscriptions: pastDueList,
       expiredCount, pendingPayments, monthlyRevenue, monthlyRevenueVerified,
     })
   } catch (error: unknown) {
