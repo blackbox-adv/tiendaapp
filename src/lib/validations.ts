@@ -64,8 +64,8 @@ export const createStoreSchema = z.object({
     .max(50, 'Categoria no puede exceder 50 caracteres')
     .optional()
     .default('otros'),
-  logo: z.string().max(500).optional().default(''),
-  bannerUrl: z.string().max(100000).optional().default(''),
+  logo: z.string().max(1000).optional().default(''),
+  bannerUrl: z.string().max(1000).optional().default(''),
   primaryColor: z
     .string()
     .regex(/^#[0-9A-Fa-f]{6}$/, 'Color primario invalido (formato: #RRGGBB)')
@@ -118,8 +118,7 @@ export const createProductSchema = z.object({
     .nullable(),
   imageUrl: z
     .string()
-    .url('URL de imagen invalida')
-    .max(500, 'URL de imagen muy larga')
+    .max(1000, 'URL de imagen muy larga')
     .optional()
     .default(''),
   category: z
@@ -215,7 +214,7 @@ export const updateUserSchema = z.object({
     .or(z.literal('')),
   password: z.string().min(8).max(128).optional(),
   isActive: z.boolean().optional(),
-  avatar: z.string().max(500).optional(),
+  avatar: z.string().max(1000).optional(),
 })
 
 // ── Helper: validate and return parsed data or error response ──
