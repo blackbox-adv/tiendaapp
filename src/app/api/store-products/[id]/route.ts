@@ -1,6 +1,7 @@
 import { db } from '@/lib/db'
 import { NextRequest, NextResponse } from 'next/server'
 import { authenticateRequest } from '@/lib/auth'
+import { serializeDecimals } from '@/lib/utils'
 
 // GET /api/store-products/[id] - Public
 export async function GET(
@@ -26,10 +27,9 @@ export async function GET(
       return NextResponse.json({ error: 'Producto no encontrado' }, { status: 404 })
     }
 
-    return NextResponse.json(product)
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Error fetching product'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return NextResponse.json(serializeDecimals(product))
+  } catch {
+    return NextResponse.json({ error: 'Error fetching product' }, { status: 500 })
   }
 }
 
@@ -58,8 +58,7 @@ export async function DELETE(
     await db.storeProduct.delete({ where: { id } })
 
     return NextResponse.json({ success: true, message: 'Producto eliminado' })
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Error deleting product'
-    return NextResponse.json({ error: message }, { status: 500 })
+  } catch {
+    return NextResponse.json({ error: 'Error deleting product' }, { status: 500 })
   }
 }

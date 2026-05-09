@@ -2,6 +2,7 @@ import { db } from '@/lib/db'
 import { NextResponse } from 'next/server'
 import { authenticateRequest } from '@/lib/auth'
 import { sendSubscriptionEmail } from '@/lib/email'
+import { decimalToNumber } from '@/lib/utils'
 
 // POST /api/billing/check - Check and expire past-due subscriptions
 // Called by cron job daily. Requires admin auth.
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
           }),
           db.payment.create({
             data: {
-              amount: sub.plan.price,
+              amount: decimalToNumber(sub.plan.price),
               currency: 'PEN',
               status: 'pending',
               notes: `Facturación automática - ${sub.plan.name} - Vencida`,
@@ -99,7 +100,7 @@ export async function POST(request: Request) {
           }),
           db.payment.create({
             data: {
-              amount: sub.plan.price,
+              amount: decimalToNumber(sub.plan.price),
               currency: 'PEN',
               status: 'failed',
               notes: 'Suscripción expirada por falta de pago (7 días). Degradado a Free.',

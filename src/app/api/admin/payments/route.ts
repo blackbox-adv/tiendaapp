@@ -2,6 +2,7 @@ import { db } from '@/lib/db'
 import { authenticateRequest } from '@/lib/auth'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 import { sendSubscriptionEmail, sendPaymentRejectedEmail } from '@/lib/email'
+import { serializeDecimals, decimalToNumber } from '@/lib/utils'
 
 // ── GET /api/admin/payments ──
 // List all payments with optional status filter, paginated, ordered by newest first.
@@ -33,7 +34,7 @@ export async function GET(request: Request) {
       db.payment.count({ where }),
     ])
 
-    return apiSuccess({ payments, total, page, limit }, 200, request)
+    return apiSuccess(serializeDecimals({ payments, total, page, limit }), 200, request)
   } catch (error: unknown) {
     console.error('[ADMIN/PAYMENTS] GET error:', error instanceof Error ? error.message : 'Error al obtener pagos')
     return apiError('Error al obtener pagos', 500, undefined, request)
@@ -135,7 +136,7 @@ export async function PUT(request: Request) {
             data: {
               planId: payment.planId,
               startDate: new Date(),
-              amountPaid: payment.amount,
+              amountPaid: decimalToNumber(payment.amount),
               status: 'active',
               nextBillingDate,
             },
@@ -148,7 +149,7 @@ export async function PUT(request: Request) {
               planId: payment.planId,
               status: 'active',
               startDate: new Date(),
-              amountPaid: payment.amount,
+              amountPaid: decimalToNumber(payment.amount),
               nextBillingDate,
             },
           })
@@ -169,11 +170,11 @@ export async function PUT(request: Request) {
     }
 
     return apiSuccess(
-      {
+      serializeDecimals({
         success: true,
         message: `Pago aprobado — suscripción al plan "${payment.plan.name}" activada`,
         paymentId: payment.id,
-      },
+      }),
       200,
       request
     )

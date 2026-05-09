@@ -4,6 +4,7 @@ import { authenticateRequest, requireRole } from '@/lib/auth'
 import { validateBody, createSubscriptionSchema, updateSubscriptionSchema } from '@/lib/validations'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 import { sendSubscriptionEmail } from '@/lib/email'
+import { serializeDecimals, decimalToNumber } from '@/lib/utils'
 
 // GET /api/subscriptions - Admin only
 export async function GET(request: NextRequest) {
@@ -27,7 +28,7 @@ export async function GET(request: NextRequest) {
       orderBy: { startDate: 'desc' },
     })
 
-    return apiSuccess(subscriptions, 200, request)
+    return apiSuccess(serializeDecimals(subscriptions), 200, request)
   } catch (error: unknown) {
     console.error('[SUBSCRIPTIONS] GET error:', error instanceof Error ? error.message : String(error))
     return apiError('Error obteniendo suscripciones', 500, undefined, request)
@@ -115,11 +116,11 @@ export async function POST(request: NextRequest) {
       if (plan.type === 'free' && existing.planId !== planId) {
         const user = await db.user.findUnique({ where: { id: userId }, select: { name: true, email: true } })
         if (user) {
-          sendSubscriptionEmail(user.name, user.email, plan.name, plan.price, 'downgraded').catch(() => {})
+          sendSubscriptionEmail(user.name, user.email, plan.name, decimalToNumber(plan.price), 'downgraded').catch(() => {})
         }
       }
 
-      return apiSuccess(updated, 200, request)
+      return apiSuccess(serializeDecimals(updated), 200, request)
     }
 
     const subscription = await db.subscription.create({
@@ -138,7 +139,7 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    return apiSuccess(subscription, 201, request)
+    return apiSuccess(serializeDecimals(subscription), 201, request)
   } catch (error: unknown) {
     console.error('[SUBSCRIPTIONS] POST error:', error instanceof Error ? error.message : String(error))
     return apiError('Error creando suscripción', 500, undefined, request)
@@ -205,12 +206,12 @@ export async function PUT(request: NextRequest) {
         subscription.user.name,
         subscription.user.email,
         subscription.plan.name,
-        subscription.plan.price,
+        decimalToNumber(subscription.plan.price),
         'cancelled'
       ).catch(() => {})
     }
 
-    return apiSuccess(updated, 200, request)
+    return apiSuccess(serializeDecimals(updated), 200, request)
   } catch (error: unknown) {
     console.error('[SUBSCRIPTIONS] PUT error:', error instanceof Error ? error.message : String(error))
     return apiError('Error actualizando suscripción', 500, undefined, request)

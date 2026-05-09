@@ -96,11 +96,16 @@ export async function GET(request: Request) {
 
     const user = await db.user.findUnique({
       where: { id: payload.userId },
-      select: { id: true, email: true, name: true, role: true, phone: true, avatar: true, isActive: true },
+      select: { id: true, email: true, name: true, role: true, phone: true, avatar: true, isActive: true, tokenVersion: true },
     })
 
     if (!user || !user.isActive) {
       return apiError('Usuario no encontrado', 401, undefined, request)
+    }
+
+    // SECURITY: Invalidate tokens if tokenVersion changed (password reset, admin action)
+    if (user.tokenVersion !== payload.tokenVersion) {
+      return apiError('Sesión expirada. Inicia sesión nuevamente.', 401, undefined, request)
     }
 
     return apiSuccess({ user }, 200, request)
@@ -151,7 +156,7 @@ export async function PUT(request: Request) {
         auditLog({ action: 'PASSWORD_RESET', userId: user.id, userEmail: user.email, ip: clientIp, details: { reason: 'email_send_failed' }, success: false, statusCode: 200 })
       }
 
-      auditLog({ action: 'PASSWORD_RESET', userId: user.id, userEmail: user.email, ip: clientIp, success: emailResult !== null, statusCode: 200 })
+      auditLog({ action: 'PASSWORD_RESET', userId: user.id, userEmail: user.email, ip: clientIp, success: !!emailResult, statusCode: 200 })
 
       return apiSuccess({ message: 'Si el email existe, recibiras instrucciones.' }, 200, request)
     }
@@ -183,7 +188,7 @@ export async function PUT(request: Request) {
         return apiError('Token invalido o expirado. Solicita un nuevo enlace.', 400, undefined, request)
       }
 
-      // Hash new password and clear reset token
+      // Hash new password and clear reset token, increment tokenVersion to invalidate all existing sessions
       const hashedPassword = await hashPassword(newPassword)
       await db.user.update({
         where: { id: user.id },
@@ -191,6 +196,7 @@ export async function PUT(request: Request) {
           password: hashedPassword,
           resetToken: null,
           resetTokenExpires: null,
+          tokenVersion: { increment: 1 },
         },
       })
 

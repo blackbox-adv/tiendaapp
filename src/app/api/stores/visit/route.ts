@@ -2,8 +2,34 @@ import { db } from '@/lib/db'
 import { NextRequest } from 'next/server'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 
+// Simple in-memory rate limiter per IP+slug to prevent visit count inflation
+const visitLimiter = new Map<string, { count: number; resetAt: number }>()
+
+function isVisitRateLimited(ip: string, slug: string): boolean {
+  const key = `visit:${ip}:${slug}`
+  const now = Date.now()
+  const entry = visitLimiter.get(key)
+  // Allow max 1 visit per IP+slug per 5 minutes
+  if (!entry || now > entry.resetAt) {
+    visitLimiter.set(key, { count: 1, resetAt: now + 5 * 60 * 1000 })
+    return false
+  }
+  entry.count++
+  return entry.count > 3 // Max 3 increments per 5 min window (allows retry)
+}
+
+// Cleanup stale entries periodically
+if (typeof setInterval !== 'undefined') {
+  setInterval(() => {
+    const now = Date.now()
+    for (const [key, entry] of visitLimiter) {
+      if (now > entry.resetAt) visitLimiter.delete(key)
+    }
+  }, 5 * 60 * 1000)
+}
+
 // POST /api/stores/visit - Increment visit count for a store by slug
-// Public endpoint — no auth required (rate-limited by IP via simple session check)
+// Public endpoint — no auth required (rate-limited by IP)
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -18,6 +44,13 @@ export async function POST(request: NextRequest) {
       return apiError('Slug invalido', 400, undefined, request)
     }
 
+    // IP-based rate limiting (server-side, not client-controlled)
+    const forwarded = request.headers.get('x-forwarded-for')
+    const ip = forwarded?.split(',')[0]?.trim() || 'unknown'
+    if (isVisitRateLimited(ip, slug)) {
+      return apiSuccess({ counted: false, visitCount: undefined }, 200, request)
+    }
+
     const store = await db.store.findUnique({
       where: { slug },
       select: { id: true, isActive: true },
@@ -25,13 +58,6 @@ export async function POST(request: NextRequest) {
 
     if (!store || !store.isActive) {
       return apiError('Tienda no encontrada', 404, undefined, request)
-    }
-
-    // Simple rate limiting: check a cookie-style header for session tracking
-    const visitedStores = request.headers.get('x-visited-stores')
-    if (visitedStores && visitedStores.split(',').includes(slug)) {
-      // Already visited this session, don't increment again
-      return apiSuccess({ counted: false, visitCount: undefined }, 200, request)
     }
 
     const updated = await db.store.update({

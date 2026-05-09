@@ -4,6 +4,7 @@ import { authenticateRequest, requireRole } from '@/lib/auth'
 import { validateBody, createStoreSchema, updateStoreSchema } from '@/lib/validations'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 import { sanitizeBasic, sanitizeHtml } from '@/lib/sanitize'
+import { serializeDecimals } from '@/lib/utils'
 
 // GET /api/stores - Public (store browsing by slug) or admin-only (list all)
 export async function GET(request: NextRequest) {
@@ -54,7 +55,7 @@ export async function GET(request: NextRequest) {
         })
         .catch(() => {})
 
-      return apiSuccess(store, 200, request)
+      return apiSuccess(serializeDecimals(store), 200, request)
     }
 
     // Auth check (required for any store listing)
@@ -134,7 +135,7 @@ export async function GET(request: NextRequest) {
         }] : [],
       }))
 
-      return apiSuccess(stores, 200, request)
+      return apiSuccess(serializeDecimals(stores), 200, request)
     }
 
     // Regular owner: return their own stores
@@ -148,7 +149,7 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'desc' },
     })
 
-    return apiSuccess(myStores, 200, request)
+    return apiSuccess(serializeDecimals(myStores), 200, request)
   } catch (error: unknown) {
     console.error('[STORES] GET error:', error instanceof Error ? error.message : String(error))
     return apiError('Error obteniendo tiendas', 500, undefined, request)
@@ -239,7 +240,7 @@ export async function POST(request: NextRequest) {
       include: { owner: { select: { id: true, name: true, email: true } } },
     })
 
-    return apiSuccess(store, 201, request)
+    return apiSuccess(serializeDecimals(store), 201, request)
   } catch (error: unknown) {
     console.error('[STORES] POST error:', error instanceof Error ? error.message : String(error))
     return apiError('Error creando tienda', 500, undefined, request)
@@ -288,7 +289,7 @@ export async function PUT(request: NextRequest) {
       include: { owner: { select: { id: true, name: true, email: true } } },
     })
 
-    return apiSuccess(store, 200, request)
+    return apiSuccess(serializeDecimals(store), 200, request)
   } catch (error: unknown) {
     console.error('[STORES] PUT error:', error instanceof Error ? error.message : String(error))
     return apiError('Error actualizando tienda', 500, undefined, request)

@@ -4,6 +4,7 @@ import { authenticateRequest, requireRole } from '@/lib/auth'
 import { validateBody, createProductSchema, updateProductSchema } from '@/lib/validations'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 import { sanitizeBasic, sanitizeHtml, sanitizeUrl } from '@/lib/sanitize'
+import { serializeDecimals } from '@/lib/utils'
 
 // GET /api/store-products - Public (product browsing)
 export async function GET(request: NextRequest) {
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
       },
     })
 
-    return apiSuccess(products, 200, request)
+    return apiSuccess(serializeDecimals(products), 200, request)
   } catch (error: unknown) {
     console.error('[PRODUCTS] GET error:', error instanceof Error ? error.message : String(error))
     return apiError('Error obteniendo productos', 500, undefined, request)
@@ -123,7 +124,7 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    return apiSuccess(product, 201, request)
+    return apiSuccess(serializeDecimals(product), 201, request)
   } catch (error: unknown) {
     console.error('[PRODUCTS] POST error:', error instanceof Error ? error.message : String(error))
     return apiError('Error creando producto', 500, undefined, request)
@@ -179,7 +180,7 @@ export async function PUT(request: NextRequest) {
       data,
     })
 
-    return apiSuccess(product, 200, request)
+    return apiSuccess(serializeDecimals(product), 200, request)
   } catch (error: unknown) {
     console.error('[PRODUCTS] PUT error:', error instanceof Error ? error.message : String(error))
     return apiError('Error actualizando producto', 500, undefined, request)

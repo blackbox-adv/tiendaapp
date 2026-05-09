@@ -29,7 +29,7 @@ export interface User {
   name: string
   email: string
   password: string
-  role: 'owner' | 'admin'
+  role: 'owner' | 'admin' | 'store_owner' | 'super_admin'
   planId: string
   storeId: string | null
   isActive: boolean

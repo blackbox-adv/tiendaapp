@@ -49,11 +49,11 @@ export async function POST(request: Request) {
 
   try {
     const formData = await request.formData()
-    const file = formData.get('file') as File | null
-
-    if (!file) {
+    const fileEntry = formData.get('file')
+    if (!fileEntry || !(fileEntry instanceof File)) {
       return NextResponse.json({ error: 'No se envió ningún archivo' }, { status: 400, headers: corsHeaders(request) })
     }
+    const file = fileEntry
 
     if (!ALLOWED_TYPES.includes(file.type)) {
       return NextResponse.json({ error: 'Tipo de archivo no permitido. Usa JPG, PNG, WebP o GIF.' }, { status: 400, headers: corsHeaders(request) })
@@ -71,11 +71,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'El archivo no coincide con el tipo declarado. Posible archivo malicioso.' }, { status: 400, headers: corsHeaders(request) })
     }
 
-    // Generate unique file path: {timestamp}-{random}.{ext}
+    // Generate unique file path using crypto-safe randomness
+    const crypto = await import('crypto')
     const ext = getExtension(file.type)
-    const timestamp = Date.now()
-    const random = Math.random().toString(36).substring(2, 8)
-    const filePath = `${timestamp}-${random}.${ext}`
+    const randomId = crypto.randomUUID()
+    const filePath = `${randomId}.${ext}`
 
     // Upload to Supabase Storage
     const { error: uploadError } = await supabase.storage

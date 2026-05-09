@@ -134,8 +134,10 @@ export default function AppRouter() {
 
   if (requiresAuth && !currentUser) {
     navigate({ page: 'login' })
-  } else if (requiresAdmin && (!currentUser || currentUser.role !== 'admin')) {
+    return null
+  } else if (requiresAdmin && (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'super_admin'))) {
     navigate({ page: 'landing' })
+    return null
   }
 
   const renderPage = () => {

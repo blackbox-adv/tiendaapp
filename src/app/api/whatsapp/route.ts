@@ -2,6 +2,7 @@ import { db } from '@/lib/db'
 import { NextRequest } from 'next/server'
 import { validateBody, whatsappSchema, normalizePeruWhatsapp, PERU_WHATSAPP_ERROR } from '@/lib/validations'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
+import { sanitizeBasic } from '@/lib/sanitize'
 
 // POST /api/whatsapp - Generate WhatsApp link and log the contact
 export async function POST(request: NextRequest) {
@@ -47,8 +48,8 @@ export async function POST(request: NextRequest) {
     } else if (productName && productPrice) {
       message = `Hola ${store.name}!\n\n` +
         `Me interesa el siguiente producto:\n` +
-        `${productName}\n` +
-        `S/${productPrice.toFixed(2)}\n\n` +
+        `${sanitizeBasic(String(productName))}\n` +
+        `S/${Number(productPrice).toFixed(2)}\n\n` +
         `${productUrl || storeUrl}\n\n` +
         `Tienen disponibilidad?`
     } else {
@@ -58,13 +59,13 @@ export async function POST(request: NextRequest) {
     const encodedMessage = encodeURIComponent(message)
     const whatsappUrl = `https://wa.me/${cleanNumber}?text=${encodedMessage}`
 
-    // Log the contact interaction (fire-and-forget)
+    // Log the contact interaction (fire-and-forget with error logging)
     db.store
       .update({
         where: { id: storeId },
         data: { visitCount: { increment: 1 } },
       })
-      .catch(() => {})
+      .catch((err) => console.error('[WHATSAPP] Failed to increment visit count:', err))
 
     return apiSuccess(
       {

@@ -2,6 +2,7 @@ import { db } from '@/lib/db'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { StorePublicClient } from './StorePublicClient'
+import { serializeDecimals } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
@@ -118,7 +119,7 @@ export default async function StorePage({ params }: Props) {
           ),
         }}
       />
-      <StorePublicClient store={store} products={products} />
+      <StorePublicClient store={serializeDecimals(store)} products={serializeDecimals(products)} />
     </>
   )
 }

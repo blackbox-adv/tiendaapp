@@ -5,6 +5,7 @@ import { validateBody, registerSchema, updateUserSchema } from '@/lib/validation
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 import { auditLog, getClientIp } from '@/lib/env'
 import { sendWelcomeEmail } from '@/lib/email'
+import { serializeDecimals } from '@/lib/utils'
 
 // GET /api/users - List users (admin only)
 export async function GET(request: NextRequest) {
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest) {
 
     // Remove password from response
     const safeUsers = users.map(({ password: _, ...user }) => user)
-    return apiSuccess(safeUsers, 200, request)
+    return apiSuccess(serializeDecimals(safeUsers), 200, request)
   } catch (error: unknown) {
     console.error('[USERS] GET error:', error instanceof Error ? error.message : String(error))
     return apiError('Error obteniendo usuarios', 500, undefined, request)
@@ -110,6 +111,7 @@ export async function PUT(request: NextRequest) {
     // Prevent non-admin from changing role or isActive
     if (!requireRole(auth.user, ['super_admin'])) {
       delete (data as Record<string, unknown>).isActive
+      delete (data as Record<string, unknown>).role
     }
 
     // Build update data
@@ -137,7 +139,7 @@ export async function PUT(request: NextRequest) {
     // Remove password from response
     const { password: _, ...safeUser } = user
 
-    return apiSuccess(safeUser, 200, request)
+    return apiSuccess(serializeDecimals(safeUser), 200, request)
   } catch (error: unknown) {
     console.error('[USERS] PUT error:', error instanceof Error ? error.message : String(error))
     return apiError('Error actualizando usuario', 500, undefined, request)

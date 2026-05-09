@@ -57,17 +57,28 @@ function transformApiUser(apiUser: Record<string, unknown>): User {
 }
 
 function transformApiProduct(apiProduct: Record<string, unknown>): Product {
+  // Price/originalPrice/rating may come as Decimal (string) from Prisma JSON serialization
+  const rawPrice = apiProduct.price
+  const rawOriginalPrice = apiProduct.originalPrice
+  const rawRating = apiProduct.rating
+
+  const toNum = (v: unknown): number => {
+    if (typeof v === 'number') return v
+    if (typeof v === 'string') return parseFloat(v) || 0
+    return 0
+  }
+
   return {
     id: apiProduct.id as string,
     name: (apiProduct.name as string) || '',
     description: (apiProduct.description as string) || '',
-    price: (apiProduct.price as number) || 0,
-    originalPrice: (apiProduct.originalPrice as number) || null,
+    price: toNum(rawPrice),
+    originalPrice: rawOriginalPrice != null ? toNum(rawOriginalPrice) : null,
     categoryId: (apiProduct.category as string) || '',
     imageUrl: (apiProduct.imageUrl as string) || '',
     isActive: (apiProduct.isActive as boolean) ?? true,
     featured: (apiProduct.featured as boolean) ?? false,
-    rating: (apiProduct.rating as number) || 0,
+    rating: toNum(rawRating),
     storeId: (apiProduct.storeId as string) || '',
     createdAt: (apiProduct.createdAt as string) || new Date().toISOString(),
   }

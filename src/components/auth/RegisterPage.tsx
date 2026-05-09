@@ -21,9 +21,13 @@ export function RegisterPage() {
   const [loading, setLoading] = useState(false)
 
   const passwordStrength = () => {
-    if (password.length < 6) return { label: 'Débil', color: 'text-red-500', width: 'w-1/3' }
-    if (password.length < 8) return { label: 'Media', color: 'text-amber-500', width: 'w-2/3' }
-    return { label: 'Fuerte', color: 'text-green-500', width: 'w-full' }
+    if (password.length < 8) return { label: 'Débil', color: 'text-red-500', width: 'w-1/3' }
+    const hasUpper = /[A-Z]/.test(password)
+    const hasNumber = /[0-9]/.test(password)
+    const hasSpecial = /[^A-Za-z0-9]/.test(password)
+    const variety = [hasUpper, hasNumber, hasSpecial].filter(Boolean).length
+    if (variety >= 2) return { label: 'Fuerte', color: 'text-green-500', width: 'w-full' }
+    return { label: 'Media', color: 'text-amber-500', width: 'w-2/3' }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -34,13 +38,12 @@ export function RegisterPage() {
       setError('Las contraseñas no coinciden.')
       return
     }
-    if (password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres.')
+    if (password.length < 8) {
+      setError('La contraseña debe tener al menos 8 caracteres.')
       return
     }
 
     setLoading(true)
-    await new Promise((r) => setTimeout(r, 500))
 
     const success = await register(name, email, password)
     setLoading(false)
@@ -123,7 +126,7 @@ export function RegisterPage() {
                   <Input
                     id="reg-password"
                     type="password"
-                    placeholder="Mínimo 6 caracteres"
+                    placeholder="Mínimo 8 caracteres"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="pl-10"
@@ -177,7 +180,10 @@ export function RegisterPage() {
               </Button>
 
               <p className="text-xs text-gray-400 text-center">
-                Al registrarte aceptas los Términos de Servicio y Política de Privacidad.
+                Al registrarte aceptas los{' '}
+                <button type="button" onClick={() => navigate({ page: 'terms' })} className="text-violet-600 hover:underline">Términos de Servicio</button>
+                {' '}y{' '}
+                <button type="button" onClick={() => navigate({ page: 'privacy' })} className="text-violet-600 hover:underline">Política de Privacidad</button>.
               </p>
             </form>
 

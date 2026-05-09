@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server'
 import { authenticateRequest } from '@/lib/auth'
 import { apiError, apiSuccess, handleCorsPreflight, corsHeaders } from '@/lib/api-response'
 import { sendPaymentSubmittedEmail } from '@/lib/email'
+import { serializeDecimals, decimalToNumber } from '@/lib/utils'
 
 // POST /api/payments/submit — Submit manual payment (Yape/Transfer voucher)
 export async function POST(request: NextRequest) {
@@ -72,11 +73,11 @@ export async function POST(request: NextRequest) {
         },
       })
 
-      return apiSuccess({
+      return apiSuccess(serializeDecimals({
         success: true,
         message: 'Pago registrado! Verificaremos tu comprobante pronto.',
         paymentId: existingPending.id,
-      }, 200, request)
+      }), 200, request)
     }
 
     // Create a placeholder subscription (inactive) if none exists
@@ -111,7 +112,7 @@ export async function POST(request: NextRequest) {
           planId,
           status: 'past_due',
           startDate: new Date(),
-          amountPaid: plan.price,
+          amountPaid: decimalToNumber(plan.price),
         },
       })
       subscriptionId = newSub.id
@@ -120,7 +121,7 @@ export async function POST(request: NextRequest) {
     // Create payment record
     const payment = await db.payment.create({
       data: {
-        amount: plan.price,
+        amount: decimalToNumber(plan.price),
         status: 'pending',
         paymentMethod: paymentMethod || 'yape',
         externalRef: externalRef.trim(),
@@ -137,11 +138,11 @@ export async function POST(request: NextRequest) {
       sendPaymentSubmittedEmail(user.name, user.email, plan.name, Number(plan.price), externalRef.trim()).catch(() => {})
     }
 
-    return apiSuccess({
+    return apiSuccess(serializeDecimals({
       success: true,
       message: 'Pago registrado! Verificaremos tu comprobante pronto.',
       paymentId: payment.id,
-    }, 201, request)
+    }), 201, request)
   } catch (error: unknown) {
     console.error('[PAYMENTS/SUBMIT] Error:', error instanceof Error ? error.message : String(error))
     return apiError('Error al registrar el pago', 500, undefined, request)

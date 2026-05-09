@@ -1,6 +1,7 @@
 import { db } from '@/lib/db'
 import { NextRequest } from 'next/server'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
+import { serializeDecimals, decimalToNumber } from '@/lib/utils'
 
 // GET /api/plans - Public endpoint: list all available plans
 export async function GET(request: NextRequest) {
@@ -9,12 +10,12 @@ export async function GET(request: NextRequest) {
       orderBy: { price: 'asc' },
     })
 
-    // Parse features from JSON string to array
+    // Parse features from JSON string to array & convert Decimal fields
     const parsedPlans = plans.map((plan: Record<string, unknown>) => ({
       id: plan.id,
       type: plan.type,
       name: plan.name,
-      price: plan.price,
+      price: decimalToNumber(plan.price),
       currency: plan.currency,
       maxProducts: plan.maxProducts,
       description: plan.description,
@@ -27,7 +28,7 @@ export async function GET(request: NextRequest) {
       popular: plan.popular,
     }))
 
-    return apiSuccess(parsedPlans, 200, request)
+    return apiSuccess(serializeDecimals(parsedPlans), 200, request)
   } catch (error: unknown) {
     console.error('[PLANS] GET error:', error instanceof Error ? error.message : String(error))
     return apiError('Error obteniendo planes', 500, undefined, request)

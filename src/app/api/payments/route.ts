@@ -4,6 +4,7 @@ import { authenticateRequest, requireRole } from '@/lib/auth'
 import { validateBody, paymentIntentSchema } from '@/lib/validations'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 import { sendSubscriptionEmail } from '@/lib/email'
+import { serializeDecimals, decimalToNumber } from '@/lib/utils'
 
 // POST /api/payments/create-intent - Create a payment intent
 export async function POST(request: NextRequest) {
@@ -63,11 +64,11 @@ export async function POST(request: NextRequest) {
       },
     }
 
-    return apiSuccess({
+    return apiSuccess(serializeDecimals({
       success: true,
       paymentIntent,
       message: `Pago preparado: S/${price.toFixed(2)} por plan ${plan.name}`,
-    }, 200, request)
+    }), 200, request)
   } catch {
     return apiError('Error creando pago', 500, undefined, request)
   }
@@ -81,18 +82,14 @@ export async function GET(request: NextRequest) {
       orderBy: { price: 'asc' },
     })
 
-    return apiSuccess(
-      {
-        plans,
-        currency: 'PEN',
-        currencySymbol: 'S/',
-        countryCode: 'PE',
-        paymentMethods: ['visa', 'mastercard', 'american_express', 'diners_club'],
-        gateway: 'culqi',
-      },
-      200,
-      request
-    )
+    return apiSuccess(serializeDecimals({
+      plans,
+      currency: 'PEN',
+      currencySymbol: 'S/',
+      countryCode: 'PE',
+      paymentMethods: ['visa', 'mastercard', 'american_express', 'diners_club'],
+      gateway: 'culqi',
+    }), 200, request)
   } catch {
     return apiError('Error obteniendo planes de pago', 500, undefined, request)
   }
