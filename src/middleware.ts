@@ -46,10 +46,14 @@ const securityHeaders: Record<string, string> = {
 }
 
 // Content Security Policy
-// FIXED: Removed unsafe-eval and unsafe-inline from script-src to prevent XSS
+// NOTE: Next.js App Router requires 'unsafe-inline' for script-src because it uses
+// inline scripts for RSC (React Server Components) flight data (self.__next_f.push).
+// Without 'unsafe-inline', React cannot hydrate and the page appears blank.
+// A nonce-based CSP is the ideal long-term solution, but requires per-request nonce
+// generation and passing it to all <Script> components via Next.js headers().
 const CSP_POLICY = [
   "default-src 'self'",
-  "script-src 'self'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com",
   "img-src 'self' data: blob: https://images.unsplash.com https://*.tile.openstreetmap.org https://lh3.googleusercontent.com",
