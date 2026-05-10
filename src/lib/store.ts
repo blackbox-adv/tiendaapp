@@ -161,6 +161,8 @@ async function syncFromAPI() {
                     defaultPlanId: settingsData.defaultPlanId || 'free',
                     maintenanceMode: settingsData.maintenanceMode === 'true',
                     registrationsEnabled: settingsData.registrationsEnabled !== 'false',
+                    contactEmail: settingsData.contactEmail || 'hola@tiendapp.pe',
+                    contactPhone: settingsData.contactPhone || '+51999888777',
                   },
                 })
               }
@@ -207,6 +209,8 @@ interface AppState {
     defaultPlanId: string
     maintenanceMode: boolean
     registrationsEnabled: boolean
+    contactEmail: string
+    contactPhone: string
   }
 
   navigate: (route: PageRoute) => void
@@ -255,6 +259,8 @@ export const useAppStore = create<AppState>((set, get) => ({
     defaultPlanId: 'free',
     maintenanceMode: false,
     registrationsEnabled: true,
+    contactEmail: 'hola@tiendapp.pe',
+    contactPhone: '+51999888777',
   },
 
   navigate: (route) =>

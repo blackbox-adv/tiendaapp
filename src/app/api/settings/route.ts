@@ -26,6 +26,8 @@ export async function GET(request: NextRequest) {
       whatsappSupport: '+51999999999',
       currency: 'PEN',
       countryCode: 'PE',
+      contactEmail: 'hola@tiendapp.pe',
+      contactPhone: '+51999888777',
     }
 
     return apiSuccess({ ...defaults, ...settings }, 200, request)
@@ -39,6 +41,8 @@ export async function GET(request: NextRequest) {
         whatsappSupport: '+51999999999',
         currency: 'PEN',
         countryCode: 'PE',
+        contactEmail: 'hola@tiendapp.pe',
+        contactPhone: '+51999888777',
       },
       200,
       request

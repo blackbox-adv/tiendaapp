@@ -2,8 +2,12 @@
 
 import Link from 'next/link'
 import { Store, Search, ArrowLeft, Home } from 'lucide-react'
+import { useAppStore } from '@/lib/store'
 
 export default function NotFound() {
+  const contactPhone = useAppStore((s) => s.platformSettings.contactPhone)
+  const whatsappDigits = contactPhone.replace(/[^0-9]/g, '') || '51999888777'
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-violet-50 to-white flex items-center justify-center px-4">
       <div className="text-center max-w-md">
@@ -52,7 +56,7 @@ export default function NotFound() {
         {/* Help text */}
         <p className="text-xs text-gray-400 mt-8">
           Si crees que esto es un error, contactanos por{' '}
-          <a href="https://wa.me/51999888777" target="_blank" rel="noopener noreferrer" className="text-violet-500 hover:underline">
+          <a href={`https://wa.me/${whatsappDigits}`} target="_blank" rel="noopener noreferrer" className="text-violet-500 hover:underline">
             WhatsApp
           </a>
         </p>

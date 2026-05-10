@@ -189,6 +189,8 @@ export const ALLOWED_SETTING_KEYS = new Set([
   'currency',
   'countryCode',
   'supportEmail',
+  'contactEmail',
+  'contactPhone',
   'logoUrl',
   'customDomain',
 ])

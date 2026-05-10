@@ -3,7 +3,7 @@ import AppRouter from '@/components/AppRouter'
 
 export const metadata: Metadata = {
   title: 'Contacto',
-  description: 'Contacta al equipo de TiendApp. Estamos aqui para ayudarte a crear tu tienda online en Peru. Escribenos a hola@tiendapp.pe.',
+  description: 'Contacta al equipo de TiendApp. Estamos aqui para ayudarte a crear tu tienda online en Peru.',
   alternates: { canonical: '/contact' },
   openGraph: {
     title: 'Contacto | TiendApp',

@@ -7,6 +7,13 @@ import { Button } from '@/components/ui/button'
 
 export function PrivacyPage() {
   const navigate = useAppStore((s) => s.navigate)
+  const contactEmail = useAppStore((s) => s.platformSettings.contactEmail)
+  const contactPhone = useAppStore((s) => s.platformSettings.contactPhone)
+
+  // Format phone for display
+  const phoneDisplay = contactPhone.startsWith('+51') && contactPhone.length >= 12
+    ? `${contactPhone.slice(0, 3)} ${contactPhone.slice(3, 6)} ${contactPhone.slice(6, 9)} ${contactPhone.slice(9)}`
+    : contactPhone
 
   return (
     <div className="min-h-screen bg-white">
@@ -101,7 +108,7 @@ export function PrivacyPage() {
             <section>
               <h2 className="text-xl font-bold text-gray-900 mb-3">11. Contacto</h2>
               <p className="text-gray-600 leading-relaxed">
-                Si tiene preguntas, preocupaciones o solicitudes relacionadas con esta Política de Privacidad, puede contactarnos a través de: Email: privacidad@tiendapp.pe, WhatsApp: +51 999 888 777, o mediante nuestro formulario de contacto. Responderemos a su solicitud en un plazo máximo de 5 días hábiles.
+                Si tiene preguntas, preocupaciones o solicitudes relacionadas con esta Política de Privacidad, puede contactarnos a través de: Email: {contactEmail}, WhatsApp: {phoneDisplay}, o mediante nuestro formulario de contacto. Responderemos a su solicitud en un plazo máximo de 5 días hábiles.
               </p>
             </section>
           </div>

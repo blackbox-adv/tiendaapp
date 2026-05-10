@@ -8,6 +8,13 @@ import Link from 'next/link'
 
 export function Footer() {
   const navigate = useAppStore((s) => s.navigate)
+  const contactEmail = useAppStore((s) => s.platformSettings.contactEmail)
+  const contactPhone = useAppStore((s) => s.platformSettings.contactPhone)
+
+  // Format phone for display: +51 999 888 777
+  const phoneDisplay = contactPhone.startsWith('+51') && contactPhone.length >= 12
+    ? `${contactPhone.slice(0, 3)} ${contactPhone.slice(3, 6)} ${contactPhone.slice(6, 9)} ${contactPhone.slice(9)}`
+    : contactPhone
 
   const handleNav = (href: string) => {
     const el = document.querySelector(href)
@@ -100,11 +107,11 @@ export function Footer() {
             <ul className="space-y-3">
               <li className="flex items-center gap-2 text-sm text-gray-500">
                 <Mail className="w-4 h-4 text-violet-400" />
-                hola@tiendapp.pe
+                {contactEmail}
               </li>
               <li className="flex items-center gap-2 text-sm text-gray-500">
                 <Phone className="w-4 h-4 text-violet-400" />
-                +51 999 888 777
+                {phoneDisplay}
               </li>
               <li className="flex items-start gap-2 text-sm text-gray-500">
                 <MapPin className="w-4 h-4 text-violet-400 mt-0.5" />

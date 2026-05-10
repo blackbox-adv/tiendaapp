@@ -12,11 +12,21 @@ import { Card, CardContent } from '@/components/ui/card'
 
 export function ContactPage() {
   const navigate = useAppStore((s) => s.navigate)
+  const contactEmail = useAppStore((s) => s.platformSettings.contactEmail)
+  const contactPhone = useAppStore((s) => s.platformSettings.contactPhone)
+
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [subject, setSubject] = useState('')
   const [message, setMessage] = useState('')
   const [sent, setSent] = useState(false)
+
+  // Extract digits only for WhatsApp link (remove +, spaces, dashes)
+  const whatsappDigits = contactPhone.replace(/[^0-9]/g, '')
+  // Format phone for display: +51 999 888 777
+  const phoneDisplay = contactPhone.startsWith('+51') && contactPhone.length >= 12
+    ? `${contactPhone.slice(0, 3)} ${contactPhone.slice(3, 6)} ${contactPhone.slice(6, 9)} ${contactPhone.slice(9)}`
+    : contactPhone
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -34,7 +44,7 @@ export function ContactPage() {
       `Asunto: ${subject}\n` +
       `Mensaje: ${message}`
     )
-    window.open(`https://wa.me/51999888777?text=${whatsappMsg}`, '_blank')
+    window.open(`https://wa.me/${whatsappDigits}?text=${whatsappMsg}`, '_blank')
 
     setSent(true)
     setName('')
@@ -71,14 +81,14 @@ export function ContactPage() {
                   <Mail className="w-5 h-5 text-violet-600 mt-0.5" />
                   <div>
                     <p className="text-sm font-medium text-gray-900">Email</p>
-                    <p className="text-sm text-gray-500">hola@tiendapp.pe</p>
+                    <p className="text-sm text-gray-500">{contactEmail}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <Phone className="w-5 h-5 text-violet-600 mt-0.5" />
                   <div>
                     <p className="text-sm font-medium text-gray-900">Teléfono</p>
-                    <p className="text-sm text-gray-500">+51 999 888 777</p>
+                    <p className="text-sm text-gray-500">{phoneDisplay}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -104,7 +114,7 @@ export function ContactPage() {
                 <h3 className="text-sm font-bold text-gray-900">¿Prefieres WhatsApp?</h3>
               </div>
               <p className="text-sm text-gray-500 mb-3">Escríbenos directamente por WhatsApp para una respuesta rápida.</p>
-              <Button className="w-full bg-green-500 hover:bg-green-600 text-white gap-2" onClick={() => window.open('https://wa.me/51999888777?text=Hola, necesito ayuda con TiendApp', '_blank')}>
+              <Button className="w-full bg-green-500 hover:bg-green-600 text-white gap-2" onClick={() => window.open(`https://wa.me/${whatsappDigits}?text=Hola, necesito ayuda con TiendApp`, '_blank')}>
                 <MessageCircle className="w-4 h-4" />
                 Escribir por WhatsApp
               </Button>

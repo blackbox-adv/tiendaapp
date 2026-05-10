@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { CookieConsent } from "@/components/CookieConsent";
+import { getPlatformContact } from "@/lib/platform-settings";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -76,11 +77,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Fetch contact info from DB for JSON-LD (server-side, cached)
+  const contact = await getPlatformContact()
+
   return (
     <html lang="es-PE" suppressHydrationWarning>
       <head>
@@ -104,8 +108,8 @@ export default function RootLayout({
                 url: 'https://tiendapp.pe',
                 logo: 'https://tiendapp.pe/logo.svg',
                 description: 'La plataforma líder en Perú para crear tiendas online sin conocimientos técnicos. WhatsApp integrado, plantillas profesionales y pagos en soles.',
-                email: 'hola@tiendapp.pe',
-                telephone: '+51999888777',
+                email: contact.contactEmail,
+                telephone: contact.contactPhone,
                 address: {
                   '@type': 'PostalAddress',
                   addressLocality: 'Lima',

@@ -17,6 +17,8 @@ export function AdminSettings() {
   const [defaultPlanId, setDefaultPlanId] = useState(platformSettings.defaultPlanId)
   const [maintenanceMode, setMaintenanceMode] = useState(platformSettings.maintenanceMode)
   const [registrationsEnabled, setRegistrationsEnabled] = useState(platformSettings.registrationsEnabled)
+  const [contactEmail, setContactEmail] = useState(platformSettings.contactEmail)
+  const [contactPhone, setContactPhone] = useState(platformSettings.contactPhone)
 
   const [saving, setSaving] = useState(false)
 
@@ -43,10 +45,12 @@ export function AdminSettings() {
           defaultPlanId,
           maintenanceMode: String(maintenanceMode),
           registrationsEnabled: String(registrationsEnabled),
+          contactEmail,
+          contactPhone,
         }),
       })
       if (res.ok) {
-        updatePlatformSettings({ name, defaultPlanId, maintenanceMode, registrationsEnabled })
+        updatePlatformSettings({ name, defaultPlanId, maintenanceMode, registrationsEnabled, contactEmail, contactPhone })
         toast.success('Configuración guardada', { description: 'Los cambios se aplicaron correctamente.' })
       } else {
         const data = await res.json().catch(() => ({}))
@@ -91,6 +95,35 @@ export function AdminSettings() {
                 <option key={plan.id} value={plan.id}>{plan.name} - S/{plan.price.toFixed(2)}/mes</option>
               )) : <option>Cargando planes...</option>}
             </select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Contact Info */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Información de contacto</CardTitle>
+          <CardDescription>Estos datos se muestran en el footer, página de contacto, términos, privacidad y página 404.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>Correo de contacto</Label>
+            <Input
+              type="email"
+              value={contactEmail}
+              onChange={(e) => setContactEmail(e.target.value)}
+              placeholder="hola@tiendapp.pe"
+            />
+            <p className="text-xs text-gray-400">Se muestra como email principal en toda la plataforma</p>
+          </div>
+          <div className="space-y-2">
+            <Label>Teléfono / WhatsApp</Label>
+            <Input
+              value={contactPhone}
+              onChange={(e) => setContactPhone(e.target.value)}
+              placeholder="+51999888777"
+            />
+            <p className="text-xs text-gray-400">Formato: +51XXXXXXXXX. Se usa para el botón de WhatsApp y teléfono de contacto.</p>
           </div>
         </CardContent>
       </Card>
