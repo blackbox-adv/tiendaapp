@@ -371,8 +371,8 @@ export function PlanManager() {
                     {currentPlan.name}
                   </h2>
                   <p className="text-sm text-gray-500">
-                    {currentPlan.maxProducts === -1
-                      ? 'Productos ilimitados'
+                    {currentPlan.maxProducts >= 100
+                      ? `${currentPlan.maxProducts} productos`
                       : `${storeProducts}/${currentPlan.maxProducts} productos`}
                     {' · '}S/{currentPlan.price.toFixed(2)}/mes
                   </p>

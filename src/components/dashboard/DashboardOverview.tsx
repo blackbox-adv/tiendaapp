@@ -533,7 +533,7 @@ export function DashboardOverview() {
                 <p className="text-sm text-violet-600 font-medium">Plan actual</p>
                 <p className="text-xl font-bold text-gray-900">{currentPlan.name} - S/{currentPlan.price.toFixed(2)}/mes</p>
                 <p className="text-sm text-gray-500 mt-1">
-                  {currentPlan.maxProducts === -1 ? 'Productos ilimitados' : `${storeProducts.length}/${currentPlan.maxProducts} productos usados`}
+                  {currentPlan.maxProducts >= 100 ? `${currentPlan.maxProducts} productos` : `${storeProducts.length}/${currentPlan.maxProducts} productos usados`}
                 </p>
               </div>
               <Button

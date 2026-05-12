@@ -38,7 +38,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
     }).catch(() => setPlanName('Gratis'))
   }, [currentUser.planId])
 
-  const currentPlan = planName ? { name: planName, price: 0, productLimit: -1 } : null
+  const currentPlan = planName ? { name: planName, price: 0, productLimit: 100 } : null
 
   const handleNav = (page: PageRoute['page']) => {
     navigate({ page } as PageRoute)

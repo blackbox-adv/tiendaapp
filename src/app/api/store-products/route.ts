@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check product limit based on plan
-    const maxProducts = store.subscriptions[0]?.plan?.maxProducts || 10
+    const maxProducts = store.subscriptions[0]?.plan?.maxProducts || 5
     const currentCount = await db.storeProduct.count({ where: { storeId } })
 
     if (currentCount >= maxProducts) {

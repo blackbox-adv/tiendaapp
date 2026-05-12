@@ -14,7 +14,7 @@ const CATEGORIES = [
   { id: 'juguetes', name: 'Juguetes' },
   { id: 'otros', name: 'Otros' },
 ]
-import { Star, ShoppingBag, Search, X, ChevronRight } from 'lucide-react'
+import { Star, ShoppingBag, Search, X, ChevronRight, Lock } from 'lucide-react'
 import { StoreFeatureBadges } from './StoreFeatureBadges'
 import { useAppStore } from '@/lib/store'
 import type { Store, Product } from '@/lib/types'
@@ -145,25 +145,35 @@ export function MinimalistTemplate({ store, products, storeSlug, planId, onProdu
       {/* Search + Filters — Ultra clean */}
       <nav className="sticky top-[53px] z-30 bg-white border-b border-gray-50">
         <div className="max-w-6xl mx-auto px-8 md:px-12 py-5 space-y-4">
-          {/* Search — minimal, borderless style */}
-          <div className="relative max-w-sm">
-            <Search className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
-            <input
-              type="text"
-              placeholder="Buscar..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-7 pr-8 py-2 text-sm text-gray-700 placeholder-gray-300 bg-transparent border-b border-gray-100 focus:outline-none focus:border-gray-300 transition-colors"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500 transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
-          </div>
+          {/* Search — Pro & Premium only */}
+          {planId !== 'free' ? (
+            <div className="relative max-w-sm">
+              <Search className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
+              <input
+                type="text"
+                placeholder="Buscar..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-7 pr-8 py-2 text-sm text-gray-700 placeholder-gray-300 bg-transparent border-b border-gray-100 focus:outline-none focus:border-gray-300 transition-colors"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          ) : (
+            <button
+              onClick={() => window.location.href = '/#pricing'}
+              className="flex items-center gap-2 py-2 text-sm text-gray-300 hover:text-gray-500 border-b border-gray-100 transition-colors"
+            >
+              <Lock className="w-3.5 h-3.5" />
+              Buscador disponible en Plan Pro
+            </button>
+          )}
 
           {/* Category pills — minimal style */}
           <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
@@ -199,6 +209,7 @@ export function MinimalistTemplate({ store, products, storeSlug, planId, onProdu
           </div>
 
           {/* Filters row — very subtle */}
+          {planId !== 'free' && (
           <div className="flex items-center gap-4 flex-wrap">
             <div className="flex items-center gap-2 text-xs text-gray-400">
               <span>S/</span>
@@ -237,6 +248,7 @@ export function MinimalistTemplate({ store, products, storeSlug, planId, onProdu
               </button>
             )}
           </div>
+          )}
         </div>
       </nav>
 

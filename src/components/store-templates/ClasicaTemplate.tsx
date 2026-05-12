@@ -14,7 +14,7 @@ const CATEGORIES = [
   { id: 'juguetes', name: 'Juguetes' },
   { id: 'otros', name: 'Otros' },
 ]
-import { Star, MessageCircle, ShoppingBag, Heart, Search, X } from 'lucide-react'
+import { Star, MessageCircle, ShoppingBag, Heart, Search, X, Lock } from 'lucide-react'
 import { StoreFeatureBadges } from './StoreFeatureBadges'
 import { Badge } from '@/components/ui/badge'
 import { useAppStore } from '@/lib/store'
@@ -159,26 +159,37 @@ export function ClasicaTemplate({ store, products, storeSlug, planId, onProductC
         }}
       >
         <div className="max-w-4xl mx-auto px-6 py-3 space-y-3">
-          {/* Search input */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#A88B6E' }} />
-            <input
-              type="text"
-              placeholder="Buscar productos..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-10 py-2.5 text-sm rounded-lg border-2 focus:outline-none transition-all"
-              style={{ backgroundColor: '#FFFBF0', borderColor: '#E8D5B7', color: '#3E2A17' }}
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors"
-              >
-                <X className="w-3 h-3 text-gray-500" />
-              </button>
-            )}
-          </div>
+          {/* Search input — Pro & Premium only */}
+          {planId !== 'free' ? (
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#A88B6E' }} />
+              <input
+                type="text"
+                placeholder="Buscar productos..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-10 py-2.5 text-sm rounded-lg border-2 focus:outline-none transition-all"
+                style={{ backgroundColor: '#FFFBF0', borderColor: '#E8D5B7', color: '#3E2A17' }}
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors"
+                >
+                  <X className="w-3 h-3 text-gray-500" />
+                </button>
+              )}
+            </div>
+          ) : (
+            <button
+              onClick={() => window.location.href = '/#pricing'}
+              className="w-full flex items-center justify-center gap-2 py-2.5 text-sm rounded-lg border-2 border-dashed text-gray-400 hover:text-amber-600 transition-all"
+              style={{ backgroundColor: '#FFFBF0', borderColor: '#E8D5B7' }}
+            >
+              <Lock className="w-3.5 h-3.5" />
+              Buscador disponible en Plan Pro
+            </button>
+          )}
           {/* Category buttons */}
           <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
           <button
@@ -221,7 +232,8 @@ export function ClasicaTemplate({ store, products, storeSlug, planId, onProductC
           })}
         </div>
 
-          {/* Filters row */}
+          {/* Filters row — Pro & Premium only */}
+          {planId !== 'free' && (
           <div className="flex items-center gap-3 flex-wrap">
             {/* Price range */}
             <div className="flex items-center gap-1.5 text-xs" style={{ color: '#A88B6E' }}>
@@ -269,6 +281,7 @@ export function ClasicaTemplate({ store, products, storeSlug, planId, onProductC
               </button>
             )}
           </div>
+          )}
         </div>
       </nav>
 

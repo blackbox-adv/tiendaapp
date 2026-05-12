@@ -149,7 +149,7 @@ export default async function RootLayout({
                     name: 'Cuánto cuesta TiendApp?',
                     acceptedAnswer: {
                       '@type': 'Answer',
-                      text: 'TiendApp tiene un plan gratuito con hasta 10 productos. El plan Pro cuesta S/29.90/mes con hasta 50 productos, y el plan Premium cuesta S/79.90/mes con productos ilimitados y funciones avanzadas como código QR y compartición en redes sociales.',
+                      text: 'TiendApp tiene un plan gratuito con hasta 5 productos. El plan Pro cuesta S/29.90/mes con hasta 20 productos y buscador, y el plan Premium cuesta S/59.90/mes con hasta 100 productos, filtros avanzados y funciones premium.',
                     },
                   },
                   {
