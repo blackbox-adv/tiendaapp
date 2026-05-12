@@ -267,7 +267,7 @@ export function ModernaTemplate({ store, products, storeSlug, planId }: { store:
                         >
                           -
                           {Math.round(
-                            ((product.originalPrice - product.price) / product.originalPrice) * 100
+                            ((Number(product.originalPrice) - Number(product.price)) / Number(product.originalPrice)) * 100
                           )}
                           %
                         </div>
@@ -306,11 +306,11 @@ export function ModernaTemplate({ store, products, storeSlug, planId }: { store:
                           className="text-sm font-semibold"
                           style={{ color: store.colors.primary }}
                         >
-                          S/{product.price.toFixed(2)}
+                          S/{Number(product.price).toFixed(2)}
                         </span>
                         {product.originalPrice && (
                           <span className="text-xs text-gray-300 line-through">
-                            S/{product.originalPrice.toFixed(2)}
+                            S/{Number(product.originalPrice).toFixed(2)}
                           </span>
                         )}
                       </div>

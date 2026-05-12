@@ -31,17 +31,24 @@ function transformStore(s: Record<string, unknown>): Store {
 }
 
 function transformProduct(p: Record<string, unknown>): Product {
+  // Price/originalPrice/rating may come as Prisma Decimal (object {s,e,d}), string, or number
+  const toNum = (v: unknown): number => {
+    if (typeof v === 'number') return v
+    if (typeof v === 'string') return parseFloat(v) || 0
+    if (typeof v === 'object' && v !== null && 'toString' in v) return parseFloat(String(v)) || 0
+    return 0
+  }
   return {
     id: p.id as string,
     name: (p.name as string) || '',
     description: (p.description as string) || '',
-    price: (p.price as number) || 0,
-    originalPrice: (p.originalPrice as number) || null,
+    price: toNum(p.price),
+    originalPrice: p.originalPrice != null ? toNum(p.originalPrice) : null,
     categoryId: (p.category as string) || '',
     imageUrl: (p.imageUrl as string) || '',
     isActive: (p.isActive as boolean) ?? true,
     featured: (p.featured as boolean) ?? false,
-    rating: (p.rating as number) || 0,
+    rating: toNum(p.rating),
     storeId: (p.storeId as string) || '',
     createdAt: (p.createdAt as string) || new Date().toISOString(),
   }

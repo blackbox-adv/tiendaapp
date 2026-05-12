@@ -117,7 +117,7 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
     const title = `${displayProduct.name} | ${displayStore.name}`
     const description = displayProduct.description
       ? `${displayProduct.description.substring(0, 160)} - ${displayStore.name} en TiendApp.`
-      : `Compra ${displayProduct.name} por S/${displayProduct.price.toFixed(2)} en ${displayStore.name}. Visita la tienda en TiendApp.`
+      : `Compra ${displayProduct.name} por S/${Number(displayProduct.price).toFixed(2)} en ${displayStore.name}. Visita la tienda en TiendApp.`
 
     document.title = title
     // Update meta description
@@ -199,9 +199,9 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
 
   const category = CATEGORIES.find((c) => c.id === product.categoryId)
   const discount = product.originalPrice
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+    ? Math.round(((Number(product.originalPrice) - Number(product.price)) / Number(product.originalPrice)) * 100)
     : 0
-  const savings = product.originalPrice ? product.originalPrice - product.price : 0
+  const savings = product.originalPrice ? Number(product.originalPrice) - Number(product.price) : 0
 
   const isNewProduct = (() => {
     const created = new Date(product.createdAt)
@@ -236,7 +236,7 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
       // Fallback
     }
     const msg = encodeURIComponent(
-      `Hola! Me interesa el producto: ${product.name}\nPrecio: S/${product.price.toFixed(2)}\nLo vi en tu tienda en TiendApp.`
+      `Hola! Me interesa el producto: ${product.name}\nPrecio: S/${Number(product.price).toFixed(2)}\nLo vi en tu tienda en TiendApp.`
     )
     window.open(`https://wa.me/${store.whatsappNumber.replace(/[^0-9]/g, '')}?text=${msg}`, '_blank')
   }
@@ -244,7 +244,7 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
   const shareProduct = async () => {
     const shareData = {
       title: `${product.name} - ${store.name}`,
-      text: `Mira este producto: ${product.name} por S/${product.price.toFixed(2)} en ${store.name}`,
+      text: `Mira este producto: ${product.name} por S/${Number(product.price).toFixed(2)} en ${store.name}`,
       url: typeof window !== 'undefined' ? window.location.href : '',
     }
     try {
@@ -263,7 +263,7 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
 
   const renderStars = (rating: number, showLabel: boolean = false) => {
     if (rating <= 0) return null
-    const formattedRating = rating % 1 === 0 ? rating.toFixed(1) : rating.toString()
+    const formattedRating = rating % 1 === 0 ? Number(rating).toFixed(1) : rating.toString()
     const getRatingLabel = (r: number) => {
       if (r >= 4.5) return 'Excelente'
       if (r >= 3.5) return 'Muy bueno'
@@ -416,22 +416,22 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
                   className="text-3xl md:text-4xl font-bold tracking-tight"
                   style={{ color: store.colors.primary }}
                 >
-                  S/{product.price.toFixed(2)}
+                  S/{Number(product.price).toFixed(2)}
                 </span>
-                {product.originalPrice && product.originalPrice > product.price && (
+                {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
                   <>
                     <span className="text-lg text-gray-400 line-through">
-                      S/{product.originalPrice.toFixed(2)}
+                      S/{Number(product.originalPrice).toFixed(2)}
                     </span>
                     <span className="bg-red-100 text-red-600 text-sm font-medium px-2.5 py-0.5 rounded-full">
-                      -{Math.round((1 - product.price / product.originalPrice) * 100)}%
+                      -{Math.round((1 - Number(product.price) / Number(product.originalPrice)) * 100)}%
                     </span>
                   </>
                 )}
               </div>
               {savings > 0 && (
                 <p className="text-sm mt-2 font-medium" style={{ color: store.colors.primary }}>
-                  Ahorras S/{savings.toFixed(2)} con este precio especial
+                  Ahorras S/{Number(savings).toFixed(2)} con este precio especial
                 </p>
               )}
             </div>
@@ -528,7 +528,7 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
                       <div className="text-center p-4 rounded-xl bg-purple-50">
                         <p className="text-xs text-gray-500 mb-1">Monto a transferir</p>
                         <p className="text-2xl font-bold" style={{ color: store.colors.primary }}>
-                          S/{product.price.toFixed(2)}
+                          S/{Number(product.price).toFixed(2)}
                         </p>
                         <p className="text-xs text-gray-400 mt-1">por {product.name}</p>
                       </div>
@@ -545,7 +545,7 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
                           <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0 mt-0.5">
                             <span className="text-xs font-bold text-purple-600">2</span>
                           </div>
-                          <p className="text-sm text-gray-600">Escanea el codigo QR y transfiere <b>S/{product.price.toFixed(2)}</b></p>
+                          <p className="text-sm text-gray-600">Escanea el codigo QR y transfiere <b>S/{Number(product.price).toFixed(2)}</b></p>
                         </div>
                         <div className="flex items-start gap-3">
                           <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -561,7 +561,7 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
                         style={{ backgroundColor: '#25D366' }}
                         onClick={() => {
                           const msg = encodeURIComponent(
-                            `Hola! Acabo de realizar el pago por Yape/Plin de S/${product.price.toFixed(2)} por: ${product.name}\nPor favor confirmar mi pedido.`
+                            `Hola! Acabo de realizar el pago por Yape/Plin de S/${Number(product.price).toFixed(2)} por: ${product.name}\nPor favor confirmar mi pedido.`
                           )
                           window.open(`https://wa.me/${store.whatsappNumber.replace(/[^0-9]/g, '')}?text=${msg}`, '_blank')
                         }}
@@ -643,11 +643,11 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
                         className="text-sm font-semibold"
                         style={{ color: store.colors.primary }}
                       >
-                        S/{rp.price.toFixed(2)}
+                        S/{Number(rp.price).toFixed(2)}
                       </span>
                       {rp.originalPrice && (
                         <span className="text-xs text-gray-300 line-through">
-                          S/{rp.originalPrice.toFixed(2)}
+                          S/{Number(rp.originalPrice).toFixed(2)}
                         </span>
                       )}
                     </div>

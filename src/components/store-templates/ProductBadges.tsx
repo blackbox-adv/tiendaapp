@@ -44,9 +44,9 @@ export function ProductBadges({ product, primaryColor = '#7C3AED', store }: Prod
           Nuevo
         </Badge>
       )}
-      {product.originalPrice && product.price < product.originalPrice && (
+      {product.originalPrice && Number(product.price) < Number(product.originalPrice) && (
         <Badge className="bg-red-500 text-white text-[10px] font-bold border-0 rounded-md px-2 py-0.5 shadow-md">
-          -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
+          -{Math.round(((Number(product.originalPrice) - Number(product.price)) / Number(product.originalPrice)) * 100)}%
         </Badge>
       )}
       {activeStoreFeatures.map((f) => (

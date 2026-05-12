@@ -353,7 +353,7 @@ export function VibranteTemplate({ store, products, storeSlug, planId }: { store
                     />
                     {product.originalPrice && (
                       <Badge className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold rounded-lg px-2.5 py-1 shadow-lg border-0">
-                        -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
+                        -{Math.round(((Number(product.originalPrice) - Number(product.price)) / Number(product.originalPrice)) * 100)}%
                       </Badge>
                     )}
                     {/* Hover overlay with "Ver detalle" */}
@@ -395,11 +395,11 @@ export function VibranteTemplate({ store, products, storeSlug, planId }: { store
                           className="text-xl font-black"
                           style={{ color: store.colors.primary }}
                         >
-                          S/{product.price.toFixed(2)}
+                          S/{Number(product.price).toFixed(2)}
                         </span>
                         {product.originalPrice && (
                           <span className="text-sm text-gray-300 line-through">
-                            S/{product.originalPrice.toFixed(2)}
+                            S/{Number(product.originalPrice).toFixed(2)}
                           </span>
                         )}
                       </div>

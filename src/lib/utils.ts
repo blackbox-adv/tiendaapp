@@ -22,13 +22,35 @@ export function decimalToNumber(value: unknown): number {
 }
 
 /**
+ * Check if a value looks like a Prisma Decimal object { s, e, d }.
+ * Prisma Decimal fields can arrive with constructor.name !== 'Decimal'
+ * (e.g. minified builds, cross-realm objects), so we also check the shape.
+ */
+function isPrismaDecimalLike(value: unknown): boolean {
+  if (value === null || value === undefined) return false
+  if (typeof value !== 'object') return false
+  const obj = value as Record<string, unknown>
+  return (
+    's' in obj && 'e' in obj && 'd' in obj &&
+    (typeof obj.s === 'number' || obj.s === 1 || obj.s === -1) &&
+    typeof obj.e === 'number' &&
+    Array.isArray(obj.d)
+  )
+}
+
+/**
  * Recursively convert all Prisma Decimal fields in an object/array to numbers.
  * This ensures API responses serialize cleanly as JSON numbers instead of Decimal objects.
  */
 export function serializeDecimals<T>(obj: T): T {
   if (obj === null || obj === undefined) return obj
   if (Array.isArray(obj)) return obj.map(serializeDecimals) as T
+  // Prisma Decimal class instance (constructor.name === 'Decimal')
   if (typeof obj === 'object' && obj.constructor?.name === 'Decimal') {
+    return decimalToNumber(obj) as T
+  }
+  // Prisma Decimal serialized shape { s, e, d } that survived JSON round-trip
+  if (isPrismaDecimalLike(obj)) {
     return decimalToNumber(obj) as T
   }
   if (typeof obj === 'object' && !(obj instanceof Date)) {

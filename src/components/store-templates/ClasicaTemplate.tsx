@@ -362,7 +362,7 @@ export function ClasicaTemplate({ store, products, storeSlug, planId }: { store:
                           >
                             -
                             {Math.round(
-                              ((product.originalPrice - product.price) / product.originalPrice) *
+                              ((Number(product.originalPrice) - Number(product.price)) / product.originalPrice) *
                                 100
                             )}
                             %
@@ -380,11 +380,11 @@ export function ClasicaTemplate({ store, products, storeSlug, planId }: { store:
                           className="text-xl font-bold"
                           style={{ fontFamily: 'Georgia, serif', color: store.colors.primary }}
                         >
-                          S/{product.price.toFixed(2)}
+                          S/{Number(product.price).toFixed(2)}
                         </span>
                         {product.originalPrice && (
                           <span className="text-sm line-through" style={{ color: '#C4A882' }}>
-                            S/{product.originalPrice.toFixed(2)}
+                            S/{Number(product.originalPrice).toFixed(2)}
                           </span>
                         )}
                       </div>

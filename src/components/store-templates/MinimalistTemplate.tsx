@@ -286,7 +286,7 @@ export function MinimalistTemplate({ store, products, storeSlug, planId }: Minim
                       />
                       {product.originalPrice && (
                         <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full text-[10px] font-medium bg-black text-white">
-                          -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
+                          -{Math.round(((Number(product.originalPrice) - Number(product.price)) / Number(product.originalPrice)) * 100)}%
                         </div>
                       )}
                       {/* "Ver detalle" — simple text link on hover, not button */}
@@ -305,11 +305,11 @@ export function MinimalistTemplate({ store, products, storeSlug, planId }: Minim
                       {renderStars(product.rating)}
                       <div className="flex items-center gap-2 mt-1.5">
                         <span className="text-sm font-semibold text-gray-900">
-                          S/{product.price.toFixed(2)}
+                          S/{Number(product.price).toFixed(2)}
                         </span>
                         {product.originalPrice && (
                           <span className="text-xs text-gray-300 line-through">
-                            S/{product.originalPrice.toFixed(2)}
+                            S/{Number(product.originalPrice).toFixed(2)}
                           </span>
                         )}
                       </div>

@@ -348,7 +348,7 @@ export function LuxuryTemplate({ store, products, storeSlug, planId }: LuxuryTem
                             className="absolute top-3 left-3 px-2.5 py-1 rounded text-[10px] font-semibold tracking-widest uppercase"
                             style={{ backgroundColor: GOLD, color: DARK_BG }}
                           >
-                            -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
+                            -{Math.round(((Number(product.originalPrice) - Number(product.price)) / Number(product.originalPrice)) * 100)}%
                           </div>
                         )}
                         {product.featured && (
@@ -395,11 +395,11 @@ export function LuxuryTemplate({ store, products, storeSlug, planId }: LuxuryTem
                             className="text-base font-semibold"
                             style={{ color: GOLD }}
                           >
-                            S/{product.price.toFixed(2)}
+                            S/{Number(product.price).toFixed(2)}
                           </span>
                           {product.originalPrice && (
                             <span className="text-xs line-through" style={{ color: '#4a4a5a' }}>
-                              S/{product.originalPrice.toFixed(2)}
+                              S/{Number(product.originalPrice).toFixed(2)}
                             </span>
                           )}
                         </div>

@@ -1,7 +1,6 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { useAppStore } from '@/lib/store'
 import { Button } from '@/components/ui/button'
 import { Monitor, Eye, Sparkles, Sun, Gem, Crown, Minimize2, Lock } from 'lucide-react'
 
@@ -120,15 +119,7 @@ const templates = [
   },
 ]
 
-const templateSlugMap: Record<string, string> = {
-  moderna: 'dulce-maria-bakery',
-  vibrante: 'pizzeria-napoli',
-  clasica: 'boutique-elegance',
-}
-
 export function Templates() {
-  const navigate = useAppStore((s) => s.navigate)
-
   return (
     <section id="templates" className="py-20 sm:py-28 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -192,28 +183,22 @@ export function Templates() {
                   <h3 className="text-base font-bold text-gray-900">{tpl.name}</h3>
                 </div>
                 <p className="text-xs text-gray-500 mb-3 line-clamp-2">{tpl.description}</p>
-                {!tpl.badge ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => navigate({ page: 'store', slug: templateSlugMap[tpl.id] || 'dulce-maria-bakery' })}
-                    className="gap-1.5 border-violet-200 text-violet-600 hover:bg-violet-50 text-xs"
-                  >
-                    <Eye className="w-3.5 h-3.5" />
-                    Ver demo
-                  </Button>
-                ) : (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => window.location.href = `/demo/${tpl.id}`}
-                    className={`gap-1.5 text-xs ${tpl.id === 'luxury' ? 'border-[#c8a456] text-[#c8a456] hover:bg-[#c8a456]/5' : 'border-gray-300 text-gray-600 hover:bg-gray-50'}`}
-                  >
-                    <Eye className="w-3.5 h-3.5" />
-                    Ver demo
-                    <Crown className="w-3 h-3 opacity-60" />
-                  </Button>
-                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.location.href = `/demo/${tpl.id}`}
+                  className={`gap-1.5 text-xs ${
+                    tpl.id === 'luxury'
+                      ? 'border-[#c8a456] text-[#c8a456] hover:bg-[#c8a456]/5'
+                      : tpl.id === 'minimalist'
+                        ? 'border-gray-300 text-gray-600 hover:bg-gray-50'
+                        : 'border-violet-200 text-violet-600 hover:bg-violet-50'
+                  }`}
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                  Ver demo
+                  {tpl.badge && <Crown className="w-3 h-3 opacity-60" />}
+                </Button>
               </div>
             </motion.div>
           ))}
