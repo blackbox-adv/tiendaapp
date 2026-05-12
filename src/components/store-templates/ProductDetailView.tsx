@@ -34,7 +34,7 @@ import { Badge } from '@/components/ui/badge'
 import { ProductBadges } from './ProductBadges'
 import type { Product, Store } from '@/lib/types'
 
-export function ProductDetailView({ slug, productId }: { slug: string; productId: string }) {
+export function ProductDetailView({ slug, productId, onDemoBack }: { slug: string; productId: string; onDemoBack?: () => void }) {
   const { stores, products, navigate, goBack } = useAppStore()
   const [showYape, setShowYape] = useState(false)
 
@@ -182,7 +182,7 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Producto no encontrado</h1>
         <p className="text-gray-500 mb-6">Este producto no existe o ya no está disponible.</p>
         <Button
-          onClick={() => (displayStore ? navigate({ page: 'store', slug }) : navigate({ page: 'landing' }))}
+          onClick={() => onDemoBack ? onDemoBack() : (displayStore ? navigate({ page: 'store', slug }) : navigate({ page: 'landing' }))}
           className="gap-2 rounded-xl"
           style={{ backgroundColor: displayStore?.colors.primary || '#7C3AED' }}
         >
@@ -310,7 +310,7 @@ export function ProductDetailView({ slug, productId }: { slug: string; productId
       {/* Top nav bar */}
       <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
         <button
-          onClick={goBack}
+          onClick={() => onDemoBack ? onDemoBack() : goBack()}
           className="flex items-center gap-2 text-gray-500 hover:text-gray-700 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />

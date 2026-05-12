@@ -20,7 +20,7 @@ import { Badge } from '@/components/ui/badge'
 import { useAppStore } from '@/lib/store'
 import type { Store, Product } from '@/lib/types'
 
-export function ClasicaTemplate({ store, products, storeSlug, planId }: { store: Store; products: Product[]; storeSlug: string; planId?: string }) {
+export function ClasicaTemplate({ store, products, storeSlug, planId, onProductClick }: { store: Store; products: Product[]; storeSlug: string; planId?: string; onProductClick?: (productId: string) => void }) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [priceRange, setPriceRange] = useState<{ min: number | null; max: number | null }>({ min: null, max: null })
@@ -303,7 +303,7 @@ export function ClasicaTemplate({ store, products, storeSlug, planId }: { store:
                   transition={{ duration: 0.35, delay: i * 0.04 }}
                   className="group flex flex-col sm:flex-row gap-0 bg-white rounded-xl border-2 overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg"
                   style={{ borderColor: '#EDE0CC' }}
-                  onClick={() => navigate({ page: 'product-detail', slug: storeSlug, productId: product.id })}
+                  onClick={() => onProductClick ? onProductClick(product.id) : navigate({ page: 'product-detail', slug: storeSlug, productId: product.id })}
                 >
                   {/* Image — left side on desktop, top on mobile */}
                   <div

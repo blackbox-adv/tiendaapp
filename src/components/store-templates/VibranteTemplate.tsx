@@ -27,7 +27,7 @@ function hexToRgb(hex: string) {
     : { r: 0, g: 0, b: 0 }
 }
 
-export function VibranteTemplate({ store, products, storeSlug, planId }: { store: Store; products: Product[]; storeSlug: string; planId?: string }) {
+export function VibranteTemplate({ store, products, storeSlug, planId, onProductClick }: { store: Store; products: Product[]; storeSlug: string; planId?: string; onProductClick?: (productId: string) => void }) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [priceRange, setPriceRange] = useState<{ min: number | null; max: number | null }>({ min: null, max: null })
@@ -338,7 +338,7 @@ export function VibranteTemplate({ store, products, storeSlug, planId }: { store
                   }}
                   whileHover={{ y: -6, scale: 1.02 }}
                   className="group cursor-pointer rounded-3xl overflow-hidden bg-white shadow-md hover:shadow-2xl transition-shadow duration-300"
-                  onClick={() => navigate({ page: 'product-detail', slug: storeSlug, productId: product.id })}
+                  onClick={() => onProductClick ? onProductClick(product.id) : navigate({ page: 'product-detail', slug: storeSlug, productId: product.id })}
                 >
                   {/* Tall image (Instagram-like) */}
                   <div className="aspect-[4/5] bg-gray-100 overflow-hidden relative">

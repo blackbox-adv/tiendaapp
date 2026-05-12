@@ -1,11 +1,13 @@
 'use client'
 
+import { useState } from 'react'
 import { useAppStore } from '@/lib/store'
 import { ModernaTemplate } from '@/components/store-templates/ModernaTemplate'
 import { VibranteTemplate } from '@/components/store-templates/VibranteTemplate'
 import { ClasicaTemplate } from '@/components/store-templates/ClasicaTemplate'
 import { LuxuryTemplate } from '@/components/store-templates/LuxuryTemplate'
 import { MinimalistTemplate } from '@/components/store-templates/MinimalistTemplate'
+import { ProductDetailView } from '@/components/store-templates/ProductDetailView'
 import { ArrowLeft, Crown, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { Store, Product } from '@/lib/types'
@@ -136,13 +138,63 @@ const demoProducts: Record<string, Product[]> = {
 }
 
 export function DemoTemplateClient({ template }: { template: string }) {
-  const navigate = useAppStore((s) => s.navigate)
   const store = demoStores[template]
   const products = demoProducts[template] || []
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null)
 
   if (!store) return null
 
   const isPremium = template === 'luxury' || template === 'minimalist'
+
+  // Populate Zustand store so ProductDetailView can find the data
+  const setStoreData = () => {
+    useAppStore.setState({
+      stores: [store],
+      products: products,
+      currentStore: store,
+    })
+  }
+
+  // Initialize Zustand on mount
+  if (typeof window !== 'undefined') {
+    const currentStores = useAppStore.getState().stores
+    if (!currentStores.find((s) => s.id === store.id)) {
+      setStoreData()
+    }
+  }
+
+  // Handle product click from templates
+  const handleProductClick = (productId: string) => {
+    setStoreData()
+    setSelectedProductId(productId)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  // Handle back from product detail
+  const handleBackToStore = () => {
+    setSelectedProductId(null)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  // If a product is selected, show ProductDetailView
+  if (selectedProductId) {
+    return (
+      <div className="relative">
+        {/* Demo Banner */}
+        <div className="fixed top-0 left-0 right-0 z-50">
+          <div className={`text-center py-2 text-xs font-medium ${isPremium ? 'bg-gradient-to-r from-[#c8a456] to-[#f0d078] text-[#1a1a2e]' : 'bg-violet-600 text-white'}`}>
+            <div className="flex items-center justify-center gap-2">
+              {isPremium ? <Crown className="w-3.5 h-3.5" /> : <Sparkles className="w-3.5 h-3.5" />}
+              <span>Vista previa de la plantilla {store.name} — {isPremium ? 'Disponible en plan Premium' : 'Disponible en planes Pro y Premium'}</span>
+            </div>
+          </div>
+        </div>
+        {/* Spacer for fixed banner */}
+        <div className="h-[40px]" />
+        <ProductDetailView slug={store.slug} productId={selectedProductId} onDemoBack={handleBackToStore} />
+      </div>
+    )
+  }
 
   return (
     <div className="relative">
@@ -156,14 +208,14 @@ export function DemoTemplateClient({ template }: { template: string }) {
         </div>
         <div className="bg-white/80 backdrop-blur-sm px-4 py-2 flex items-center justify-between border-b border-gray-100">
           <button
-            onClick={() => navigate({ page: 'landing' })}
+            onClick={() => window.location.href = '/'}
             className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Volver
           </button>
           <Button
-            onClick={() => navigate({ page: 'register' })}
+            onClick={() => window.location.href = '/register'}
             size="sm"
             className={`rounded-lg text-xs font-semibold ${isPremium ? 'bg-[#c8a456] hover:bg-[#b8943e] text-white' : 'bg-violet-600 hover:bg-violet-700 text-white'}`}
           >
@@ -175,12 +227,12 @@ export function DemoTemplateClient({ template }: { template: string }) {
       {/* Spacer for fixed banner */}
       <div className="h-[76px]" />
 
-      {/* Template */}
-      {template === 'luxury' && <LuxuryTemplate store={store} products={products} storeSlug={store.slug} planId="premium" />}
-      {template === 'minimalist' && <MinimalistTemplate store={store} products={products} storeSlug={store.slug} planId="premium" />}
-      {template === 'moderna' && <ModernaTemplate store={store} products={products} storeSlug={store.slug} planId="pro" />}
-      {template === 'vibrante' && <VibranteTemplate store={store} products={products} storeSlug={store.slug} planId="pro" />}
-      {template === 'clasica' && <ClasicaTemplate store={store} products={products} storeSlug={store.slug} planId="pro" />}
+      {/* Template — pass onProductClick handler */}
+      {template === 'luxury' && <LuxuryTemplate store={store} products={products} storeSlug={store.slug} planId="premium" onProductClick={handleProductClick} />}
+      {template === 'minimalist' && <MinimalistTemplate store={store} products={products} storeSlug={store.slug} planId="premium" onProductClick={handleProductClick} />}
+      {template === 'moderna' && <ModernaTemplate store={store} products={products} storeSlug={store.slug} planId="pro" onProductClick={handleProductClick} />}
+      {template === 'vibrante' && <VibranteTemplate store={store} products={products} storeSlug={store.slug} planId="pro" onProductClick={handleProductClick} />}
+      {template === 'clasica' && <ClasicaTemplate store={store} products={products} storeSlug={store.slug} planId="pro" onProductClick={handleProductClick} />}
     </div>
   )
 }

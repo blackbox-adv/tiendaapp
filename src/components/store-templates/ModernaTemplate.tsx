@@ -20,7 +20,7 @@ import { Badge } from '@/components/ui/badge'
 import { useAppStore } from '@/lib/store'
 import type { Store, Product } from '@/lib/types'
 
-export function ModernaTemplate({ store, products, storeSlug, planId }: { store: Store; products: Product[]; storeSlug: string; planId?: string }) {
+export function ModernaTemplate({ store, products, storeSlug, planId, onProductClick }: { store: Store; products: Product[]; storeSlug: string; planId?: string; onProductClick?: (productId: string) => void }) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [priceRange, setPriceRange] = useState<{ min: number | null; max: number | null }>({ min: null, max: null })
@@ -248,7 +248,7 @@ export function ModernaTemplate({ store, products, storeSlug, planId }: { store:
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.35 }}
                     className="group cursor-pointer"
-                    onClick={() => navigate({ page: 'product-detail', slug: storeSlug, productId: product.id })}
+                    onClick={() => onProductClick ? onProductClick(product.id) : navigate({ page: 'product-detail', slug: storeSlug, productId: product.id })}
                   >
                     <div className="aspect-square bg-gray-50 rounded-lg overflow-hidden border border-gray-100 relative">
                       <img

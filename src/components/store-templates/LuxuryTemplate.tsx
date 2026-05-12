@@ -31,9 +31,10 @@ interface LuxuryTemplateProps {
   products: Product[]
   storeSlug: string
   planId?: string
+  onProductClick?: (productId: string) => void
 }
 
-export function LuxuryTemplate({ store, products, storeSlug, planId }: LuxuryTemplateProps) {
+export function LuxuryTemplate({ store, products, storeSlug, planId, onProductClick }: LuxuryTemplateProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [priceRange, setPriceRange] = useState<{ min: number | null; max: number | null }>({ min: null, max: null })
@@ -321,7 +322,7 @@ export function LuxuryTemplate({ store, products, storeSlug, planId }: LuxuryTem
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.4 }}
                     className="group cursor-pointer"
-                    onClick={() => navigate({ page: 'product-detail', slug: storeSlug, productId: product.id })}
+                    onClick={() => onProductClick ? onProductClick(product.id) : navigate({ page: 'product-detail', slug: storeSlug, productId: product.id })}
                   >
                     {/* Card with thin gold border */}
                     <div

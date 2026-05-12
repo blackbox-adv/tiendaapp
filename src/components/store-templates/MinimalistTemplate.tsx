@@ -24,9 +24,10 @@ interface MinimalistTemplateProps {
   products: Product[]
   storeSlug: string
   planId?: string
+  onProductClick?: (productId: string) => void
 }
 
-export function MinimalistTemplate({ store, products, storeSlug, planId }: MinimalistTemplateProps) {
+export function MinimalistTemplate({ store, products, storeSlug, planId, onProductClick }: MinimalistTemplateProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [priceRange, setPriceRange] = useState<{ min: number | null; max: number | null }>({ min: null, max: null })
@@ -271,7 +272,7 @@ export function MinimalistTemplate({ store, products, storeSlug, planId }: Minim
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
                     className="group cursor-pointer"
-                    onClick={() => navigate({ page: 'product-detail', slug: storeSlug, productId: product.id })}
+                    onClick={() => onProductClick ? onProductClick(product.id) : navigate({ page: 'product-detail', slug: storeSlug, productId: product.id })}
                   >
                     {/* Image — square, no border */}
                     <div className="aspect-square overflow-hidden relative bg-gray-50">
