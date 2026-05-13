@@ -3,7 +3,8 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { ProductPublicClient } from './ProductPublicClient'
 
-export const dynamic = 'force-dynamic'
+// ISR: revalidate every 5 minutes
+export const revalidate = 300
 
 interface Props {
   params: Promise<{ slug: string; id: string }>

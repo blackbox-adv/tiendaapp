@@ -161,7 +161,7 @@ export async function PUT(request: NextRequest) {
         return apiError('Monto de pago no coincide con el precio del plan', 400, undefined, request)
       }
 
-      const existing = await db.subscription.findFirst({
+      let existing = await db.subscription.findFirst({
         where: { userId, status: 'active' },
       })
 
@@ -176,27 +176,39 @@ export async function PUT(request: NextRequest) {
           data: { planId, startDate: new Date(), status: 'active', nextBillingDate },
         })
       } else {
-        await db.subscription.create({
+        // Require storeId for new subscriptions
+        if (!storeId) {
+          return apiError('storeId es requerido para crear una suscripción', 400, undefined, request)
+        }
+        const newSub = await db.subscription.create({
           data: {
             userId,
-            storeId: storeId || '',
+            storeId,
             planId,
             status: 'active',
             startDate: new Date(),
             nextBillingDate,
           },
         })
+        existing = newSub
       }
 
-      // Log the payment event
+      // Log the payment event (subscriptionId is now guaranteed to exist)
+      if (!existing?.id) {
+        return apiError('Error: no se pudo obtener la suscripción', 500, undefined, request)
+      }
+      // Require storeId for payment record
+      if (!storeId) {
+        return apiError('storeId es requerido para registrar el pago', 400, undefined, request)
+      }
       await db.payment.create({
         data: {
           amount: amount || planPrice,
           status: 'completed',
           externalRef: externalRef || `webhook_${Date.now()}`,
-          subscriptionId: existing?.id || '',
+          subscriptionId: existing.id,
           userId,
-          storeId: storeId || '',
+          storeId,
           planId,
         },
       })

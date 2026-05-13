@@ -4,7 +4,9 @@ import type { Metadata } from 'next'
 import { StorePublicClient } from './StorePublicClient'
 import { serializeDecimals } from '@/lib/utils'
 
-export const dynamic = 'force-dynamic'
+// ISR: revalidate every 5 minutes instead of force-dynamic
+// On-demand revalidation happens via revalidatePath() when store/products are updated
+export const revalidate = 300
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -78,6 +80,7 @@ export default async function StorePage({ params }: Props) {
         products: {
           where: { isActive: true },
           orderBy: { createdAt: 'desc' },
+          take: 200, // Limit to prevent OOM with huge catalogs
         },
       },
     }) as unknown as Record<string, unknown> | null

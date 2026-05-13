@@ -5,6 +5,7 @@ import { validateBody, createProductSchema, updateProductSchema } from '@/lib/va
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 import { sanitizeBasic, sanitizeHtml, sanitizeUrl } from '@/lib/sanitize'
 import { serializeDecimals } from '@/lib/utils'
+import { revalidatePath } from 'next/cache'
 
 // GET /api/store-products - Public (product browsing)
 export async function GET(request: NextRequest) {
@@ -124,6 +125,12 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    // On-demand revalidation: update store page cache
+    try {
+      const storeData = await db.store.findUnique({ where: { id: storeId }, select: { slug: true } })
+      if (storeData?.slug) revalidatePath(`/store/${storeData.slug}`)
+    } catch { /* non-critical */ }
+
     return apiSuccess(serializeDecimals(product), 201, request)
   } catch (error: unknown) {
     console.error('[PRODUCTS] POST error:', error instanceof Error ? error.message : String(error))
@@ -180,6 +187,13 @@ export async function PUT(request: NextRequest) {
       data,
     })
 
+    // On-demand revalidation: update store page cache
+    try {
+      const storeData = await db.store.findUnique({ where: { id: product.storeId }, select: { slug: true } })
+      if (storeData?.slug) revalidatePath(`/store/${storeData.slug}`)
+      revalidatePath(`/store/${storeData?.slug || ''}/product/${id}`)
+    } catch { /* non-critical */ }
+
     return apiSuccess(serializeDecimals(product), 200, request)
   } catch (error: unknown) {
     console.error('[PRODUCTS] PUT error:', error instanceof Error ? error.message : String(error))
@@ -217,7 +231,19 @@ export async function DELETE(request: NextRequest) {
       }
     }
 
+    // Get store slug before deleting for cache revalidation
+    let storeSlug = ''
+    try {
+      const product = await db.storeProduct.findUnique({ where: { id }, include: { store: { select: { slug: true } } } })
+      storeSlug = product?.store?.slug || ''
+    } catch { /* non-critical */ }
+
     await db.storeProduct.delete({ where: { id } })
+
+    // On-demand revalidation: update store page cache
+    if (storeSlug) {
+      try { revalidatePath(`/store/${storeSlug}`) } catch { /* non-critical */ }
+    }
 
     return apiSuccess({ success: true, message: 'Producto eliminado' }, 200, request)
   } catch (error: unknown) {
