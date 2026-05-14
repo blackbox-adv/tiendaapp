@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
     // Check duplicate
     const existing = await db.user.findUnique({ where: { email: email.toLowerCase() } })
     if (existing) {
-      return apiError('El email ya esta registrado', 409, undefined, request)
+      return apiError('Este email ya esta registrado. Intenta iniciar sesion con tu cuenta existente.', 409, undefined, request)
     }
 
     const hashedPassword = await hashPassword(password)
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
       error && typeof error === 'object' && 'code' in error &&
       (error as { code: string }).code === 'P2002'
     ) {
-      return apiError('El email ya esta registrado', 409, undefined, request)
+      return apiError('Este email ya esta registrado. Intenta iniciar sesion con tu cuenta existente.', 409, undefined, request)
     }
     return apiError('Error creando usuario', 500, undefined, request)
   }
