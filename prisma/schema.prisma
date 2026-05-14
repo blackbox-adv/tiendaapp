@@ -139,6 +139,8 @@ model Subscription {
   @@index([storeId])                              // Store's subscriptions
   @@index([status])                               // Active subscriptions filter
   @@index([status, nextBillingDate])              // Billing check queries
+  @@index([userId, storeId])                      // Composite lookup for ownership checks
+  @@index([userId, storeId, status])              // Active subscription per user+store query
   // REMOVED: @@unique([userId, storeId, status]) — broken on re-subscription
   // Instead, enforce one active subscription per user+store at application level
 }

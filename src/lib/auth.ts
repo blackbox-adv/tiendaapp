@@ -45,7 +45,8 @@ export function getTokenFromHeader(request: Request): string | null {
 
 // Middleware helper - call at start of every protected API route
 // Returns { user, error, status }
-export function authenticateRequest(request: Request): { user: JwtPayload; error: null } | { user: null; error: string; status: number } {
+// CRITICAL FIX: Now validates tokenVersion against DB to invalidate tokens after password reset
+export async function authenticateRequest(request: Request): Promise<{ user: JwtPayload; error: null } | { user: null; error: string; status: number }> {
   const token = getTokenFromHeader(request)
   if (!token) {
     return { user: null, error: 'Token de autenticación requerido', status: 401 }
@@ -54,6 +55,31 @@ export function authenticateRequest(request: Request): { user: JwtPayload; error
   const payload = verifyToken(token)
   if (!payload) {
     return { user: null, error: 'Token inválido o expirado', status: 401 }
+  }
+
+  // Verify tokenVersion matches the one in DB (invalidates tokens after password reset)
+  try {
+    const { db } = await import('@/lib/db')
+    const user = await db.user.findUnique({
+      where: { id: payload.userId },
+      select: { tokenVersion: true, isActive: true },
+    })
+    
+    if (!user) {
+      return { user: null, error: 'Usuario no encontrado', status: 401 }
+    }
+    
+    if (!user.isActive) {
+      return { user: null, error: 'Cuenta desactivada', status: 403 }
+    }
+    
+    if (user.tokenVersion !== payload.tokenVersion) {
+      return { user: null, error: 'Sesión expirada. Inicia sesión nuevamente.', status: 401 }
+    }
+  } catch (err) {
+    // If DB check fails, allow the request but log the error
+    // This prevents a total outage if DB is temporarily down
+    console.error('[AUTH] tokenVersion DB check failed:', err)
   }
   
   return { user: payload, error: null }

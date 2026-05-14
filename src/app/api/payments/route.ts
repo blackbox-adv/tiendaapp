@@ -8,7 +8,7 @@ import { serializeDecimals, decimalToNumber } from '@/lib/utils'
 
 // POST /api/payments/create-intent - Create a payment intent
 export async function POST(request: NextRequest) {
-  const auth = authenticateRequest(request)
+  const auth = await authenticateRequest(request)
   if (auth.error) {
     return apiError(auth.error, auth.status, undefined, request)
   }
@@ -161,8 +161,9 @@ export async function PUT(request: NextRequest) {
         return apiError('Monto de pago no coincide con el precio del plan', 400, undefined, request)
       }
 
+      // FIXED: Include storeId in subscription lookup for correct matching
       let existing = await db.subscription.findFirst({
-        where: { userId, status: 'active' },
+        where: { userId, ...(storeId ? { storeId } : {}), status: 'active' },
       })
 
       // FIXED: Calculate nextBillingDate based on billing cycle
@@ -170,50 +171,65 @@ export async function PUT(request: NextRequest) {
       const days = billingCycle === 'yearly' ? 365 : 30
       const nextBillingDate = new Date(Date.now() + days * 24 * 60 * 60 * 1000)
 
-      if (existing) {
-        await db.subscription.update({
-          where: { id: existing.id },
-          data: { planId, startDate: new Date(), status: 'active', nextBillingDate },
-        })
-      } else {
-        // Require storeId for new subscriptions
-        if (!storeId) {
-          return apiError('storeId es requerido para crear una suscripción', 400, undefined, request)
+      // CRITICAL FIX: Wrap subscription update + payment creation in a transaction
+      // to prevent data inconsistency if either operation fails
+      const result = await db.$transaction(async (tx) => {
+        let subscriptionId: string
+
+        if (existing) {
+          await tx.subscription.update({
+            where: { id: existing!.id },
+            data: { planId, startDate: new Date(), status: 'active', nextBillingDate },
+          })
+          subscriptionId = existing!.id
+        } else {
+          // Require storeId for new subscriptions
+          if (!storeId) {
+            throw new Error('storeId_required')
+          }
+          const newSub = await tx.subscription.create({
+            data: {
+              userId,
+              storeId,
+              planId,
+              status: 'active',
+              startDate: new Date(),
+              nextBillingDate,
+            },
+          })
+          subscriptionId = newSub.id
         }
-        const newSub = await db.subscription.create({
+
+        // Create payment record within the same transaction
+        await tx.payment.create({
           data: {
+            amount: amount || planPrice,
+            status: 'completed',
+            externalRef: externalRef || `webhook_${Date.now()}`,
+            subscriptionId,
             userId,
-            storeId,
+            storeId: storeId || '',
             planId,
-            status: 'active',
-            startDate: new Date(),
-            nextBillingDate,
           },
         })
-        existing = newSub
-      }
 
-      // Log the payment event (subscriptionId is now guaranteed to exist)
-      if (!existing?.id) {
-        return apiError('Error: no se pudo obtener la suscripción', 500, undefined, request)
-      }
-      // Require storeId for payment record
-      if (!storeId) {
-        return apiError('storeId es requerido para registrar el pago', 400, undefined, request)
-      }
-      await db.payment.create({
-        data: {
-          amount: amount || planPrice,
-          status: 'completed',
-          externalRef: externalRef || `webhook_${Date.now()}`,
-          subscriptionId: existing.id,
-          userId,
-          storeId,
-          planId,
-        },
+        return subscriptionId
+      }).catch((err) => {
+        if (err instanceof Error && err.message === 'storeId_required') {
+          return 'storeId_required'
+        }
+        console.error('[PAYMENTS] Webhook transaction error:', err)
+        return null
       })
 
-      // Send subscription activation email
+      if (result === 'storeId_required') {
+        return apiError('storeId es requerido para crear una suscripción', 400, undefined, request)
+      }
+      if (result === null) {
+        return apiError('Error procesando la suscripción', 500, undefined, request)
+      }
+
+      // Send subscription activation email (non-blocking)
       const user = await db.user.findUnique({ where: { id: userId }, select: { name: true, email: true } })
       if (user) {
         sendSubscriptionEmail(user.name, user.email, plan.name, planPrice, 'activated').catch(() => {})

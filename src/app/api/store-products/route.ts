@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
 
 // POST /api/store-products - Create product (auth required + ownership + plan limit)
 export async function POST(request: NextRequest) {
-  const auth = authenticateRequest(request)
+  const auth = await authenticateRequest(request)
   if (auth.error) {
     return apiError(auth.error, auth.status, undefined, request)
   }
@@ -92,9 +92,45 @@ export async function POST(request: NextRequest) {
 
     // Check product limit based on plan
     const maxProducts = store.subscriptions[0]?.plan?.maxProducts || 5
-    const currentCount = await db.storeProduct.count({ where: { storeId } })
 
-    if (currentCount >= maxProducts) {
+    // CRITICAL FIX: Use transaction to prevent race condition on product limit check
+    const product = await db.$transaction(async (tx) => {
+      const currentCount = await tx.storeProduct.count({ where: { storeId } })
+
+      if (currentCount >= maxProducts) {
+        throw new Error('PRODUCT_LIMIT')
+      }
+
+      // Sanitize user-generated content (XSS prevention)
+      const sanitizedName = sanitizeBasic(name)
+      const sanitizedDescription = sanitizeHtml(description || '')
+      const sanitizedImageUrl = sanitizeUrl(imageUrl || '')
+      const sanitizedCategory = sanitizeBasic(category || '')
+
+      return tx.storeProduct.create({
+        data: {
+          storeId,
+          name: sanitizedName,
+          description: sanitizedDescription,
+          price: parseFloat(price.toString()),
+          originalPrice: originalPrice ? parseFloat(originalPrice.toString()) : null,
+          imageUrl: sanitizedImageUrl,
+          category: sanitizedCategory,
+          color: color || null,
+          isActive: isActive !== undefined ? isActive : true,
+          featured: featured === true,
+          rating: rating ? parseFloat(rating.toString()) : 0,
+        },
+      })
+    }).catch((err) => {
+      if (err instanceof Error && err.message === 'PRODUCT_LIMIT') {
+        return 'PRODUCT_LIMIT'
+      }
+      console.error('[PRODUCTS] Transaction error:', err)
+      return null
+    })
+
+    if (product === 'PRODUCT_LIMIT') {
       return apiError(
         `Has alcanzado el limite de ${maxProducts} productos. Actualiza tu plan para mas.`,
         403,
@@ -103,27 +139,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Sanitize user-generated content (XSS prevention)
-    const sanitizedName = sanitizeBasic(name)
-    const sanitizedDescription = sanitizeHtml(description || '')
-    const sanitizedImageUrl = sanitizeUrl(imageUrl || '')
-    const sanitizedCategory = sanitizeBasic(category || '')
-
-    const product = await db.storeProduct.create({
-      data: {
-        storeId,
-        name: sanitizedName,
-        description: sanitizedDescription,
-        price: parseFloat(price.toString()),
-        originalPrice: originalPrice ? parseFloat(originalPrice.toString()) : null,
-        imageUrl: sanitizedImageUrl,
-        category: sanitizedCategory,
-        color: color || null,
-        isActive: isActive !== undefined ? isActive : true,
-        featured: featured === true,
-        rating: rating ? parseFloat(rating.toString()) : 0,
-      },
-    })
+    if (product === null) {
+      return apiError('Error creando producto', 500, undefined, request)
+    }
 
     // On-demand revalidation: update store page cache
     try {
@@ -140,7 +158,7 @@ export async function POST(request: NextRequest) {
 
 // PUT /api/store-products - Update product (auth required + ownership)
 export async function PUT(request: NextRequest) {
-  const auth = authenticateRequest(request)
+  const auth = await authenticateRequest(request)
   if (auth.error) {
     return apiError(auth.error, auth.status, undefined, request)
   }
@@ -203,7 +221,7 @@ export async function PUT(request: NextRequest) {
 
 // DELETE /api/store-products/:id - Delete product (auth required + ownership)
 export async function DELETE(request: NextRequest) {
-  const auth = authenticateRequest(request)
+  const auth = await authenticateRequest(request)
   if (auth.error) {
     return apiError(auth.error, auth.status, undefined, request)
   }

@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     return apiError('Seed endpoint is disabled in production. Use database migrations.', 403, undefined, request)
   }
   // Protect this endpoint!
-  const auth = authenticateRequest(request)
+  const auth = await authenticateRequest(request)
   if (auth.error) {
     return apiError(auth.error, auth.status, undefined, request)
   }

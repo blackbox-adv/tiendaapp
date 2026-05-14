@@ -9,7 +9,7 @@ import { serializeDecimals } from '@/lib/utils'
 
 // GET /api/users - List users (admin only)
 export async function GET(request: NextRequest) {
-  const auth = authenticateRequest(request)
+  const auth = await authenticateRequest(request)
   if (auth.error) {
     return apiError(auth.error, auth.status, undefined, request)
   }
@@ -20,19 +20,37 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const users = await db.user.findMany({
-      include: {
-        stores: { select: { id: true, name: true, slug: true, isActive: true } },
-        subscriptions: {
-          include: { plan: { select: { id: true, name: true, price: true } } },
+    const { searchParams } = new URL(request.url)
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '50', 10)))
+    const skip = (page - 1) * limit
+
+    const [users, total] = await Promise.all([
+      db.user.findMany({
+        include: {
+          stores: { select: { id: true, name: true, slug: true, isActive: true } },
+          subscriptions: {
+            include: { plan: { select: { id: true, name: true, price: true } } },
+          },
         },
-      },
-      orderBy: { createdAt: 'desc' },
-    })
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      db.user.count(),
+    ])
 
     // Remove password from response
     const safeUsers = users.map(({ password: _, ...user }) => user)
-    return apiSuccess(serializeDecimals(safeUsers), 200, request)
+    return apiSuccess(serializeDecimals({
+      users: safeUsers,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    }), 200, request)
   } catch (error: unknown) {
     console.error('[USERS] GET error:', error instanceof Error ? error.message : String(error))
     return apiError('Error obteniendo usuarios', 500, undefined, request)
@@ -88,7 +106,7 @@ export async function POST(request: NextRequest) {
 
 // PUT /api/users - Update user (auth required, admin can update anyone, user can update self)
 export async function PUT(request: NextRequest) {
-  const auth = authenticateRequest(request)
+  const auth = await authenticateRequest(request)
   if (auth.error) {
     return apiError(auth.error, auth.status, undefined, request)
   }

@@ -1,19 +1,20 @@
 import { db } from '@/lib/db'
-import { NextResponse } from 'next/server'
 import { authenticateRequest } from '@/lib/auth'
+import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 import { sendSubscriptionEmail } from '@/lib/email'
-import { decimalToNumber } from '@/lib/utils'
+import { decimalToNumber, serializeDecimals } from '@/lib/utils'
+import { NextRequest } from 'next/server'
 
 // POST /api/billing/check - Check and expire past-due subscriptions
 // Called by cron job daily. Requires admin auth.
-export async function POST(request: Request) {
-  const auth = authenticateRequest(request)
+export async function POST(request: NextRequest) {
+  const auth = await authenticateRequest(request)
   if (auth.error) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status })
+    return apiError(auth.error, auth.status, undefined, request)
   }
-  if (!auth.user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
+  if (!auth.user) return apiError('No autenticado', 401, undefined, request)
   if (auth.user.role !== 'super_admin') {
-    return NextResponse.json({ error: 'Solo administradores' }, { status: 403 })
+    return apiError('Solo administradores', 403, undefined, request)
   }
 
   try {
@@ -21,7 +22,7 @@ export async function POST(request: Request) {
     let expiredCount = 0
     let pastDueCount = 0
 
-    // FIXED: Use targeted queries instead of loading ALL subscriptions
+    // Use targeted queries instead of loading ALL subscriptions
     // 1. Find active subscriptions past their nextBillingDate
     const activeSubscriptions = await db.subscription.findMany({
       where: {
@@ -33,7 +34,6 @@ export async function POST(request: Request) {
     })
 
     for (const sub of activeSubscriptions) {
-      // FIXED: Wrap each subscription's operations in a transaction
       try {
         await db.$transaction([
           db.subscription.update({
@@ -55,20 +55,18 @@ export async function POST(request: Request) {
         ])
         pastDueCount++
 
-        // Send past_due notification email
         if (sub.user) {
           sendSubscriptionEmail(sub.user.name, sub.user.email, sub.plan.name, Number(sub.plan.price), 'downgraded').catch(() => {})
         }
       } catch (txError) {
         console.error(`[BILLING] Transaction failed for subscription ${sub.id}:`, txError)
-        // Continue processing other subscriptions
       }
     }
 
     // 2. Subscriptions past_due for 7+ days → expire and downgrade to Free
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
     const freePlan = await db.plan.findUnique({ where: { type: 'free' } })
-    if (!freePlan) return NextResponse.json({ error: 'Plan Free no encontrado' }, { status: 500 })
+    if (!freePlan) return apiError('Plan Free no encontrado', 500, undefined, request)
 
     const pastDueSubscriptions = await db.subscription.findMany({
       where: {
@@ -80,7 +78,6 @@ export async function POST(request: Request) {
     })
 
     for (const sub of pastDueSubscriptions) {
-      // FIXED: Wrap all operations in a transaction
       try {
         await db.$transaction([
           db.subscription.update({
@@ -113,40 +110,36 @@ export async function POST(request: Request) {
         ])
         expiredCount++
 
-        // Send downgrade email
         if (sub.user) {
           sendSubscriptionEmail(sub.user.name, sub.user.email, 'Free', 0, 'downgraded').catch(() => {})
         }
       } catch (txError) {
         console.error(`[BILLING] Transaction failed for expired subscription ${sub.id}:`, txError)
-        // Continue processing other subscriptions
       }
     }
 
-    return NextResponse.json({
+    return apiSuccess({
       success: true, checkedAt: now.toISOString(),
       pastDueCount, expiredCount,
       message: `Verificación: ${pastDueCount} vencidas, ${expiredCount} expiradas y degradadas a Free`,
-    })
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Error checking subscriptions'
-    return NextResponse.json({ error: message }, { status: 500 })
+    }, 200, request)
+  } catch {
+    return apiError('Error checking subscriptions', 500, undefined, request)
   }
 }
 
 // GET /api/billing/check - Get billing status summary (admin)
-export async function GET(request: Request) {
-  const auth = authenticateRequest(request)
-  if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status })
-  if (!auth.user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
-  if (auth.user.role !== 'super_admin') return NextResponse.json({ error: 'Solo administradores' }, { status: 403 })
+export async function GET(request: NextRequest) {
+  const auth = await authenticateRequest(request)
+  if (auth.error) return apiError(auth.error, auth.status, undefined, request)
+  if (!auth.user) return apiError('No autenticado', 401, undefined, request)
+  if (auth.user.role !== 'super_admin') return apiError('Solo administradores', 403, undefined, request)
 
   try {
     const now = new Date()
     const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
 
-    // FIXED: Use targeted queries instead of loading all subscriptions
     const [activeCount, expiringSoon, pastDueList, expiredCount, pendingPayments, completedPayments] = await Promise.all([
       db.subscription.count({ where: { status: 'active' } }),
       db.subscription.count({
@@ -173,12 +166,15 @@ export async function GET(request: Request) {
     const monthlyRevenue = completedPayments.reduce((sum, p) => sum + Number(p.amount), 0)
     const monthlyRevenueVerified = completedPayments.filter(p => p.verifiedAt).reduce((sum, p) => sum + Number(p.amount), 0)
 
-    return NextResponse.json({
+    return apiSuccess(serializeDecimals({
       activeCount, expiringSoon, pastDueCount: pastDueList.length, pastDueSubscriptions: pastDueList,
       expiredCount, pendingPayments, monthlyRevenue, monthlyRevenueVerified,
-    })
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Error fetching billing status'
-    return NextResponse.json({ error: message }, { status: 500 })
+    }), 200, request)
+  } catch {
+    return apiError('Error fetching billing status', 500, undefined, request)
   }
+}
+
+export async function OPTIONS(request: NextRequest) {
+  return handleCorsPreflight(request)
 }

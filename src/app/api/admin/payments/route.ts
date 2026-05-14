@@ -1,5 +1,6 @@
 import { db } from '@/lib/db'
 import { authenticateRequest } from '@/lib/auth'
+import { validateBody, adminPaymentActionSchema } from '@/lib/validations'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 import { sendSubscriptionEmail, sendPaymentRejectedEmail } from '@/lib/email'
 import { serializeDecimals, decimalToNumber } from '@/lib/utils'
@@ -7,7 +8,7 @@ import { serializeDecimals, decimalToNumber } from '@/lib/utils'
 // ── GET /api/admin/payments ──
 // List all payments with optional status filter, paginated, ordered by newest first.
 export async function GET(request: Request) {
-  const auth = authenticateRequest(request)
+  const auth = await authenticateRequest(request)
   if (auth.error) return apiError(auth.error, auth.status, undefined, request)
   if (!auth.user || auth.user.role !== 'super_admin') return apiError('Solo administradores', 403, undefined, request)
 
@@ -44,25 +45,18 @@ export async function GET(request: Request) {
 // ── PUT /api/admin/payments ──
 // Verify / approve / reject a manual payment (Yape, transfer, etc.)
 export async function PUT(request: Request) {
-  const auth = authenticateRequest(request)
+  const auth = await authenticateRequest(request)
   if (auth.error) return apiError(auth.error, auth.status, undefined, request)
   if (!auth.user || auth.user.role !== 'super_admin') return apiError('Solo administradores', 403, undefined, request)
 
   try {
     const body = await request.json()
-    const { paymentId, action, notes } = body as {
-      paymentId: string
-      action: 'approve' | 'reject'
-      notes?: string
+    const validation = validateBody(adminPaymentActionSchema, body)
+    if (!validation.success) {
+      return apiError(validation.error, 400, undefined, request)
     }
 
-    if (!paymentId || !action) {
-      return apiError('paymentId y action son requeridos', 400, undefined, request)
-    }
-
-    if (action !== 'approve' && action !== 'reject') {
-      return apiError('action debe ser "approve" o "reject"', 400, undefined, request)
-    }
+    const { paymentId, action, notes } = validation.data
 
     // Fetch the payment with its plan info
     const payment = await db.payment.findUnique({

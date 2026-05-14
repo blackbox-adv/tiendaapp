@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Auth check (required for any store listing)
-    const auth = authenticateRequest(request)
+    const auth = await authenticateRequest(request)
     if (auth.error) {
       return apiError(auth.error, auth.status, undefined, request)
     }
@@ -158,7 +158,7 @@ export async function GET(request: NextRequest) {
 
 // POST /api/stores - Create store (auth required)
 export async function POST(request: NextRequest) {
-  const auth = authenticateRequest(request)
+  const auth = await authenticateRequest(request)
   if (auth.error) {
     return apiError(auth.error, auth.status, undefined, request)
   }
@@ -179,27 +179,85 @@ export async function POST(request: NextRequest) {
     const { name, description, category, logo, primaryColor, secondaryColor, whatsappNumber, template } =
       validation.data
 
-    // Check store limit per plan (owner gets 1 store on free, up to 3 on premium)
-    const existingStores = await db.store.count({
-      where: { ownerId: auth.user.userId },
+    // CRITICAL FIX: Use transaction to prevent race condition on store limit check
+    const store = await db.$transaction(async (tx) => {
+      // Check store limit per plan (owner gets 1 store on free, up to 3 on premium)
+      const existingStores = await tx.store.count({
+        where: { ownerId: auth.user.userId },
+      })
+
+      // Check user's plan for store limit
+      const userSubs = await tx.subscription.findMany({
+        where: { userId: auth.user.userId, status: 'active' },
+        include: { plan: true },
+        orderBy: { startDate: 'desc' },
+        take: 1,
+      })
+
+      let maxStores = 1 // Default: 1 store
+      if (userSubs.length > 0 && userSubs[0].plan) {
+        const planType = userSubs[0].plan.type
+        if (planType === 'premium') maxStores = 3
+        else if (planType === 'pro') maxStores = 1
+      }
+
+      if (existingStores >= maxStores) {
+        throw new Error('STORE_LIMIT')
+      }
+
+      // Sanitize user-generated content
+      const sanitizedName = sanitizeBasic(name)
+      const sanitizedDescription = sanitizeHtml(description || '')
+      const sanitizedCategory = sanitizeBasic(category || 'general')
+
+      // Generate unique slug from sanitized name
+      const baseSlug = sanitizedName
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '')
+        .slice(0, 60)
+
+      const slug = `${baseSlug}-${Date.now().toString(36)}`
+
+      return tx.store.create({
+        data: {
+          ownerId: auth.user.userId,
+          name: sanitizedName,
+          slug,
+          description: sanitizedDescription,
+          logo: logo || '',
+          primaryColor: primaryColor || '#7C3AED',
+          secondaryColor: secondaryColor || '#10B981',
+          whatsappNumber: whatsappNumber || '',
+          template: template || 'moderna',
+          category: sanitizedCategory,
+        },
+        include: { owner: { select: { id: true, name: true, email: true } } },
+      })
+    }).catch((err) => {
+      if (err instanceof Error && err.message === 'STORE_LIMIT') {
+        return 'STORE_LIMIT'
+      }
+      console.error('[STORES] Transaction error:', err)
+      return null
     })
 
-    // Check user's plan for store limit
-    const userSubs = await db.subscription.findMany({
-      where: { userId: auth.user.userId, status: 'active' },
-      include: { plan: true },
-      orderBy: { startDate: 'desc' },
-      take: 1,
-    })
-
-    let maxStores = 1 // Default: 1 store
-    if (userSubs.length > 0 && userSubs[0].plan) {
-      const planType = userSubs[0].plan.type
-      if (planType === 'premium') maxStores = 3
-      else if (planType === 'pro') maxStores = 1
-    }
-
-    if (existingStores >= maxStores) {
+    if (store === 'STORE_LIMIT') {
+      // Re-check for the limit message
+      const userSubs = await db.subscription.findMany({
+        where: { userId: auth.user.userId, status: 'active' },
+        include: { plan: true },
+        orderBy: { startDate: 'desc' },
+        take: 1,
+      })
+      let maxStores = 1
+      if (userSubs.length > 0 && userSubs[0].plan) {
+        const planType = userSubs[0].plan.type
+        if (planType === 'premium') maxStores = 3
+        else if (planType === 'pro') maxStores = 1
+      }
       return apiError(
         `Has alcanzado el limite de ${maxStores} tienda(s). Actualiza tu plan para mas.`,
         403,
@@ -208,37 +266,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Sanitize user-generated content
-    const sanitizedName = sanitizeBasic(name)
-    const sanitizedDescription = sanitizeHtml(description || '')
-    const sanitizedCategory = sanitizeBasic(category || 'general')
-
-    // Generate unique slug from sanitized name
-    const baseSlug = sanitizedName
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '')
-      .slice(0, 60)
-
-    const slug = `${baseSlug}-${Date.now().toString(36)}`
-
-    const store = await db.store.create({
-      data: {
-        ownerId: auth.user.userId,
-        name: sanitizedName,
-        slug,
-        description: sanitizedDescription,
-        logo: logo || '',
-        primaryColor: primaryColor || '#7C3AED',
-        secondaryColor: secondaryColor || '#10B981',
-        whatsappNumber: whatsappNumber || '',
-        template: template || 'moderna',
-        category: sanitizedCategory,
-      },
-      include: { owner: { select: { id: true, name: true, email: true } } },
-    })
+    if (store === null) {
+      return apiError('Error creando tienda', 500, undefined, request)
+    }
 
     return apiSuccess(serializeDecimals(store), 201, request)
   } catch (error: unknown) {
@@ -249,7 +279,7 @@ export async function POST(request: NextRequest) {
 
 // PUT /api/stores - Update store (auth required + ownership check)
 export async function PUT(request: NextRequest) {
-  const auth = authenticateRequest(request)
+  const auth = await authenticateRequest(request)
   if (auth.error) {
     return apiError(auth.error, auth.status, undefined, request)
   }

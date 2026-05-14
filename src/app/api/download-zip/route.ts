@@ -4,7 +4,7 @@ import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 
 // GET /api/download-zip - Admin only: download store data as zip placeholder
 export async function GET(request: NextRequest) {
-  const auth = authenticateRequest(request)
+  const auth = await authenticateRequest(request)
   if (auth.error) {
     return apiError(auth.error, auth.status, undefined, request)
   }

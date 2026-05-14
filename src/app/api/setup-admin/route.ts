@@ -1,13 +1,14 @@
 import { db } from '@/lib/db'
 import { hashPassword, authenticateRequest, requireRole } from '@/lib/auth'
 import { NextRequest } from 'next/server'
+import { validateBody, adminSetupSchema } from '@/lib/validations'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 import { auditLog, getClientIp } from '@/lib/env'
 
 // POST /api/setup-admin - Reset admin password (REQUIRES super_admin auth)
 export async function POST(request: NextRequest) {
   // CRITICAL: Require super_admin authentication
-  const auth = authenticateRequest(request)
+  const auth = await authenticateRequest(request)
   if (auth.error) {
     return apiError(auth.error, auth.status, undefined, request)
   }
@@ -19,16 +20,13 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
-    const { email, newPassword } = body
+    const validation = validateBody(adminSetupSchema, body)
+    if (!validation.success) {
+      return apiError(validation.error, 400, undefined, request)
+    }
+
+    const { email, newPassword } = validation.data
     const clientIp = getClientIp(request)
-
-    if (!email || !newPassword) {
-      return apiError('Email y nueva contraseña son requeridos', 400, undefined, request)
-    }
-
-    if (newPassword.length < 8) {
-      return apiError('La contraseña debe tener al menos 8 caracteres', 400, undefined, request)
-    }
 
     // Find user by email
     const user = await db.user.findUnique({ where: { email: email.toLowerCase() } })
@@ -42,9 +40,10 @@ export async function POST(request: NextRequest) {
     }
 
     const hashedPassword = await hashPassword(newPassword)
+    // CRITICAL FIX: Increment tokenVersion to invalidate all existing sessions
     await db.user.update({
       where: { id: user.id },
-      data: { password: hashedPassword },
+      data: { password: hashedPassword, tokenVersion: { increment: 1 } },
     })
 
     auditLog({ action: 'ADMIN_PASSWORD_RESET', userId: auth.user.userId, userEmail: auth.user.email, ip: clientIp, details: { targetUser: user.email }, success: true, statusCode: 200 })

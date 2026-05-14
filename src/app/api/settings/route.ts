@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
 
 // PUT /api/settings - Admin only
 export async function PUT(request: NextRequest) {
-  const auth = authenticateRequest(request)
+  const auth = await authenticateRequest(request)
   if (auth.error) {
     return apiError(auth.error, auth.status, undefined, request)
   }

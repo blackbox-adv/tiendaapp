@@ -1,28 +1,25 @@
 import { db } from '@/lib/db'
 import { NextRequest } from 'next/server'
 import { authenticateRequest } from '@/lib/auth'
-import { apiError, apiSuccess, handleCorsPreflight, corsHeaders } from '@/lib/api-response'
+import { validateBody, paymentSubmitSchema } from '@/lib/validations'
+import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 import { sendPaymentSubmittedEmail } from '@/lib/email'
 import { serializeDecimals, decimalToNumber } from '@/lib/utils'
 
 // POST /api/payments/submit — Submit manual payment (Yape/Transfer voucher)
 export async function POST(request: NextRequest) {
-  const auth = authenticateRequest(request)
+  const auth = await authenticateRequest(request)
   if (auth.error) return apiError(auth.error, auth.status, undefined, request)
   if (!auth.user) return apiError('No autenticado', 401, undefined, request)
 
   try {
     const body = await request.json()
-    const { planId, storeId, externalRef, paymentMethod } = body as {
-      planId: string
-      storeId?: string
-      externalRef: string
-      paymentMethod?: string
+    const validation = validateBody(paymentSubmitSchema, body)
+    if (!validation.success) {
+      return apiError(validation.error, 400, undefined, request)
     }
 
-    if (!planId || !externalRef?.trim()) {
-      return apiError('planId y externalRef (numero de operacion) son requeridos', 400, undefined, request)
-    }
+    const { planId, storeId, externalRef, paymentMethod } = validation.data
 
     // Get the plan
     const plan = await db.plan.findUnique({ where: { id: planId } })
@@ -67,7 +64,7 @@ export async function POST(request: NextRequest) {
       await db.payment.update({
         where: { id: existingPending.id },
         data: {
-          externalRef: externalRef.trim(),
+          externalRef: externalRef,
           paymentMethod: paymentMethod || 'yape',
           createdAt: new Date(), // Refresh timestamp
         },
@@ -124,7 +121,7 @@ export async function POST(request: NextRequest) {
         amount: decimalToNumber(plan.price),
         status: 'pending',
         paymentMethod: paymentMethod || 'yape',
-        externalRef: externalRef.trim(),
+        externalRef: externalRef,
         userId: auth.user.userId,
         storeId: targetStoreId,
         planId,
@@ -135,7 +132,7 @@ export async function POST(request: NextRequest) {
     // Send payment submitted confirmation email (non-blocking)
     const user = await db.user.findUnique({ where: { id: auth.user.userId }, select: { name: true, email: true } })
     if (user) {
-      sendPaymentSubmittedEmail(user.name, user.email, plan.name, Number(plan.price), externalRef.trim()).catch(() => {})
+      sendPaymentSubmittedEmail(user.name, user.email, plan.name, Number(plan.price), externalRef).catch(() => {})
     }
 
     return apiSuccess(serializeDecimals({

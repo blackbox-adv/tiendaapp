@@ -173,6 +173,37 @@ export const updateSubscriptionSchema = z.object({
   status: z.enum(['active', 'past_due', 'cancelled', 'expired']).optional(),
 })
 
+// ── Payment submission schema (Yape/Transfer) ──
+export const paymentSubmitSchema = z.object({
+  planId: z.string().min(1, 'planId es requerido'),
+  storeId: z.string().optional(),
+  externalRef: z
+    .string()
+    .min(1, 'Numero de operacion requerido')
+    .max(50, 'Numero de operacion no puede exceder 50 caracteres')
+    .trim(),
+  paymentMethod: z
+    .enum(['yape', 'plin', 'bank_transfer'])
+    .optional()
+    .default('yape'),
+})
+
+// ── Admin setup schema ──
+export const adminSetupSchema = z.object({
+  email: z.string().email('Email invalido').toLowerCase().trim(),
+  newPassword: z
+    .string()
+    .min(8, 'Contrasena debe tener al menos 8 caracteres')
+    .max(128, 'Contrasena no puede exceder 128 caracteres'),
+})
+
+// ── Admin payment action schema ──
+export const adminPaymentActionSchema = z.object({
+  paymentId: z.string().min(1, 'paymentId es requerido'),
+  action: z.enum(['approve', 'reject']),
+  notes: z.string().max(500, 'Notas no pueden exceder 500 caracteres').optional(),
+})
+
 // ── Settings schema ──
 export const settingsSchema = z.record(
   z.string().max(50, 'Key no puede exceder 50 caracteres'),

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { corsHeaders } from '@/lib/api-response'
 import { authenticateRequest } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
+import { db } from '@/lib/db'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
@@ -39,7 +40,7 @@ function validateFileMagicBytes(buffer: Buffer, claimedType: string): boolean {
 
 export async function POST(request: Request) {
   // CRITICAL: Require authentication for uploads
-  const auth = authenticateRequest(request)
+  const auth = await authenticateRequest(request)
   if (auth.error) {
     return NextResponse.json({ error: auth.error }, { status: auth.status, headers: corsHeaders(request) })
   }
@@ -111,7 +112,7 @@ export async function POST(request: Request) {
 // DELETE endpoint to remove images from storage (auth required + ownership check)
 export async function DELETE(request: Request) {
   // CRITICAL: Require authentication for deletions
-  const auth = authenticateRequest(request)
+  const auth = await authenticateRequest(request)
   if (auth.error) {
     return NextResponse.json({ error: auth.error }, { status: auth.status, headers: corsHeaders(request) })
   }
@@ -136,6 +137,36 @@ export async function DELETE(request: Request) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     if (supabaseUrl && !url.startsWith(supabaseUrl)) {
       return NextResponse.json({ error: 'URL de imagen inválida' }, { status: 400, headers: corsHeaders(request) })
+    }
+
+    // CRITICAL FIX: Verify the image belongs to a store owned by this user
+    // Check if any product in user's stores uses this image URL
+    const userStores = await db.store.findMany({
+      where: { ownerId: auth.user.userId },
+      select: { id: true },
+    })
+    const userStoreIds = userStores.map(s => s.id)
+
+    const productWithImage = await db.storeProduct.findFirst({
+      where: {
+        imageUrl: url,
+        storeId: { in: userStoreIds },
+      },
+      select: { id: true },
+    })
+
+    // Also check store logos
+    const storeWithImage = await db.store.findFirst({
+      where: {
+        logo: url,
+        id: { in: userStoreIds },
+      },
+      select: { id: true },
+    })
+
+    // Admin can delete any image; regular users can only delete their own
+    if (auth.user.role !== 'super_admin' && !productWithImage && !storeWithImage) {
+      return NextResponse.json({ error: 'No tienes permiso para eliminar esta imagen' }, { status: 403, headers: corsHeaders(request) })
     }
 
     // Extract file path from URL: https://project.supabase.co/storage/v1/object/public/bucket/path

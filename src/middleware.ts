@@ -85,10 +85,11 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // API-specific headers
+  // API-specific headers (enhanced with more security headers)
   if (pathname.startsWith('/api/')) {
     response.headers.set('X-Content-Type-Options', 'nosniff')
     response.headers.set('X-Frame-Options', 'DENY')
+    response.headers.set('Cache-Control', 'no-store')
   }
 
   // Handle CORS preflight for ALL API routes
@@ -183,6 +184,46 @@ export function middleware(request: NextRequest) {
       return NextResponse.json({ error: 'Demasiadas solicitudes.', code: 'RATE_LIMITED' }, { status: 429, headers: corsHeaders(request) })
     }
   }
+  // Rate limit: Store creation (max 5 per minute per IP)
+  if (pathname === '/api/stores' && method === 'POST') {
+    const key = getRateLimitKey(request, 'store-create')
+    if (isRateLimited(key, 5, 60 * 1000)) {
+      return NextResponse.json({ error: 'Demasiadas tiendas creadas. Intenta de nuevo en 1 minuto.', code: 'RATE_LIMITED' }, { status: 429, headers: corsHeaders(request) })
+    }
+  }
+
+  // Rate limit: Product creation (max 20 per minute per IP)
+  if (pathname === '/api/store-products' && method === 'POST') {
+    const key = getRateLimitKey(request, 'product-create')
+    if (isRateLimited(key, 20, 60 * 1000)) {
+      return NextResponse.json({ error: 'Demasiados productos creados. Intenta de nuevo en 1 minuto.', code: 'RATE_LIMITED' }, { status: 429, headers: corsHeaders(request) })
+    }
+  }
+
+  // Rate limit: Store updates (max 15 per minute per IP)
+  if (pathname === '/api/stores' && method === 'PUT') {
+    const key = getRateLimitKey(request, 'store-update')
+    if (isRateLimited(key, 15, 60 * 1000)) {
+      return NextResponse.json({ error: 'Demasiadas actualizaciones. Intenta de nuevo en 1 minuto.', code: 'RATE_LIMITED' }, { status: 429, headers: corsHeaders(request) })
+    }
+  }
+
+  // Rate limit: Product updates (max 20 per minute per IP)
+  if (pathname === '/api/store-products' && method === 'PUT') {
+    const key = getRateLimitKey(request, 'product-update')
+    if (isRateLimited(key, 20, 60 * 1000)) {
+      return NextResponse.json({ error: 'Demasiadas actualizaciones. Intenta de nuevo en 1 minuto.', code: 'RATE_LIMITED' }, { status: 429, headers: corsHeaders(request) })
+    }
+  }
+
+  // Rate limit: Product deletion (max 10 per minute per IP)
+  if (pathname === '/api/store-products' && method === 'DELETE') {
+    const key = getRateLimitKey(request, 'product-delete')
+    if (isRateLimited(key, 10, 60 * 1000)) {
+      return NextResponse.json({ error: 'Demasiados productos eliminados. Intenta de nuevo en 1 minuto.', code: 'RATE_LIMITED' }, { status: 429, headers: corsHeaders(request) })
+    }
+  }
+
   // Rate limit: Password reset (max 3 per hour per IP)
   if (pathname === '/api/auth' && method === 'PUT') {
     const key = getRateLimitKey(request, 'reset')

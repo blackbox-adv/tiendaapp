@@ -8,7 +8,7 @@ import { serializeDecimals, decimalToNumber } from '@/lib/utils'
 
 // GET /api/subscriptions - Admin only
 export async function GET(request: NextRequest) {
-  const auth = authenticateRequest(request)
+  const auth = await authenticateRequest(request)
   if (auth.error) {
     return apiError(auth.error, auth.status, undefined, request)
   }
@@ -19,16 +19,34 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const subscriptions = await db.subscription.findMany({
-      include: {
-        user: { select: { id: true, name: true, email: true } },
-        store: { select: { id: true, name: true, slug: true } },
-        plan: { select: { id: true, name: true, price: true, type: true } },
-      },
-      orderBy: { startDate: 'desc' },
-    })
+    const { searchParams } = new URL(request.url)
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '50', 10)))
+    const skip = (page - 1) * limit
 
-    return apiSuccess(serializeDecimals(subscriptions), 200, request)
+    const [subscriptions, total] = await Promise.all([
+      db.subscription.findMany({
+        include: {
+          user: { select: { id: true, name: true, email: true } },
+          store: { select: { id: true, name: true, slug: true } },
+          plan: { select: { id: true, name: true, price: true, type: true } },
+        },
+        orderBy: { startDate: 'desc' },
+        skip,
+        take: limit,
+      }),
+      db.subscription.count(),
+    ])
+
+    return apiSuccess(serializeDecimals({
+      subscriptions,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    }), 200, request)
   } catch (error: unknown) {
     console.error('[SUBSCRIPTIONS] GET error:', error instanceof Error ? error.message : String(error))
     return apiError('Error obteniendo suscripciones', 500, undefined, request)
@@ -39,7 +57,7 @@ export async function GET(request: NextRequest) {
 // Users can ONLY create free plan subscriptions.
 // Paid plan subscriptions are created ONLY via admin approval or webhook.
 export async function POST(request: NextRequest) {
-  const auth = authenticateRequest(request)
+  const auth = await authenticateRequest(request)
   if (auth.error) {
     return apiError(auth.error, auth.status, undefined, request)
   }
@@ -148,7 +166,7 @@ export async function POST(request: NextRequest) {
 
 // PUT /api/subscriptions - Auth required (admin can update any, user can cancel own)
 export async function PUT(request: NextRequest) {
-  const auth = authenticateRequest(request)
+  const auth = await authenticateRequest(request)
   if (auth.error) {
     return apiError(auth.error, auth.status, undefined, request)
   }

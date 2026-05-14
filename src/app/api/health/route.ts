@@ -5,7 +5,7 @@ import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 export async function GET(request: Request) {
   try {
     if (process.env.NODE_ENV === 'production') {
-      const auth = authenticateRequest(request)
+      const auth = await authenticateRequest(request)
       if (auth.error || !auth.user) {
         return NextResponse.json({ status: 'ok', timestamp: new Date().toISOString() })
       }
