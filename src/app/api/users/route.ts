@@ -100,6 +100,13 @@ export async function POST(request: NextRequest) {
     return apiSuccess(safeUser, 201, request)
   } catch (error: unknown) {
     console.error('[USERS] POST error:', error instanceof Error ? error.message : String(error))
+    // Handle Prisma unique constraint violation (P2002)
+    if (
+      error && typeof error === 'object' && 'code' in error &&
+      (error as { code: string }).code === 'P2002'
+    ) {
+      return apiError('El email ya esta registrado', 409, undefined, request)
+    }
     return apiError('Error creando usuario', 500, undefined, request)
   }
 }
