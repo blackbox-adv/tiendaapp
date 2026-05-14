@@ -216,7 +216,7 @@ interface AppState {
   navigate: (route: PageRoute) => void
   goBack: () => void
   login: (email: string, password: string) => Promise<boolean>
-  register: (name: string, email: string, password: string) => Promise<boolean>
+  register: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>
   logout: () => void
   getToken: () => string
   setWizardStep: (step: number) => void
@@ -361,12 +361,22 @@ export const useAppStore = create<AppState>((set, get) => ({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password }),
       })
-      if (!res.ok) return false
+
+      if (!res.ok) {
+        // FIXED: Read actual error message from API instead of generic "email ya registrado"
+        try {
+          const errorData = await res.json()
+          return { success: false, error: errorData.error || 'Error al registrarse' }
+        } catch {
+          return { success: false, error: 'Error al registrarse' }
+        }
+      }
 
       // Auto-login after register
-      return get().login(email, password)
+      const loginResult = await get().login(email, password)
+      return loginResult ? { success: true } : { success: false, error: 'Cuenta creada pero error al iniciar sesión. Intenta iniciar sesión manualmente.' }
     } catch {
-      return false
+      return { success: false, error: 'Error de conexión. Intenta de nuevo.' }
     }
   },
 

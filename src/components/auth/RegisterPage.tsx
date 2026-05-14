@@ -45,14 +45,21 @@ export function RegisterPage() {
 
     setLoading(true)
 
-    const success = await register(name, email, password)
+    const result = await register(name, email, password)
     setLoading(false)
 
-    if (success) {
-      toast.success('Cuenta creada', { description: 'Bienvenido a TiendApp. Configura tu tienda.' })
+    if (result && typeof result === 'object' && 'success' in result) {
+      if (result.success) {
+        toast.success('Cuenta creada', { description: 'Bienvenido a TiendApp. Configura tu tienda.' })
+      } else {
+        const errorMessage = (result as { error?: string }).error || 'Error al registrarse'
+        setError(errorMessage)
+        toast.error('Error al registrarse', { description: errorMessage })
+      }
     } else {
-      setError('Este email ya está registrado.')
-      toast.error('Error al registrarse', { description: 'Este email ya está registrado.' })
+      // Fallback for old boolean return
+      setError('Error al registrarse. Intenta de nuevo.')
+      toast.error('Error al registrarse')
     }
   }
 
