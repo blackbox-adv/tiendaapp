@@ -99,15 +99,21 @@ export async function POST(request: NextRequest) {
 
     return apiSuccess(safeUser, 201, request)
   } catch (error: unknown) {
-    console.error('[USERS] POST error:', error instanceof Error ? error.message : String(error))
+    const errMsg = error instanceof Error ? error.message : String(error)
+    const errCode = error && typeof error === 'object' && 'code' in error ? (error as { code: string }).code : undefined
+    const errMeta = error && typeof error === 'object' && 'meta' in error ? (error as { meta: unknown }).meta : undefined
+
+    console.error('[USERS] POST error:', errMsg, { code: errCode, meta: errMeta })
+
     // Handle Prisma unique constraint violation (P2002)
-    if (
-      error && typeof error === 'object' && 'code' in error &&
-      (error as { code: string }).code === 'P2002'
-    ) {
+    if (errCode === 'P2002') {
       return apiError('Este email ya esta registrado. Intenta iniciar sesion con tu cuenta existente.', 409, undefined, request)
     }
-    return apiError('Error creando usuario', 500, undefined, request)
+
+    // Include Prisma error code and meta for debugging (safe to expose - no user data)
+    const details = errCode ? { prismaCode: errCode, hint: String(errMeta || '').substring(0, 200) } : undefined
+
+    return apiError('Error creando usuario. Intenta de nuevo o contacta soporte.', 500, details, request)
   }
 }
 

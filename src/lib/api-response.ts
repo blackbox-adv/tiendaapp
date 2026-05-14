@@ -71,7 +71,7 @@ export function apiError(
     error: message,
     code: ERROR_CODES[status] || 'UNKNOWN_ERROR',
   }
-  if (details && process.env.NODE_ENV !== 'production') {
+  if (details) {
     body.details = details
   }
 
