@@ -42,6 +42,7 @@ export async function POST(request: Request) {
   // CRITICAL: Require authentication for uploads
   const auth = await authenticateRequest(request)
   if (auth.error) {
+    console.error('[UPLOAD] Auth error:', auth.error)
     return NextResponse.json({ error: auth.error }, { status: auth.status, headers: corsHeaders(request) })
   }
   if (!auth.user) {
@@ -55,6 +56,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No se envió ningún archivo' }, { status: 400, headers: corsHeaders(request) })
     }
     const file = fileEntry
+
+    console.log('[UPLOAD] File received:', file.name, file.type, `${(file.size / 1024).toFixed(1)}KB`)
 
     if (!ALLOWED_TYPES.includes(file.type)) {
       return NextResponse.json({ error: 'Tipo de archivo no permitido. Usa JPG, PNG, WebP o GIF.' }, { status: 400, headers: corsHeaders(request) })
@@ -78,7 +81,18 @@ export async function POST(request: Request) {
     const randomId = crypto.randomUUID()
     const filePath = `${randomId}.${ext}`
 
+    // Check if Supabase is configured
+    const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
+    if (!supabaseUrl) {
+      console.error('[UPLOAD] Missing SUPABASE_URL / NEXT_PUBLIC_SUPABASE_URL environment variable')
+      return NextResponse.json(
+        { error: 'Error de configuración: falta la URL de Supabase. Contacta al administrador.' },
+        { status: 500, headers: corsHeaders(request) }
+      )
+    }
+
     // Upload to Supabase Storage
+    console.log('[UPLOAD] Uploading to bucket:', BUCKET_NAME, 'path:', filePath)
     const { error: uploadError } = await supabase.storage
       .from(BUCKET_NAME)
       .upload(filePath, buffer, {
@@ -88,13 +102,17 @@ export async function POST(request: Request) {
       })
 
     if (uploadError) {
+      console.error('[UPLOAD] Supabase upload error:', uploadError.message, uploadError.statusCode)
+
       // Try to create bucket if it doesn't exist
       if (uploadError.message?.includes('not found') || uploadError.message?.includes('does not exist') || uploadError.message?.includes('Bucket not found')) {
+        console.log('[UPLOAD] Attempting to create bucket:', BUCKET_NAME)
         const { error: createError } = await supabase.storage.createBucket(BUCKET_NAME, {
           public: true,
           fileSizeLimit: MAX_FILE_SIZE,
         })
         if (!createError) {
+          console.log('[UPLOAD] Bucket created, retrying upload...')
           // Retry upload
           const { error: retryError } = await supabase.storage
             .from(BUCKET_NAME)
@@ -108,6 +126,7 @@ export async function POST(request: Request) {
             const { data: retryUrlData } = supabase.storage
               .from(BUCKET_NAME)
               .getPublicUrl(filePath)
+            console.log('[UPLOAD] Upload successful (after bucket creation):', retryUrlData.publicUrl)
             return NextResponse.json({ url: retryUrlData.publicUrl }, { headers: corsHeaders(request) })
           }
           console.error('[UPLOAD] Retry upload failed after creating bucket:', retryError.message)
@@ -115,9 +134,8 @@ export async function POST(request: Request) {
           console.error('[UPLOAD] Failed to create bucket:', createError.message)
         }
       }
-      console.error('[UPLOAD] Supabase Storage error:', uploadError.message)
       return NextResponse.json(
-        { error: 'Error al subir la imagen. Verifica que el bucket de almacenamiento existe en Supabase.' },
+        { error: 'Error al subir la imagen: ' + uploadError.message },
         { status: 500, headers: corsHeaders(request) }
       )
     }
@@ -128,11 +146,16 @@ export async function POST(request: Request) {
       .getPublicUrl(filePath)
 
     const publicUrl = urlData.publicUrl
+    console.log('[UPLOAD] Upload successful:', publicUrl)
 
     return NextResponse.json({ url: publicUrl }, { headers: corsHeaders(request) })
   } catch (error) {
-    console.error('[UPLOAD] Unexpected error:', error)
-    return NextResponse.json({ error: 'Error al subir la imagen' }, { status: 500, headers: corsHeaders(request) })
+    const message = error instanceof Error ? error.message : String(error)
+    console.error('[UPLOAD] Unexpected error:', message)
+    return NextResponse.json(
+      { error: 'Error al subir la imagen: ' + message },
+      { status: 500, headers: corsHeaders(request) }
+    )
   }
 }
 
@@ -161,7 +184,7 @@ export async function DELETE(request: Request) {
     }
 
     // Validate URL belongs to our Supabase domain to prevent SSRF
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
     if (supabaseUrl && !url.startsWith(supabaseUrl)) {
       return NextResponse.json({ error: 'URL de imagen inválida' }, { status: 400, headers: corsHeaders(request) })
     }

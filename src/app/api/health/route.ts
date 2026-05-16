@@ -6,7 +6,9 @@ export async function GET(request: Request) {
     const checks: Record<string, string> = {}
     checks['DATABASE_URL'] = process.env.DATABASE_URL ? 'OK' : 'MISSING'
     checks['DIRECT_URL'] = process.env.DIRECT_URL ? 'OK' : 'MISSING'
-    checks['SUPABASE_URL'] = process.env.SUPABASE_URL ? 'OK' : 'MISSING'
+    checks['SUPABASE_URL'] = (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL) ? 'OK' : 'MISSING'
+    checks['SUPABASE_SERVICE_ROLE_KEY'] = process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SET' : 'MISSING'
+    checks['NEXT_PUBLIC_SUPABASE_URL'] = process.env.NEXT_PUBLIC_SUPABASE_URL ? 'OK' : 'NOT SET'
     checks['RESEND_API_KEY'] = process.env.RESEND_API_KEY ? 'SET' : 'NOT SET'
     checks['NEXT_PUBLIC_APP_URL'] = process.env.NEXT_PUBLIC_APP_URL ? 'OK' : 'NOT SET'
     checks['JWT_SECRET'] = process.env.JWT_SECRET && process.env.JWT_SECRET.length >= 16 ? 'OK' : 'WEAK OR MISSING'
@@ -35,6 +37,21 @@ export async function GET(request: Request) {
       } catch (planErr: unknown) {
         const msg = planErr instanceof Error ? planErr.message : String(planErr)
         checks['PLAN_TABLE'] = `ERROR: ${msg.substring(0, 100)}`
+      }
+
+      // Check Supabase Storage (upload functionality)
+      try {
+        const { supabase } = await import('@/lib/supabase')
+        const { data, error } = await supabase.storage.listBuckets()
+        if (error) {
+          checks['SUPABASE_STORAGE'] = `ERROR: ${error.message.substring(0, 80)}`
+        } else {
+          const bucketNames = data?.map(b => b.name) || []
+          checks['SUPABASE_STORAGE'] = bucketNames.includes('product-images') ? 'OK (product-images bucket exists)' : `NO product-images bucket. Buckets: ${bucketNames.join(', ') || 'none'}`
+        }
+      } catch (storageErr: unknown) {
+        const msg = storageErr instanceof Error ? storageErr.message : String(storageErr)
+        checks['SUPABASE_STORAGE'] = `ERROR: ${msg.substring(0, 80)}`
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err)

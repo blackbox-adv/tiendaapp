@@ -374,8 +374,7 @@ export function StoreWizard() {
                               className="text-xs gap-1 h-7"
                               onClick={(e) => {
                                 e.stopPropagation()
-                                const slug = wizardData.storeName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') || 'preview'
-                                window.open(`/tienda/${slug}?template=${tpl.id}`, '_blank')
+                                window.open(`/demo/${tpl.id}`, '_blank')
                               }}
                             >
                               <Eye className="w-3 h-3" />

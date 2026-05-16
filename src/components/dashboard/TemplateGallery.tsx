@@ -1,11 +1,13 @@
 'use client'
 
+import { useState } from 'react'
 import { useAppStore } from '@/lib/store'
 import { Check, Lock, LayoutTemplate, Palette, Sparkles, Sun, Crown, Minimize2 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { toast } from 'sonner'
 
 type TemplateId = 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist'
 
@@ -112,8 +114,22 @@ export function TemplateGallery() {
     )
   }
 
-  const handleSelect = (templateId: TemplateId) => {
-    updateStoreSettings({ template: templateId })
+  const [changingTemplate, setChangingTemplate] = useState<string | null>(null)
+
+  const handleSelect = async (templateId: TemplateId) => {
+    setChangingTemplate(templateId)
+    try {
+      const result = await updateStoreSettings({ template: templateId })
+      if (result.success) {
+        toast.success('Plantilla actualizada', { description: `Tu tienda ahora usa la plantilla ${templateList.find(t => t.id === templateId)?.name || templateId}.` })
+      } else {
+        toast.error('Error al cambiar plantilla', { description: result.error || 'No se pudo guardar el cambio. Intenta de nuevo.' })
+      }
+    } catch {
+      toast.error('Error de conexión', { description: 'No se pudo cambiar la plantilla. Intenta de nuevo.' })
+    } finally {
+      setChangingTemplate(null)
+    }
   }
 
   return (
@@ -206,14 +222,15 @@ export function TemplateGallery() {
                     <>
                       <Button
                         onClick={() => handleSelect(tpl.id)}
+                        disabled={changingTemplate !== null}
                         className="flex-1 bg-violet-600 hover:bg-violet-700 text-white"
                       >
-                        Usar
+                        {changingTemplate === tpl.id ? 'Cambiando...' : 'Usar'}
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => navigate({ page: 'store', slug: currentStore.slug })}
+                        onClick={() => window.open(`/demo/${tpl.id}`, '_blank')}
                         className="text-gray-500"
                       >
                         Vista previa

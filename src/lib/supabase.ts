@@ -4,11 +4,13 @@ let _supabase: ReturnType<typeof createClient> | null = null
 
 export function getSupabase() {
   if (!_supabase) {
-    const supabaseUrl = process.env.SUPABASE_URL
+    // Try SUPABASE_URL first, then fall back to NEXT_PUBLIC_SUPABASE_URL
+    const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
     if (!supabaseUrl || !supabaseServiceKey) {
-      throw new Error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY')
+      throw new Error(`Missing Supabase config: ${!supabaseUrl ? 'SUPABASE_URL/NEXT_PUBLIC_SUPABASE_URL' : ''} ${!supabaseServiceKey ? 'SUPABASE_SERVICE_ROLE_KEY' : ''}`)
     }
+    console.log('[SUPABASE] Initializing client with URL:', supabaseUrl.substring(0, 30) + '...')
     _supabase = createClient(supabaseUrl, supabaseServiceKey)
   }
   return _supabase
