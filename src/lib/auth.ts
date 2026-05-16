@@ -73,7 +73,9 @@ export async function authenticateRequest(request: Request): Promise<{ user: Jwt
       return { user: null, error: 'Cuenta desactivada', status: 403 }
     }
     
-    if (user.tokenVersion !== payload.tokenVersion) {
+    // Treat NULL tokenVersion as 0 (for users created before this column was added)
+    const dbTokenVersion = user.tokenVersion ?? 0
+    if (dbTokenVersion !== payload.tokenVersion) {
       return { user: null, error: 'Sesión expirada. Inicia sesión nuevamente.', status: 401 }
     }
   } catch (err) {

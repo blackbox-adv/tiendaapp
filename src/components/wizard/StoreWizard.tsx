@@ -314,7 +314,11 @@ export function StoreWizard() {
             {/* Step 3: Template */}
             {wizardStep === 3 && (
               <div className="space-y-4">
-                <h2 className="text-lg font-semibold text-gray-900 mb-6">Elige tu plantilla</h2>
+                <h2 className="text-lg font-semibold text-gray-900 mb-2">Elige tu plantilla</h2>
+                <div className="bg-violet-50 border border-violet-200 rounded-lg px-4 py-3 flex items-center gap-2 text-sm text-violet-700">
+                  <LayoutTemplate className="w-4 h-4 flex-shrink-0" />
+                  <span>Elige cómo se verá tu tienda. <strong>Puedes cambiarla después</strong> desde Configuración en tu panel.</span>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {[
                     { id: 'moderna' as const, name: 'Moderna', icon: Palette, desc: 'Diseño limpio y minimalista, perfecto para marcas sofisticadas.', color: '#7C3AED', gradient: 'from-violet-500 to-purple-600', requiredPlan: 'free' as const, planLabel: '' },
@@ -352,6 +356,18 @@ export function StoreWizard() {
                                 </Badge>
                               </div>
                             )}
+                            {/* Preview eye overlay */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                window.open(`/demo/${tpl.id}`, '_blank')
+                              }}
+                              className="absolute inset-0 flex items-center justify-center bg-black/0 hover:bg-black/30 transition-all group"
+                            >
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white rounded-full p-3 shadow-lg">
+                                <Eye className="w-5 h-5 text-gray-700" />
+                              </div>
+                            </button>
                           </div>
                           <div className="flex items-center gap-2 mb-1">
                             <Icon className="w-4 h-4" style={{ color: tpl.color }} />
@@ -378,7 +394,7 @@ export function StoreWizard() {
                               }}
                             >
                               <Eye className="w-3 h-3" />
-                              Vista previa
+                              Preview
                             </Button>
                           </div>
                         </CardContent>
@@ -386,9 +402,6 @@ export function StoreWizard() {
                     )
                   })}
                 </div>
-                <p className="text-xs text-gray-400 mt-2 text-center">
-                  Puedes cambiar la plantilla después en Configuración
-                </p>
               </div>
             )}
           </motion.div>

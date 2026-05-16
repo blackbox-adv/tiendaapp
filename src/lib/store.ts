@@ -118,7 +118,7 @@ async function syncFromAPI() {
               const transformedStores = apiStores.map(transformApiStore)
 
               // Set currentStore to the first store (owner typically has 1)
-              if (transformedStores.length > 0 && !useAppStore.getState().currentStore) {
+              if (transformedStores.length > 0) {
                 useAppStore.setState({ currentStore: transformedStores[0] })
               }
 
@@ -168,10 +168,22 @@ async function syncFromAPI() {
               }
             }
           }
+        } else {
+          // Auth failed (401) — token is invalid/expired, clear session
+          console.warn('[Zustand] Auth failed with status:', authRes.status, '— clearing session')
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('tiendapp_token')
+            localStorage.removeItem('tiendapp_user')
+          }
+          // Reset to landing page if user was on a protected route
+          const currentRoute = useAppStore.getState().route
+          if (currentRoute.page.startsWith('dashboard') || currentRoute.page === 'wizard') {
+            useAppStore.setState({ route: { page: 'login' }, currentUser: null, currentStore: null })
+          }
         }
       } catch (err) {
-        // Token expired or invalid — clear it
-        console.warn('[Zustand] Token invalid, clearing session:', err)
+        // Network error — clear token but don't redirect (could be temporary)
+        console.warn('[Zustand] Network error during sync:', err)
         if (typeof window !== 'undefined') {
           localStorage.removeItem('tiendapp_token')
           localStorage.removeItem('tiendapp_user')

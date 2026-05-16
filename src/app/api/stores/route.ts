@@ -316,7 +316,10 @@ export async function PUT(request: NextRequest) {
     const store = await db.store.update({
       where: { id },
       data,
-      include: { owner: { select: { id: true, name: true, email: true } } },
+      include: {
+        owner: { select: { id: true, name: true, email: true } },
+        subscriptions: { include: { plan: { select: { id: true, name: true, price: true } } } },
+      },
     })
 
     return apiSuccess(serializeDecimals(store), 200, request)

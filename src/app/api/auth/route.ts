@@ -104,7 +104,9 @@ export async function GET(request: Request) {
     }
 
     // SECURITY: Invalidate tokens if tokenVersion changed (password reset, admin action)
-    if (user.tokenVersion !== payload.tokenVersion) {
+    // Treat NULL tokenVersion as 0 (for users created before this column was added)
+    const dbTokenVersion = user.tokenVersion ?? 0
+    if (dbTokenVersion !== payload.tokenVersion) {
       return apiError('Sesión expirada. Inicia sesión nuevamente.', 401, undefined, request)
     }
 
