@@ -4,13 +4,14 @@ import { useState, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAppStore } from '@/lib/store'
 // Plans and categories are now fetched from the API
-import { Zap, Crown, Gift, ArrowLeft, ArrowRight, Check, Store, Palette, LayoutTemplate, Upload } from 'lucide-react'
+import { Zap, Crown, Gift, ArrowLeft, ArrowRight, Check, Store, Palette, LayoutTemplate, Upload, Sparkles, Sun, Minimize2, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 
 const iconMap: Record<string, React.ElementType> = { Gift, Zap, Crown }
 
@@ -84,14 +85,14 @@ export function StoreWizard() {
         if (data.url) {
           updateWizardData({ storeLogo: data.url })
         } else {
-          toast.error('Error al subir', { description: 'No se recibió la URL del logo' })
+          toast.error('Error al subir', { description: 'No se recibió la URL del logo. Puedes usar un emoji como alternativa.', duration: 6000 })
         }
       } else {
         const data = await res.json().catch(() => ({}))
-        toast.error('Error al subir', { description: data.error || 'Error al subir el logo' })
+        toast.error('Error al subir el logo', { description: (data.error || 'No se pudo subir el logo') + '. Puedes usar un emoji como alternativa.', duration: 6000 })
       }
     } catch {
-      toast.error('Error de conexión', { description: 'No se pudo subir el logo' })
+      toast.error('Error de conexión', { description: 'No se pudo subir el logo. Puedes usar un emoji como alternativa.', duration: 6000 })
     } finally {
       setUploadingLogo(false)
     }
@@ -316,36 +317,79 @@ export function StoreWizard() {
                 <h2 className="text-lg font-semibold text-gray-900 mb-6">Elige tu plantilla</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {[
-                    { id: 'moderna' as const, name: 'Moderna', desc: 'Diseño limpio y minimalista', color: '#7C3AED' },
-                    { id: 'vibrante' as const, name: 'Vibrante', desc: 'Colores vibrantes y dinámicos', color: '#EC4899' },
-                    { id: 'clasica' as const, name: 'Clásica', desc: 'Elegancia atemporal', color: '#D97706' },
-                  ].map((tpl) => (
-                    <Card
-                      key={tpl.id}
-                      onClick={() => setSelectedTemplate(tpl.id)}
-                      className={`cursor-pointer transition-all ${
-                        selectedTemplate === tpl.id
-                          ? 'border-violet-500 ring-2 ring-violet-200 shadow-lg'
-                          : 'border-gray-200 hover:border-violet-200'
-                      }`}
-                    >
-                      <CardContent className="p-5">
-                        <div className="rounded-lg h-40 mb-3 flex items-center justify-center text-white font-bold text-lg"
-                          style={{ background: `linear-gradient(135deg, ${tpl.color}, ${tpl.color}99)` }}
-                        >
-                          <LayoutTemplate className="w-10 h-10 opacity-50" />
-                        </div>
-                        <h3 className="font-bold text-gray-900">{tpl.name}</h3>
-                        <p className="text-xs text-gray-500 mt-1">{tpl.desc}</p>
-                        {selectedTemplate === tpl.id && (
-                          <div className="mt-3 text-center text-xs font-semibold text-violet-600 bg-violet-50 py-1.5 rounded-lg">
-                            ✓ Seleccionada
+                    { id: 'moderna' as const, name: 'Moderna', icon: Palette, desc: 'Diseño limpio y minimalista, perfecto para marcas sofisticadas.', color: '#7C3AED', gradient: 'from-violet-500 to-purple-600', requiredPlan: 'free' as const, planLabel: '' },
+                    { id: 'vibrante' as const, name: 'Vibrante', icon: Sparkles, desc: 'Colores vibrantes y dinámicos para tiendas con personalidad.', color: '#EC4899', gradient: 'from-pink-500 to-orange-400', requiredPlan: 'pro' as const, planLabel: 'Pro' },
+                    { id: 'clasica' as const, name: 'Clásica', icon: Sun, desc: 'Elegancia atemporal con tonos cálidos para tiendas tradicionales.', color: '#D97706', gradient: 'from-amber-500 to-yellow-500', requiredPlan: 'pro' as const, planLabel: 'Pro' },
+                    { id: 'luxury' as const, name: 'Luxury', icon: Crown, desc: 'Diseño de alta gama con tonos oscuros y acentos dorados para marcas premium.', color: '#c8a456', gradient: 'from-gray-900 via-gray-800 to-amber-900', requiredPlan: 'premium' as const, planLabel: 'Premium' },
+                    { id: 'minimalist' as const, name: 'Minimalist', icon: Minimize2, desc: 'Ultra limpio al estilo Apple. Espacios amplios, tipografía ligera y sin distracciones.', color: '#374151', gradient: 'from-gray-50 via-white to-gray-100', requiredPlan: 'premium' as const, planLabel: 'Premium' },
+                  ].map((tpl) => {
+                    const Icon = tpl.icon
+                    return (
+                      <Card
+                        key={tpl.id}
+                        onClick={() => setSelectedTemplate(tpl.id)}
+                        className={`cursor-pointer transition-all ${
+                          selectedTemplate === tpl.id
+                            ? 'border-violet-500 ring-2 ring-violet-200 shadow-lg'
+                            : 'border-gray-200 hover:border-violet-200'
+                        }`}
+                      >
+                        <CardContent className="p-5">
+                          <div className={`rounded-lg h-40 mb-3 flex items-center justify-center relative bg-gradient-to-br ${tpl.gradient}`}
+                          >
+                            <LayoutTemplate className="w-10 h-10 opacity-30" />
+                            {/* Premium badge */}
+                            {tpl.requiredPlan !== 'free' && (
+                              <div className="absolute top-2 left-2">
+                                <Badge
+                                  className="text-[10px] font-bold border-0 shadow-sm"
+                                  style={{
+                                    backgroundColor: tpl.requiredPlan === 'premium' ? '#c8a456' : '#8B5CF6',
+                                    color: tpl.requiredPlan === 'premium' ? '#1a1a2e' : '#fff',
+                                  }}
+                                >
+                                  {tpl.requiredPlan === 'premium' ? '✨ Premium' : '⭐ Pro'}
+                                </Badge>
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
+                          <div className="flex items-center gap-2 mb-1">
+                            <Icon className="w-4 h-4" style={{ color: tpl.color }} />
+                            <h3 className="font-bold text-gray-900">{tpl.name}</h3>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-1">{tpl.desc}</p>
+                          <div className="flex items-center gap-2 mt-3">
+                            {selectedTemplate === tpl.id ? (
+                              <div className="flex-1 text-center text-xs font-semibold text-violet-600 bg-violet-50 py-1.5 rounded-lg">
+                                ✓ Seleccionada
+                              </div>
+                            ) : (
+                              <div className="flex-1 text-center text-xs font-medium text-gray-500 bg-gray-50 py-1.5 rounded-lg">
+                                Seleccionar
+                              </div>
+                            )}
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-xs gap-1 h-7"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                const slug = wizardData.storeName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') || 'preview'
+                                window.open(`/tienda/${slug}?template=${tpl.id}`, '_blank')
+                              }}
+                            >
+                              <Eye className="w-3 h-3" />
+                              Vista previa
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )
+                  })}
                 </div>
+                <p className="text-xs text-gray-400 mt-2 text-center">
+                  Puedes cambiar la plantilla después en Configuración
+                </p>
               </div>
             )}
           </motion.div>

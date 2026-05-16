@@ -88,9 +88,36 @@ export async function POST(request: Request) {
       })
 
     if (uploadError) {
+      // Try to create bucket if it doesn't exist
+      if (uploadError.message?.includes('not found') || uploadError.message?.includes('does not exist') || uploadError.message?.includes('Bucket not found')) {
+        const { error: createError } = await supabase.storage.createBucket(BUCKET_NAME, {
+          public: true,
+          fileSizeLimit: MAX_FILE_SIZE,
+        })
+        if (!createError) {
+          // Retry upload
+          const { error: retryError } = await supabase.storage
+            .from(BUCKET_NAME)
+            .upload(filePath, buffer, {
+              contentType: file.type,
+              cacheControl: '31536000',
+              upsert: false,
+            })
+          if (!retryError) {
+            // Success on retry - get URL and return
+            const { data: retryUrlData } = supabase.storage
+              .from(BUCKET_NAME)
+              .getPublicUrl(filePath)
+            return NextResponse.json({ url: retryUrlData.publicUrl }, { headers: corsHeaders(request) })
+          }
+          console.error('[UPLOAD] Retry upload failed after creating bucket:', retryError.message)
+        } else {
+          console.error('[UPLOAD] Failed to create bucket:', createError.message)
+        }
+      }
       console.error('[UPLOAD] Supabase Storage error:', uploadError.message)
       return NextResponse.json(
-        { error: 'Error al subir la imagen al almacenamiento' },
+        { error: 'Error al subir la imagen. Verifica que el bucket de almacenamiento existe en Supabase.' },
         { status: 500, headers: corsHeaders(request) }
       )
     }

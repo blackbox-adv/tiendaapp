@@ -72,14 +72,14 @@ export function StoreSettings() {
         if (data.url) {
           setLogo(data.url)
         } else {
-          toast.error('Error al subir', { description: 'No se recibió la URL del logo' })
+          toast.error('Error al subir', { description: 'No se recibió la URL del logo. Puedes usar un emoji como alternativa.', duration: 6000 })
         }
       } else {
         const data = await res.json().catch(() => ({}))
-        toast.error('Error al subir', { description: data.error || 'Error al subir el logo' })
+        toast.error('Error al subir el logo', { description: (data.error || 'No se pudo subir el logo') + '. Puedes usar un emoji como alternativa.', duration: 6000 })
       }
     } catch {
-      toast.error('Error de conexión', { description: 'No se pudo subir el logo' })
+      toast.error('Error de conexión', { description: 'No se pudo subir el logo. Puedes usar un emoji como alternativa.', duration: 6000 })
     } finally {
       setUploadingLogo(false)
     }
@@ -118,14 +118,14 @@ export function StoreSettings() {
         if (data.url) {
           setBannerUrl(data.url)
         } else {
-          toast.error('Error al subir', { description: 'No se recibió la URL del banner' })
+          toast.error('Error al subir', { description: 'No se recibió la URL del banner', duration: 6000 })
         }
       } else {
         const data = await res.json().catch(() => ({}))
-        toast.error('Error al subir', { description: data.error || 'Error al subir el banner' })
+        toast.error('Error al subir el banner', { description: data.error || 'No se pudo subir el banner', duration: 6000 })
       }
     } catch {
-      toast.error('Error de conexión', { description: 'No se pudo subir el banner' })
+      toast.error('Error de conexión', { description: 'No se pudo subir el banner', duration: 6000 })
     } finally {
       setUploadingBanner(false)
     }
@@ -188,25 +188,38 @@ export function StoreSettings() {
     )
   }
 
-  const handleSave = () => {
+  const [saving, setSaving] = useState(false)
+
+  const handleSave = async () => {
     if (!name.trim()) {
       toast.error('Error', { description: 'El nombre de la tienda es obligatorio.' })
       return
     }
-    updateStoreSettings({
-      name,
-      description,
-      whatsappNumber: whatsapp,
-      logo,
-      bannerUrl,
-      colors: { primary: primaryColor, secondary: primaryColor + '80' },
-      template: template as 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist',
-      categoryId: category,
-      hasShipping,
-      hasSecurePayment,
-      hasReturns,
-    })
-    toast.success('Tienda actualizada', { description: 'Los cambios se guardaron correctamente.' })
+    setSaving(true)
+    try {
+      const result = await updateStoreSettings({
+        name,
+        description,
+        whatsappNumber: whatsapp,
+        logo,
+        bannerUrl,
+        colors: { primary: primaryColor, secondary: primaryColor + '80' },
+        template: template as 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist',
+        categoryId: category,
+        hasShipping,
+        hasSecurePayment,
+        hasReturns,
+      })
+      if (result.success) {
+        toast.success('Tienda actualizada', { description: 'Los cambios se guardaron correctamente.' })
+      } else {
+        toast.error('Error al guardar', { description: result.error || 'No se pudieron guardar los cambios. Intenta de nuevo.' })
+      }
+    } catch {
+      toast.error('Error al guardar', { description: 'Ocurrió un error inesperado. Intenta de nuevo.' })
+    } finally {
+      setSaving(false)
+    }
   }
 
   const presetColors = ['#7C3AED', '#EC4899', '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4']
@@ -445,9 +458,9 @@ export function StoreSettings() {
           </Card>
 
           <div className="flex gap-3">
-            <Button onClick={handleSave} className="bg-violet-600 hover:bg-violet-700 text-white gap-2">
+            <Button onClick={handleSave} disabled={saving} className="bg-violet-600 hover:bg-violet-700 text-white gap-2">
               <Save className="w-4 h-4" />
-              Guardar cambios
+              {saving ? 'Guardando...' : 'Guardar cambios'}
             </Button>
             <Button variant="outline" onClick={() => navigate({ page: 'store', slug: currentStore.slug })} className="gap-2">
               <Eye className="w-4 h-4" />

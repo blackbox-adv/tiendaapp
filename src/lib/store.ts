@@ -225,7 +225,7 @@ interface AppState {
   addProduct: (product: Omit<Product, 'id' | 'createdAt'>) => Promise<void>
   updateProduct: (id: string, data: Partial<Product>) => Promise<void>
   deleteProduct: (id: string) => void
-  updateStoreSettings: (data: Partial<Store>) => void
+  updateStoreSettings: (data: Partial<Store>) => Promise<{ success: boolean; error?: string }>
   changePlan: (planId: string) => void
   toggleStoreActive: (storeId: string) => void
   toggleUserActive: (userId: string) => void
@@ -562,9 +562,9 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
   },
 
-  updateStoreSettings: (data) => {
+  updateStoreSettings: async (data) => {
     const storeId = get().currentStore?.id
-    if (!storeId) return
+    if (!storeId) return { success: false, error: 'No hay tienda seleccionada' }
 
     // Update local state immediately (optimistic)
     set((state) => ({
@@ -591,21 +591,29 @@ export const useAppStore = create<AppState>((set, get) => ({
       if (data.hasSecurePayment !== undefined) apiData.hasSecurePayment = data.hasSecurePayment
       if (data.hasReturns !== undefined) apiData.hasReturns = data.hasReturns
 
-      fetch('/api/stores', {
+      const res = await fetch('/api/stores', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify(apiData),
-      }).then(async (res) => {
-        if (res.ok) {
-          const saved = await res.json()
-          const realStore = transformApiStore(saved)
-          set((state) => ({
-            currentStore: realStore,
-            stores: state.stores.map((s) => (s.id === storeId ? realStore : s)),
-          }))
-        }
-      }).catch(() => { /* fallback to local state */ })
-    } catch { /* fallback to local state */ }
+      })
+
+      if (res.ok) {
+        const saved = await res.json()
+        const realStore = transformApiStore(saved)
+        set((state) => ({
+          currentStore: realStore,
+          stores: state.stores.map((s) => (s.id === storeId ? realStore : s)),
+        }))
+        return { success: true }
+      } else {
+        const errorData = await res.json().catch(() => ({}))
+        console.error('[Store] Failed to update store settings via API:', errorData.error || res.status)
+        return { success: false, error: errorData.error || 'Error al guardar en el servidor' }
+      }
+    } catch (error) {
+      console.error('[Store] Error updating store settings:', error)
+      return { success: false, error: 'Error de conexión al guardar' }
+    }
   },
 
   changePlan: (planId) => {
