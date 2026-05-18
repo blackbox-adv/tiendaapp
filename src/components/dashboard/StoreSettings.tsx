@@ -203,7 +203,7 @@ export function StoreSettings() {
         whatsappNumber: whatsapp,
         logo,
         bannerUrl,
-        colors: { primary: primaryColor, secondary: primaryColor + '80' },
+        colors: { primary: primaryColor, secondary: primaryColor },
         template: template as 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist',
         categoryId: category,
         hasShipping,
@@ -479,8 +479,14 @@ export function StoreSettings() {
               <div className="rounded-xl border border-gray-200 overflow-hidden">
                 <div className="h-2" style={{ backgroundColor: primaryColor }} />
                 <div className="p-4 text-center">
-                  <div className="w-14 h-14 rounded-xl mx-auto mb-2 flex items-center justify-center text-2xl" style={{ backgroundColor: primaryColor + '15' }}>
-                    {currentStore.logo}
+                  <div className="w-14 h-14 rounded-xl mx-auto mb-2 flex items-center justify-center text-2xl overflow-hidden" style={{ backgroundColor: primaryColor + '15' }}>
+                    {logo && !logo.startsWith('http') && !logo.startsWith('/') ? (
+                      <span>{logo}</span>
+                    ) : logo ? (
+                      <img src={logo} alt="Logo" className="w-full h-full object-cover" />
+                    ) : (
+                      <Store className="w-6 h-6 text-gray-400" />
+                    )}
                   </div>
                   <h3 className="font-bold text-gray-900">{name || 'Nombre de la tienda'}</h3>
                   <p className="text-xs text-gray-400 mt-1 line-clamp-2">{description || 'Descripción...'}</p>

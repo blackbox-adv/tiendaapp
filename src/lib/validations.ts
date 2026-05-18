@@ -68,12 +68,12 @@ export const createStoreSchema = z.object({
   bannerUrl: z.string().max(1000).optional().default(''),
   primaryColor: z
     .string()
-    .regex(/^#[0-9A-Fa-f]{6}$/, 'Color primario invalido (formato: #RRGGBB)')
+    .regex(/^#[0-9A-Fa-f]{6,8}$/, 'Color primario invalido (formato: #RRGGBB o #RRGGBBAA)')
     .optional()
     .default('#7C3AED'),
   secondaryColor: z
     .string()
-    .regex(/^#[0-9A-Fa-f]{6}$/, 'Color secundario invalido (formato: #RRGGBB)')
+    .regex(/^#[0-9A-Fa-f]{6,8}$/, 'Color secundario invalido (formato: #RRGGBB o #RRGGBBAA)')
     .optional()
     .default('#10B981'),
   whatsappNumber: peruWhatsappString
