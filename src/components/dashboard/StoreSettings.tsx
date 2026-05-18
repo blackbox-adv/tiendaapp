@@ -38,6 +38,7 @@ export function StoreSettings() {
   const [hasShipping, setHasShipping] = useState(currentStore?.hasShipping ?? false)
   const [hasSecurePayment, setHasSecurePayment] = useState(currentStore?.hasSecurePayment ?? false)
   const [hasReturns, setHasReturns] = useState(currentStore?.hasReturns ?? false)
+  const [saving, setSaving] = useState(false)
 
   const handleLogoUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -188,8 +189,6 @@ export function StoreSettings() {
     )
   }
 
-  const [saving, setSaving] = useState(false)
-
   const handleSave = async () => {
     if (!name.trim()) {
       toast.error('Error', { description: 'El nombre de la tienda es obligatorio.' })
@@ -203,7 +202,7 @@ export function StoreSettings() {
         whatsappNumber: whatsapp,
         logo,
         bannerUrl,
-        colors: { primary: primaryColor, secondary: primaryColor },
+        colors: { primary: primaryColor, secondary: currentStore?.colors.secondary || primaryColor },
         template: template as 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist',
         categoryId: category,
         hasShipping,

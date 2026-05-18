@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAppStore } from '@/lib/store'
 import { ModernaTemplate } from '@/components/store-templates/ModernaTemplate'
 import { VibranteTemplate } from '@/components/store-templates/VibranteTemplate'
@@ -155,13 +155,10 @@ export function DemoTemplateClient({ template }: { template: string }) {
     })
   }
 
-  // Initialize Zustand on mount
-  if (typeof window !== 'undefined') {
-    const currentStores = useAppStore.getState().stores
-    if (!currentStores.find((s) => s.id === store.id)) {
-      setStoreData()
-    }
-  }
+  // Initialize Zustand on mount (useEffect instead of render-time mutation)
+  useEffect(() => {
+    setStoreData()
+  }, [])
 
   // Handle product click from templates
   const handleProductClick = (productId: string) => {
