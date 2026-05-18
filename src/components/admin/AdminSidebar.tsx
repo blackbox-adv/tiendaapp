@@ -1,7 +1,8 @@
 'use client'
 
+import { useState } from 'react'
 import { useAppStore } from '@/lib/store'
-import { LayoutDashboard, Store, Users, CreditCard, Settings, LogOut, Zap, Banknote } from 'lucide-react'
+import { LayoutDashboard, Store, Users, CreditCard, Settings, LogOut, Zap, Banknote, Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import type { PageRoute } from '@/lib/types'
@@ -18,9 +19,15 @@ const navItems: { page: PageRoute['page']; label: string; icon: React.ElementTyp
 export function AdminSidebar() {
   const { navigate, logout } = useAppStore()
   const route = useAppStore((s) => s.route)
+  const [mobileOpen, setMobileOpen] = useState(false)
 
-  return (
-    <aside className="w-64 min-h-screen bg-[#1e1b4b] text-white flex flex-col flex-shrink-0">
+  const handleNav = (page: PageRoute['page']) => {
+    navigate({ page } as PageRoute)
+    setMobileOpen(false)
+  }
+
+  const sidebarContent = (
+    <>
       {/* Logo */}
       <div className="px-5 py-5 flex items-center gap-2">
         <div className="w-8 h-8 rounded-lg bg-violet-500 flex items-center justify-center">
@@ -39,7 +46,7 @@ export function AdminSidebar() {
           return (
             <button
               key={item.page}
-              onClick={() => navigate({ page: item.page } as PageRoute)}
+              onClick={() => handleNav(item.page)}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                 isActive
                   ? 'bg-violet-600 text-white shadow-lg shadow-violet-600/30'
@@ -65,6 +72,40 @@ export function AdminSidebar() {
           <span className="text-sm">Cerrar sesión</span>
         </Button>
       </div>
-    </aside>
+    </>
+  )
+
+  return (
+    <>
+      {/* Mobile hamburger button */}
+      <button
+        onClick={() => setMobileOpen(!mobileOpen)}
+        className="md:hidden fixed top-4 left-4 z-50 bg-[#1e1b4b] text-white p-2 rounded-lg shadow-lg"
+      >
+        {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+      </button>
+
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div
+          className="md:hidden fixed inset-0 bg-black/50 z-30"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* Mobile sidebar */}
+      <aside
+        className={`md:hidden fixed top-0 left-0 h-full w-64 bg-[#1e1b4b] text-white flex flex-col z-40 transition-transform duration-300 ${
+          mobileOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        {sidebarContent}
+      </aside>
+
+      {/* Desktop sidebar */}
+      <aside className="hidden md:flex w-64 min-h-screen bg-[#1e1b4b] text-white flex-col flex-shrink-0">
+        {sidebarContent}
+      </aside>
+    </>
   )
 }

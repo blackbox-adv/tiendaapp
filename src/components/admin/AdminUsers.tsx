@@ -75,7 +75,10 @@ export function AdminUsers() {
     try {
       const token = localStorage.getItem('tiendapp_token')
       const res = await fetch('/api/users', { headers: { Authorization: `Bearer ${token}` } })
-      if (res.ok) setUsers(await res.json())
+      if (res.ok) {
+        const data = await res.json()
+        setUsers(data.users || data)
+      }
     } catch (err) { console.error(err) }
     finally { setLoading(false) }
   }
@@ -196,18 +199,18 @@ export function AdminUsers() {
           return (
             <Card key={user.id} className="overflow-hidden">
               <CardContent className="p-5">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${user.role === 'super_admin' ? 'bg-amber-100' : 'bg-violet-100'}`}>
+                <div className="flex items-start justify-between mb-4 gap-2">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${user.role === 'super_admin' ? 'bg-amber-100' : 'bg-violet-100'}`}>
                       {user.role === 'super_admin' ? <Shield className="w-5 h-5 text-amber-600" /> : <User className="w-5 h-5 text-violet-600" />}
                     </div>
-                    <div>
-                      <p className="font-semibold text-gray-900">{user.name}</p>
-                      <p className="text-xs text-gray-400">{user.email}</p>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-gray-900 truncate">{user.name}</p>
+                      <p className="text-xs text-gray-400 truncate">{user.email}</p>
                     </div>
                   </div>
                   <Button variant="ghost" size="sm" onClick={() => toggleUserActive(user.id, user.isActive)} disabled={togglingId === user.id}
-                    className={user.isActive ? 'text-green-600 hover:bg-green-50' : 'text-gray-400 hover:bg-gray-100'}>
+                    className={`flex-shrink-0 ${user.isActive ? 'text-green-600 hover:bg-green-50' : 'text-gray-400 hover:bg-gray-100'}`}>
                     {togglingId === user.id ? <div className="animate-spin w-5 h-5 border-2 border-gray-200 border-t-gray-600 rounded-full" /> : user.isActive ? <ToggleRight className="w-6 h-6" /> : <ToggleLeft className="w-6 h-6" />}
                   </Button>
                 </div>
@@ -218,13 +221,13 @@ export function AdminUsers() {
                       {user.role === 'super_admin' ? 'Administrador' : 'Propietario'}
                     </Badge>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500">Suscripción</span>
-                    <span className="text-xs font-medium">{planName} ({subStatus})</span>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs text-gray-500 flex-shrink-0">Suscripción</span>
+                    <span className="text-xs font-medium truncate">{planName} ({subStatus})</span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500">Tienda</span>
-                    <span className="text-xs text-gray-700">{userStore ? userStore.name : 'Sin tienda'}</span>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs text-gray-500 flex-shrink-0">Tienda</span>
+                    <span className="text-xs text-gray-700 truncate">{userStore ? userStore.name : 'Sin tienda'}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-500">Último login</span>
