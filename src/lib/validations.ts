@@ -91,6 +91,8 @@ export const updateStoreSchema = createStoreSchema.partial().extend({
   hasShipping: z.boolean().optional(),
   hasSecurePayment: z.boolean().optional(),
   hasReturns: z.boolean().optional(),
+  // Override whatsappNumber: lenient validation for updates (don't block save for format issues)
+  whatsappNumber: z.string().max(30).optional(),
 })
 
 // ── Product schemas ──
