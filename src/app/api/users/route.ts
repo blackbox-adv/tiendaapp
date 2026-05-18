@@ -177,6 +177,73 @@ export async function PUT(request: NextRequest) {
   }
 }
 
+// DELETE /api/users - Delete user (admin only)
+export async function DELETE(request: NextRequest) {
+  const auth = await authenticateRequest(request)
+  if (auth.error) {
+    return apiError(auth.error, auth.status, undefined, request)
+  }
+  if (!auth.user) return apiError('No autenticado', 401, undefined, request)
+
+  // Only super_admin can delete users
+  if (!requireRole(auth.user, ['super_admin'])) {
+    return apiError('Acceso denegado. Solo administradores pueden eliminar usuarios.', 403, undefined, request)
+  }
+
+  try {
+    const { searchParams } = new URL(request.url)
+    const userId = searchParams.get('id')
+
+    if (!userId) {
+      return apiError('ID de usuario requerido', 400, undefined, request)
+    }
+
+    // Prevent deleting yourself
+    if (auth.user.userId === userId) {
+      return apiError('No puedes eliminar tu propia cuenta.', 400, undefined, request)
+    }
+
+    // Check user exists
+    const user = await db.user.findUnique({
+      where: { id: userId },
+      include: {
+        stores: { select: { id: true, name: true } },
+        subscriptions: { select: { id: true } },
+      },
+    })
+
+    if (!user) {
+      return apiError('Usuario no encontrado', 404, undefined, request)
+    }
+
+    // Prevent deleting other super_admins (safety measure)
+    if (user.role === 'super_admin') {
+      return apiError('No puedes eliminar otros administradores.', 403, undefined, request)
+    }
+
+    // Delete in transaction — cascades handle: stores → products, subscriptions → payments
+    // Payment.userId has onDelete: SetNull, but payments are cascade-deleted via subscription first
+    await db.user.delete({
+      where: { id: userId },
+    })
+
+    auditLog({
+      action: 'USER_DELETED',
+      userId: auth.user.userId,
+      userEmail: auth.user.email,
+      ip: getClientIp(request),
+      details: { deletedUserId: userId, deletedUserEmail: user.email, deletedUserName: user.name, deletedStores: user.stores.length },
+      success: true,
+      statusCode: 200,
+    })
+
+    return apiSuccess({ message: `Usuario "${user.name}" eliminado correctamente`, deletedUserId: userId }, 200, request)
+  } catch (error: unknown) {
+    console.error('[USERS] DELETE error:', error instanceof Error ? error.message : String(error))
+    return apiError('Error eliminando usuario. Puede tener datos relacionados que impiden la eliminación.', 500, undefined, request)
+  }
+}
+
 // OPTIONS /api/users - CORS preflight
 export async function OPTIONS(request: NextRequest) {
   return handleCorsPreflight(request)

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useAppStore } from '@/lib/store'
-import { Search, Users, Shield, User, ToggleLeft, ToggleRight, KeyRound } from 'lucide-react'
+import { Search, Users, Shield, User, ToggleLeft, ToggleRight, KeyRound, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
@@ -57,6 +57,11 @@ export function AdminUsers() {
   const [togglingId, setTogglingId] = useState<string | null>(null)
 
   // Delete confirmation dialog
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string; email: string; storeCount: number } | null>(null)
+  const [deleting, setDeleting] = useState(false)
+
+  // Reset password dialog
   const [resetDialogOpen, setResetDialogOpen] = useState(false)
   const [resetTarget, setResetTarget] = useState<{ id: string; email: string } | null>(null)
   const [newPassword, setNewPassword] = useState('')
@@ -95,6 +100,34 @@ export function AdminUsers() {
     setPasswordError('')
     setResetSuccess(false)
     setResetDialogOpen(true)
+  }
+
+  function openDeleteDialog(userId: string, userName: string, userEmail: string, storeCount: number) {
+    setDeleteTarget({ id: userId, name: userName, email: userEmail, storeCount })
+    setDeleteDialogOpen(true)
+  }
+
+  async function confirmDeleteUser() {
+    if (!deleteTarget) return
+    setDeleting(true)
+    try {
+      const token = localStorage.getItem('tiendapp_token')
+      const res = await fetch(`/api/users?id=${deleteTarget.id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (res.ok) {
+        setUsers(prev => prev.filter(u => u.id !== deleteTarget.id))
+        setDeleteDialogOpen(false)
+      } else {
+        const data = await res.json().catch(() => ({}))
+        alert(data.error || 'Error al eliminar el usuario')
+      }
+    } catch {
+      alert('Error de conexion al eliminar')
+    } finally {
+      setDeleting(false)
+    }
   }
 
   async function confirmResetPassword() {
@@ -208,6 +241,11 @@ export function AdminUsers() {
                   <Button variant="outline" size="sm" className="flex-1 text-xs h-7" onClick={() => openResetDialog(user.id, user.email)}>
                     <KeyRound className="w-3 h-3 mr-1" /> Reset password
                   </Button>
+                  {user.role !== 'super_admin' && (
+                    <Button variant="outline" size="sm" className="text-xs h-7 text-red-500 hover:text-red-700 hover:bg-red-50 border-red-200" onClick={() => openDeleteDialog(user.id, user.name, user.email, user.stores.length)}>
+                      <Trash2 className="w-3 h-3 mr-1" /> Eliminar
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -257,6 +295,32 @@ export function AdminUsers() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eliminar usuario</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <span>Estas a punto de eliminar permanentemente la cuenta de <strong>{deleteTarget?.name}</strong> ({deleteTarget?.email}).</span>
+              {deleteTarget && deleteTarget.storeCount > 0 && (
+                <span className="block text-red-600 font-medium">Se eliminara tambien su tienda y {deleteTarget.storeCount} tienda(s) con todos sus productos, suscripciones y pagos asociados.</span>
+              )}
+              <span className="block">Esta accion no se puede deshacer.</span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteUser}
+              disabled={deleting}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {deleting ? 'Eliminando...' : 'Eliminar permanentemente'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
