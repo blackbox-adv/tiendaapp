@@ -228,7 +228,7 @@ export async function DELETE(request: NextRequest) {
     })
 
     auditLog({
-      action: 'USER_DELETED',
+      action: 'USER_DELETE',
       userId: auth.user.userId,
       userEmail: auth.user.email,
       ip: getClientIp(request),
