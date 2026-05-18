@@ -32,9 +32,7 @@ export async function POST(request: NextRequest) {
       return apiError('Usuario no encontrado', 404, undefined, request)
     }
 
-    if (user.role !== 'super_admin') {
-      return apiError('Este endpoint solo funciona para super_admin', 403, undefined, request)
-    }
+    // Allow any user role (not just super_admin)
 
     const hashedPassword = await hashPassword(newPassword)
     await db.user.update({
