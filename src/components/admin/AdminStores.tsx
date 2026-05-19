@@ -42,7 +42,7 @@ export function AdminStores() {
     try {
       const token = localStorage.getItem('tiendapp_token')
       if (!token) { console.warn('[AdminStores] No token found'); setLoading(false); return }
-      const res = await fetch('/api/stores', { headers: { Authorization: `Bearer ${token}` } })
+      const res = await fetch('/api/admin/stores', { headers: { Authorization: `Bearer ${token}` } })
       if (res.ok) {
         const data = await res.json()
         if (Array.isArray(data)) {
@@ -63,7 +63,7 @@ export function AdminStores() {
     setTogglingId(storeId)
     try {
       const token = localStorage.getItem('tiendapp_token')
-      const res = await fetch('/api/stores', {
+      const res = await fetch('/api/admin/stores', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ id: storeId, isActive: !currentActive }),
@@ -83,7 +83,7 @@ export function AdminStores() {
     setDeleting(true)
     try {
       const token = localStorage.getItem('tiendapp_token')
-      const res = await fetch(`/api/stores?id=${deleteTarget.id}`, {
+      const res = await fetch(`/api/admin/stores?id=${deleteTarget.id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       })
