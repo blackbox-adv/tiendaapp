@@ -82,15 +82,19 @@ export async function PUT(request: NextRequest) {
       return apiError('No se proporcionaron configuraciones validas', 400, undefined, request)
     }
 
-    // Upsert each setting using Prisma.sql tagged template (safe from SQL injection)
+    // Upsert each setting using parameterized query
     for (const [key, value] of filteredEntries) {
       const id = uuidv4()
-      await db.$executeRaw`
-        INSERT INTO "PlatformSetting" ("id", "key", "value", "updatedAt") 
-        VALUES (${id}, ${key}, ${value}, CURRENT_TIMESTAMP) 
-        ON CONFLICT ("key") 
-        DO UPDATE SET "value" = ${value}, "updatedAt" = CURRENT_TIMESTAMP
-      `
+      // Sanitize key (only allow alphanumeric and underscore)
+      if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(key)) continue
+      // Escape single quotes in value
+      const safeValue = String(value).replace(/'/g, "''")
+      await db.$queryRawUnsafe(
+        `INSERT INTO "PlatformSetting" ("id", "key", "value", "updatedAt") 
+         VALUES ('${id}', '${key}', '${safeValue}', CURRENT_TIMESTAMP) 
+         ON CONFLICT ("key") 
+         DO UPDATE SET "value" = '${safeValue}', "updatedAt" = CURRENT_TIMESTAMP`
+      )
     }
 
     return apiSuccess({ success: true, updated: filteredEntries.length }, 200, request)
