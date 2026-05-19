@@ -67,72 +67,43 @@ export async function GET(request: NextRequest) {
 
     // Admin gets all stores; owner gets only their own
     if (requireRole(auth.user, ['super_admin'])) {
-      // Use raw SQL to avoid Prisma type conversion issues with Supabase
-      const sql = db.$queryRawUnsafe.bind(db)
-      type StoreRow = {
-        id: string; name: string; slug: string; description: string; logo: string
-        primaryColor: string; secondaryColor: string; whatsappNumber: string | null
-        template: string; category: string; isActive: boolean; visitCount: number
-        createdAt: string; ownerId: string
-        ownerName: string; ownerEmail: string; productCount: number
-        planId: string | null; planName: string | null; planPrice: string | null
-        subStatus: string | null
-        hasShipping: boolean; hasSecurePayment: boolean; hasReturns: boolean
-      }
-      const rows: StoreRow[] = await sql(
-        `SELECT s.id, s.name, s.slug, s.description, s.logo,
-                s."primaryColor", s."secondaryColor", s."whatsappNumber",
-                s.template, s.category, s."isActive", s."visitCount"::int,
-                s."createdAt"::text, s."ownerId",
-                s."hasShipping", s."hasSecurePayment", s."hasReturns",
-                u.name as "ownerName", u.email as "ownerEmail",
-                COUNT(p.id)::int as "productCount",
-                sub_plan."planId", sub_plan."planName",
-                sub_plan."planPrice", sub_plan."subStatus"
-         FROM "Store" s
-         JOIN "User" u ON s."ownerId" = u.id
-         LEFT JOIN LATERAL (
-           SELECT sub.id, sub."planId", pl.name as "planName",
-                  pl.price::text as "planPrice", sub.status::text as "subStatus"
-           FROM "Subscription" sub
-           JOIN "Plan" pl ON sub."planId" = pl.id
-           WHERE sub."storeId" = s.id
-           ORDER BY sub."createdAt" DESC LIMIT 1
-         ) sub_plan ON true
-         LEFT JOIN "StoreProduct" p ON p."storeId" = s.id AND p."isActive" = true
-         GROUP BY s.id, s.name, s.slug, s.description, s.logo,
-                  s."primaryColor", s."secondaryColor", s."whatsappNumber",
-                  s.template, s.category, s."isActive", s."visitCount",
-                  s."createdAt", s."ownerId", u.name, u.email,
-                  sub_plan."planId", sub_plan."planName",
-                  sub_plan."planPrice", sub_plan."subStatus"
-         ORDER BY s."createdAt" DESC`
-      )
+      const allStores = await db.store.findMany({
+        include: {
+          owner: { select: { id: true, name: true, email: true } },
+          _count: { select: { products: { where: { isActive: true } } } },
+          subscriptions: {
+            include: { plan: { select: { id: true, name: true, price: true } } },
+            orderBy: { createdAt: 'desc' },
+            take: 1,
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      })
 
-      const stores = rows.map(r => ({
-        id: r.id,
-        name: r.name,
-        slug: r.slug,
-        description: r.description,
-        logo: r.logo,
-        primaryColor: r.primaryColor,
-        secondaryColor: r.secondaryColor,
-        whatsappNumber: r.whatsappNumber,
-        template: r.template,
-        category: r.category,
-        isActive: r.isActive,
-        visitCount: r.visitCount,
-        createdAt: r.createdAt,
-        ownerId: r.ownerId,
-        hasShipping: r.hasShipping,
-        hasSecurePayment: r.hasSecurePayment,
-        hasReturns: r.hasReturns,
-        owner: { id: r.ownerId, name: r.ownerName, email: r.ownerEmail },
-        _count: { products: r.productCount },
-        subscriptions: r.planId ? [{
-          status: r.subStatus || 'active',
-          plan: { id: r.planId, name: r.planName || 'Free', price: parseFloat(r.planPrice || '0') },
-        }] : [],
+      const stores = allStores.map(s => ({
+        id: s.id,
+        name: s.name,
+        slug: s.slug,
+        description: s.description,
+        logo: s.logo,
+        primaryColor: s.primaryColor,
+        secondaryColor: s.secondaryColor,
+        whatsappNumber: s.whatsappNumber,
+        template: s.template,
+        category: s.category,
+        isActive: s.isActive,
+        visitCount: s.visitCount,
+        createdAt: s.createdAt,
+        ownerId: s.ownerId,
+        hasShipping: s.hasShipping,
+        hasSecurePayment: s.hasSecurePayment,
+        hasReturns: s.hasReturns,
+        owner: { id: s.owner.id, name: s.owner.name, email: s.owner.email },
+        _count: { products: s._count.products },
+        subscriptions: s.subscriptions.map(sub => ({
+          status: sub.status,
+          plan: { id: sub.plan.id, name: sub.plan.name, price: Number(sub.plan.price) },
+        })),
       }))
 
       return apiSuccess(serializeDecimals(stores), 200, request)

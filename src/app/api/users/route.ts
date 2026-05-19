@@ -53,6 +53,9 @@ export async function GET(request: NextRequest) {
     }), 200, request)
   } catch (error: unknown) {
     console.error('[USERS] GET error:', error instanceof Error ? error.message : String(error))
+    console.error('[USERS] GET stack:', error instanceof Error ? error.stack : 'no stack')
+    const errCode = error && typeof error === 'object' && 'code' in error ? (error as { code: string }).code : undefined
+    console.error('[USERS] GET prisma code:', errCode)
     return apiError('Error obteniendo usuarios', 500, undefined, request)
   }
 }

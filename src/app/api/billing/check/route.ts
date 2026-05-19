@@ -170,7 +170,9 @@ export async function GET(request: NextRequest) {
       activeCount, expiringSoon, pastDueCount: pastDueList.length, pastDueSubscriptions: pastDueList,
       expiredCount, pendingPayments, monthlyRevenue, monthlyRevenueVerified,
     }), 200, request)
-  } catch {
+  } catch (error: unknown) {
+    console.error('[BILLING CHECK] GET error:', error instanceof Error ? error.message : String(error))
+    console.error('[BILLING CHECK] stack:', error instanceof Error ? error.stack : 'no stack')
     return apiError('Error fetching billing status', 500, undefined, request)
   }
 }

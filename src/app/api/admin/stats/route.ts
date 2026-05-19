@@ -1,6 +1,7 @@
 import { db } from '@/lib/db'
 import { NextResponse } from 'next/server'
 import { authenticateRequest } from '@/lib/auth'
+import { serializeDecimals } from '@/lib/utils'
 
 // GET /api/admin/stats - Complete platform statistics
 export async function GET(request: Request) {
@@ -14,99 +15,123 @@ export async function GET(request: Request) {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
     const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
 
-    // Use $queryRawUnsafe to completely bypass Prisma's query engine and avoid type conversion issues
-    // with string status fields in PostgreSQL
-    const sql = db.$queryRawUnsafe.bind(db)
+    // Use Prisma ORM methods to avoid PgBouncer prepared statement issues
+    const [
+      totalUsers,
+      activeUsers,
+      totalStores,
+      activeStores,
+      totalProducts,
+      newUsersThisMonth,
+      newStoresThisMonth,
+      allSubsWithPlan,
+      completedPaymentsMonth,
+      pendingPaymentsCount,
+      topStoreRows,
+      recentStoreRows,
+    ] = await Promise.all([
+      // User counts
+      db.user.count({ where: { role: 'store_owner' } }),
+      db.user.count({ where: { role: 'store_owner', isActive: true } }),
+      // Store counts
+      db.store.count(),
+      db.store.count({ where: { isActive: true } }),
+      // Product count
+      db.storeProduct.count({ where: { isActive: true } }),
+      // New this month
+      db.user.count({ where: { role: 'store_owner', createdAt: { gte: startOfMonth } } }),
+      db.store.count({ where: { createdAt: { gte: startOfMonth } } }),
+      // All subscriptions with plan info
+      db.subscription.findMany({
+        include: { plan: { select: { id: true, name: true, type: true, price: true } } },
+      }),
+      // Completed payments this month
+      db.payment.findMany({
+        where: { status: 'completed', createdAt: { gte: startOfMonth } },
+        select: { amount: true, verifiedAt: true },
+      }),
+      // Pending payments count
+      db.payment.count({ where: { status: 'pending' } }),
+      // Top stores by visit count
+      db.store.findMany({
+        where: { isActive: true },
+        select: {
+          id: true, name: true, slug: true, visitCount: true,
+          _count: { select: { products: { where: { isActive: true } } } },
+        },
+        orderBy: { visitCount: 'desc' },
+        take: 5,
+      }),
+      // Recent stores
+      db.store.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+        select: {
+          id: true, name: true, slug: true, createdAt: true,
+          owner: { select: { name: true, email: true } },
+          subscriptions: {
+            include: { plan: { select: { name: true, price: true } } },
+            orderBy: { createdAt: 'desc' },
+            take: 1,
+          },
+        },
+      }),
+    ])
 
-    type CountR = { c: number }
-    const [totalUsersRow]: CountR[] = await sql('SELECT COUNT(*)::int as c FROM "User" WHERE role = $1', ['store_owner'])
-    const [activeUsersRow]: CountR[] = await sql('SELECT COUNT(*)::int as c FROM "User" WHERE role = $1 AND "isActive" = true', ['store_owner'])
-    const [totalStoresRow]: CountR[] = await sql('SELECT COUNT(*)::int as c FROM "Store"')
-    const [activeStoresRow]: CountR[] = await sql('SELECT COUNT(*)::int as c FROM "Store" WHERE "isActive" = true')
-    const [totalProductsRow]: CountR[] = await sql('SELECT COUNT(*)::int as c FROM "StoreProduct" WHERE "isActive" = true')
-    const [newUsersRow]: CountR[] = await sql('SELECT COUNT(*)::int as c FROM "User" WHERE role = $1 AND "createdAt" >= $2', ['store_owner', startOfMonth])
-    const [newStoresRow]: CountR[] = await sql('SELECT COUNT(*)::int as c FROM "Store" WHERE "createdAt" >= $1', [startOfMonth])
-
-    // Subscriptions with plan info - cast all to text to avoid Prisma conversion
-    type SubR = { id: string; status: string; planName: string; planType: string; planPrice: string; nextBillingDate: string | null }
-    const subs: SubR[] = await sql(
-      `SELECT s.id, s.status::text, p.name as "planName", p.type as "planType", p.price::text as "planPrice", s."nextBillingDate"::text as "nextBillingDate"
-       FROM "Subscription" s JOIN "Plan" p ON s."planId" = p.id`
-    )
-
+    // Calculate plan distribution and MRR
     const planDistribution: Record<string, number> = {}
     let mrr = 0
-    for (const sub of subs) {
-      planDistribution[sub.planName] = (planDistribution[sub.planName] || 0) + 1
-      if (sub.planType !== 'free' && sub.status === 'active') mrr += parseFloat(sub.planPrice)
+    for (const sub of allSubsWithPlan) {
+      planDistribution[sub.plan.name] = (planDistribution[sub.plan.name] || 0) + 1
+      if (sub.plan.type !== 'free' && sub.status === 'active') {
+        mrr += Number(sub.plan.price)
+      }
     }
 
-    // Payments
-    type PayR = { amount: string; verifiedAt: string | null }
-    const completedPays: PayR[] = await sql(
-      'SELECT amount::text, "verifiedAt"::text FROM "Payment" WHERE status = $1 AND "createdAt" >= $2',
-      ['completed', startOfMonth]
-    )
-    const monthlyRevenue = completedPays.reduce((sum, p) => sum + parseFloat(p.amount), 0)
-    const verifiedRevenue = completedPays.filter(p => p.verifiedAt).reduce((sum, p) => sum + parseFloat(p.amount), 0)
-    const [pendingRow]: CountR[] = await sql('SELECT COUNT(*)::int as c FROM "Payment" WHERE status = $1', ['pending'])
+    // Revenue calculations
+    const monthlyRevenue = completedPaymentsMonth.reduce((sum, p) => sum + Number(p.amount), 0)
+    const verifiedRevenue = completedPaymentsMonth.filter(p => p.verifiedAt).reduce((sum, p) => sum + Number(p.amount), 0)
 
-    const expiringSubscriptions = subs.filter(
-      s => s.status === 'active' && s.nextBillingDate && new Date(s.nextBillingDate) <= threeDaysFromNow && s.planType !== 'free'
+    // Expiring and past due counts
+    const expiringSubscriptions = allSubsWithPlan.filter(
+      s => s.status === 'active' && s.nextBillingDate && new Date(s.nextBillingDate) <= threeDaysFromNow && s.plan.type !== 'free'
     ).length
-    const pastDueCount = subs.filter(s => s.status === 'past_due').length
+    const pastDueCount = allSubsWithPlan.filter(s => s.status === 'past_due').length
 
-    // Top stores
-    type TopR = { id: string; name: string; slug: string; visitCount: number; pc: number }
-    const topStoreRows: TopR[] = await sql(
-      `SELECT s.id, s.name, s.slug, s."visitCount"::int, COUNT(p.id)::int as pc
-        FROM "Store" s LEFT JOIN "StoreProduct" p ON p."storeId" = s.id AND p."isActive" = true
-        WHERE s."isActive" = true
-        GROUP BY s.id, s.name, s.slug, s."visitCount"
-        ORDER BY s."visitCount" DESC LIMIT 5`
-    )
-    const topStores = topStoreRows.map(r => ({
-      id: r.id, name: r.name, slug: r.slug,
-      visitCount: r.visitCount,
-      _count: { products: r.pc },
+    // Format top stores
+    const topStores = topStoreRows.map(s => ({
+      id: s.id, name: s.name, slug: s.slug,
+      visitCount: s.visitCount,
+      _count: { products: s._count.products },
     }))
 
-    // Recent stores
-    type RecentR = { id: string; name: string; slug: string; createdAt: string; ownerName: string; ownerEmail: string; pn: string; pp: string }
-    const recentRows: RecentR[] = await sql(
-      `SELECT s.id, s.name, s.slug, s."createdAt"::text,
-        u.name as "ownerName", u.email as "ownerEmail",
-        COALESCE(sub_plan.pn, 'Free') as pn, COALESCE(sub_plan.pp, '0') as pp
-        FROM "Store" s
-        JOIN "User" u ON s."ownerId" = u.id
-        LEFT JOIN LATERAL (
-          SELECT p.name as pn, p.price::text as pp
-          FROM "Subscription" sub JOIN "Plan" p ON sub."planId" = p.id
-          WHERE sub."storeId" = s.id
-          ORDER BY sub."createdAt" DESC LIMIT 1
-        ) sub_plan ON true
-        ORDER BY s."createdAt" DESC LIMIT 5`
-    )
-    const recentStores = recentRows.map(r => ({
-      id: r.id, name: r.name, slug: r.slug, createdAt: r.createdAt,
-      owner: { name: r.ownerName, email: r.ownerEmail },
-      subscriptions: [{ plan: { name: r.pn, price: parseFloat(r.pp) } }],
+    // Format recent stores
+    const recentStores = recentStoreRows.map(s => ({
+      id: s.id, name: s.name, slug: s.slug, createdAt: s.createdAt,
+      owner: { name: s.owner.name, email: s.owner.email },
+      subscriptions: s.subscriptions.map(sub => ({
+        plan: { name: sub.plan.name, price: Number(sub.plan.price) },
+      })),
     }))
 
-    return NextResponse.json({
-      totalUsers: totalUsersRow?.c ?? 0,
-      activeUsers: activeUsersRow?.c ?? 0,
-      totalStores: totalStoresRow?.c ?? 0,
-      activeStores: activeStoresRow?.c ?? 0,
-      totalProducts: totalProductsRow?.c ?? 0,
-      newUsersThisMonth: newUsersRow?.c ?? 0,
-      newStoresThisMonth: newStoresRow?.c ?? 0,
-      planDistribution, mrr,
-      monthlyRevenue, verifiedRevenue,
-      pendingPayments: pendingRow?.c ?? 0,
-      topStores, recentStores,
-      expiringSubscriptions, pastDueCount,
-    })
+    return NextResponse.json(serializeDecimals({
+      totalUsers,
+      activeUsers,
+      totalStores,
+      activeStores,
+      totalProducts,
+      newUsersThisMonth,
+      newStoresThisMonth,
+      planDistribution,
+      mrr,
+      monthlyRevenue,
+      verifiedRevenue,
+      pendingPayments: pendingPaymentsCount,
+      topStores,
+      recentStores,
+      expiringSubscriptions,
+      pastDueCount,
+    }))
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error fetching stats'
     console.error('[ADMIN STATS]', message)

@@ -11,7 +11,7 @@ function getDatabaseUrl(): string {
   // Supabase transaction pooler REQUIRES ?pgbouncer=true for Prisma
   if (url.includes('pooler.supabase.com') && !url.includes('pgbouncer')) {
     const separator = url.includes('?') ? '&' : '?'
-    return url + separator + 'pgbouncer=true'
+    return url + separator + 'pgbouncer=true&connection_limit=5'
   }
   return url
 }
