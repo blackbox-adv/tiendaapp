@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useAppStore } from '@/lib/store'
-import { Search, Users, Shield, User, ToggleLeft, ToggleRight, KeyRound, Trash2 } from 'lucide-react'
+import { Search, Users, Shield, User, ToggleLeft, ToggleRight, KeyRound, Trash2, Pencil } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
@@ -68,6 +68,15 @@ export function AdminUsers() {
   const [passwordError, setPasswordError] = useState('')
   const [resetSuccess, setResetSuccess] = useState(false)
 
+  // Edit user dialog
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [editTarget, setEditTarget] = useState<ApiUser | null>(null)
+  const [editName, setEditName] = useState('')
+  const [editEmail, setEditEmail] = useState('')
+  const [editPhone, setEditPhone] = useState('')
+  const [editSaving, setEditSaving] = useState(false)
+  const [editError, setEditError] = useState('')
+
   useEffect(() => { loadUsers() }, [])
 
   async function loadUsers() {
@@ -105,6 +114,55 @@ export function AdminUsers() {
     setResetDialogOpen(true)
   }
 
+  function openEditDialog(user: ApiUser) {
+    setEditTarget(user)
+    setEditName(user.name)
+    setEditEmail(user.email)
+    setEditPhone(user.phone || '')
+    setEditError('')
+    setEditDialogOpen(true)
+  }
+
+  async function confirmEditUser() {
+    if (!editTarget) return
+    if (!editName.trim() || editName.trim().length < 2) {
+      setEditError('El nombre debe tener al menos 2 caracteres')
+      return
+    }
+    if (!editEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editEmail.trim())) {
+      setEditError('Ingresa un email valido')
+      return
+    }
+    setEditSaving(true)
+    setEditError('')
+    try {
+      const token = localStorage.getItem('tiendapp_token')
+      const res = await fetch('/api/users', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          id: editTarget.id,
+          name: editName.trim(),
+          email: editEmail.trim().toLowerCase(),
+          phone: editPhone.trim() || '',
+        }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        const updatedUser = data.data || data
+        setUsers(prev => prev.map(u => u.id === editTarget.id ? { ...u, name: editName.trim(), email: editEmail.trim().toLowerCase(), phone: editPhone.trim() || null } : u))
+        setEditDialogOpen(false)
+      } else {
+        const data = await res.json().catch(() => ({}))
+        setEditError(data.error || 'Error al actualizar el usuario')
+      }
+    } catch {
+      setEditError('Error de conexion')
+    } finally {
+      setEditSaving(false)
+    }
+  }
+
   function openDeleteDialog(userId: string, userName: string, userEmail: string, storeCount: number) {
     setDeleteTarget({ id: userId, name: userName, email: userEmail, storeCount })
     setDeleteDialogOpen(true)
@@ -135,8 +193,8 @@ export function AdminUsers() {
 
   async function confirmResetPassword() {
     if (!resetTarget) return
-    if (newPassword.length < 6) {
-      setPasswordError('Minimo 6 caracteres')
+    if (newPassword.length < 8) {
+      setPasswordError('Minimo 8 caracteres')
       return
     }
     try {
@@ -241,12 +299,15 @@ export function AdminUsers() {
                   </div>
                 </div>
                 <div className="flex gap-2 mt-3 pt-3 border-t border-gray-50">
-                  <Button variant="outline" size="sm" className="flex-1 text-xs h-7" onClick={() => openResetDialog(user.id, user.email)}>
-                    <KeyRound className="w-3 h-3 mr-1" /> Reset password
+                  <Button variant="outline" size="sm" className="flex-1 text-xs h-7" onClick={() => openEditDialog(user)}>
+                    <Pencil className="w-3 h-3 mr-1" /> Editar
+                  </Button>
+                  <Button variant="outline" size="sm" className="text-xs h-7" onClick={() => openResetDialog(user.id, user.email)}>
+                    <KeyRound className="w-3 h-3 mr-1" /> Clave
                   </Button>
                   {user.role !== 'super_admin' && (
                     <Button variant="outline" size="sm" className="text-xs h-7 text-red-500 hover:text-red-700 hover:bg-red-50 border-red-200" onClick={() => openDeleteDialog(user.id, user.name, user.email, user.stores.length)}>
-                      <Trash2 className="w-3 h-3 mr-1" /> Eliminar
+                      <Trash2 className="w-3 h-3" />
                     </Button>
                   )}
                 </div>
@@ -258,6 +319,52 @@ export function AdminUsers() {
       {filteredUsers.length === 0 && (
         <Card><CardContent className="py-12 text-center text-gray-400"><Users className="w-12 h-12 mx-auto mb-3 text-gray-300" /><p>No se encontraron usuarios</p></CardContent></Card>
       )}
+
+      {/* Edit User Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Editar usuario</DialogTitle>
+            <DialogDescription>
+              Modifica los datos de <span className="font-semibold text-gray-900">{editTarget?.name}</span>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Nombre</label>
+              <Input
+                placeholder="Nombre completo"
+                value={editName}
+                onChange={(e) => { setEditName(e.target.value); setEditError('') }}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Email</label>
+              <Input
+                type="email"
+                placeholder="correo@ejemplo.com"
+                value={editEmail}
+                onChange={(e) => { setEditEmail(e.target.value); setEditError('') }}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Teléfono</label>
+              <Input
+                placeholder="+51 999 888 777"
+                value={editPhone}
+                onChange={(e) => { setEditPhone(e.target.value); setEditError('') }}
+              />
+            </div>
+            {editError && <p className="text-xs text-red-500">{editError}</p>}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)} disabled={editSaving}>Cancelar</Button>
+            <Button onClick={confirmEditUser} disabled={editSaving || !editName.trim() || !editEmail.trim()}>
+              {editSaving ? 'Guardando...' : 'Guardar cambios'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Reset Password Dialog */}
       <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
@@ -282,7 +389,7 @@ export function AdminUsers() {
                   <label className="text-sm font-medium">Nueva contraseña</label>
                   <Input
                     type="password"
-                    placeholder="Minimo 6 caracteres"
+                    placeholder="Minimo 8 caracteres"
                     value={newPassword}
                     onChange={(e) => { setNewPassword(e.target.value); setPasswordError('') }}
                     onKeyDown={(e) => { if (e.key === 'Enter') confirmResetPassword() }}
@@ -292,7 +399,7 @@ export function AdminUsers() {
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setResetDialogOpen(false)}>Cancelar</Button>
-                <Button onClick={confirmResetPassword} disabled={!newPassword || newPassword.length < 6}>Guardar</Button>
+                <Button onClick={confirmResetPassword} disabled={!newPassword || newPassword.length < 8}>Guardar</Button>
               </DialogFooter>
             </>
           )}

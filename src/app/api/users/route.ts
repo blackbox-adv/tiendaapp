@@ -172,7 +172,15 @@ export async function PUT(request: NextRequest) {
 
     return apiSuccess(serializeDecimals(safeUser), 200, request)
   } catch (error: unknown) {
-    console.error('[USERS] PUT error:', error instanceof Error ? error.message : String(error))
+    const errMsg = error instanceof Error ? error.message : String(error)
+    const errCode = error && typeof error === 'object' && 'code' in error ? (error as { code: string }).code : undefined
+    console.error('[USERS] PUT error:', errMsg, { code: errCode })
+
+    // Handle Prisma unique constraint violation (P2002) — duplicate email
+    if (errCode === 'P2002') {
+      return apiError('Este email ya esta registrado por otro usuario.', 409, undefined, request)
+    }
+
     return apiError('Error actualizando usuario', 500, undefined, request)
   }
 }
