@@ -82,24 +82,47 @@ export async function PUT(request: NextRequest) {
       return apiError('No se proporcionaron configuraciones validas', 400, undefined, request)
     }
 
-    // Use raw SQL without parameters for PgBouncer compatibility
-    // Validate key format to prevent SQL injection (alphanumeric + underscore only)
+    // Use Prisma upsert for each setting to avoid column name mismatches
     for (const [key, value] of filteredEntries) {
       if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(key)) {
         console.warn('[SETTINGS] Invalid key format:', key)
         continue
       }
 
-      const id = uuidv4()
-      // Escape single quotes in value to prevent SQL injection
-      const safeValue = String(value).replace(/'/g, "''")
-
-      await db.$executeRawUnsafe(
-        `INSERT INTO "PlatformSetting" ("id", "key", "value", "updatedAt") ` +
-        `VALUES ('${id}', '${key}', '${safeValue}', CURRENT_TIMESTAMP) ` +
-        `ON CONFLICT ("key") ` +
-        `DO UPDATE SET "value" = EXCLUDED."value", "updatedAt" = CURRENT_TIMESTAMP`
-      )
+      try {
+        // Try upsert first
+        await db.platformSetting.upsert({
+          where: { key },
+          update: { value: String(value) },
+          create: { key, value: String(value) },
+        })
+      } catch {
+        // If upsert fails (e.g., column name mismatch), try raw SQL
+        // Check what columns the table actually has
+        const safeValue = String(value).replace(/'/g, "''")
+        try {
+          await db.$executeRawUnsafe(
+            `INSERT INTO "PlatformSetting" ("key", "value") ` +
+            `VALUES ('${key}', '${safeValue}') ` +
+            `ON CONFLICT ("key") ` +
+            `DO UPDATE SET "value" = EXCLUDED."value"`
+          )
+        } catch (rawErr) {
+          console.error('[SETTINGS] Raw SQL also failed:', rawErr instanceof Error ? rawErr.message : String(rawErr))
+          // Last resort: try with all standard columns including id
+          const id = uuidv4()
+          try {
+            await db.$executeRawUnsafe(
+              `INSERT INTO "PlatformSetting" ("id", "key", "value") ` +
+              `VALUES ('${id}', '${key}', '${safeValue}') ` +
+              `ON CONFLICT ("key") ` +
+              `DO UPDATE SET "value" = EXCLUDED."value"`
+            )
+          } catch (rawErr2) {
+            console.error('[SETTINGS] All SQL attempts failed:', rawErr2 instanceof Error ? rawErr2.message : String(rawErr2))
+          }
+        }
+      }
     }
 
     return apiSuccess({ success: true, updated: filteredEntries.length }, 200, request)
