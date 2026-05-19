@@ -4,6 +4,35 @@ import { authenticateRequest, requireRole } from '@/lib/auth'
 import { validateBody, settingsSchema, ALLOWED_SETTING_KEYS } from '@/lib/validations'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 
+// Helper: ensure PlatformSetting table exists
+async function ensureSettingsTable(): Promise<boolean> {
+  try {
+    // Try a simple query first
+    await db.platformSetting.count()
+    return true
+  } catch {
+    // Table doesn't exist, create it
+    try {
+      await db.$executeRawUnsafe(`
+        CREATE TABLE IF NOT EXISTS "PlatformSetting" (
+          "id" TEXT NOT NULL,
+          "key" TEXT NOT NULL,
+          "value" TEXT NOT NULL,
+          "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          CONSTRAINT "PlatformSetting_pkey" PRIMARY KEY ("id")
+        );
+        CREATE UNIQUE INDEX IF NOT EXISTS "PlatformSetting_key_key" ON "PlatformSetting"("key");
+        CREATE INDEX IF NOT EXISTS "PlatformSetting_key_idx" ON "PlatformSetting"("key");
+      `)
+      console.log('[SETTINGS] Created PlatformSetting table')
+      return true
+    } catch (createErr) {
+      console.error('[SETTINGS] Failed to create PlatformSetting table:', createErr instanceof Error ? createErr.message : String(createErr))
+      return false
+    }
+  }
+}
+
 // GET /api/settings - Public
 export async function GET(request: NextRequest) {
   try {
@@ -78,6 +107,12 @@ export async function PUT(request: NextRequest) {
       return apiError('No se proporcionaron configuraciones validas', 400, undefined, request)
     }
 
+    // Ensure the table exists before trying to upsert
+    const tableReady = await ensureSettingsTable()
+    if (!tableReady) {
+      return apiError('No se pudo acceder a la tabla de configuracion. Ejecuta las migraciones de base de datos.', 500, undefined, request)
+    }
+
     for (const [key, value] of filteredEntries) {
       await db.platformSetting.upsert({
         where: { key },
@@ -87,7 +122,9 @@ export async function PUT(request: NextRequest) {
     }
 
     return apiSuccess({ success: true, updated: filteredEntries.length }, 200, request)
-  } catch {
+  } catch (error: unknown) {
+    console.error('[SETTINGS] PUT error:', error instanceof Error ? error.message : String(error))
+    console.error('[SETTINGS] PUT stack:', error instanceof Error ? error.stack : 'no stack')
     return apiError('Error actualizando configuracion', 500, undefined, request)
   }
 }
