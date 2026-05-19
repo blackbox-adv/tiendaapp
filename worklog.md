@@ -102,3 +102,29 @@ Stage Summary:
 - Created: /api/admin/stores/route.ts (GET/PUT/DELETE with raw SQL for PgBouncer compatibility)
 - Modified: AdminStores.tsx (changed all API calls to /api/admin/stores)
 - Deployed: Pushed commit 87ffdec to GitHub, Vercel auto-deployed
+---
+Task ID: 2
+Agent: Main Agent
+Task: Fix image uploads (logo, banner, products) - /api/upload endpoint was missing
+
+Work Log:
+- User reported "Error al subir el banner" - images can't be uploaded
+- Investigated and found the /api/upload route.ts file DOES NOT EXIST
+- Frontend components (StoreSettings, ProductForm, StoreWizard) all call /api/upload but it returned 404
+- Verified Supabase Storage is configured: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY both set in Vercel
+- Verified product-images bucket exists via /api/health check
+- Created /api/upload/route.ts with:
+  - POST: Upload files to Supabase Storage (product-images bucket)
+  - Auto-creates bucket if it doesn't exist, ensures it's public
+  - File validation: type (JPG/PNG/WebP/GIF), size (max 5MB)
+  - Auth required, generates unique file paths per user
+  - Returns public URL for the uploaded file
+  - DELETE: Remove files from storage (only own files)
+  - CORS and rate limiting already configured in middleware
+- Tested: Upload works, returns public URL, image is accessible (HTTP 200)
+
+Stage Summary:
+- Fixed: Image uploads now work (logo, banner, product images)
+- Created: /api/upload/route.ts (POST/DELETE/OPTIONS)
+- The upload returns public URLs like: https://bsshjfawtlcfshnmaawf.supabase.co/storage/v1/object/public/product-images/...
+- Deployed: Pushed commit 0bcd49b to GitHub, Vercel auto-deployed
