@@ -82,19 +82,25 @@ export async function PUT(request: NextRequest) {
       return apiError('No se proporcionaron configuraciones validas', 400, undefined, request)
     }
 
-    // Upsert each setting using parameterized query
+    // Use Prisma ORM for upsert (handles PgBouncer correctly)
     for (const [key, value] of filteredEntries) {
-      const id = uuidv4()
-      // Sanitize key (only allow alphanumeric and underscore)
-      if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(key)) continue
-      // Escape single quotes in value
-      const safeValue = String(value).replace(/'/g, "''")
-      await db.$queryRawUnsafe(
-        `INSERT INTO "PlatformSetting" ("id", "key", "value", "updatedAt") 
-         VALUES ('${id}', '${key}', '${safeValue}', CURRENT_TIMESTAMP) 
-         ON CONFLICT ("key") 
-         DO UPDATE SET "value" = '${safeValue}', "updatedAt" = CURRENT_TIMESTAMP`
-      )
+      try {
+        // Try to find existing setting first
+        const existing = await db.platformSetting.findUnique({ where: { key } })
+        if (existing) {
+          await db.platformSetting.update({
+            where: { key },
+            data: { value, updatedAt: new Date() },
+          })
+        } else {
+          await db.platformSetting.create({
+            data: { id: uuidv4(), key, value },
+          })
+        }
+      } catch (upsertErr) {
+        console.error('[SETTINGS] Upsert error for key:', key, upsertErr instanceof Error ? upsertErr.message : String(upsertErr))
+        throw upsertErr
+      }
     }
 
     return apiSuccess({ success: true, updated: filteredEntries.length }, 200, request)
