@@ -3,35 +3,7 @@ import { NextRequest } from 'next/server'
 import { authenticateRequest, requireRole } from '@/lib/auth'
 import { validateBody, settingsSchema, ALLOWED_SETTING_KEYS } from '@/lib/validations'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
-
-// Helper: ensure PlatformSetting table exists
-async function ensureSettingsTable(): Promise<boolean> {
-  try {
-    // Try a simple query first
-    await db.platformSetting.count()
-    return true
-  } catch {
-    // Table doesn't exist, create it
-    try {
-      await db.$executeRawUnsafe(`
-        CREATE TABLE IF NOT EXISTS "PlatformSetting" (
-          "id" TEXT NOT NULL,
-          "key" TEXT NOT NULL,
-          "value" TEXT NOT NULL,
-          "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          CONSTRAINT "PlatformSetting_pkey" PRIMARY KEY ("id")
-        );
-        CREATE UNIQUE INDEX IF NOT EXISTS "PlatformSetting_key_key" ON "PlatformSetting"("key");
-        CREATE INDEX IF NOT EXISTS "PlatformSetting_key_idx" ON "PlatformSetting"("key");
-      `)
-      console.log('[SETTINGS] Created PlatformSetting table')
-      return true
-    } catch (createErr) {
-      console.error('[SETTINGS] Failed to create PlatformSetting table:', createErr instanceof Error ? createErr.message : String(createErr))
-      return false
-    }
-  }
-}
+import { v4 as uuidv4 } from 'uuid'
 
 // GET /api/settings - Public
 export async function GET(request: NextRequest) {
@@ -39,12 +11,15 @@ export async function GET(request: NextRequest) {
     let settings: Record<string, string> = {}
 
     try {
-      const dbSettings = await db.platformSetting.findMany()
-      for (const s of dbSettings) {
-        settings[s.key] = s.value
+      // Use raw SQL to avoid Prisma client sync issues
+      const rows = await db.$queryRawUnsafe(
+        `SELECT "key", "value" FROM "PlatformSetting"`
+      ) as Array<{ key: string; value: string }>
+      for (const row of rows) {
+        settings[row.key] = row.value
       }
     } catch {
-      // Table doesn't exist yet, use defaults
+      // Table doesn't exist yet or error, use defaults
     }
 
     const defaults: Record<string, string> = {
@@ -107,18 +82,41 @@ export async function PUT(request: NextRequest) {
       return apiError('No se proporcionaron configuraciones validas', 400, undefined, request)
     }
 
-    // Ensure the table exists before trying to upsert
-    const tableReady = await ensureSettingsTable()
-    if (!tableReady) {
-      return apiError('No se pudo acceder a la tabla de configuracion. Ejecuta las migraciones de base de datos.', 500, undefined, request)
+    // Ensure table exists
+    try {
+      await db.$executeRawUnsafe(`
+        CREATE TABLE IF NOT EXISTS "PlatformSetting" (
+          "id" TEXT NOT NULL,
+          "key" TEXT NOT NULL,
+          "value" TEXT NOT NULL,
+          "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          CONSTRAINT "PlatformSetting_pkey" PRIMARY KEY ("id")
+        )
+      `)
+      await db.$executeRawUnsafe(
+        `CREATE UNIQUE INDEX IF NOT EXISTS "PlatformSetting_key_key" ON "PlatformSetting"("key")`
+      )
+    } catch {
+      // Table may already exist, that's fine
     }
 
+    // Upsert each setting using raw SQL
     for (const [key, value] of filteredEntries) {
-      await db.platformSetting.upsert({
-        where: { key },
-        update: { value },
-        create: { key, value },
-      })
+      // Try update first
+      const updated = await db.$executeRawUnsafe(
+        `UPDATE "PlatformSetting" SET "value" = $1, "updatedAt" = CURRENT_TIMESTAMP WHERE "key" = $2`,
+        value,
+        key
+      )
+      // If no row was updated, insert a new one
+      if (updated === 0) {
+        await db.$executeRawUnsafe(
+          `INSERT INTO "PlatformSetting" ("id", "key", "value", "updatedAt") VALUES ($1, $2, $3, CURRENT_TIMESTAMP)`,
+          uuidv4(),
+          key,
+          value
+        )
+      }
     }
 
     return apiSuccess({ success: true, updated: filteredEntries.length }, 200, request)
