@@ -3,7 +3,6 @@ import { NextRequest } from 'next/server'
 import { authenticateRequest, requireRole } from '@/lib/auth'
 import { validateBody, settingsSchema, ALLOWED_SETTING_KEYS } from '@/lib/validations'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
-import { Prisma } from '@prisma/client'
 import { v4 as uuidv4 } from 'uuid'
 
 // GET /api/settings - Public
@@ -82,25 +81,24 @@ export async function PUT(request: NextRequest) {
       return apiError('No se proporcionaron configuraciones validas', 400, undefined, request)
     }
 
-    // Use Prisma ORM for upsert (handles PgBouncer correctly)
+    // Use raw SQL for all operations (PgBouncer + Prisma ORM doesn't work in Vercel+Supabase)
     for (const [key, value] of filteredEntries) {
-      try {
-        // Try to find existing setting first
-        const existing = await db.platformSetting.findUnique({ where: { key } })
-        if (existing) {
-          await db.platformSetting.update({
-            where: { key },
-            data: { value, updatedAt: new Date() },
-          })
-        } else {
-          await db.platformSetting.create({
-            data: { id: uuidv4(), key, value },
-          })
-        }
-      } catch (upsertErr) {
-        console.error('[SETTINGS] Upsert error for key:', key, upsertErr instanceof Error ? upsertErr.message : String(upsertErr))
-        throw upsertErr
+      // Validate key format (alphanumeric + underscore only)
+      if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(key)) {
+        console.warn('[SETTINGS] Invalid key format:', key)
+        continue
       }
+      
+      const id = uuidv4()
+      const safeValue = String(value).replace(/'/g, "''")
+      
+      // Use native PostgreSQL upsert via raw SQL
+      await db.$executeRawUnsafe(
+        `INSERT INTO "PlatformSetting" ("id", "key", "value", "updatedAt") ` +
+        `VALUES ('${id}', '${key}', '${safeValue}', CURRENT_TIMESTAMP) ` +
+        `ON CONFLICT ("key") ` +
+        `DO UPDATE SET "value" = EXCLUDED."value", "updatedAt" = CURRENT_TIMESTAMP`
+      )
     }
 
     return apiSuccess({ success: true, updated: filteredEntries.length }, 200, request)
