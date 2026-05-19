@@ -100,23 +100,17 @@ export async function PUT(request: NextRequest) {
       // Table may already exist, that's fine
     }
 
-    // Upsert each setting using raw SQL
+    // Upsert each setting using native PostgreSQL INSERT ... ON CONFLICT
     for (const [key, value] of filteredEntries) {
-      // Try update first
-      const updated = await db.$executeRawUnsafe(
-        `UPDATE "PlatformSetting" SET "value" = $1, "updatedAt" = CURRENT_TIMESTAMP WHERE "key" = $2`,
-        value,
-        key
+      await db.$executeRawUnsafe(
+        `INSERT INTO "PlatformSetting" ("id", "key", "value", "updatedAt") 
+         VALUES ($1, $2, $3, CURRENT_TIMESTAMP) 
+         ON CONFLICT ("key") 
+         DO UPDATE SET "value" = $3, "updatedAt" = CURRENT_TIMESTAMP`,
+        uuidv4(),
+        key,
+        value
       )
-      // If no row was updated, insert a new one
-      if (updated === 0) {
-        await db.$executeRawUnsafe(
-          `INSERT INTO "PlatformSetting" ("id", "key", "value", "updatedAt") VALUES ($1, $2, $3, CURRENT_TIMESTAMP)`,
-          uuidv4(),
-          key,
-          value
-        )
-      }
     }
 
     return apiSuccess({ success: true, updated: filteredEntries.length }, 200, request)
