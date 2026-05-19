@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server'
 import { authenticateRequest, requireRole } from '@/lib/auth'
 import { validateBody, settingsSchema, ALLOWED_SETTING_KEYS } from '@/lib/validations'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
+import { v4 as uuidv4 } from 'uuid'
 
 // GET /api/settings - Public
 export async function GET(request: NextRequest) {
@@ -10,9 +11,10 @@ export async function GET(request: NextRequest) {
     let settings: Record<string, string> = {}
 
     try {
-      const rows = await db.platformSetting.findMany({
-        select: { key: true, value: true },
-      })
+      // Use raw SQL without parameters for PgBouncer compatibility
+      const rows = await db.$queryRawUnsafe(
+        `SELECT "key", "value" FROM "PlatformSetting"`
+      ) as Array<{ key: string; value: string }>
       for (const row of rows) {
         settings[row.key] = row.value
       }
@@ -80,19 +82,24 @@ export async function PUT(request: NextRequest) {
       return apiError('No se proporcionaron configuraciones validas', 400, undefined, request)
     }
 
-    // Use Prisma ORM upsert instead of raw SQL to avoid PgBouncer issues
+    // Use raw SQL without parameters for PgBouncer compatibility
+    // Validate key format to prevent SQL injection (alphanumeric + underscore only)
     for (const [key, value] of filteredEntries) {
-      // Validate key format (alphanumeric + underscore only)
       if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(key)) {
         console.warn('[SETTINGS] Invalid key format:', key)
         continue
       }
 
-      await db.platformSetting.upsert({
-        where: { key },
-        update: { value: String(value) },
-        create: { key, value: String(value) },
-      })
+      const id = uuidv4()
+      // Escape single quotes in value to prevent SQL injection
+      const safeValue = String(value).replace(/'/g, "''")
+
+      await db.$executeRawUnsafe(
+        `INSERT INTO "PlatformSetting" ("id", "key", "value", "updatedAt") ` +
+        `VALUES ('${id}', '${key}', '${safeValue}', CURRENT_TIMESTAMP) ` +
+        `ON CONFLICT ("key") ` +
+        `DO UPDATE SET "value" = EXCLUDED."value", "updatedAt" = CURRENT_TIMESTAMP`
+      )
     }
 
     return apiSuccess({ success: true, updated: filteredEntries.length }, 200, request)

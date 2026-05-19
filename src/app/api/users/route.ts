@@ -25,25 +25,68 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '50', 10)))
     const skip = (page - 1) * limit
 
-    const [users, total] = await Promise.all([
-      db.user.findMany({
-        include: {
-          stores: { select: { id: true, name: true, slug: true, isActive: true } },
-          subscriptions: {
-            include: { plan: { select: { id: true, name: true, price: true } } },
-          },
-        },
-        orderBy: { createdAt: 'desc' },
-        skip,
-        take: limit,
-      }),
-      db.user.count(),
-    ])
+    // Use raw SQL without parameters for PgBouncer compatibility
+    // Prisma ORM with include chains causes type conversion errors through PgBouncer
+    type UserRow = {
+      id: string; email: string; name: string; role: string; phone: string | null; avatar: string | null
+      isActive: boolean; lastLogin: string | null; createdAt: string
+      storeId: string | null; storeName: string | null; storeSlug: string | null; storeIsActive: boolean | null
+      subStatus: string | null; planName: string | null; planPrice: string | null
+    }
 
-    // Remove password from response
-    const safeUsers = users.map(({ password: _, ...user }) => user)
+    const rows: UserRow[] = await db.$queryRawUnsafe(
+      `SELECT u.id, u.email, u.name, u.role::text, u.phone, u.avatar,
+              u."isActive", u."lastLogin"::text, u."createdAt"::text,
+              s.id as "storeId", s.name as "storeName", s.slug as "storeSlug", s."isActive" as "storeIsActive",
+              sub.status::text as "subStatus", p.name as "planName", p.price::text as "planPrice"
+       FROM "User" u
+       LEFT JOIN "Store" s ON s."ownerId" = u.id
+       LEFT JOIN LATERAL (
+         SELECT sub.status, sub."planId"
+         FROM "Subscription" sub
+         WHERE sub."userId" = u.id
+         ORDER BY sub."createdAt" DESC LIMIT 1
+       ) sub ON true
+       LEFT JOIN "Plan" p ON sub."planId" = p.id
+       ORDER BY u."createdAt" DESC
+       LIMIT ${limit} OFFSET ${skip}`
+    )
+
+    // Count total users
+    const countRows = await db.$queryRawUnsafe(
+      `SELECT COUNT(*)::int as c FROM "User"`
+    ) as Array<{ c: number }>
+    const total = Number(countRows[0]?.c ?? 0)
+
+    // Group stores and subscriptions by user
+    const userMap = new Map<string, {
+      id: string; name: string; email: string; role: string; phone: string | null; avatar: string | null
+      isActive: boolean; lastLogin: string | null; createdAt: string
+      stores: { id: string; name: string; slug: string; isActive: boolean }[]
+      subscriptions: { status: string; plan: { id: string; name: string; price: number } }[]
+    }>()
+
+    for (const r of rows) {
+      if (!userMap.has(r.id)) {
+        userMap.set(r.id, {
+          id: r.id, name: r.name, email: r.email, role: r.role, phone: r.phone, avatar: r.avatar,
+          isActive: r.isActive, lastLogin: r.lastLogin, createdAt: r.createdAt,
+          stores: [], subscriptions: [],
+        })
+      }
+      const user = userMap.get(r.id)!
+      if (r.storeId && !user.stores.some(s => s.id === r.storeId)) {
+        user.stores.push({ id: r.storeId, name: r.storeName!, slug: r.storeSlug!, isActive: r.storeIsActive! })
+      }
+      if (r.subStatus && r.planName && !user.subscriptions.some(s => s.plan.name === r.planName)) {
+        user.subscriptions.push({ status: r.subStatus, plan: { id: '', name: r.planName, price: parseFloat(r.planPrice || '0') } })
+      }
+    }
+
+    const users = Array.from(userMap.values())
+
     return apiSuccess(serializeDecimals({
-      users: safeUsers,
+      users,
       pagination: {
         page,
         limit,
@@ -54,8 +97,6 @@ export async function GET(request: NextRequest) {
   } catch (error: unknown) {
     console.error('[USERS] GET error:', error instanceof Error ? error.message : String(error))
     console.error('[USERS] GET stack:', error instanceof Error ? error.stack : 'no stack')
-    const errCode = error && typeof error === 'object' && 'code' in error ? (error as { code: string }).code : undefined
-    console.error('[USERS] GET prisma code:', errCode)
     return apiError('Error obteniendo usuarios', 500, undefined, request)
   }
 }

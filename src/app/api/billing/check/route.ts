@@ -140,31 +140,37 @@ export async function GET(request: NextRequest) {
     const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
 
-    const [activeCount, expiringSoon, pastDueList, expiredCount, pendingPayments, completedPayments] = await Promise.all([
-      db.subscription.count({ where: { status: 'active' } }),
-      db.subscription.count({
-        where: {
-          status: 'active',
-          nextBillingDate: { lte: threeDaysFromNow, gte: now },
-          plan: { type: { not: 'free' } },
-        },
-      }),
-      db.subscription.findMany({
-        where: { status: 'past_due' },
-        include: {
-          user: { select: { id: true, name: true, email: true } },
-          store: { select: { id: true, name: true, slug: true } },
-          plan: { select: { id: true, name: true, price: true } },
-        },
-        orderBy: { nextBillingDate: 'asc' },
-      }),
-      db.subscription.count({ where: { status: 'expired' } }),
-      db.payment.count({ where: { status: 'pending' } }),
-      db.payment.findMany({ where: { status: 'completed', createdAt: { gte: startOfMonth } } }),
+    // Use raw SQL without parameters for PgBouncer compatibility
+    const sql = db.$queryRawUnsafe.bind(db)
+    const fmtDate = (d: Date) => `'${d.toISOString()}'`
+
+    type CountR = { c: number }
+
+    const [activeCountRow, expiringSoonRow, expiredCountRow, pendingPaymentsRow, completedPaymentsRows, pastDueRows] = await Promise.all([
+      sql(`SELECT COUNT(*)::int as c FROM "Subscription" WHERE status = 'active'`) as Promise<CountR[]>,
+      sql(`SELECT COUNT(*)::int as c FROM "Subscription" sub JOIN "Plan" p ON sub."planId" = p.id WHERE sub.status = 'active' AND sub."nextBillingDate" >= ${fmtDate(now)} AND sub."nextBillingDate" <= ${fmtDate(threeDaysFromNow)} AND p.type != 'free'`) as Promise<CountR[]>,
+      sql(`SELECT COUNT(*)::int as c FROM "Subscription" WHERE status = 'expired'`) as Promise<CountR[]>,
+      sql(`SELECT COUNT(*)::int as c FROM "Payment" WHERE status = 'pending'`) as Promise<CountR[]>,
+      sql(`SELECT amount::text, "verifiedAt"::text FROM "Payment" WHERE status = 'completed' AND "createdAt" >= ${fmtDate(startOfMonth)}`) as Promise<Array<{ amount: string; verifiedAt: string | null }>>,
+      sql(`SELECT sub.id, sub.status::text, sub."nextBillingDate"::text, u.id as "userId", u.name as "userName", u.email as "userEmail", s.id as "storeId", s.name as "storeName", s.slug as "storeSlug", p.id as "planId", p.name as "planName", p.price::text as "planPrice" FROM "Subscription" sub JOIN "User" u ON sub."userId" = u.id JOIN "Store" s ON sub."storeId" = s.id JOIN "Plan" p ON sub."planId" = p.id WHERE sub.status = 'past_due' ORDER BY sub."nextBillingDate" ASC`) as Promise<Array<{ id: string; status: string; nextBillingDate: string | null; userId: string; userName: string; userEmail: string; storeId: string; storeName: string; storeSlug: string; planId: string; planName: string; planPrice: string }>>,
     ])
 
-    const monthlyRevenue = completedPayments.reduce((sum, p) => sum + Number(p.amount), 0)
-    const monthlyRevenueVerified = completedPayments.filter(p => p.verifiedAt).reduce((sum, p) => sum + Number(p.amount), 0)
+    const activeCount = Number(activeCountRow[0]?.c ?? 0)
+    const expiringSoon = Number(expiringSoonRow[0]?.c ?? 0)
+    const expiredCount = Number(expiredCountRow[0]?.c ?? 0)
+    const pendingPayments = Number(pendingPaymentsRow[0]?.c ?? 0)
+
+    const monthlyRevenue = completedPaymentsRows.reduce((sum, p) => sum + parseFloat(p.amount), 0)
+    const monthlyRevenueVerified = completedPaymentsRows.filter(p => p.verifiedAt).reduce((sum, p) => sum + parseFloat(p.amount), 0)
+
+    const pastDueList = pastDueRows.map(r => ({
+      id: r.id,
+      status: r.status,
+      nextBillingDate: r.nextBillingDate,
+      user: { id: r.userId, name: r.userName, email: r.userEmail },
+      store: { id: r.storeId, name: r.storeName, slug: r.storeSlug },
+      plan: { id: r.planId, name: r.planName, price: parseFloat(r.planPrice) },
+    }))
 
     return apiSuccess(serializeDecimals({
       activeCount, expiringSoon, pastDueCount: pastDueList.length, pastDueSubscriptions: pastDueList,
