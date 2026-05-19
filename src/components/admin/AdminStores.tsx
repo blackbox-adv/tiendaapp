@@ -2,11 +2,16 @@
 
 import { useEffect, useState } from 'react'
 import { useAppStore } from '@/lib/store'
-import { Search, Eye, ToggleLeft, ToggleRight, Store, BarChart3 } from 'lucide-react'
+import { Search, Eye, ToggleLeft, ToggleRight, Store, BarChart3, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel,
+  AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
+  AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 interface ApiStore {
   id: string; name: string; slug: string; description: string; logo: string
@@ -24,6 +29,11 @@ export function AdminStores() {
   const [loading, setLoading] = useState(true)
   const [togglingId, setTogglingId] = useState<string | null>(null)
   const [apiStores, setApiStores] = useState<ApiStore[] | null>(null)
+
+  // Delete dialog state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string; productCount: number; ownerName: string } | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => { loadStores() }, [])
 
@@ -61,6 +71,34 @@ export function AdminStores() {
       if (res.ok) setApiStores(prev => (prev || []).map(s => s.id === storeId ? { ...s, isActive: !currentActive } : s))
     } catch (err) { console.error(err) }
     finally { setTogglingId(null) }
+  }
+
+  function openDeleteDialog(storeId: string, storeName: string, productCount: number, ownerName: string) {
+    setDeleteTarget({ id: storeId, name: storeName, productCount, ownerName })
+    setDeleteDialogOpen(true)
+  }
+
+  async function confirmDeleteStore() {
+    if (!deleteTarget) return
+    setDeleting(true)
+    try {
+      const token = localStorage.getItem('tiendapp_token')
+      const res = await fetch(`/api/stores?id=${deleteTarget.id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (res.ok) {
+        setApiStores(prev => (prev || []).filter(s => s.id !== deleteTarget.id))
+        setDeleteDialogOpen(false)
+      } else {
+        const data = await res.json().catch(() => ({}))
+        alert(data.error || 'Error al eliminar la tienda')
+      }
+    } catch {
+      alert('Error de conexion al eliminar')
+    } finally {
+      setDeleting(false)
+    }
   }
 
   // Use API stores if available (admin fetches all), otherwise fall back to Zustand store
@@ -119,16 +157,16 @@ export function AdminStores() {
                     <tr key={store.id} className="border-b border-gray-50 hover:bg-gray-50/50">
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm" style={{ backgroundColor: store.primaryColor + '20' }}>
+                          <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm flex-shrink-0" style={{ backgroundColor: store.primaryColor + '20' }}>
                             {store.logo || <Store className="w-4 h-4" />}
                           </div>
-                          <div>
-                            <p className="font-medium text-gray-900">{store.name}</p>
-                            <p className="text-xs text-gray-400">{store.slug}</p>
+                          <div className="min-w-0">
+                            <p className="font-medium text-gray-900 truncate">{store.name}</p>
+                            <p className="text-xs text-gray-400 truncate">{store.slug}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="py-3 px-4 hidden md:table-cell text-gray-600">{store.owner.name}</td>
+                      <td className="py-3 px-4 hidden md:table-cell text-gray-600 truncate max-w-[150px]">{store.owner.name}</td>
                       <td className="py-3 px-4 hidden sm:table-cell">
                         <Badge variant="outline" className="text-xs">{planName} - S/{planPrice.toFixed(2)}</Badge>
                         <p className="text-[10px] text-gray-400 mt-0.5">{subStatus}</p>
@@ -146,12 +184,15 @@ export function AdminStores() {
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex items-center justify-end gap-1">
-                          <Button variant="ghost" size="sm" onClick={() => navigate({ page: 'store', slug: store.slug })} className="text-violet-600 hover:bg-violet-50">
+                          <Button variant="ghost" size="sm" onClick={() => navigate({ page: 'store', slug: store.slug })} className="text-violet-600 hover:bg-violet-50" title="Ver tienda">
                             <Eye className="w-4 h-4" />
                           </Button>
                           <Button variant="ghost" size="sm" onClick={() => toggleStoreActive(store.id, store.isActive)} disabled={togglingId === store.id}
-                            className={store.isActive ? 'text-amber-600 hover:bg-amber-50' : 'text-green-600 hover:bg-green-50'}>
+                            className={store.isActive ? 'text-amber-600 hover:bg-amber-50' : 'text-green-600 hover:bg-green-50'} title={store.isActive ? 'Desactivar' : 'Activar'}>
                             {togglingId === store.id ? <div className="animate-spin w-4 h-4 border-2 border-gray-200 border-t-gray-600 rounded-full" /> : store.isActive ? <ToggleRight className="w-5 h-5" /> : <ToggleLeft className="w-5 h-5" />}
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => openDeleteDialog(store.id, store.name, store._count.products, store.owner.name)} className="text-red-500 hover:bg-red-50 hover:text-red-700" title="Eliminar tienda">
+                            <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
                       </td>
@@ -172,6 +213,32 @@ export function AdminStores() {
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eliminar tienda</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <span>Estas a punto de eliminar permanentemente la tienda <strong>{deleteTarget?.name}</strong> de <strong>{deleteTarget?.ownerName}</strong>.</span>
+              {deleteTarget && deleteTarget.productCount > 0 && (
+                <span className="block text-red-600 font-medium">Se eliminaran tambien {deleteTarget.productCount} producto(s), suscripciones y pagos asociados.</span>
+              )}
+              <span className="block">Esta accion no se puede deshacer.</span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteStore}
+              disabled={deleting}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {deleting ? 'Eliminando...' : 'Eliminar permanentemente'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

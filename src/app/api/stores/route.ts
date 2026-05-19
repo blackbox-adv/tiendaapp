@@ -329,6 +329,58 @@ export async function PUT(request: NextRequest) {
   }
 }
 
+// DELETE /api/stores - Delete store (admin only)
+export async function DELETE(request: NextRequest) {
+  const auth = await authenticateRequest(request)
+  if (auth.error) {
+    return apiError(auth.error, auth.status, undefined, request)
+  }
+  if (!auth.user) return apiError('No autenticado', 401, undefined, request)
+
+  if (!requireRole(auth.user, ['super_admin'])) {
+    return apiError('Acceso denegado. Solo administradores pueden eliminar tiendas.', 403, undefined, request)
+  }
+
+  try {
+    const { searchParams } = new URL(request.url)
+    const storeId = searchParams.get('id')
+
+    if (!storeId) {
+      return apiError('ID de tienda requerido', 400, undefined, request)
+    }
+
+    // Check store exists
+    const store = await db.store.findUnique({
+      where: { id: storeId },
+      include: {
+        _count: { select: { products: true, subscriptions: true } },
+      },
+    })
+
+    if (!store) {
+      return apiError('Tienda no encontrada', 404, undefined, request)
+    }
+
+    // Delete the store - cascade will handle products, subscriptions, payments
+    await db.store.delete({
+      where: { id: storeId },
+    })
+
+    return apiSuccess(
+      {
+        message: `Tienda "${store.name}" eliminada correctamente`,
+        deletedStoreId: storeId,
+        deletedProducts: store._count.products,
+      },
+      200,
+      request
+    )
+  } catch (error: unknown) {
+    console.error('[STORES] DELETE error:', error instanceof Error ? error.message : String(error))
+    return apiError('Error eliminando tienda', 500, undefined, request)
+  }
+}
+
 // OPTIONS /api/stores - CORS preflight
 export async function OPTIONS(request: NextRequest) {
   return handleCorsPreflight(request)
