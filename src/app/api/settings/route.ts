@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server'
 import { authenticateRequest, requireRole } from '@/lib/auth'
 import { validateBody, settingsSchema, ALLOWED_SETTING_KEYS } from '@/lib/validations'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
+import { Prisma } from '@prisma/client'
 import { v4 as uuidv4 } from 'uuid'
 
 // GET /api/settings - Public
@@ -11,7 +12,6 @@ export async function GET(request: NextRequest) {
     let settings: Record<string, string> = {}
 
     try {
-      // Use raw SQL to avoid Prisma client sync issues
       const rows = await db.$queryRawUnsafe(
         `SELECT "key", "value" FROM "PlatformSetting"`
       ) as Array<{ key: string; value: string }>
@@ -100,17 +100,15 @@ export async function PUT(request: NextRequest) {
       // Table may already exist, that's fine
     }
 
-    // Upsert each setting using native PostgreSQL INSERT ... ON CONFLICT
+    // Upsert each setting using Prisma.sql tagged template (safe from SQL injection)
     for (const [key, value] of filteredEntries) {
-      await db.$executeRawUnsafe(
-        `INSERT INTO "PlatformSetting" ("id", "key", "value", "updatedAt") 
-         VALUES ($1, $2, $3, CURRENT_TIMESTAMP) 
-         ON CONFLICT ("key") 
-         DO UPDATE SET "value" = $3, "updatedAt" = CURRENT_TIMESTAMP`,
-        uuidv4(),
-        key,
-        value
-      )
+      const id = uuidv4()
+      await db.$executeRaw`
+        INSERT INTO "PlatformSetting" ("id", "key", "value", "updatedAt") 
+        VALUES (${id}, ${key}, ${value}, CURRENT_TIMESTAMP) 
+        ON CONFLICT ("key") 
+        DO UPDATE SET "value" = ${value}, "updatedAt" = CURRENT_TIMESTAMP
+      `
     }
 
     return apiSuccess({ success: true, updated: filteredEntries.length }, 200, request)
