@@ -82,24 +82,6 @@ export async function PUT(request: NextRequest) {
       return apiError('No se proporcionaron configuraciones validas', 400, undefined, request)
     }
 
-    // Ensure table exists
-    try {
-      await db.$executeRawUnsafe(`
-        CREATE TABLE IF NOT EXISTS "PlatformSetting" (
-          "id" TEXT NOT NULL,
-          "key" TEXT NOT NULL,
-          "value" TEXT NOT NULL,
-          "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          CONSTRAINT "PlatformSetting_pkey" PRIMARY KEY ("id")
-        )
-      `)
-      await db.$executeRawUnsafe(
-        `CREATE UNIQUE INDEX IF NOT EXISTS "PlatformSetting_key_key" ON "PlatformSetting"("key")`
-      )
-    } catch {
-      // Table may already exist, that's fine
-    }
-
     // Upsert each setting using Prisma.sql tagged template (safe from SQL injection)
     for (const [key, value] of filteredEntries) {
       const id = uuidv4()
