@@ -106,7 +106,8 @@ export async function PUT(request: NextRequest) {
   } catch (error: unknown) {
     console.error('[SETTINGS] PUT error:', error instanceof Error ? error.message : String(error))
     console.error('[SETTINGS] PUT stack:', error instanceof Error ? error.stack : 'no stack')
-    return apiError('Error actualizando configuracion', 500, undefined, request)
+    const errMsg = error instanceof Error ? error.message : 'Error actualizando configuracion'
+    return apiError(errMsg, 500, undefined, request)
   }
 }
 
