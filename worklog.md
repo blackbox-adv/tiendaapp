@@ -81,3 +81,24 @@ Stage Summary:
 - All 3 original bugs fixed: template preview, template change, logo upload
 - Admin login fixed with password reset
 - Deployed to tienda.blackboxperu.com
+---
+Task ID: 1
+Agent: Main Agent
+Task: Fix admin panel not showing stores
+
+Work Log:
+- Investigated why stores don't appear in super admin panel
+- Tested API endpoints directly - found GET /api/stores returns 500 error for admin
+- Root cause: Prisma ORM queries with complex includes fail through PgBouncer (Supabase connection pooler) with prepared statement type conversion errors
+- Admin stats endpoint works because it already uses raw SQL ($queryRawUnsafe)
+- Created new dedicated endpoint /api/admin/stores with raw SQL for GET, PUT, DELETE operations
+- Updated AdminStores.tsx to call /api/admin/stores instead of /api/stores
+- PUT endpoint uses raw SQL for simple isActive toggles, Prisma without includes for other updates
+- Tested: 7 stores now load correctly, toggle active/inactive works
+- Also verified: PUT /api/users (edit user) works correctly for admin user editing
+
+Stage Summary:
+- Fixed: Admin panel stores now display correctly
+- Created: /api/admin/stores/route.ts (GET/PUT/DELETE with raw SQL for PgBouncer compatibility)
+- Modified: AdminStores.tsx (changed all API calls to /api/admin/stores)
+- Deployed: Pushed commit 87ffdec to GitHub, Vercel auto-deployed
