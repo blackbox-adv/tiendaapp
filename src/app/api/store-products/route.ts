@@ -87,8 +87,8 @@ export async function POST(request: NextRequest) {
       const planResult = await db.$queryRawUnsafe(`
         SELECT pl."maxProducts" 
         FROM "Subscription" sub
-        JOIN "Plan" pl ON pl.id = sub.plan_id
-        WHERE sub.user_id = $1 AND sub.status = 'active'
+        JOIN "Plan" pl ON pl.id = sub."planId"
+        WHERE sub."userId" = $1 AND sub.status = 'active'
         ORDER BY sub."createdAt" DESC LIMIT 1
       `, auth.user.userId) as Array<Record<string, unknown>>
       if (Array.isArray(planResult) && planResult.length > 0 && planResult[0].maxProducts) {
@@ -244,7 +244,7 @@ export async function DELETE(request: NextRequest) {
     if (!requireRole(auth.user, ['super_admin'])) {
       const ownershipCheck = await db.$queryRawUnsafe(`
         SELECT p.id, s."ownerId", s.slug as "storeSlug"
-        FROM "Product" p
+        FROM "StoreProduct" p
         JOIN "Store" s ON s.id = p."storeId"
         WHERE p.id = $1
       `, id) as Array<Record<string, unknown>>
@@ -260,7 +260,7 @@ export async function DELETE(request: NextRequest) {
     let storeSlug = ''
     try {
       const slugResult = await db.$queryRawUnsafe(`
-        SELECT s.slug FROM "Product" p JOIN "Store" s ON s.id = p."storeId" WHERE p.id = $1
+        SELECT s.slug FROM "StoreProduct" p JOIN "Store" s ON s.id = p."storeId" WHERE p.id = $1
       `, id) as Array<Record<string, unknown>>
       storeSlug = (Array.isArray(slugResult) && slugResult.length > 0) ? String(slugResult[0].slug || '') : ''
     } catch { /* non-critical */ }

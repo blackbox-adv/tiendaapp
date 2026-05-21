@@ -20,6 +20,7 @@ export async function GET(request: NextRequest) {
 
       // Use raw SQL for slug lookup to avoid PgBouncer timeout with Prisma include.
       // The include (products + owner) can hang indefinitely through PgBouncer.
+      // NOTE: Column names use double quotes for camelCase (Prisma convention)
       const storeRows = await db.$queryRawUnsafe(`
         SELECT s.*, 
           COALESCE(json_agg(
@@ -33,7 +34,7 @@ export async function GET(request: NextRequest) {
           ) FILTER (WHERE p.id IS NOT NULL AND p."isActive" = true), '[]') as products,
           json_build_object('id', u.id, 'name', u.name) as owner
         FROM "Store" s
-        LEFT JOIN "Product" p ON p."storeId" = s.id AND p."isActive" = true
+        LEFT JOIN "StoreProduct" p ON p."storeId" = s.id AND p."isActive" = true
         LEFT JOIN "User" u ON u.id = s."ownerId"
         WHERE s.slug = $1
         GROUP BY s.id, u.id, u.name
@@ -68,28 +69,37 @@ export async function GET(request: NextRequest) {
     // which uses raw SQL to avoid PgBouncer timeout with Prisma include
     if (requireRole(auth.user, ['super_admin'])) {
       // Use the same raw SQL pattern as /api/admin/stores to avoid PgBouncer issues
+      // NOTE: Column names must use double quotes for camelCase (Prisma convention)
       const stores = await db.$queryRawUnsafe(`
-        SELECT s.id, s.name, s.slug, s.description, s.logo, s."primaryColor", s."secondaryColor",
-          s."whatsappNumber", s.template, s.category, s."isActive", s."visitCount",
-          s."createdAt", s."ownerId", s."bannerUrl",
+        SELECT s.id, s.name, s.slug, s.description, s.logo,
+          s."primaryColor", s."secondaryColor", s."whatsappNumber",
+          s.template, s.category, s."isActive", s."visitCount"::int,
+          s."createdAt"::text, s."ownerId", s."bannerUrl",
           s."hasShipping", s."hasSecurePayment", s."hasReturns",
           u.name as "ownerName", u.email as "ownerEmail",
-          COALESCE(product_count.cnt, 0) as "productCount",
-          COALESCE(sub_data.plan_id, '') as "planId",
-          COALESCE(sub_data.plan_name, 'Free') as "planName",
-          COALESCE(sub_data.plan_price, 0) as "planPrice"
+          COALESCE(pc.cnt, 0)::int as "productCount",
+          sub_s.status::text as "subStatus",
+          sub_p.name as "planName",
+          sub_p.price::text as "planPrice"
         FROM "Store" s
-        LEFT JOIN "User" u ON u.id = s."ownerId"
+        JOIN "User" u ON s."ownerId" = u.id
+        LEFT JOIN (
+          SELECT "storeId", COUNT(*)::int as cnt FROM "StoreProduct" WHERE "isActive" = true GROUP BY "storeId"
+        ) pc ON pc."storeId" = s.id
         LEFT JOIN LATERAL (
-          SELECT COUNT(*) as cnt FROM "Product" p WHERE p."storeId" = s.id AND p."isActive" = true
-        ) product_count ON true
-        LEFT JOIN LATERAL (
-          SELECT sub.plan_id, pl.name as plan_name, pl.price as plan_price
+          SELECT sub.status, p.name, p.price
           FROM "Subscription" sub
-          JOIN "Plan" pl ON pl.id = sub.plan_id
-          WHERE sub.user_id = s."ownerId" AND sub.status = 'active'
+          JOIN "Plan" p ON sub."planId" = p.id
+          WHERE sub."storeId" = s.id
           ORDER BY sub."createdAt" DESC LIMIT 1
-        ) sub_data ON true
+        ) sub_s ON true
+        LEFT JOIN LATERAL (
+          SELECT p.name, p.price
+          FROM "Subscription" sub
+          JOIN "Plan" p ON sub."planId" = p.id
+          WHERE sub."storeId" = s.id
+          ORDER BY sub."createdAt" DESC LIMIT 1
+        ) sub_p ON true
         ORDER BY s."createdAt" DESC
       `)
 
@@ -114,10 +124,10 @@ export async function GET(request: NextRequest) {
         hasReturns: s.hasReturns,
         owner: { id: s.ownerId, name: s.ownerName, email: s.ownerEmail },
         _count: { products: Number(s.productCount) || 0 },
-        subscriptions: [{
-          status: 'active',
-          plan: { id: s.planId || '', name: s.planName || 'Free', price: Number(s.planPrice) || 0 },
-        }],
+        subscriptions: s.planName ? [{
+          status: s.subStatus || 'active',
+          plan: { id: '', name: s.planName, price: parseFloat(String(s.planPrice || '0')) },
+        }] : [],
       }))
 
       return apiSuccess(serializeDecimals(mappedStores), 200, request)
@@ -174,8 +184,8 @@ export async function POST(request: NextRequest) {
       try {
         const planResult = await tx.$queryRawUnsafe(`
           SELECT pl.type, pl.name FROM "Subscription" sub
-          JOIN "Plan" pl ON pl.id = sub.plan_id
-          WHERE sub.user_id = $1 AND sub.status = 'active'
+          JOIN "Plan" pl ON pl.id = sub."planId"
+          WHERE sub."userId" = $1 AND sub.status = 'active'
           ORDER BY sub."createdAt" DESC LIMIT 1
         `, auth.user.userId) as Array<Record<string, unknown>>
         if (Array.isArray(planResult) && planResult.length > 0) {
@@ -330,7 +340,7 @@ export async function DELETE(request: NextRequest) {
     // Check store exists — use raw SQL to avoid PgBouncer include timeout
     const storeResult = await db.$queryRawUnsafe(`
       SELECT s.id, s.name, 
-        (SELECT COUNT(*) FROM "Product" p WHERE p."storeId" = s.id) as "productCount"
+        (SELECT COUNT(*) FROM "StoreProduct" p WHERE p."storeId" = s.id) as "productCount"
       FROM "Store" s WHERE s.id = $1
     `, storeId) as Array<Record<string, unknown>>
 
