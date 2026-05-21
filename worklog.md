@@ -152,3 +152,35 @@ Stage Summary:
 - Root cause was session instability, not upload endpoint failure
 - 4 critical bugs fixed that together caused uploads to "not work"
 - Deployed to production at tienda.blackboxperu.com
+---
+Task ID: 1
+Agent: Main Agent
+Task: Fix image uploads not working (logo, banner, product images)
+
+Work Log:
+- Investigated upload API endpoint (/api/upload) - works correctly via curl
+- Tested Supabase Storage - bucket "product-images" exists and is public, uploads succeed
+- Tested from browser via JavaScript - upload API returns 200 with valid URL
+- Discovered root cause: Prisma ORM queries with `include` (nested relations like subscriptions → plan) hang indefinitely through Supabase's PgBouncer connection pooler
+- The PUT /api/stores endpoint was timing out (30+ seconds) because Prisma include query never returned
+- Vercel serverless function would timeout (10s default) before try/catch fallback could run
+- Fixed by replacing ALL Prisma include queries with raw SQL across all affected endpoints:
+  - GET /api/stores (slug lookup): raw SQL with StoreProduct + User JOINs
+  - GET /api/stores (admin listing): raw SQL with LATERAL JOINs for products/subscription counts
+  - GET /api/stores (owner listing): simple findMany without includes
+  - PUT /api/stores: simple findUnique without includes for response
+  - POST /api/stores: raw SQL for plan limit check
+  - DELETE /api/stores: raw SQL for store info before deletion
+  - POST /api/store-products: raw SQL for plan limit check
+  - PUT /api/store-products: raw SQL for ownership check
+  - DELETE /api/store-products: raw SQL for ownership check
+- Also fixed: logo || '🛍️' bug changed to ?? '' to allow empty logos
+- Also fixed: auth race condition with isSyncing state
+- Also fixed: network error clearing localStorage token
+- Pushed 3 commits to production, all tests pass
+
+Stage Summary:
+- Image uploads now work: upload API → save logo/banner URL → display in store
+- All API endpoints respond in <3 seconds (was 30+ seconds before)
+- Key insight: Prisma ORM with `include` relations FAILS through PgBouncer - must use raw SQL
+- Deployed to https://tienda.blackboxperu.com
