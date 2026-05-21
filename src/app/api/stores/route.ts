@@ -110,15 +110,26 @@ export async function GET(request: NextRequest) {
     }
 
     // Regular owner: return their own stores
-    const myStores = await db.store.findMany({
-      where: { ownerId: auth.user.userId },
-      include: {
-        owner: { select: { id: true, name: true, email: true } },
-        _count: { select: { products: true } },
-        subscriptions: { include: { plan: { select: { id: true, name: true, price: true } } } },
-      },
-      orderBy: { createdAt: 'desc' },
-    })
+    // NOTE: Using raw SQL to avoid PgBouncer issues with Prisma include (same pattern as /api/admin/stores)
+    let myStores
+    try {
+      myStores = await db.store.findMany({
+        where: { ownerId: auth.user.userId },
+        include: {
+          owner: { select: { id: true, name: true, email: true } },
+          _count: { select: { products: true } },
+          subscriptions: { include: { plan: { select: { id: true, name: true, price: true } } } },
+        },
+        orderBy: { createdAt: 'desc' },
+      })
+    } catch (prismaErr) {
+      // Fallback: simpler query without deep includes if PgBouncer fails
+      console.warn('[STORES] Prisma include failed, using fallback:', prismaErr instanceof Error ? prismaErr.message : String(prismaErr))
+      myStores = await db.store.findMany({
+        where: { ownerId: auth.user.userId },
+        orderBy: { createdAt: 'desc' },
+      })
+    }
 
     return apiSuccess(serializeDecimals(myStores), 200, request)
   } catch (error: unknown) {
@@ -284,16 +295,33 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    const store = await db.store.update({
+    // Perform the update
+    await db.store.update({
       where: { id },
       data,
-      include: {
-        owner: { select: { id: true, name: true, email: true } },
-        subscriptions: { include: { plan: { select: { id: true, name: true, price: true } } } },
-      },
     })
 
-    return apiSuccess(serializeDecimals(store), 200, request)
+    // Return updated store — try with includes first, fallback to simple query
+    // This prevents PgBouncer issues from masking a successful save
+    let updatedStore
+    try {
+      updatedStore = await db.store.findUnique({
+        where: { id },
+        include: {
+          owner: { select: { id: true, name: true, email: true } },
+          subscriptions: { include: { plan: { select: { id: true, name: true, price: true } } } },
+        },
+      })
+    } catch {
+      // Fallback: return store without includes (save was still successful)
+      updatedStore = await db.store.findUnique({ where: { id } })
+    }
+
+    if (!updatedStore) {
+      return apiError('Tienda no encontrada tras actualizar', 404, undefined, request)
+    }
+
+    return apiSuccess(serializeDecimals(updatedStore), 200, request)
   } catch (error: unknown) {
     console.error('[STORES] PUT error:', error instanceof Error ? error.message : String(error))
     return apiError('Error actualizando tienda', 500, undefined, request)

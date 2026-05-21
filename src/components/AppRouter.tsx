@@ -61,6 +61,7 @@ const pageVariants = {
 export default function AppRouter() {
   const route = useAppStore((s) => s.route)
   const currentUser = useAppStore((s) => s.currentUser)
+  const isSyncing = useAppStore((s) => s.isSyncing)
   const navigate = useAppStore((s) => s.navigate)
 
   // Deep-link detection: sync Zustand route with actual browser URL
@@ -128,9 +129,21 @@ export default function AppRouter() {
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Route guards
+  // Route guards — wait for sync to complete before redirecting
   const requiresAuth = route.page.startsWith('dashboard') || route.page === 'wizard'
   const requiresAdmin = route.page.startsWith('admin')
+
+  // Show loading while syncing from API (prevents race condition on page refresh)
+  if (isSyncing && (requiresAuth || requiresAdmin)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center space-y-3">
+          <div className="w-10 h-10 border-3 border-violet-200 border-t-violet-600 rounded-full animate-spin mx-auto" />
+          <p className="text-sm text-gray-500">Cargando...</p>
+        </div>
+      </div>
+    )
+  }
 
   if (requiresAuth && !currentUser) {
     navigate({ page: 'login' })

@@ -14,7 +14,7 @@ function transformApiStore(apiStore: Record<string, unknown>): Store {
     name: apiStore.name as string,
     slug: apiStore.slug as string,
     description: (apiStore.description as string) || '',
-    logo: (apiStore.logo as string) || '🛍️',
+    logo: (apiStore.logo as string) ?? '',
     categoryId: (apiStore.category as string) || '',
     planId,
     colors: {
@@ -182,12 +182,9 @@ async function syncFromAPI() {
           }
         }
       } catch (err) {
-        // Network error — clear token but don't redirect (could be temporary)
-        console.warn('[Zustand] Network error during sync:', err)
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('tiendapp_token')
-          localStorage.removeItem('tiendapp_user')
-        }
+        // Network error — DON'T clear token (could be temporary)
+        // Only clear session on explicit 401 from the auth endpoint above
+        console.warn('[Zustand] Network error during sync (keeping session):', err)
       }
     }
 
@@ -205,6 +202,7 @@ interface AppState {
   users: User[]
   stores: Store[]
   products: Product[]
+  isSyncing: boolean
   wizardStep: number
   wizardData: {
     planId: string
@@ -264,6 +262,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   users: [],
   stores: [],
   products: [],
+  isSyncing: false,
   wizardStep: 1,
   wizardData: { ...defaultWizardData },
   platformSettings: {
@@ -693,5 +692,9 @@ export const useAppStore = create<AppState>((set, get) => ({
 
 // ── Auto-sync on module load ──
 if (typeof window !== 'undefined') {
-  syncFromAPI()
+  // Mark sync as in-progress to prevent auth guard race condition
+  useAppStore.setState({ isSyncing: true })
+  syncFromAPI().finally(() => {
+    useAppStore.setState({ isSyncing: false })
+  })
 }
