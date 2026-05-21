@@ -66,19 +66,10 @@ export async function POST(request: NextRequest) {
     const { storeId, name, description, price, originalPrice, imageUrl, category, color, isActive, featured, rating } =
       validation.data
 
-    // Check ownership FIRST
+    // Check ownership FIRST — use simple query to avoid PgBouncer timeout with Prisma include
     const store = await db.store.findUnique({
       where: { id: storeId },
-      select: {
-        id: true,
-        ownerId: true,
-        subscriptions: {
-          where: { status: 'active' },
-          include: { plan: true },
-          orderBy: { startDate: 'desc' },
-          take: 1,
-        },
-      },
+      select: { id: true, ownerId: true },
     })
 
     if (!store) {
@@ -90,8 +81,20 @@ export async function POST(request: NextRequest) {
       return apiError('Acceso denegado. No eres dueno de esta tienda.', 403, undefined, request)
     }
 
-    // Check product limit based on plan
-    const maxProducts = store.subscriptions[0]?.plan?.maxProducts || 5
+    // Check product limit based on plan — use raw SQL to avoid PgBouncer include timeout
+    let maxProducts = 5 // Default for free plan
+    try {
+      const planResult = await db.$queryRawUnsafe(`
+        SELECT pl."maxProducts" 
+        FROM "Subscription" sub
+        JOIN "Plan" pl ON pl.id = sub.plan_id
+        WHERE sub.user_id = $1 AND sub.status = 'active'
+        ORDER BY sub."createdAt" DESC LIMIT 1
+      `, auth.user.userId) as Array<Record<string, unknown>>
+      if (Array.isArray(planResult) && planResult.length > 0 && planResult[0].maxProducts) {
+        maxProducts = Number(planResult[0].maxProducts)
+      }
+    } catch { /* use default */ }
 
     // CRITICAL FIX: Use transaction to prevent race condition on product limit check
     const product = await db.$transaction(async (tx) => {
@@ -179,16 +182,18 @@ export async function PUT(request: NextRequest) {
     if (data.imageUrl) data.imageUrl = sanitizeUrl(data.imageUrl)
     if (data.category) data.category = sanitizeBasic(data.category)
 
-    // Check ownership through store
+    // Check ownership through store — use raw SQL to avoid PgBouncer include timeout
     if (!requireRole(auth.user, ['super_admin'])) {
-      const product = await db.storeProduct.findUnique({
-        where: { id },
-        include: { store: { select: { ownerId: true } } },
-      })
-      if (!product) {
+      const ownershipCheck = await db.$queryRawUnsafe(`
+        SELECT p.id, s."ownerId" 
+        FROM "Product" p 
+        JOIN "Store" s ON s.id = p."storeId" 
+        WHERE p.id = $1
+      `, id) as Array<Record<string, unknown>>
+      if (!Array.isArray(ownershipCheck) || ownershipCheck.length === 0) {
         return apiError('Producto no encontrado', 404, undefined, request)
       }
-      if (product.store.ownerId !== auth.user.userId) {
+      if (ownershipCheck[0].ownerId !== auth.user.userId) {
         return apiError('Acceso denegado. No eres dueno de este producto.', 403, undefined, request)
       }
     }
@@ -235,16 +240,18 @@ export async function DELETE(request: NextRequest) {
       return apiError('ID del producto requerido', 400, undefined, request)
     }
 
-    // Check ownership
+    // Check ownership — use raw SQL to avoid PgBouncer include timeout
     if (!requireRole(auth.user, ['super_admin'])) {
-      const product = await db.storeProduct.findUnique({
-        where: { id },
-        include: { store: { select: { ownerId: true } } },
-      })
-      if (!product) {
+      const ownershipCheck = await db.$queryRawUnsafe(`
+        SELECT p.id, s."ownerId", s.slug as "storeSlug"
+        FROM "Product" p
+        JOIN "Store" s ON s.id = p."storeId"
+        WHERE p.id = $1
+      `, id) as Array<Record<string, unknown>>
+      if (!Array.isArray(ownershipCheck) || ownershipCheck.length === 0) {
         return apiError('Producto no encontrado', 404, undefined, request)
       }
-      if (product.store.ownerId !== auth.user.userId) {
+      if (ownershipCheck[0].ownerId !== auth.user.userId) {
         return apiError('Acceso denegado. No eres dueno de este producto.', 403, undefined, request)
       }
     }
@@ -252,8 +259,10 @@ export async function DELETE(request: NextRequest) {
     // Get store slug before deleting for cache revalidation
     let storeSlug = ''
     try {
-      const product = await db.storeProduct.findUnique({ where: { id }, include: { store: { select: { slug: true } } } })
-      storeSlug = product?.store?.slug || ''
+      const slugResult = await db.$queryRawUnsafe(`
+        SELECT s.slug FROM "Product" p JOIN "Store" s ON s.id = p."storeId" WHERE p.id = $1
+      `, id) as Array<Record<string, unknown>>
+      storeSlug = (Array.isArray(slugResult) && slugResult.length > 0) ? String(slugResult[0].slug || '') : ''
     } catch { /* non-critical */ }
 
     await db.storeProduct.delete({ where: { id } })

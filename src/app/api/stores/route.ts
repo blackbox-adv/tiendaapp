@@ -18,30 +18,29 @@ export async function GET(request: NextRequest) {
         return apiError('Slug invalido', 400, undefined, request)
       }
 
-      const store = await db.store.findUnique({
-        where: { slug },
-        include: {
-          products: {
-            where: { isActive: true },
-            orderBy: { createdAt: 'desc' },
-            select: {
-              id: true,
-              name: true,
-              description: true,
-              price: true,
-              originalPrice: true,
-              imageUrl: true,
-              category: true,
-              isActive: true,
-              featured: true,
-              rating: true,
-              storeId: true,
-              createdAt: true,
-            },
-          },
-          owner: { select: { id: true, name: true } },  // FIXED: Removed email to prevent PII exposure
-        },
-      })
+      // Use raw SQL for slug lookup to avoid PgBouncer timeout with Prisma include.
+      // The include (products + owner) can hang indefinitely through PgBouncer.
+      const storeRows = await db.$queryRawUnsafe(`
+        SELECT s.*, 
+          COALESCE(json_agg(
+            json_build_object(
+              'id', p.id, 'name', p.name, 'description', p.description,
+              'price', p.price, 'originalPrice', p."originalPrice",
+              'imageUrl', p."imageUrl", 'category', p.category,
+              'isActive', p."isActive", 'featured', p.featured,
+              'rating', p.rating, 'storeId', p."storeId", 'createdAt', p."createdAt"
+            )
+          ) FILTER (WHERE p.id IS NOT NULL AND p."isActive" = true), '[]') as products,
+          json_build_object('id', u.id, 'name', u.name) as owner
+        FROM "Store" s
+        LEFT JOIN "Product" p ON p."storeId" = s.id AND p."isActive" = true
+        LEFT JOIN "User" u ON u.id = s."ownerId"
+        WHERE s.slug = $1
+        GROUP BY s.id, u.id, u.name
+        LIMIT 1
+      `, slug)
+
+      const store = Array.isArray(storeRows) && storeRows.length > 0 ? storeRows[0] : null
 
       if (!store) {
         return apiError('Tienda no encontrada', 404, undefined, request)
@@ -65,22 +64,36 @@ export async function GET(request: NextRequest) {
     }
     if (!auth.user) return apiError('No autenticado', 401, undefined, request)
 
-    // Admin gets all stores; owner gets only their own
+    // Admin gets all stores — redirect to dedicated admin endpoint
+    // which uses raw SQL to avoid PgBouncer timeout with Prisma include
     if (requireRole(auth.user, ['super_admin'])) {
-      const allStores = await db.store.findMany({
-        include: {
-          owner: { select: { id: true, name: true, email: true } },
-          _count: { select: { products: { where: { isActive: true } } } },
-          subscriptions: {
-            include: { plan: { select: { id: true, name: true, price: true } } },
-            orderBy: { createdAt: 'desc' },
-            take: 1,
-          },
-        },
-        orderBy: { createdAt: 'desc' },
-      })
+      // Use the same raw SQL pattern as /api/admin/stores to avoid PgBouncer issues
+      const stores = await db.$queryRawUnsafe(`
+        SELECT s.id, s.name, s.slug, s.description, s.logo, s."primaryColor", s."secondaryColor",
+          s."whatsappNumber", s.template, s.category, s."isActive", s."visitCount",
+          s."createdAt", s."ownerId", s."bannerUrl",
+          s."hasShipping", s."hasSecurePayment", s."hasReturns",
+          u.name as "ownerName", u.email as "ownerEmail",
+          COALESCE(product_count.cnt, 0) as "productCount",
+          COALESCE(sub_data.plan_id, '') as "planId",
+          COALESCE(sub_data.plan_name, 'Free') as "planName",
+          COALESCE(sub_data.plan_price, 0) as "planPrice"
+        FROM "Store" s
+        LEFT JOIN "User" u ON u.id = s."ownerId"
+        LEFT JOIN LATERAL (
+          SELECT COUNT(*) as cnt FROM "Product" p WHERE p."storeId" = s.id AND p."isActive" = true
+        ) product_count ON true
+        LEFT JOIN LATERAL (
+          SELECT sub.plan_id, pl.name as plan_name, pl.price as plan_price
+          FROM "Subscription" sub
+          JOIN "Plan" pl ON pl.id = sub.plan_id
+          WHERE sub.user_id = s."ownerId" AND sub.status = 'active'
+          ORDER BY sub."createdAt" DESC LIMIT 1
+        ) sub_data ON true
+        ORDER BY s."createdAt" DESC
+      `)
 
-      const stores = allStores.map(s => ({
+      const mappedStores = (Array.isArray(stores) ? stores : []).map((s: Record<string, unknown>) => ({
         id: s.id,
         name: s.name,
         slug: s.slug,
@@ -92,44 +105,32 @@ export async function GET(request: NextRequest) {
         template: s.template,
         category: s.category,
         isActive: s.isActive,
-        visitCount: s.visitCount,
+        visitCount: Number(s.visitCount) || 0,
         createdAt: s.createdAt,
         ownerId: s.ownerId,
+        bannerUrl: s.bannerUrl,
         hasShipping: s.hasShipping,
         hasSecurePayment: s.hasSecurePayment,
         hasReturns: s.hasReturns,
-        owner: { id: s.owner.id, name: s.owner.name, email: s.owner.email },
-        _count: { products: s._count.products },
-        subscriptions: s.subscriptions.map(sub => ({
-          status: sub.status,
-          plan: { id: sub.plan.id, name: sub.plan.name, price: Number(sub.plan.price) },
-        })),
+        owner: { id: s.ownerId, name: s.ownerName, email: s.ownerEmail },
+        _count: { products: Number(s.productCount) || 0 },
+        subscriptions: [{
+          status: 'active',
+          plan: { id: s.planId || '', name: s.planName || 'Free', price: Number(s.planPrice) || 0 },
+        }],
       }))
 
-      return apiSuccess(serializeDecimals(stores), 200, request)
+      return apiSuccess(serializeDecimals(mappedStores), 200, request)
     }
 
     // Regular owner: return their own stores
-    // NOTE: Using raw SQL to avoid PgBouncer issues with Prisma include (same pattern as /api/admin/stores)
-    let myStores
-    try {
-      myStores = await db.store.findMany({
-        where: { ownerId: auth.user.userId },
-        include: {
-          owner: { select: { id: true, name: true, email: true } },
-          _count: { select: { products: true } },
-          subscriptions: { include: { plan: { select: { id: true, name: true, price: true } } } },
-        },
-        orderBy: { createdAt: 'desc' },
-      })
-    } catch (prismaErr) {
-      // Fallback: simpler query without deep includes if PgBouncer fails
-      console.warn('[STORES] Prisma include failed, using fallback:', prismaErr instanceof Error ? prismaErr.message : String(prismaErr))
-      myStores = await db.store.findMany({
-        where: { ownerId: auth.user.userId },
-        orderBy: { createdAt: 'desc' },
-      })
-    }
+    // Use simple query without includes to avoid PgBouncer timeout.
+    // Prisma include with nested relations (subscriptions → plan) can hang indefinitely
+    // through PgBouncer, causing Vercel function timeout before catch fallback runs.
+    const myStores = await db.store.findMany({
+      where: { ownerId: auth.user.userId },
+      orderBy: { createdAt: 'desc' },
+    })
 
     return apiSuccess(serializeDecimals(myStores), 200, request)
   } catch (error: unknown) {
@@ -168,20 +169,21 @@ export async function POST(request: NextRequest) {
         where: { ownerId: auth.user.userId },
       })
 
-      // Check user's plan for store limit
-      const userSubs = await tx.subscription.findMany({
-        where: { userId: auth.user.userId, status: 'active' },
-        include: { plan: true },
-        orderBy: { startDate: 'desc' },
-        take: 1,
-      })
-
+      // Check user's plan for store limit — use raw SQL to avoid PgBouncer include timeout
       let maxStores = 1 // Default: 1 store
-      if (userSubs.length > 0 && userSubs[0].plan) {
-        const planType = userSubs[0].plan.type
-        if (planType === 'premium') maxStores = 3
-        else if (planType === 'pro') maxStores = 1
-      }
+      try {
+        const planResult = await tx.$queryRawUnsafe(`
+          SELECT pl.type, pl.name FROM "Subscription" sub
+          JOIN "Plan" pl ON pl.id = sub.plan_id
+          WHERE sub.user_id = $1 AND sub.status = 'active'
+          ORDER BY sub."createdAt" DESC LIMIT 1
+        `, auth.user.userId) as Array<Record<string, unknown>>
+        if (Array.isArray(planResult) && planResult.length > 0) {
+          const planType = planResult[0].type as string
+          if (planType === 'premium') maxStores = 3
+          else if (planType === 'pro') maxStores = 1
+        }
+      } catch { /* use default */ }
 
       if (existingStores >= maxStores) {
         throw new Error('STORE_LIMIT')
@@ -203,6 +205,7 @@ export async function POST(request: NextRequest) {
 
       const slug = `${baseSlug}-${Date.now().toString(36)}`
 
+      // Create without include to avoid PgBouncer timeout
       return tx.store.create({
         data: {
           ownerId: auth.user.userId,
@@ -216,7 +219,6 @@ export async function POST(request: NextRequest) {
           template: template || 'moderna',
           category: sanitizedCategory,
         },
-        include: { owner: { select: { id: true, name: true, email: true } } },
       })
     }).catch((err) => {
       if (err instanceof Error && err.message === 'STORE_LIMIT') {
@@ -227,21 +229,8 @@ export async function POST(request: NextRequest) {
     })
 
     if (store === 'STORE_LIMIT') {
-      // Re-check for the limit message
-      const userSubs = await db.subscription.findMany({
-        where: { userId: auth.user.userId, status: 'active' },
-        include: { plan: true },
-        orderBy: { startDate: 'desc' },
-        take: 1,
-      })
-      let maxStores = 1
-      if (userSubs.length > 0 && userSubs[0].plan) {
-        const planType = userSubs[0].plan.type
-        if (planType === 'premium') maxStores = 3
-        else if (planType === 'pro') maxStores = 1
-      }
       return apiError(
-        `Has alcanzado el limite de ${maxStores} tienda(s). Actualiza tu plan para mas.`,
+        `Has alcanzado el limite de 1 tienda(s). Actualiza tu plan para mas.`,
         403,
         undefined,
         request
@@ -301,21 +290,11 @@ export async function PUT(request: NextRequest) {
       data,
     })
 
-    // Return updated store — try with includes first, fallback to simple query
-    // This prevents PgBouncer issues from masking a successful save
-    let updatedStore
-    try {
-      updatedStore = await db.store.findUnique({
-        where: { id },
-        include: {
-          owner: { select: { id: true, name: true, email: true } },
-          subscriptions: { include: { plan: { select: { id: true, name: true, price: true } } } },
-        },
-      })
-    } catch {
-      // Fallback: return store without includes (save was still successful)
-      updatedStore = await db.store.findUnique({ where: { id } })
-    }
+    // Return updated store — use simple query to avoid PgBouncer timeout with Prisma include.
+    // The include (owner + subscriptions → plan) can hang indefinitely through PgBouncer,
+    // causing Vercel function timeout before the catch fallback runs.
+    // We fetch the store data without relations since the client already knows the owner.
+    const updatedStore = await db.store.findUnique({ where: { id } })
 
     if (!updatedStore) {
       return apiError('Tienda no encontrada tras actualizar', 404, undefined, request)
@@ -348,17 +327,18 @@ export async function DELETE(request: NextRequest) {
       return apiError('ID de tienda requerido', 400, undefined, request)
     }
 
-    // Check store exists
-    const store = await db.store.findUnique({
-      where: { id: storeId },
-      include: {
-        _count: { select: { products: true, subscriptions: true } },
-      },
-    })
+    // Check store exists — use raw SQL to avoid PgBouncer include timeout
+    const storeResult = await db.$queryRawUnsafe(`
+      SELECT s.id, s.name, 
+        (SELECT COUNT(*) FROM "Product" p WHERE p."storeId" = s.id) as "productCount"
+      FROM "Store" s WHERE s.id = $1
+    `, storeId) as Array<Record<string, unknown>>
 
-    if (!store) {
+    if (!Array.isArray(storeResult) || storeResult.length === 0) {
       return apiError('Tienda no encontrada', 404, undefined, request)
     }
+
+    const storeInfo = storeResult[0]
 
     // Delete the store - cascade will handle products, subscriptions, payments
     await db.store.delete({
@@ -367,9 +347,9 @@ export async function DELETE(request: NextRequest) {
 
     return apiSuccess(
       {
-        message: `Tienda "${store.name}" eliminada correctamente`,
+        message: `Tienda "${storeInfo.name}" eliminada correctamente`,
         deletedStoreId: storeId,
-        deletedProducts: store._count.products,
+        deletedProducts: Number(storeInfo.productCount) || 0,
       },
       200,
       request
