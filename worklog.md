@@ -128,3 +128,27 @@ Stage Summary:
 - Created: /api/upload/route.ts (POST/DELETE/OPTIONS)
 - The upload returns public URLs like: https://bsshjfawtlcfshnmaawf.supabase.co/storage/v1/object/public/product-images/...
 - Deployed: Pushed commit 0bcd49b to GitHub, Vercel auto-deployed
+
+---
+Task ID: fix-uploads-and-session
+Agent: main
+Task: Fix image uploads not working and session stability issues
+
+Work Log:
+- Investigated upload endpoint - found it exists and works correctly
+- Tested upload + save flow via curl - both work
+- Discovered root cause: cascading state management bugs, not upload API
+- Fixed Bug 1: Race condition in AppRouter - auth guard redirected to login before syncFromAPI completed
+- Fixed Bug 2: syncFromAPI wiped auth token on network errors (now only on 401)
+- Fixed Bug 3: PgBouncer-incompatible Prisma include in store owner GET endpoint (added fallback)
+- Fixed Bug 4: PUT /api/stores response query could fail and mask successful save (separated update from response)
+- Fixed Bug 5: Empty logo replaced with emoji default (changed || to ??)
+- Added isSyncing state to Zustand store
+- Added loading spinner in AppRouter during sync
+- Pushed to GitHub and verified deploy on Vercel
+- Tested complete upload + save flow - works correctly
+
+Stage Summary:
+- Root cause was session instability, not upload endpoint failure
+- 4 critical bugs fixed that together caused uploads to "not work"
+- Deployed to production at tienda.blackboxperu.com
