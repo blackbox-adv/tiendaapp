@@ -30,6 +30,13 @@ function transformApiStore(apiStore: Record<string, unknown>): Store {
     hasShipping: (apiStore.hasShipping as boolean) ?? false,
     hasSecurePayment: (apiStore.hasSecurePayment as boolean) ?? false,
     hasReturns: (apiStore.hasReturns as boolean) ?? false,
+    // Promo Popup fields
+    popupEnabled: (apiStore.popupEnabled as boolean) ?? false,
+    popupType: (apiStore.popupType as 'product' | 'custom') ?? 'product',
+    popupProductId: (apiStore.popupProductId as string | null) ?? null,
+    popupCustomImage: (apiStore.popupCustomImage as string | null) ?? null,
+    popupTitle: (apiStore.popupTitle as string | null) ?? null,
+    popupButtonText: (apiStore.popupButtonText as string) ?? 'Ver oferta',
   }
 }
 
@@ -438,6 +445,12 @@ export const useAppStore = create<AppState>((set, get) => ({
       hasShipping: false,
       hasSecurePayment: false,
       hasReturns: false,
+      popupEnabled: false,
+      popupType: 'product' as const,
+      popupProductId: null,
+      popupCustomImage: null,
+      popupTitle: null,
+      popupButtonText: 'Ver oferta',
     }
 
     set((state) => ({
@@ -601,6 +614,13 @@ export const useAppStore = create<AppState>((set, get) => ({
       if (data.hasShipping !== undefined) apiData.hasShipping = data.hasShipping
       if (data.hasSecurePayment !== undefined) apiData.hasSecurePayment = data.hasSecurePayment
       if (data.hasReturns !== undefined) apiData.hasReturns = data.hasReturns
+      // Popup fields
+      if (data.popupEnabled !== undefined) apiData.popupEnabled = data.popupEnabled
+      if (data.popupType !== undefined) apiData.popupType = data.popupType
+      if (data.popupProductId !== undefined) apiData.popupProductId = data.popupProductId
+      if (data.popupCustomImage !== undefined) apiData.popupCustomImage = data.popupCustomImage
+      if (data.popupTitle !== undefined) apiData.popupTitle = data.popupTitle
+      if (data.popupButtonText !== undefined) apiData.popupButtonText = data.popupButtonText
 
       const res = await fetch('/api/stores', {
         method: 'PUT',

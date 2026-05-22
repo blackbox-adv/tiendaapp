@@ -66,6 +66,12 @@ export function StoreView({ slug }: { slug: string }) {
               hasShipping: data.hasShipping ?? false,
               hasSecurePayment: data.hasSecurePayment ?? false,
               hasReturns: data.hasReturns ?? false,
+              popupEnabled: data.popupEnabled ?? false,
+              popupType: (data.popupType as 'product' | 'custom') ?? 'product',
+              popupProductId: data.popupProductId || null,
+              popupCustomImage: data.popupCustomImage || null,
+              popupTitle: data.popupTitle || null,
+              popupButtonText: data.popupButtonText || 'Ver oferta',
             })
             if (data.products && Array.isArray(data.products)) {
               // Helper to safely convert Prisma Decimal / string / number to JS number
@@ -235,7 +241,7 @@ export function StoreView({ slug }: { slug: string }) {
       <WhatsAppButton whatsappNumber={displayStore!.whatsappNumber} />
 
       {/* Promo Popup */}
-      <PromoPopup store={displayStore!} products={displayProducts} />
+      <PromoPopup store={displayStore!} products={displayProducts} onProductClick={(productId) => navigate({ page: 'product-detail', slug, productId })} />
     </>
   )
 }

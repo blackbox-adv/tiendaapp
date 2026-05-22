@@ -13,7 +13,7 @@ const CATEGORIES = [
   { id: 'juguetes', name: 'Juguetes' },
   { id: 'otros', name: 'Otros' },
 ]
-import { Save, Eye, Store, LayoutTemplate, Upload, X, ImageIcon, Truck, ShieldCheck, RotateCcw } from 'lucide-react'
+import { Save, Eye, Store, LayoutTemplate, Upload, X, ImageIcon, Truck, ShieldCheck, RotateCcw, Lock, Megaphone, Package, ImagePlus, Sparkles, Tag } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -21,9 +21,10 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Badge } from '@/components/ui/badge'
 
 export function StoreSettings() {
-  const { currentStore, navigate, updateStoreSettings } = useAppStore()
+  const { currentStore, products, navigate, updateStoreSettings } = useAppStore()
 
   const [name, setName] = useState(currentStore?.name || '')
   const [description, setDescription] = useState(currentStore?.description || '')
@@ -39,6 +40,20 @@ export function StoreSettings() {
   const [hasSecurePayment, setHasSecurePayment] = useState(currentStore?.hasSecurePayment ?? false)
   const [hasReturns, setHasReturns] = useState(currentStore?.hasReturns ?? false)
   const [saving, setSaving] = useState(false)
+
+  // Popup state
+  const [popupEnabled, setPopupEnabled] = useState(currentStore?.popupEnabled ?? false)
+  const [popupType, setPopupType] = useState<'product' | 'custom'>(currentStore?.popupType ?? 'product')
+  const [popupProductId, setPopupProductId] = useState(currentStore?.popupProductId ?? '')
+  const [popupCustomImage, setPopupCustomImage] = useState(currentStore?.popupCustomImage ?? '')
+  const [uploadingPopupImage, setUploadingPopupImage] = useState(false)
+  const [popupTitle, setPopupTitle] = useState(currentStore?.popupTitle ?? '')
+  const [popupButtonText, setPopupButtonText] = useState(currentStore?.popupButtonText ?? 'Ver oferta')
+
+  // Plan info
+  const planId = currentStore?.planId || 'free'
+  const isProOrAbove = planId !== 'free'
+  const isPremium = planId === 'premium'
 
   const handleLogoUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -132,6 +147,52 @@ export function StoreSettings() {
     }
   }, [])
 
+  const handlePopupImageUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Formato no válido', { description: 'Solo se permiten JPG, PNG y WebP' })
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Archivo muy grande', { description: 'La imagen no debe superar los 5MB' })
+      return
+    }
+
+    setUploadingPopupImage(true)
+
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const token = localStorage.getItem('tiendapp_token')
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        if (data.url) {
+          setPopupCustomImage(data.url)
+        } else {
+          toast.error('Error al subir', { description: 'No se recibió la URL de la imagen' })
+        }
+      } else {
+        const data = await res.json().catch(() => ({}))
+        toast.error('Error al subir la imagen', { description: data.error || 'No se pudo subir la imagen' })
+      }
+    } catch {
+      toast.error('Error de conexión', { description: 'No se pudo subir la imagen' })
+    } finally {
+      setUploadingPopupImage(false)
+    }
+  }, [])
+
   if (!currentStore) {
     return (
       <div className="space-y-6">
@@ -208,6 +269,12 @@ export function StoreSettings() {
         hasShipping,
         hasSecurePayment,
         hasReturns,
+        popupEnabled: isProOrAbove ? popupEnabled : false,
+        popupType: isProOrAbove ? popupType : 'product',
+        popupProductId: isProOrAbove ? (popupProductId || null) : null,
+        popupCustomImage: isPremium ? (popupCustomImage || null) : null,
+        popupTitle: isProOrAbove ? (popupTitle || null) : null,
+        popupButtonText: isProOrAbove ? popupButtonText : 'Ver oferta',
       })
       if (result.success) {
         toast.success('Tienda actualizada', { description: 'Los cambios se guardaron correctamente.' })
@@ -223,6 +290,9 @@ export function StoreSettings() {
 
   const presetColors = ['#7C3AED', '#EC4899', '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4']
 
+  // Get store products for the popup dropdown
+  const storeProducts = products.filter((p) => p.storeId === currentStore?.id && p.isActive)
+
   return (
     <div className="space-y-6 animate-fadeIn max-w-3xl">
       <div>
@@ -233,38 +303,70 @@ export function StoreSettings() {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Form */}
         <div className="lg:col-span-3 space-y-6">
+          {/* Logo Section */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Logo de la tienda</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">Logo de la tienda</CardTitle>
+                <Badge className="bg-violet-100 text-violet-700 border-violet-200 text-xs font-semibold px-2.5 py-1">
+                  512 × 512 px (cuadrada)
+                </Badge>
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center gap-4">
-                {/* Preview */}
-                <div className="w-20 h-20 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden bg-gray-50">
+              <div className="flex items-start gap-4">
+                {/* Preview with aspect ratio indicator */}
+                <div className="relative w-24 h-24 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden bg-gray-50 flex-shrink-0">
                   {logo && !logo.startsWith('http') && !logo.startsWith('/') ? (
                     <span className="text-3xl">{logo}</span>
                   ) : logo ? (
                     <img src={logo} alt="Logo" className="w-full h-full object-cover" />
                   ) : (
-                    <Store className="w-8 h-8 text-gray-300" />
+                    <>
+                      <Store className="w-8 h-8 text-gray-300" />
+                      {/* Aspect ratio indicator */}
+                      <div className="absolute bottom-0 inset-x-0 bg-gray-900/60 text-[9px] text-white text-center py-0.5 font-medium">
+                        1:1
+                      </div>
+                    </>
                   )}
+                  {/* 1:1 ratio corner indicator */}
+                  <div className="absolute top-1 right-1">
+                    <div className="w-3.5 h-3.5 border-t-2 border-r-2 border-violet-400 rounded-tr-sm" />
+                  </div>
+                  <div className="absolute bottom-1 left-1">
+                    <div className="w-3.5 h-3.5 border-b-2 border-l-2 border-violet-400 rounded-bl-sm" />
+                  </div>
                 </div>
-                <div>
+                <div className="flex-1">
                   <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleLogoUpload} className="hidden" id="settings-logo-upload" />
                   <label htmlFor="settings-logo-upload" className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
                     {uploadingLogo ? 'Subiendo...' : <><Upload className="w-4 h-4" /> Subir logo</>}
                   </label>
-                  <p className="text-xs text-gray-400 mt-1">JPG, PNG, WebP. Max 5MB. Recomendado: 128 × 128 px (cuadrada)</p>
+                  <p className="text-xs text-gray-400 mt-1">JPG, PNG, WebP. Máximo 5MB.</p>
+                  <div className="flex items-center gap-1.5 mt-1.5">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-violet-50 text-violet-600 text-xs font-semibold">
+                      📐 512 × 512 px
+                    </span>
+                    <span className="text-xs text-gray-400">cuadrada (1:1)</span>
+                  </div>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Banner */}
+          {/* Banner Section */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Banner de la tienda</CardTitle>
-              <CardDescription className="text-sm text-gray-500">Imagen de fondo que se muestra en el encabezado de tu tienda</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-lg">Banner de la tienda</CardTitle>
+                  <CardDescription className="text-sm text-gray-500">Imagen de fondo que se muestra en el encabezado de tu tienda</CardDescription>
+                </div>
+                <Badge className="bg-violet-100 text-violet-700 border-violet-200 text-xs font-semibold px-2.5 py-1 whitespace-nowrap">
+                  1200 × 400 px (3:1)
+                </Badge>
+              </div>
             </CardHeader>
             <CardContent className="space-y-3">
               {bannerUrl ? (
@@ -279,11 +381,24 @@ export function StoreSettings() {
                   </button>
                 </div>
               ) : (
-                <div className="rounded-xl border-2 border-dashed border-gray-200 h-36 flex items-center justify-center bg-gray-50">
-                  <div className="text-center">
-                    <ImageIcon className="w-8 h-8 text-gray-300 mx-auto" />
-                    <p className="text-xs text-gray-400 mt-1">Sin banner</p>
+                <div className="rounded-xl border-2 border-dashed border-gray-200 h-36 flex items-center justify-center bg-gray-50 relative overflow-hidden">
+                  {/* Visual ratio guide lines */}
+                  <div className="absolute inset-3 border border-violet-200/50 rounded-lg flex items-center justify-center">
+                    <div className="text-center">
+                      <ImageIcon className="w-8 h-8 text-gray-300 mx-auto" />
+                      <p className="text-lg font-bold text-gray-300 mt-1">1200 × 400 px</p>
+                      <p className="text-xs text-gray-300">panorámica 3:1</p>
+                    </div>
                   </div>
+                  {/* Aspect ratio indicators */}
+                  <div className="absolute top-2 right-2">
+                    <div className="px-1.5 py-0.5 rounded bg-violet-100 border border-violet-300">
+                      <span className="text-[9px] text-violet-600 font-bold">3:1</span>
+                    </div>
+                  </div>
+                  {/* Wide format guide lines */}
+                  <div className="absolute top-1/2 left-4 right-4 h-px bg-violet-200/40" />
+                  <div className="absolute left-1/2 top-4 bottom-4 w-px bg-violet-200/40" />
                 </div>
               )}
               <div className="flex items-center gap-3">
@@ -291,7 +406,12 @@ export function StoreSettings() {
                 <label htmlFor="settings-banner-upload" className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
                   {uploadingBanner ? 'Subiendo...' : <><Upload className="w-4 h-4" /> Subir banner</>}
                 </label>
-                <p className="text-xs text-gray-400">JPG, PNG, WebP. Max 5MB. <span className="text-violet-500 font-medium">Recomendado: 1200 × 400 px</span></p>
+                <div className="flex items-center gap-1.5 mt-1">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-violet-50 text-violet-600 text-xs font-semibold">
+                    📐 1200 × 400 px
+                  </span>
+                  <span className="text-xs text-gray-400">panorámica (3:1)</span>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -453,6 +573,287 @@ export function StoreSettings() {
                   <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${hasReturns ? 'translate-x-5' : ''}`} />
                 </button>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Promo Popup Configuration */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Megaphone className="w-5 h-5 text-violet-500" />
+                    Popup Promocional
+                  </CardTitle>
+                  <CardDescription className="text-sm text-gray-500 mt-1">Muestra una oferta destacada cuando los clientes visitan tu tienda</CardDescription>
+                </div>
+                {!isProOrAbove && (
+                  <Badge className="bg-gray-100 text-gray-500 border-gray-200 text-xs">
+                    <Lock className="w-3 h-3 mr-1" />
+                    Pro+
+                  </Badge>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {!isProOrAbove ? (
+                /* Locked state for free plan */
+                <div className="rounded-xl border-2 border-dashed border-gray-200 p-6 text-center bg-gray-50">
+                  <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
+                    <Lock className="w-6 h-6 text-gray-400" />
+                  </div>
+                  <h3 className="font-semibold text-gray-700 mb-1">Disponible en Plan Pro y Premium</h3>
+                  <p className="text-sm text-gray-400 mb-4">Actualiza tu plan para activar el popup promocional y mostrar ofertas a tus clientes</p>
+                  <Button
+                    onClick={() => navigate({ page: 'dashboard-plan' })}
+                    className="bg-violet-600 hover:bg-violet-700 text-white gap-2"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    Actualizar plan
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  {/* Toggle popup */}
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-gray-50">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-violet-100 flex items-center justify-center">
+                        <Megaphone className="w-5 h-5 text-violet-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">Activar popup</p>
+                        <p className="text-xs text-gray-500">Muestra el popup a los visitantes de tu tienda</p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setPopupEnabled(!popupEnabled)}
+                      className={`relative w-11 h-6 rounded-full transition-colors ${popupEnabled ? 'bg-violet-600' : 'bg-gray-300'}`}
+                    >
+                      <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${popupEnabled ? 'translate-x-5' : ''}`} />
+                    </button>
+                  </div>
+
+                  {popupEnabled && (
+                    <div className="space-y-4 animate-fadeIn">
+                      {/* Popup type selector */}
+                      <div className="space-y-2">
+                        <Label>Tipo de popup</Label>
+                        <div className="grid grid-cols-2 gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setPopupType('product')}
+                            className={`flex items-center gap-2 p-3 rounded-xl border-2 transition-all text-left ${
+                              popupType === 'product'
+                                ? 'border-violet-500 bg-violet-50 ring-1 ring-violet-200'
+                                : 'border-gray-200 hover:border-violet-200'
+                            }`}
+                          >
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                              popupType === 'product' ? 'bg-violet-100' : 'bg-gray-100'
+                            }`}>
+                              <Package className={`w-4 h-4 ${popupType === 'product' ? 'text-violet-600' : 'text-gray-400'}`} />
+                            </div>
+                            <div>
+                              <p className={`text-sm font-semibold ${popupType === 'product' ? 'text-violet-700' : 'text-gray-600'}`}>Producto destacado</p>
+                              <p className="text-[11px] text-gray-400">Pro y Premium</p>
+                            </div>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => isPremium ? setPopupType('custom') : null}
+                            className={`flex items-center gap-2 p-3 rounded-xl border-2 transition-all text-left relative ${
+                              !isPremium
+                                ? 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed'
+                                : popupType === 'custom'
+                                ? 'border-violet-500 bg-violet-50 ring-1 ring-violet-200'
+                                : 'border-gray-200 hover:border-violet-200'
+                            }`}
+                          >
+                            {!isPremium && (
+                              <div className="absolute top-1.5 right-1.5">
+                                <Lock className="w-3 h-3 text-gray-400" />
+                              </div>
+                            )}
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                              popupType === 'custom' ? 'bg-violet-100' : 'bg-gray-100'
+                            }`}>
+                              <ImagePlus className={`w-4 h-4 ${popupType === 'custom' ? 'text-violet-600' : 'text-gray-400'}`} />
+                            </div>
+                            <div>
+                              <p className={`text-sm font-semibold ${popupType === 'custom' ? 'text-violet-700' : 'text-gray-600'}`}>Imagen personalizada</p>
+                              <p className="text-[11px] text-gray-400">Solo Premium</p>
+                            </div>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Product selection (for product type) */}
+                      {popupType === 'product' && (
+                        <div className="space-y-2">
+                          <Label>Producto a destacar</Label>
+                          {storeProducts.length > 0 ? (
+                            <select
+                              value={popupProductId}
+                              onChange={(e) => setPopupProductId(e.target.value)}
+                              className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                            >
+                              <option value="">Seleccionar producto...</option>
+                              {storeProducts.map((p) => (
+                                <option key={p.id} value={p.id}>
+                                  {p.name} — S/{p.price.toFixed(2)}
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            <p className="text-sm text-gray-400 bg-gray-50 p-3 rounded-lg">No tienes productos activos. Agrega productos primero.</p>
+                          )}
+                          {popupProductId && storeProducts.find((p) => p.id === popupProductId) && (
+                            <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
+                              <img
+                                src={storeProducts.find((p) => p.id === popupProductId)?.imageUrl || ''}
+                                alt=""
+                                className="w-12 h-12 rounded-lg object-cover"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).style.display = 'none'
+                                }}
+                              />
+                              <div>
+                                <p className="text-sm font-semibold text-gray-900">{storeProducts.find((p) => p.id === popupProductId)?.name}</p>
+                                <p className="text-xs text-violet-600 font-semibold">S/{storeProducts.find((p) => p.id === popupProductId)?.price.toFixed(2)}</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Custom image upload (for custom type, premium only) */}
+                      {popupType === 'custom' && isPremium && (
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <Label>Imagen promocional</Label>
+                            <Badge className="bg-violet-100 text-violet-700 border-violet-200 text-xs font-semibold px-2.5 py-1">
+                              600 × 400 px (3:2)
+                            </Badge>
+                          </div>
+                          {popupCustomImage ? (
+                            <div className="relative rounded-xl overflow-hidden border border-gray-200 bg-gray-100">
+                              <img src={popupCustomImage} alt="Popup promocional" className="w-full h-40 object-cover" />
+                              <button
+                                type="button"
+                                onClick={() => setPopupCustomImage('')}
+                                className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center transition-colors"
+                              >
+                                <X className="w-3.5 h-3.5 text-white" />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="rounded-xl border-2 border-dashed border-gray-200 h-40 flex items-center justify-center bg-gray-50 relative overflow-hidden">
+                              <div className="absolute inset-3 border border-violet-200/50 rounded-lg flex items-center justify-center">
+                                <div className="text-center">
+                                  <ImageIcon className="w-8 h-8 text-gray-300 mx-auto" />
+                                  <p className="text-base font-bold text-gray-300 mt-1">600 × 400 px</p>
+                                  <p className="text-xs text-gray-300">horizontal 3:2</p>
+                                </div>
+                              </div>
+                              <div className="absolute top-2 right-2">
+                                <div className="px-1.5 py-0.5 rounded bg-violet-100 border border-violet-300">
+                                  <span className="text-[9px] text-violet-600 font-bold">3:2</span>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                          <div className="flex items-center gap-3">
+                            <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handlePopupImageUpload} className="hidden" id="settings-popup-image-upload" />
+                            <label htmlFor="settings-popup-image-upload" className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+                              {uploadingPopupImage ? 'Subiendo...' : <><Upload className="w-4 h-4" /> Subir imagen</>}
+                            </label>
+                            <div className="flex items-center gap-1.5 mt-1">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-violet-50 text-violet-600 text-xs font-semibold">
+                                📐 600 × 400 px
+                              </span>
+                              <span className="text-xs text-gray-400">horizontal (3:2)</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Popup title */}
+                      <div className="space-y-2">
+                        <Label>Título del popup</Label>
+                        <Input
+                          value={popupTitle}
+                          onChange={(e) => setPopupTitle(e.target.value)}
+                          placeholder="Ej: ¡Oferta especial!, 2x1 solo este mes"
+                          maxLength={200}
+                        />
+                        <p className="text-xs text-gray-400">Se muestra sobre la imagen del popup. Si lo dejas vacío, se usará el nombre del producto.</p>
+                      </div>
+
+                      {/* Button text */}
+                      <div className="space-y-2">
+                        <Label>Texto del botón</Label>
+                        <Input
+                          value={popupButtonText}
+                          onChange={(e) => setPopupButtonText(e.target.value)}
+                          placeholder="Ver oferta"
+                          maxLength={50}
+                        />
+                      </div>
+
+                      {/* Live popup preview */}
+                      <div className="space-y-2">
+                        <Label className="text-xs text-gray-400 font-medium">Vista previa del popup</Label>
+                        <div className="rounded-xl border border-gray-200 overflow-hidden max-w-[280px] mx-auto bg-white shadow-sm">
+                          <div className="relative aspect-[3/2] overflow-hidden bg-gray-100">
+                            {popupType === 'product' && popupProductId && storeProducts.find((p) => p.id === popupProductId) ? (
+                              <img
+                                src={storeProducts.find((p) => p.id === popupProductId)?.imageUrl || ''}
+                                alt=""
+                                className="w-full h-full object-cover"
+                                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                              />
+                            ) : popupType === 'custom' && popupCustomImage ? (
+                              <img
+                                src={popupCustomImage}
+                                alt=""
+                                className="w-full h-full object-cover"
+                                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <ImageIcon className="w-8 h-8 text-gray-300" />
+                              </div>
+                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                            <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-white text-[10px] font-bold flex items-center gap-0.5" style={{ backgroundColor: primaryColor }}>
+                              <Tag className="w-2.5 h-2.5" />
+                              Oferta
+                            </div>
+                            {(popupTitle || (popupType === 'product' && popupProductId)) && (
+                              <div className="absolute bottom-2 left-2 right-8">
+                                <p className="text-white font-bold text-sm leading-tight truncate">
+                                  {popupTitle || (popupType === 'product' && popupProductId ? storeProducts.find((p) => p.id === popupProductId)?.name : '')}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                          <div className="p-3">
+                            {popupType === 'product' && popupProductId && storeProducts.find((p) => p.id === popupProductId) && (
+                              <p className="text-lg font-bold mb-2" style={{ color: primaryColor }}>
+                                S/{storeProducts.find((p) => p.id === popupProductId)?.price.toFixed(2)}
+                              </p>
+                            )}
+                            <div className="py-2 rounded-lg text-white text-xs font-bold text-center" style={{ backgroundColor: primaryColor }}>
+                              {popupButtonText || 'Ver oferta'}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             </CardContent>
           </Card>
 

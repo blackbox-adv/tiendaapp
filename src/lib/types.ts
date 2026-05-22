@@ -51,6 +51,12 @@ export interface Store {
   hasShipping: boolean
   hasSecurePayment: boolean
   hasReturns: boolean
+  popupEnabled: boolean
+  popupType: 'product' | 'custom'
+  popupProductId: string | null
+  popupCustomImage: string | null
+  popupTitle: string | null
+  popupButtonText: string
   userId: string
   isActive: boolean
   createdAt: string

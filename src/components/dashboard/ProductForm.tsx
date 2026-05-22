@@ -21,6 +21,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 
 export function ProductForm({ productId }: { productId?: string }) {
@@ -241,7 +242,17 @@ export function ProductForm({ productId }: { productId?: string }) {
 
             {/* Image Upload & URL */}
             <div className="space-y-3">
-              <Label>Imagen del producto *</Label>
+              <div className="flex items-center justify-between">
+                <Label>Imagen del producto *</Label>
+                <div className="flex items-center gap-2">
+                  <Badge className="bg-violet-100 text-violet-700 border-violet-200 text-[10px] font-semibold px-2 py-0.5">
+                    800 × 800 px (1:1)
+                  </Badge>
+                  <Badge className="bg-violet-100 text-violet-700 border-violet-200 text-[10px] font-semibold px-2 py-0.5">
+                    800 × 1000 px (4:5)
+                  </Badge>
+                </div>
+              </div>
 
               {/* Upload area */}
               <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-violet-300 hover:bg-violet-50/30 transition-colors">
@@ -269,7 +280,32 @@ export function ProductForm({ productId }: { productId?: string }) {
                       <div>
                         <p className="text-sm font-medium text-gray-700">Haz clic para subir una imagen</p>
                         <p className="text-xs text-gray-400 mt-0.5">JPG, PNG, WebP o GIF. Máximo 5MB</p>
-                        <p className="text-xs text-violet-500 mt-1 font-medium">Recomendado: 800 × 800 px (cuadrada) ó 800 × 1000 px (vertical)</p>
+                      </div>
+                      {/* Visual aspect ratio guides */}
+                      <div className="flex items-center gap-4 mt-2">
+                        <div className="flex flex-col items-center gap-1">
+                          <div className="w-10 h-10 rounded-lg border-2 border-violet-300 bg-violet-50 flex items-center justify-center">
+                            <span className="text-[8px] text-violet-600 font-bold">1:1</span>
+                          </div>
+                          <span className="text-[10px] text-violet-600 font-semibold">Cuadrada</span>
+                        </div>
+                        <div className="flex flex-col items-center gap-1">
+                          <div className="w-8 h-10 rounded-lg border-2 border-violet-300 bg-violet-50 flex items-center justify-center">
+                            <span className="text-[7px] text-violet-600 font-bold">4:5</span>
+                          </div>
+                          <span className="text-[10px] text-violet-600 font-semibold">Vertical</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-violet-50 text-violet-600 text-xs font-semibold">
+                          📐 800 × 800 px
+                        </span>
+                        <span className="text-xs text-gray-400">cuadrada (1:1)</span>
+                        <span className="text-gray-300">|</span>
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-violet-50 text-violet-600 text-xs font-semibold">
+                          📐 800 × 1000 px
+                        </span>
+                        <span className="text-xs text-gray-400">vertical (4:5)</span>
                       </div>
                     </>
                   )}
@@ -343,9 +379,23 @@ export function ProductForm({ productId }: { productId?: string }) {
                 </button>
               </div>
             ) : (
-              <div className="rounded-xl border border-gray-200 h-56 bg-gray-50 flex flex-col items-center justify-center gap-2 text-gray-300">
-                <ImageIcon className="w-10 h-10" />
-                <p className="text-sm">Vista previa de la imagen</p>
+              <div className="rounded-xl border border-gray-200 h-56 bg-gray-50 flex flex-col items-center justify-center gap-2 text-gray-300 relative overflow-hidden">
+                <div className="absolute inset-3 border border-violet-200/30 rounded-lg" />
+                <div className="flex items-center gap-6">
+                  <div className="flex flex-col items-center gap-1">
+                    <div className="w-14 h-14 rounded-lg border-2 border-dashed border-gray-200 bg-white flex items-center justify-center">
+                      <span className="text-[10px] text-gray-300 font-bold">1:1</span>
+                    </div>
+                    <span className="text-[10px] text-gray-300">800 × 800</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-1">
+                    <div className="w-11 h-14 rounded-lg border-2 border-dashed border-gray-200 bg-white flex items-center justify-center">
+                      <span className="text-[9px] text-gray-300 font-bold">4:5</span>
+                    </div>
+                    <span className="text-[10px] text-gray-300">800 × 1000</span>
+                  </div>
+                </div>
+                <p className="text-sm mt-1">Vista previa de la imagen</p>
               </div>
             )}
 

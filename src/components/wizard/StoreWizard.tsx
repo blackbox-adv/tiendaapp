@@ -213,17 +213,35 @@ export function StoreWizard() {
                 <CardContent className="p-6 space-y-5">
                   {/* Logo Upload */}
                   <div className="space-y-3">
-                    <Label>Logo de la tienda</Label>
-                    <div className="flex items-center gap-4">
-                      {/* Preview */}
-                      <div className="w-20 h-20 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden bg-gray-50">
+                    <div className="flex items-center justify-between">
+                      <Label>Logo de la tienda</Label>
+                      <Badge className="bg-violet-100 text-violet-700 border-violet-200 text-xs font-semibold px-2.5 py-1">
+                        512 × 512 px (cuadrada)
+                      </Badge>
+                    </div>
+                    <div className="flex items-start gap-4">
+                      {/* Preview with aspect ratio indicator */}
+                      <div className="relative w-20 h-20 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden bg-gray-50 flex-shrink-0">
                         {wizardData.storeLogo && !wizardData.storeLogo.includes('/') ? (
                           <span className="text-3xl">{wizardData.storeLogo}</span>
                         ) : wizardData.storeLogo ? (
                           <img src={wizardData.storeLogo} alt="Logo" className="w-full h-full object-cover" />
                         ) : (
-                          <Store className="w-8 h-8 text-gray-300" />
+                          <>
+                            <Store className="w-8 h-8 text-gray-300" />
+                            {/* Aspect ratio indicator */}
+                            <div className="absolute bottom-0 inset-x-0 bg-gray-900/60 text-[9px] text-white text-center py-0.5 font-medium">
+                              1:1
+                            </div>
+                          </>
                         )}
+                        {/* Corner ratio indicators */}
+                        <div className="absolute top-1 right-1">
+                          <div className="w-3.5 h-3.5 border-t-2 border-r-2 border-violet-400 rounded-tr-sm" />
+                        </div>
+                        <div className="absolute bottom-1 left-1">
+                          <div className="w-3.5 h-3.5 border-b-2 border-l-2 border-violet-400 rounded-bl-sm" />
+                        </div>
                       </div>
                       {/* Upload button */}
                       <div>
@@ -231,7 +249,13 @@ export function StoreWizard() {
                         <label htmlFor="wizard-logo-upload" className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
                           {uploadingLogo ? 'Subiendo...' : <><Upload className="w-4 h-4" /> Subir logo</>}
                         </label>
-                        <p className="text-xs text-gray-400 mt-1">JPG, PNG, WebP. Max 5MB. Recomendado: 128 × 128 px (cuadrada)</p>
+                        <p className="text-xs text-gray-400 mt-1">JPG, PNG, WebP. Máximo 5MB.</p>
+                        <div className="flex items-center gap-1.5 mt-1.5">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-violet-50 text-violet-600 text-xs font-semibold">
+                            📐 512 × 512 px
+                          </span>
+                          <span className="text-xs text-gray-400">cuadrada (1:1)</span>
+                        </div>
                       </div>
                     </div>
                   </div>

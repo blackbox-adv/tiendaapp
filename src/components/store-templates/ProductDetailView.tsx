@@ -79,6 +79,12 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
               hasShipping: data.hasShipping ?? false,
               hasSecurePayment: data.hasSecurePayment ?? false,
               hasReturns: data.hasReturns ?? false,
+              popupEnabled: data.popupEnabled ?? false,
+              popupType: (data.popupType as 'product' | 'custom') ?? 'product',
+              popupProductId: data.popupProductId || null,
+              popupCustomImage: data.popupCustomImage || null,
+              popupTitle: data.popupTitle || null,
+              popupButtonText: data.popupButtonText || 'Ver oferta',
             }
             setApiStore(mappedStore)
 

@@ -69,6 +69,15 @@ model Store {
   hasShipping      Boolean  @default(false)
   hasSecurePayment Boolean  @default(false)
   hasReturns       Boolean  @default(false)
+
+  // Promo Popup configuration
+  popupEnabled     Boolean  @default(false)
+  popupType        String   @default("product")    // "product" (Pro) or "custom" (Premium)
+  popupProductId   String?                           // Product ID to feature (Pro plan)
+  popupCustomImage String?                           // Custom uploaded promo image (Premium plan)
+  popupTitle       String?                           // e.g. "2x1 solo este mes"
+  popupButtonText  String   @default("Ver oferta")  // CTA button text
+
   isActive       Boolean  @default(true)
   visitCount     Int      @default(0)
   createdAt      DateTime @default(now())

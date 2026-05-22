@@ -91,6 +91,13 @@ export const updateStoreSchema = createStoreSchema.partial().extend({
   hasShipping: z.boolean().optional(),
   hasSecurePayment: z.boolean().optional(),
   hasReturns: z.boolean().optional(),
+  // Popup configuration
+  popupEnabled: z.boolean().optional(),
+  popupType: z.enum(['product', 'custom']).optional(),
+  popupProductId: z.string().max(100).optional().nullable(),
+  popupCustomImage: z.string().max(1000).optional().nullable(),
+  popupTitle: z.string().max(200).optional().nullable(),
+  popupButtonText: z.string().max(50).optional(),
   // Override whatsappNumber: lenient validation for updates (don't block save for format issues)
   whatsappNumber: z.string().max(30).optional(),
 })

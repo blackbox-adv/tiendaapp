@@ -27,6 +27,12 @@ function transformStore(s: Record<string, unknown>): Store {
     hasShipping: (s.hasShipping as boolean) ?? false,
     hasSecurePayment: (s.hasSecurePayment as boolean) ?? false,
     hasReturns: (s.hasReturns as boolean) ?? false,
+    popupEnabled: (s.popupEnabled as boolean) ?? false,
+    popupType: (s.popupType as 'product' | 'custom') ?? 'product',
+    popupProductId: (s.popupProductId as string) || null,
+    popupCustomImage: (s.popupCustomImage as string) || null,
+    popupTitle: (s.popupTitle as string) || null,
+    popupButtonText: (s.popupButtonText as string) || 'Ver oferta',
   }
 }
 

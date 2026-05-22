@@ -29,6 +29,7 @@ const demoStores: Record<string, Store> = {
     isActive: true,
     createdAt: new Date().toISOString(),
     hasShipping: true, hasSecurePayment: true, hasReturns: false,
+    popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
   },
   minimalist: {
     id: 'demo-minimalist',
@@ -46,6 +47,7 @@ const demoStores: Record<string, Store> = {
     isActive: true,
     createdAt: new Date().toISOString(),
     hasShipping: true, hasSecurePayment: true, hasReturns: true,
+    popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
   },
   moderna: {
     id: 'demo-moderna',
@@ -63,6 +65,7 @@ const demoStores: Record<string, Store> = {
     isActive: true,
     createdAt: new Date().toISOString(),
     hasShipping: true, hasSecurePayment: true, hasReturns: true,
+    popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
   },
   vibrante: {
     id: 'demo-vibrante',
@@ -80,6 +83,7 @@ const demoStores: Record<string, Store> = {
     isActive: true,
     createdAt: new Date().toISOString(),
     hasShipping: true, hasSecurePayment: false, hasReturns: false,
+    popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
   },
   clasica: {
     id: 'demo-clasica',
@@ -97,6 +101,7 @@ const demoStores: Record<string, Store> = {
     isActive: true,
     createdAt: new Date().toISOString(),
     hasShipping: true, hasSecurePayment: true, hasReturns: true,
+    popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
   },
 }
 

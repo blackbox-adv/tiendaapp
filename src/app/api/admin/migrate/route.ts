@@ -193,6 +193,30 @@ export async function POST(request: NextRequest) {
     },
   ]
 
+  // Add popup columns to Store table if missing
+  const popupColumns = [
+    { name: 'popupEnabled', sql: `ALTER TABLE "Store" ADD COLUMN IF NOT EXISTS "popupEnabled" BOOLEAN NOT NULL DEFAULT false` },
+    { name: 'popupType', sql: `ALTER TABLE "Store" ADD COLUMN IF NOT EXISTS "popupType" TEXT NOT NULL DEFAULT 'product'` },
+    { name: 'popupProductId', sql: `ALTER TABLE "Store" ADD COLUMN IF NOT EXISTS "popupProductId" TEXT` },
+    { name: 'popupCustomImage', sql: `ALTER TABLE "Store" ADD COLUMN IF NOT EXISTS "popupCustomImage" TEXT` },
+    { name: 'popupTitle', sql: `ALTER TABLE "Store" ADD COLUMN IF NOT EXISTS "popupTitle" TEXT` },
+    { name: 'popupButtonText', sql: `ALTER TABLE "Store" ADD COLUMN IF NOT EXISTS "popupButtonText" TEXT NOT NULL DEFAULT 'Ver oferta'` },
+  ]
+
+  for (const col of popupColumns) {
+    try {
+      await db.$executeRawUnsafe(col.sql)
+      results.push({ table: 'Store', action: `added_column_${col.name}`, success: true })
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err)
+      if (errMsg.includes('already exists') || errMsg.includes('duplicate')) {
+        results.push({ table: 'Store', action: `column_${col.name}_already_exists`, success: true })
+      } else {
+        results.push({ table: 'Store', action: `add_column_${col.name}`, success: false, error: errMsg.substring(0, 200) })
+      }
+    }
+  }
+
   // Add foreign keys separately (they depend on tables existing)
   const foreignKeys = [
     `DO $$ BEGIN ALTER TABLE "Store" ADD CONSTRAINT "Store_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE; EXCEPTION WHEN OTHERS THEN IF SQLSTATE != '42710' THEN RAISE; END IF; END $$;`,
