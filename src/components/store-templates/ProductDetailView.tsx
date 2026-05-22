@@ -28,6 +28,8 @@ import {
   Star,
   QrCode,
   ChevronDown,
+  Minus,
+  Plus,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -37,6 +39,7 @@ import type { Product, Store } from '@/lib/types'
 export function ProductDetailView({ slug, productId, onDemoBack }: { slug: string; productId: string; onDemoBack?: () => void }) {
   const { stores, products, navigate, goBack } = useAppStore()
   const [showYape, setShowYape] = useState(false)
+  const [quantity, setQuantity] = useState(1)
 
   const zustandStore = stores.find((s) => s.slug === slug && s.isActive)
   const zustandProduct = products.find((p) => p.id === productId && p.isActive)
@@ -216,6 +219,8 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
     (p) => p.storeId === store.id && p.isActive && p.categoryId === product.categoryId && p.id !== product.id
   ).slice(0, 4)
 
+  const totalPrice = Number(product.price) * quantity
+
   const openWhatsApp = async () => {
     try {
       const res = await fetch('/api/whatsapp', {
@@ -225,6 +230,7 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
           storeId: store.id,
           productName: product.name,
           productPrice: product.price,
+          quantity,
         }),
       })
       const data = await res.json()
@@ -235,8 +241,10 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
     } catch {
       // Fallback
     }
+    const qtyText = quantity > 1 ? `${quantity} unidades` : 'el producto'
+    const totalText = quantity > 1 ? `\nTotal: S/${totalPrice.toFixed(2)}` : `\nPrecio: S/${Number(product.price).toFixed(2)}`
     const msg = encodeURIComponent(
-      `Hola! Me interesa el producto: ${product.name}\nPrecio: S/${Number(product.price).toFixed(2)}\nLo vi en tu tienda en TiendApp.`
+      `Hola! Me interesa ${qtyText} de: ${product.name}${totalText}\nLo vi en tu tienda en TiendApp.`
     )
     window.open(`https://wa.me/${store.whatsappNumber.replace(/[^0-9]/g, '')}?text=${msg}`, '_blank')
   }
@@ -416,8 +424,13 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
                   className="text-3xl md:text-4xl font-bold tracking-tight"
                   style={{ color: store.colors.primary }}
                 >
-                  S/{Number(product.price).toFixed(2)}
+                  {quantity > 1 ? `S/${totalPrice.toFixed(2)}` : `S/${Number(product.price).toFixed(2)}`}
                 </span>
+                {quantity > 1 && (
+                  <span className="text-sm text-gray-400 font-normal">
+                    S/{Number(product.price).toFixed(2)} c/u
+                  </span>
+                )}
                 {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
                   <>
                     <span className="text-lg text-gray-400 line-through">
@@ -429,9 +442,14 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
                   </>
                 )}
               </div>
+              {quantity > 1 && (
+                <p className="text-sm mt-2 font-medium" style={{ color: store.colors.primary }}>
+                  Total por {quantity} unidades: S/{totalPrice.toFixed(2)}
+                </p>
+              )}
               {savings > 0 && (
                 <p className="text-sm mt-2 font-medium" style={{ color: store.colors.primary }}>
-                  Ahorras S/{Number(savings).toFixed(2)} con este precio especial
+                  Ahorras S/{(Number(savings) * quantity).toFixed(2)} con este precio especial
                 </p>
               )}
             </div>
@@ -467,6 +485,45 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
                 </div>
               )
             })()}
+
+            {/* Quantity Selector */}
+            <div className="mt-6">
+              <label className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3 block">
+                Cantidad
+              </label>
+              <div className="flex items-center gap-0">
+                <button
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  disabled={quantity <= 1}
+                  className="w-11 h-11 flex items-center justify-center rounded-l-xl border-2 transition-colors disabled:opacity-30"
+                  style={{
+                    borderColor: store.colors.primary + '30',
+                    color: store.colors.primary,
+                  }}
+                >
+                  <Minus className="w-4 h-4" />
+                </button>
+                <div
+                  className="w-14 h-11 flex items-center justify-center border-y-2 text-base font-bold"
+                  style={{
+                    borderColor: store.colors.primary + '30',
+                    color: store.colors.primary,
+                  }}
+                >
+                  {quantity}
+                </div>
+                <button
+                  onClick={() => setQuantity(Math.min(999, quantity + 1))}
+                  className="w-11 h-11 flex items-center justify-center rounded-r-xl border-2 transition-colors"
+                  style={{
+                    borderColor: store.colors.primary + '30',
+                    color: store.colors.primary,
+                  }}
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
 
             {/* WhatsApp CTA */}
             <div className="mt-8 flex flex-col gap-3">
@@ -528,9 +585,11 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
                       <div className="text-center p-4 rounded-xl bg-purple-50">
                         <p className="text-xs text-gray-500 mb-1">Monto a transferir</p>
                         <p className="text-2xl font-bold" style={{ color: store.colors.primary }}>
-                          S/{Number(product.price).toFixed(2)}
+                          S/{totalPrice.toFixed(2)}
                         </p>
-                        <p className="text-xs text-gray-400 mt-1">por {product.name}</p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          {quantity > 1 ? `${quantity}x ${product.name}` : `por ${product.name}`}
+                        </p>
                       </div>
 
                       {/* Steps */}
@@ -545,7 +604,7 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
                           <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0 mt-0.5">
                             <span className="text-xs font-bold text-purple-600">2</span>
                           </div>
-                          <p className="text-sm text-gray-600">Escanea el codigo QR y transfiere <b>S/{Number(product.price).toFixed(2)}</b></p>
+                          <p className="text-sm text-gray-600">Escanea el codigo QR y transfiere <b>S/{totalPrice.toFixed(2)}</b></p>
                         </div>
                         <div className="flex items-start gap-3">
                           <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -560,8 +619,9 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
                         className="w-full text-white gap-3 rounded-2xl py-5 text-sm font-bold shadow-lg hover:opacity-90 transition-opacity"
                         style={{ backgroundColor: '#25D366' }}
                         onClick={() => {
+                          const qtyText = quantity > 1 ? ` (${quantity} unidades)` : ''
                           const msg = encodeURIComponent(
-                            `Hola! Acabo de realizar el pago por Yape/Plin de S/${Number(product.price).toFixed(2)} por: ${product.name}\nPor favor confirmar mi pedido.`
+                            `Hola! Acabo de realizar el pago por Yape/Plin de S/${totalPrice.toFixed(2)} por: ${product.name}${qtyText}\nPor favor confirmar mi pedido.`
                           )
                           window.open(`https://wa.me/${store.whatsappNumber.replace(/[^0-9]/g, '')}?text=${msg}`, '_blank')
                         }}

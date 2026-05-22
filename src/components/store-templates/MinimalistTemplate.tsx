@@ -14,8 +14,9 @@ const CATEGORIES = [
   { id: 'juguetes', name: 'Juguetes' },
   { id: 'otros', name: 'Otros' },
 ]
-import { Star, ShoppingBag, Search, X, ChevronRight, Lock } from 'lucide-react'
+import { Star, ShoppingBag, Search, X, ChevronRight } from 'lucide-react'
 import { StoreFeatureBadges } from './StoreFeatureBadges'
+import { CombosSection } from './CombosSection'
 import { useAppStore } from '@/lib/store'
 import type { Store, Product } from '@/lib/types'
 
@@ -96,28 +97,21 @@ export function MinimalistTemplate({ store, products, storeSlug, planId, onProdu
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      {/* Banner */}
-      {store.bannerUrl && (
+      {/* Banner with overlaid name — or standalone header */}
+      {store.bannerUrl ? (
         <div className="relative h-44 md:h-56 overflow-hidden">
           <img src={store.bannerUrl} alt="" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-black/20" />
-        </div>
-      )}
-      {/* Store Header — Clean, left-aligned, lots of whitespace */}
-      <header className={store.bannerUrl ? 'pt-8 pb-8' : 'pt-16 pb-10'}>
-        <div className="max-w-6xl mx-auto px-8 md:px-12">
-          <motion.div
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4 }}
-          >
+          <div className="absolute inset-0 bg-black/30" />
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
             {store.logo && (
-              <div className="mb-4 flex justify-center"><StoreLogo logo={store.logo} size={64} /></div>
+              <div className="mb-4 bg-white/15 backdrop-blur-sm rounded-full p-2 ring-2 ring-white/25">
+                <StoreLogo logo={store.logo} size={56} />
+              </div>
             )}
-            <h1 className="text-3xl md:text-4xl font-light text-gray-900 tracking-tight">
+            <h1 className="text-3xl md:text-4xl font-light text-white tracking-tight">
               {store.name}
             </h1>
-            <p className="text-sm text-gray-400 mt-3 max-w-md font-light leading-relaxed">
+            <p className="text-sm text-white/60 mt-3 max-w-md font-light leading-relaxed">
               {store.description}
             </p>
             <div className="mt-4">
@@ -129,9 +123,38 @@ export function MinimalistTemplate({ store, products, storeSlug, planId, onProdu
                 primaryColor={store.colors.primary}
               />
             </div>
-          </motion.div>
+          </div>
         </div>
-      </header>
+      ) : (
+        <header className="pt-16 pb-10">
+          <div className="max-w-6xl mx-auto px-8 md:px-12">
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4 }}
+            >
+              {store.logo && (
+                <div className="mb-4 flex justify-center"><StoreLogo logo={store.logo} size={64} /></div>
+              )}
+              <h1 className="text-3xl md:text-4xl font-light text-gray-900 tracking-tight">
+                {store.name}
+              </h1>
+              <p className="text-sm text-gray-400 mt-3 max-w-md font-light leading-relaxed">
+                {store.description}
+              </p>
+              <div className="mt-4">
+                <StoreFeatureBadges
+                  hasShipping={store.hasShipping}
+                  hasSecurePayment={store.hasSecurePayment}
+                  hasReturns={store.hasReturns}
+                  variant="minimalist"
+                  primaryColor={store.colors.primary}
+                />
+              </div>
+            </motion.div>
+          </div>
+        </header>
+      )}
 
       {/* Breadcrumb */}
       <div className="max-w-6xl mx-auto px-8 md:px-12">
@@ -165,15 +188,7 @@ export function MinimalistTemplate({ store, products, storeSlug, planId, onProdu
                 </button>
               )}
             </div>
-          ) : (
-            <button
-              onClick={() => window.location.href = '/#pricing'}
-              className="flex items-center gap-2 py-2 text-sm text-gray-300 hover:text-gray-500 border-b border-gray-100 transition-colors"
-            >
-              <Lock className="w-3.5 h-3.5" />
-              Buscador disponible en Plan Pro
-            </button>
-          )}
+          ) : null}
 
           {/* Category pills — minimal style */}
           <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
@@ -252,8 +267,13 @@ export function MinimalistTemplate({ store, products, storeSlug, planId, onProdu
         </div>
       </nav>
 
-      {/* Product Grid — 2 col mobile, 4 desktop, lots of whitespace */}
+      {/* Combos/Packs + Product Grid */}
       <main className="flex-1 max-w-6xl mx-auto px-8 md:px-12 py-12 w-full">
+        {/* Combos/Packs */}
+        <div className="mb-8">
+          <CombosSection products={products} store={store} storeSlug={storeSlug} primaryColor={store.colors.primary} />
+        </div>
+
         {filteredProducts.length === 0 ? (
           <div className="text-center py-24">
             <ShoppingBag className="w-10 h-10 mx-auto mb-4 text-gray-100" />

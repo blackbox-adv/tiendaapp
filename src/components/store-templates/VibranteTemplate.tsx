@@ -14,8 +14,9 @@ const CATEGORIES = [
   { id: 'juguetes', name: 'Juguetes' },
   { id: 'otros', name: 'Otros' },
 ]
-import { Star, MessageCircle, ShoppingBag, Search, X, SlidersHorizontal, Lock } from 'lucide-react'
+import { Star, MessageCircle, ShoppingBag, Search, X, SlidersHorizontal } from 'lucide-react'
 import { StoreFeatureBadges } from './StoreFeatureBadges'
+import { CombosSection } from './CombosSection'
 import { Badge } from '@/components/ui/badge'
 import { useAppStore } from '@/lib/store'
 import type { Store, Product } from '@/lib/types'
@@ -203,15 +204,7 @@ export function VibranteTemplate({ store, products, storeSlug, planId, onProduct
                 </button>
               )}
             </div>
-          ) : (
-            <button
-              onClick={() => window.location.href = '/#pricing'}
-              className="w-full flex items-center justify-center gap-2 py-2.5 text-sm rounded-xl border-0 bg-white/60 text-gray-400 hover:text-violet-500 transition-all"
-            >
-              <Lock className="w-3.5 h-3.5" />
-              Buscador disponible en Plan Pro
-            </button>
-          )}
+          ) : null}
 
           {/* Category chips */}
           <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
@@ -312,8 +305,13 @@ export function VibranteTemplate({ store, products, storeSlug, planId, onProduct
         </div>
       </nav>
 
-      {/* Products — Large tall cards, bouncy */}
+      {/* Combos/Packs + Products */}
       <main className="max-w-6xl mx-auto px-4 py-8 flex-1">
+        {/* Combos/Packs */}
+        <div className="mb-8">
+          <CombosSection products={products} store={store} storeSlug={storeSlug} primaryColor={store.colors.primary} />
+        </div>
+
         {filteredProducts.length === 0 ? (
           <div className="text-center py-20">
             <ShoppingBag className="w-16 h-16 mx-auto mb-4 text-gray-300" />

@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
       return apiError(validation.error, 400, undefined, request)
     }
 
-    const { storeId, productName, productPrice, productUrl, customerMessage } = validation.data
+    const { storeId, productName, productPrice, productUrl, customerMessage, quantity } = validation.data
 
     // Fetch store to get WhatsApp number
     const store = await db.store.findUnique({
@@ -46,10 +46,13 @@ export async function POST(request: NextRequest) {
       // Sanitize customer message: limit length
       message = customerMessage.slice(0, 1000)
     } else if (productName && productPrice) {
+      const qtyText = quantity && quantity > 1 ? `${quantity} unidades de` : 'el producto'
+      const totalText = quantity && quantity > 1 ? `Total: S/${(Number(productPrice) * quantity).toFixed(2)}\n` : ''
       message = `Hola ${store.name}!\n\n` +
-        `Me interesa el siguiente producto:\n` +
+        `Me interesa ${qtyText}:\n` +
         `${sanitizeBasic(String(productName))}\n` +
-        `S/${Number(productPrice).toFixed(2)}\n\n` +
+        `S/${Number(productPrice).toFixed(2)}${quantity && quantity > 1 ? ' c/u' : ''}\n` +
+        `${totalText}\n` +
         `${productUrl || storeUrl}\n\n` +
         `Tienen disponibilidad?`
     } else {

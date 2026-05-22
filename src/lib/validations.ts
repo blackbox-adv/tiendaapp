@@ -235,6 +235,7 @@ export const whatsappSchema = z.object({
   productPrice: z.number().positive().max(999999).optional(),
   productUrl: z.string().url().max(500).optional().or(z.literal('')),
   customerMessage: z.string().max(1000).optional(),
+  quantity: z.number().int().min(1).max(999).optional(),
 })
 
 // ── User update schema ──

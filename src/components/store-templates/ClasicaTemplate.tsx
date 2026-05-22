@@ -14,8 +14,9 @@ const CATEGORIES = [
   { id: 'juguetes', name: 'Juguetes' },
   { id: 'otros', name: 'Otros' },
 ]
-import { Star, MessageCircle, ShoppingBag, Heart, Search, X, Lock } from 'lucide-react'
+import { Star, MessageCircle, ShoppingBag, Heart, Search, X } from 'lucide-react'
 import { StoreFeatureBadges } from './StoreFeatureBadges'
+import { CombosSection } from './CombosSection'
 import { Badge } from '@/components/ui/badge'
 import { useAppStore } from '@/lib/store'
 import type { Store, Product } from '@/lib/types'
@@ -97,58 +98,91 @@ export function ClasicaTemplate({ store, products, storeSlug, planId, onProductC
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#FFF9F0' }}>
-      {/* Banner */}
-      {store.bannerUrl && (
+      {/* Banner with overlaid name — or standalone header */}
+      {store.bannerUrl ? (
         <div className="relative h-48 md:h-56 overflow-hidden">
           <img src={store.bannerUrl} alt="" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/50" />
-        </div>
-      )}
-      {/* Header — Elegant serif, warm tones */}
-      <header
-        className="border-b"
-        style={{
-          backgroundColor: '#FFF5E6',
-          borderBottomColor: '#E8D5B7',
-        }}
-      >
-        <div className="max-w-4xl mx-auto px-6 py-10 text-center">
-          <div
-            className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center text-4xl border-2"
-            style={{
-              backgroundColor: '#FFFBF0',
-              borderColor: store.colors.primary + '40',
-            }}
-          >
-            <StoreLogo logo={store.logo} size={56} />
-          </div>
-          <h1
-            className="text-3xl font-bold tracking-wide"
-            style={{ fontFamily: 'Georgia, "Times New Roman", serif', color: '#5D3A1A' }}
-          >
-            {store.name}
-          </h1>
-          <div
-            className="w-16 h-0.5 mx-auto mt-4 mb-3"
-            style={{ backgroundColor: store.colors.primary + '50' }}
-          />
-          <p
-            className="max-w-md mx-auto leading-relaxed"
-            style={{ fontFamily: 'Georgia, "Times New Roman", serif', color: '#8B6F5C' }}
-          >
-            {store.description}
-          </p>
-          <div className="mt-4">
-            <StoreFeatureBadges
-              hasShipping={store.hasShipping}
-              hasSecurePayment={store.hasSecurePayment}
-              hasReturns={store.hasReturns}
-              variant="classic"
-              primaryColor={store.colors.primary}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-black/60" />
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+            <div
+              className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center text-4xl bg-white/15 backdrop-blur-sm ring-2 ring-white/25"
+              style={{ borderColor: store.colors.primary + '40' }}
+            >
+              <StoreLogo logo={store.logo} size={56} />
+            </div>
+            <h1
+              className="text-3xl font-bold tracking-wide text-white"
+              style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
+            >
+              {store.name}
+            </h1>
+            <div
+              className="w-16 h-0.5 mx-auto mt-4 mb-3"
+              style={{ backgroundColor: 'rgba(255,255,255,0.5)' }}
             />
+            <p
+              className="max-w-md mx-auto leading-relaxed text-white/75"
+              style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
+            >
+              {store.description}
+            </p>
+            <div className="mt-4">
+              <StoreFeatureBadges
+                hasShipping={store.hasShipping}
+                hasSecurePayment={store.hasSecurePayment}
+                hasReturns={store.hasReturns}
+                variant="classic"
+                primaryColor={store.colors.primary}
+              />
+            </div>
           </div>
         </div>
-      </header>
+      ) : (
+        <header
+          className="border-b"
+          style={{
+            backgroundColor: '#FFF5E6',
+            borderBottomColor: '#E8D5B7',
+          }}
+        >
+          <div className="max-w-4xl mx-auto px-6 py-10 text-center">
+            <div
+              className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center text-4xl border-2"
+              style={{
+                backgroundColor: '#FFFBF0',
+                borderColor: store.colors.primary + '40',
+              }}
+            >
+              <StoreLogo logo={store.logo} size={56} />
+            </div>
+            <h1
+              className="text-3xl font-bold tracking-wide"
+              style={{ fontFamily: 'Georgia, "Times New Roman", serif', color: '#5D3A1A' }}
+            >
+              {store.name}
+            </h1>
+            <div
+              className="w-16 h-0.5 mx-auto mt-4 mb-3"
+              style={{ backgroundColor: store.colors.primary + '50' }}
+            />
+            <p
+              className="max-w-md mx-auto leading-relaxed"
+              style={{ fontFamily: 'Georgia, "Times New Roman", serif', color: '#8B6F5C' }}
+            >
+              {store.description}
+            </p>
+            <div className="mt-4">
+              <StoreFeatureBadges
+                hasShipping={store.hasShipping}
+                hasSecurePayment={store.hasSecurePayment}
+                hasReturns={store.hasReturns}
+                variant="classic"
+                primaryColor={store.colors.primary}
+              />
+            </div>
+          </div>
+        </header>
+      )}
 
       {/* Category Buttons — Rectangular with border, not pills */}
       <nav
@@ -180,16 +214,7 @@ export function ClasicaTemplate({ store, products, storeSlug, planId, onProductC
                 </button>
               )}
             </div>
-          ) : (
-            <button
-              onClick={() => window.location.href = '/#pricing'}
-              className="w-full flex items-center justify-center gap-2 py-2.5 text-sm rounded-lg border-2 border-dashed text-gray-400 hover:text-amber-600 transition-all"
-              style={{ backgroundColor: '#FFFBF0', borderColor: '#E8D5B7' }}
-            >
-              <Lock className="w-3.5 h-3.5" />
-              Buscador disponible en Plan Pro
-            </button>
-          )}
+          ) : null}
           {/* Category buttons */}
           <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
           <button
@@ -285,8 +310,13 @@ export function ClasicaTemplate({ store, products, storeSlug, planId, onProductC
         </div>
       </nav>
 
-      {/* Product List — Horizontal layout (image left, text right) */}
+      {/* Combos/Packs + Product List */}
       <main className="flex-1 max-w-4xl mx-auto px-6 py-8 w-full">
+        {/* Combos/Packs */}
+        <div className="mb-8">
+          <CombosSection products={products} store={store} storeSlug={storeSlug} primaryColor={store.colors.primary} />
+        </div>
+
         {filteredProducts.length === 0 ? (
           <div className="text-center py-20">
             <ShoppingBag className="w-14 h-14 mx-auto mb-4" style={{ color: '#D4B896' }} />

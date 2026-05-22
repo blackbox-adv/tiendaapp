@@ -14,8 +14,9 @@ const CATEGORIES = [
   { id: 'juguetes', name: 'Juguetes' },
   { id: 'otros', name: 'Otros' },
 ]
-import { Star, ShoppingBag, Search, X, Diamond, Crown, Lock } from 'lucide-react'
+import { Star, ShoppingBag, Search, X, Diamond, Crown } from 'lucide-react'
 import { StoreFeatureBadges } from './StoreFeatureBadges'
+import { CombosSection } from './CombosSection'
 import { Badge } from '@/components/ui/badge'
 import { useAppStore } from '@/lib/store'
 import type { Store, Product } from '@/lib/types'
@@ -103,32 +104,20 @@ export function LuxuryTemplate({ store, products, storeSlug, planId, onProductCl
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: DARK_BG }}>
-      {/* Banner */}
-      {store.bannerUrl && (
+      {/* Banner with overlaid name — or standalone header */}
+      {store.bannerUrl ? (
         <div className="relative h-48 md:h-64 overflow-hidden">
           <img src={store.bannerUrl} alt="" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/50" />
-          {/* Gold gradient line at bottom of banner */}
-          <div className="absolute bottom-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${GOLD}, transparent)` }} />
-        </div>
-      )}
-      {/* Elegant Header — centered, gold accents */}
-      <header className={`relative text-center ${store.bannerUrl ? 'pt-8 pb-8' : 'pt-14 pb-10'}`}>
-        {/* Subtle gold gradient line at top */}
-        <div className="absolute top-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${GOLD}, transparent)` }} />
-
-        <div className="max-w-2xl mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
             {store.logo && (
               <div
                 className="w-20 h-20 rounded-full mx-auto mb-5 flex items-center justify-center text-4xl"
                 style={{
-                  border: `2px solid ${GOLD}40`,
-                  boxShadow: `0 0 30px ${GOLD}15`,
+                  border: `2px solid ${GOLD}60`,
+                  boxShadow: `0 0 30px ${GOLD}25`,
+                  backgroundColor: 'rgba(0,0,0,0.3)',
+                  backdropFilter: 'blur(8px)',
                 }}
               >
                 <StoreLogo logo={store.logo} size={56} />
@@ -143,15 +132,14 @@ export function LuxuryTemplate({ store, products, storeSlug, planId, onProductCl
             >
               {store.name}
             </h1>
-            {/* Gold gradient divider */}
             <div className="flex items-center justify-center mt-5 mb-4 gap-3">
-              <div className="h-px w-12" style={{ backgroundColor: GOLD + '40' }} />
+              <div className="h-px w-12" style={{ backgroundColor: GOLD + '60' }} />
               <Diamond size={14} style={{ color: GOLD }} />
-              <div className="h-px w-12" style={{ backgroundColor: GOLD + '40' }} />
+              <div className="h-px w-12" style={{ backgroundColor: GOLD + '60' }} />
             </div>
             <p
-              className="text-sm leading-relaxed max-w-md mx-auto"
-              style={{ color: '#8a8a9a', fontFamily: 'Georgia, serif' }}
+              className="text-sm leading-relaxed max-w-md mx-auto text-gray-300"
+              style={{ fontFamily: 'Georgia, serif' }}
             >
               {store.description}
             </p>
@@ -164,9 +152,66 @@ export function LuxuryTemplate({ store, products, storeSlug, planId, onProductCl
                 primaryColor={store.colors.primary}
               />
             </div>
-          </motion.div>
+          </div>
+          {/* Gold gradient line at bottom of banner */}
+          <div className="absolute bottom-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${GOLD}, transparent)` }} />
         </div>
-      </header>
+      ) : (
+        <header className="relative text-center pt-14 pb-10">
+          {/* Subtle gold gradient line at top */}
+          <div className="absolute top-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${GOLD}, transparent)` }} />
+
+          <div className="max-w-2xl mx-auto px-6">
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              {store.logo && (
+                <div
+                  className="w-20 h-20 rounded-full mx-auto mb-5 flex items-center justify-center text-4xl"
+                  style={{
+                    border: `2px solid ${GOLD}40`,
+                    boxShadow: `0 0 30px ${GOLD}15`,
+                  }}
+                >
+                  <StoreLogo logo={store.logo} size={56} />
+                </div>
+              )}
+              <h1
+                className="text-3xl md:text-4xl font-light tracking-[0.15em] uppercase"
+                style={{
+                  fontFamily: 'Georgia, "Times New Roman", "Playfair Display", serif',
+                  color: '#f5f0e8',
+                }}
+              >
+                {store.name}
+              </h1>
+              {/* Gold gradient divider */}
+              <div className="flex items-center justify-center mt-5 mb-4 gap-3">
+                <div className="h-px w-12" style={{ backgroundColor: GOLD + '40' }} />
+                <Diamond size={14} style={{ color: GOLD }} />
+                <div className="h-px w-12" style={{ backgroundColor: GOLD + '40' }} />
+              </div>
+              <p
+                className="text-sm leading-relaxed max-w-md mx-auto"
+                style={{ color: '#8a8a9a', fontFamily: 'Georgia, serif' }}
+              >
+                {store.description}
+              </p>
+              <div className="mt-5">
+                <StoreFeatureBadges
+                  hasShipping={store.hasShipping}
+                  hasSecurePayment={store.hasSecurePayment}
+                  hasReturns={store.hasReturns}
+                  variant="luxury"
+                  primaryColor={store.colors.primary}
+                />
+              </div>
+            </motion.div>
+          </div>
+        </header>
+      )}
 
       {/* Search + Filters — Dark elegant bar */}
       <nav
@@ -203,19 +248,7 @@ export function LuxuryTemplate({ store, products, storeSlug, planId, onProductCl
                 </button>
               )}
             </div>
-          ) : (
-            <button
-              onClick={() => window.location.href = '/#pricing'}
-              className="w-full flex items-center justify-center gap-2 py-2.5 text-sm rounded-lg text-gray-500 hover:text-amber-400 transition-all"
-              style={{
-                backgroundColor: DARK_BG,
-                border: `1px solid ${GOLD}20`,
-              }}
-            >
-              <Lock className="w-3.5 h-3.5" />
-              Buscador disponible en Plan Pro
-            </button>
-          )}
+          ) : null}
 
           {/* Category scroll — horizontal with gold underline active state */}
           <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide py-1">
@@ -306,8 +339,13 @@ export function LuxuryTemplate({ store, products, storeSlug, planId, onProductCl
         </div>
       </nav>
 
-      {/* Products Grid — 2 col mobile, 3 desktop, bigger cards */}
+      {/* Combos/Packs + Products Grid */}
       <main className="flex-1 max-w-6xl mx-auto px-6 py-10 w-full">
+        {/* Combos/Packs */}
+        <div className="mb-8">
+          <CombosSection products={products} store={store} storeSlug={storeSlug} primaryColor={store.colors.primary} />
+        </div>
+
         {filteredProducts.length === 0 ? (
           <div className="text-center py-24">
             <ShoppingBag className="w-12 h-12 mx-auto mb-4" style={{ color: '#2a2a3e' }} />

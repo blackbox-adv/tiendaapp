@@ -14,8 +14,9 @@ const CATEGORIES = [
   { id: 'juguetes', name: 'Juguetes' },
   { id: 'otros', name: 'Otros' },
 ]
-import { Star, ShoppingBag, Search, X, Lock } from 'lucide-react'
+import { Star, ShoppingBag, Search, X } from 'lucide-react'
 import { StoreFeatureBadges } from './StoreFeatureBadges'
+import { CombosSection } from './CombosSection'
 import { Badge } from '@/components/ui/badge'
 import { useAppStore } from '@/lib/store'
 import type { Store, Product } from '@/lib/types'
@@ -71,38 +72,60 @@ export function ModernaTemplate({ store, products, storeSlug, planId, onProductC
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Banner */}
-      {store.bannerUrl && (
+      {/* Banner with overlaid name — or standalone header */}
+      {store.bannerUrl ? (
         <div className="relative h-48 md:h-64 overflow-hidden">
           <img src={store.bannerUrl} alt="" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-black/30" />
-        </div>
-      )}
-      {/* Header — ultra-minimal, centered */}
-      <header className={`text-center ${store.bannerUrl ? 'pt-8 pb-10' : 'pt-16 pb-12'}`}>
-        <div className="max-w-xl mx-auto px-6">
-          {store.logo && (
-            <div className="w-14 h-14 rounded-full mx-auto mb-5 flex items-center justify-center text-2xl grayscale opacity-80">
-              <StoreLogo logo={store.logo} size={56} />
+          <div className="absolute inset-0 bg-black/40" />
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+            {store.logo && (
+              <div className="w-14 h-14 rounded-full mx-auto mb-4 flex items-center justify-center bg-white/20 backdrop-blur-sm ring-2 ring-white/30">
+                <StoreLogo logo={store.logo} size={56} />
+              </div>
+            )}
+            <h1 className="text-2xl md:text-3xl font-semibold text-white tracking-tight">
+              {store.name}
+            </h1>
+            <p className="text-sm text-white/70 mt-2 leading-relaxed max-w-sm mx-auto">
+              {store.description}
+            </p>
+            <div className="mt-4">
+              <StoreFeatureBadges
+                hasShipping={store.hasShipping}
+                hasSecurePayment={store.hasSecurePayment}
+                hasReturns={store.hasReturns}
+                variant="light"
+                primaryColor={store.colors.primary}
+              />
             </div>
-          )}
-          <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">
-            {store.name}
-          </h1>
-          <p className="text-sm text-gray-400 mt-2 leading-relaxed max-w-sm mx-auto">
-            {store.description}
-          </p>
-          <div className="mt-4">
-            <StoreFeatureBadges
-              hasShipping={store.hasShipping}
-              hasSecurePayment={store.hasSecurePayment}
-              hasReturns={store.hasReturns}
-              variant="light"
-              primaryColor={store.colors.primary}
-            />
           </div>
         </div>
-      </header>
+      ) : (
+        <header className="text-center pt-16 pb-12">
+          <div className="max-w-xl mx-auto px-6">
+            {store.logo && (
+              <div className="w-14 h-14 rounded-full mx-auto mb-5 flex items-center justify-center text-2xl grayscale opacity-80">
+                <StoreLogo logo={store.logo} size={56} />
+              </div>
+            )}
+            <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">
+              {store.name}
+            </h1>
+            <p className="text-sm text-gray-400 mt-2 leading-relaxed max-w-sm mx-auto">
+              {store.description}
+            </p>
+            <div className="mt-4">
+              <StoreFeatureBadges
+                hasShipping={store.hasShipping}
+                hasSecurePayment={store.hasSecurePayment}
+                hasReturns={store.hasReturns}
+                variant="light"
+                primaryColor={store.colors.primary}
+              />
+            </div>
+          </div>
+        </header>
+      )}
 
       {/* Search bar + Category Pills */}
       <nav className="sticky top-[53px] z-30 bg-white/90 backdrop-blur-sm border-b border-gray-50">
@@ -127,15 +150,7 @@ export function ModernaTemplate({ store, products, storeSlug, planId, onProductC
                 </button>
               )}
             </div>
-          ) : (
-            <button
-              onClick={() => window.location.href = '/#pricing'}
-              className="w-full flex items-center justify-center gap-2 py-2.5 text-sm rounded-lg border border-dashed border-gray-200 bg-gray-50 text-gray-400 hover:text-violet-500 hover:border-violet-300 transition-all"
-            >
-              <Lock className="w-3.5 h-3.5" />
-              Buscador disponible en Plan Pro
-            </button>
-          )}
+          ) : null}
 
           {/* Category pills */}
           <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide">
@@ -229,6 +244,11 @@ export function ModernaTemplate({ store, products, storeSlug, planId, onProductC
 
       {/* Product Grid */}
       <main className="max-w-5xl mx-auto px-6 py-10 flex-1">
+        {/* Combos/Packs */}
+        <div className="mb-8">
+          <CombosSection products={products} store={store} storeSlug={storeSlug} primaryColor={store.colors.primary} />
+        </div>
+
         {filteredProducts.length === 0 ? (
           <div className="text-center py-24">
             <ShoppingBag className="w-12 h-12 mx-auto mb-4 text-gray-200" />

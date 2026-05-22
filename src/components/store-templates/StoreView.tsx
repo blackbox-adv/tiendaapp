@@ -13,6 +13,7 @@ import { VibranteTemplate } from './VibranteTemplate'
 import { ClasicaTemplate } from './ClasicaTemplate'
 import { LuxuryTemplate } from './LuxuryTemplate'
 import { MinimalistTemplate } from './MinimalistTemplate'
+import { PromoPopup } from './PromoPopup'
 import type { Product, Store as StoreType } from '@/lib/types'
 
 export function StoreView({ slug }: { slug: string }) {
@@ -232,6 +233,9 @@ export function StoreView({ slug }: { slug: string }) {
 
       {/* WhatsApp Float */}
       <WhatsAppButton whatsappNumber={displayStore!.whatsappNumber} />
+
+      {/* Promo Popup */}
+      <PromoPopup store={displayStore!} products={displayProducts} />
     </>
   )
 }
