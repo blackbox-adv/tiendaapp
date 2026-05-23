@@ -72,6 +72,7 @@ export function StoreWizard() {
     try {
       const formData = new FormData()
       formData.append('file', file)
+      formData.append('folder', 'logo')
 
       const token = localStorage.getItem('tiendapp_token')
       const res = await fetch('/api/upload', {

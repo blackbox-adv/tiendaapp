@@ -75,6 +75,7 @@ export function StoreSettings() {
     try {
       const formData = new FormData()
       formData.append('file', file)
+      formData.append('folder', 'logo')
 
       const token = localStorage.getItem('tiendapp_token')
       const res = await fetch('/api/upload', {
@@ -121,6 +122,7 @@ export function StoreSettings() {
     try {
       const formData = new FormData()
       formData.append('file', file)
+      formData.append('folder', 'banner')
 
       const token = localStorage.getItem('tiendapp_token')
       const res = await fetch('/api/upload', {

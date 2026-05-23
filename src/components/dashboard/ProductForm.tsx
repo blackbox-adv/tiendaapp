@@ -124,6 +124,7 @@ export function ProductForm({ productId }: { productId?: string }) {
     try {
       const formData = new FormData()
       formData.append('file', file)
+      formData.append('folder', 'product')
 
       const token = localStorage.getItem('tiendapp_token')
       const res = await fetch('/api/upload', {

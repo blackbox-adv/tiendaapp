@@ -35,10 +35,30 @@ export function Testimonials() {
               className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-lg hover:border-violet-100 transition-all duration-300 relative"
             >
               <Quote className="absolute top-4 right-4 w-8 h-8 text-violet-100" />
-              
+
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-full bg-violet-100 flex items-center justify-center text-2xl">
-                  {t.avatar}
+                <div className="w-12 h-12 rounded-full overflow-hidden bg-violet-100 flex-shrink-0">
+                  {t.avatar.startsWith('http') ? (
+                    <img
+                      src={t.avatar}
+                      alt={t.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement
+                        target.style.display = 'none'
+                        if (target.nextElementSibling) {
+                          (target.nextElementSibling as HTMLElement).style.display = 'flex'
+                        }
+                      }}
+                    />
+                  ) : null}
+                  {/* Fallback initials if image fails to load */}
+                  <div
+                    className="w-full h-full flex items-center justify-center text-sm font-bold text-violet-600"
+                    style={{ display: t.avatar.startsWith('http') ? 'none' : 'flex' }}
+                  >
+                    {t.name.split(' ').map(n => n[0]).join('').substring(0, 2)}
+                  </div>
                 </div>
                 <div>
                   <h4 className="font-semibold text-gray-900 text-sm">{t.name}</h4>
@@ -56,7 +76,7 @@ export function Testimonials() {
               </div>
 
               <p className="text-sm text-gray-600 leading-relaxed">"{t.comment}"</p>
-              
+
               <div className="mt-4 pt-3 border-t border-gray-100">
                 <span className="text-xs text-violet-600 font-medium">{t.storeName}</span>
               </div>
