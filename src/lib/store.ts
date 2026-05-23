@@ -7,7 +7,9 @@ import { PLANS, MOCK_USERS, MOCK_STORES, MOCK_PRODUCTS, CATEGORIES } from './moc
 function transformApiStore(apiStore: Record<string, unknown>): Store {
   const subs = (apiStore.subscriptions as Array<Record<string, unknown>>) || []
   const latestSub = subs.length > 0 ? subs[subs.length - 1] : null
-  const planId = (latestSub?.planId as string) || 'free'
+  // Determine planId: prefer subscription's plan type, then planId, then 'free'
+  const subPlan = latestSub?.plan as Record<string, unknown> | undefined
+  const planId = (subPlan?.type as string) || (latestSub?.planId as string) || 'free'
 
   return {
     id: apiStore.id as string,
@@ -121,12 +123,23 @@ async function syncFromAPI() {
           const storesRes = await fetch('/api/stores', { headers })
           if (storesRes.ok) {
             const apiStores = await storesRes.json()
-            if (Array.isArray(apiStores)) {
-              const transformedStores = apiStores.map(transformApiStore)
+            console.log('[Zustand] Stores API response:', Array.isArray(apiStores) ? `${apiStores.length} stores` : typeof apiStores, apiStores)
+            // Handle both array directly and wrapped { data: [...] }
+            const storesArray = Array.isArray(apiStores) ? apiStores : (apiStores?.data && Array.isArray(apiStores.data) ? apiStores.data : null)
+            if (storesArray) {
+              const transformedStores = storesArray.map(transformApiStore)
 
               // Set currentStore to the first store (owner typically has 1)
               if (transformedStores.length > 0) {
                 useAppStore.setState({ currentStore: transformedStores[0] })
+                console.log('[Zustand] currentStore set:', transformedStores[0].name, 'planId:', transformedStores[0].planId)
+              } else {
+                console.warn('[Zustand] No stores found for this user — redirecting to wizard')
+                // No stores — user should be on wizard, not dashboard
+                const currentRoute = useAppStore.getState().route
+                if (currentRoute.page.startsWith('dashboard')) {
+                  useAppStore.setState({ route: { page: 'wizard' }, history: [{ page: 'wizard' }] })
+                }
               }
 
               // Replace stores entirely (no mock data mixing)
@@ -138,13 +151,20 @@ async function syncFromAPI() {
                 const productsRes = await fetch(`/api/store-products?storeId=${store.id}`, { headers })
                 if (productsRes.ok) {
                   const apiProducts = await productsRes.json()
-                  if (Array.isArray(apiProducts)) {
-                    allProducts.push(...apiProducts.map(transformApiProduct))
+                  const productsArray = Array.isArray(apiProducts) ? apiProducts : (apiProducts?.data && Array.isArray(apiProducts.data) ? apiProducts.data : [])
+                  if (Array.isArray(productsArray)) {
+                    allProducts.push(...productsArray.map(transformApiProduct))
                   }
                 }
               }
               useAppStore.setState({ products: allProducts })
+            } else {
+              console.warn('[Zustand] Stores API returned unexpected format:', typeof apiStores)
             }
+          } else {
+            console.warn('[Zustand] Stores API failed with status:', storesRes.status)
+            const errText = await storesRes.text().catch(() => '')
+            console.warn('[Zustand] Stores API error body:', errText.substring(0, 200))
           }
 
           // 4) If admin, also fetch all users

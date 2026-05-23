@@ -89,26 +89,20 @@ export function TemplateGallery() {
 
   if (!currentStore) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 animate-fadeIn">
         <div>
-          <Skeleton className="h-8 w-32 mb-2" />
-          <Skeleton className="h-4 w-72" />
+          <h1 className="text-2xl font-bold text-gray-900">Plantillas</h1>
+          <p className="text-gray-500 mt-1">Elige la plantilla que mejor represente tu marca</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="rounded-xl border border-gray-100 overflow-hidden">
-              <Skeleton className="h-48 w-full" />
-              <div className="p-5 space-y-3">
-                <div className="flex items-center gap-2">
-                  <Skeleton className="h-5 w-5 rounded" />
-                  <Skeleton className="h-5 w-24" />
-                </div>
-                <Skeleton className="h-3 w-full" />
-                <Skeleton className="h-3 w-4/5" />
-                <Skeleton className="h-10 w-full rounded-lg" />
-              </div>
-            </div>
-          ))}
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 text-center">
+          <p className="text-amber-700 font-medium">No se encontró tu tienda</p>
+          <p className="text-sm text-amber-600 mt-2">Esto puede pasar si la sesión se perdió. Intenta recargar la página.</p>
+          <Button
+            onClick={() => window.location.reload()}
+            className="mt-4 bg-violet-600 hover:bg-violet-700 text-white"
+          >
+            Recargar página
+          </Button>
         </div>
       </div>
     )

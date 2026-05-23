@@ -142,15 +142,67 @@ export async function GET(request: NextRequest) {
     }
 
     // Regular owner: return their own stores
-    // Use simple query without includes to avoid PgBouncer timeout.
-    // Prisma include with nested relations (subscriptions → plan) can hang indefinitely
-    // through PgBouncer, causing Vercel function timeout before catch fallback runs.
-    const myStores = await db.store.findMany({
-      where: { ownerId: auth.user.userId },
-      orderBy: { createdAt: 'desc' },
-    })
+    // Use raw SQL to include subscription/plan info (avoids PgBouncer timeout with Prisma include).
+    const myStores = await db.$queryRawUnsafe(`
+      SELECT s.*,
+        sub_s.status::text as "subStatus",
+        sub_p.id as "subPlanId",
+        sub_p.name as "planName",
+        sub_p.type as "planType"
+      FROM "Store" s
+      LEFT JOIN LATERAL (
+        SELECT sub.status, p.id, p.name, p.type
+        FROM "Subscription" sub
+        JOIN "Plan" p ON sub."planId" = p.id
+        WHERE sub."storeId" = s.id
+        ORDER BY sub."createdAt" DESC LIMIT 1
+      ) sub_s ON true
+      LEFT JOIN LATERAL (
+        SELECT p.id, p.name, p.type
+        FROM "Subscription" sub
+        JOIN "Plan" p ON sub."planId" = p.id
+        WHERE sub."storeId" = s.id
+        ORDER BY sub."createdAt" DESC LIMIT 1
+      ) sub_p ON true
+      WHERE s."ownerId" = $1
+      ORDER BY s."createdAt" DESC
+    `, auth.user.userId) as Array<Record<string, unknown>>
 
-    return apiSuccess(serializeDecimals(myStores), 200, request)
+    // Map raw results to include subscriptions for frontend transformApiStore
+    const mappedStores = myStores.map((s) => ({
+      id: s.id,
+      name: s.name,
+      slug: s.slug,
+      description: s.description,
+      logo: s.logo,
+      primaryColor: s.primaryColor,
+      secondaryColor: s.secondaryColor,
+      whatsappNumber: s.whatsappNumber,
+      template: s.template,
+      category: s.category,
+      isActive: s.isActive,
+      visitCount: Number(s.visitCount) || 0,
+      createdAt: s.createdAt,
+      ownerId: s.ownerId,
+      bannerUrl: s.bannerUrl,
+      hasShipping: s.hasShipping,
+      hasSecurePayment: s.hasSecurePayment,
+      hasReturns: s.hasReturns,
+      popupEnabled: s.popupEnabled,
+      popupType: s.popupType,
+      popupProductId: s.popupProductId,
+      popupCustomImage: s.popupCustomImage,
+      popupTitle: s.popupTitle,
+      popupButtonText: s.popupButtonText,
+      // Include subscription info for frontend transformApiStore
+      subscriptions: s.planName ? [{
+        status: s.subStatus || 'active',
+        planId: s.subPlanId,
+        plan: { id: s.subPlanId, name: s.planName, type: s.planType },
+      }] : [],
+    }))
+
+    return apiSuccess(serializeDecimals(mappedStores), 200, request)
   } catch (error: unknown) {
     console.error('[STORES] GET error:', error instanceof Error ? error.message : String(error))
     return apiError('Error obteniendo tiendas', 500, undefined, request)
