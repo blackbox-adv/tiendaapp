@@ -37,6 +37,7 @@ import { StoreSettings } from '@/components/dashboard/StoreSettings'
 import { TemplateGallery } from '@/components/dashboard/TemplateGallery'
 import { PlanManager } from '@/components/dashboard/PlanManager'
 import { StoreQRCode } from '@/components/dashboard/StoreQRCode'
+import { PopupManager } from '@/components/dashboard/PopupManager'
 
 // Store templates
 import { StoreView } from '@/components/store-templates/StoreView'
@@ -90,6 +91,7 @@ export default function AppRouter() {
         'settings': 'dashboard-settings',
         'templates': 'dashboard-templates',
         'qr': 'dashboard-qr',
+        'popup': 'dashboard-popup',
         'plan': 'dashboard-plan',
       }
       if (dashboardRoutes[sub]) {
@@ -244,7 +246,8 @@ export default function AppRouter() {
       case 'dashboard-settings':
       case 'dashboard-templates':
       case 'dashboard-qr':
-      case 'dashboard-plan': {
+      case 'dashboard-plan':
+      case 'dashboard-popup': {
         const dashboardContent = () => {
           switch (route.page) {
             case 'dashboard': return <DashboardOverview />
@@ -254,6 +257,7 @@ export default function AppRouter() {
             case 'dashboard-templates': return <TemplateGallery />
             case 'dashboard-qr': return <StoreQRCode />
             case 'dashboard-plan': return <PlanManager />
+            case 'dashboard-popup': return <PopupManager />
           }
         }
         return (

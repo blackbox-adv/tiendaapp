@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useAppStore } from '@/lib/store'
 import {
   LayoutDashboard, Package, Settings, Palette, CreditCard,
-  LogOut, ExternalLink, Store, Menu, X, QrCode
+  LogOut, ExternalLink, Store, Menu, X, QrCode, Megaphone
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -16,6 +16,7 @@ const navItems: { page: PageRoute['page']; label: string; icon: React.ElementTyp
   { page: 'dashboard', label: 'Panel', icon: LayoutDashboard },
   { page: 'dashboard-products', label: 'Productos', icon: Package },
   { page: 'dashboard-templates', label: 'Plantillas', icon: Palette },
+  { page: 'dashboard-popup', label: 'Popup Promocional', icon: Megaphone },
   { page: 'dashboard-qr', label: 'Codigo QR', icon: QrCode },
   { page: 'dashboard-settings', label: 'Configuracion', icon: Settings },
   { page: 'dashboard-plan', label: 'Plan', icon: CreditCard },
