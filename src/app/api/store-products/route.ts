@@ -186,7 +186,7 @@ export async function PUT(request: NextRequest) {
     if (!requireRole(auth.user, ['super_admin'])) {
       const ownershipCheck = await db.$queryRawUnsafe(`
         SELECT p.id, s."ownerId" 
-        FROM "Product" p 
+        FROM "StoreProduct" p 
         JOIN "Store" s ON s.id = p."storeId" 
         WHERE p.id = $1
       `, id) as Array<Record<string, unknown>>

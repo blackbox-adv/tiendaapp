@@ -78,9 +78,12 @@ export function StorePublicClient({ store, products }: StorePublicClientProps) {
       })
 
     // Populate Zustand so existing components can find the data
+    // MERGE instead of replace: keep products from other stores, replace only this store's products
+    const existingProducts = useAppStore.getState().products
+    const otherStoreProducts = existingProducts.filter(p => p.storeId !== ts.id)
     useAppStore.setState({
       stores: [ts],
-      products: tp,
+      products: [...tp, ...otherStoreProducts],
       currentStore: ts,
     })
   }, [store, products])

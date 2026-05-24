@@ -73,9 +73,13 @@ export function ProductPublicClient({ store, product, relatedProducts }: Product
     const rp = relatedProducts.map(transformProduct)
 
     // Populate Zustand with store, current product, and related products
+    // MERGE instead of replace: keep products from other stores, replace only this store's products
+    const thisStoreProducts = [tp, ...rp]
+    const existingProducts = useAppStore.getState().products
+    const otherStoreProducts = existingProducts.filter(p => p.storeId !== ts.id)
     useAppStore.setState({
       stores: [ts],
-      products: [tp, ...rp],
+      products: [...thisStoreProducts, ...otherStoreProducts],
       currentStore: ts,
     })
   }, [store, product, relatedProducts])

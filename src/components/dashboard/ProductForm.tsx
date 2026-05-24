@@ -69,10 +69,13 @@ export function ProductForm({ productId }: { productId?: string }) {
     return Object.keys(errs).length === 0
   }
 
+  const [saving, setSaving] = useState(false)
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!validate() || !currentStore) return
 
+    setSaving(true)
     const productData = {
       name: name.trim(),
       description: description.trim(),
@@ -86,19 +89,27 @@ export function ProductForm({ productId }: { productId?: string }) {
       storeId: currentStore.id,
     }
 
-    if (isEditing && productId) {
-      await updateProduct(productId, productData)
-      toast.success('Producto actualizado', {
-        description: `"${name.trim()}" fue actualizado correctamente.`,
+    try {
+      if (isEditing && productId) {
+        await updateProduct(productId, productData)
+        toast.success('Producto actualizado', {
+          description: `"${name.trim()}" fue actualizado correctamente.`,
+        })
+      } else {
+        await addProduct(productData)
+        toast.success('Producto creado', {
+          description: `"${name.trim()}" fue agregado a tu tienda.`,
+        })
+      }
+      navigate({ page: 'dashboard-products' })
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Error al guardar el producto'
+      toast.error('Error al guardar', {
+        description: errorMsg,
       })
-    } else {
-      await addProduct(productData)
-      toast.success('Producto creado', {
-        description: `"${name.trim()}" fue agregado a tu tienda.`,
-      })
+    } finally {
+      setSaving(false)
     }
-
-    navigate({ page: 'dashboard-products' })
   }
 
   const handleImageUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -445,9 +456,9 @@ export function ProductForm({ productId }: { productId?: string }) {
               >
                 Cancelar
               </Button>
-              <Button type="submit" className="bg-violet-600 hover:bg-violet-700 text-white gap-2">
-                <Save className="w-4 h-4" />
-                {isEditing ? 'Guardar cambios' : 'Crear producto'}
+              <Button type="submit" disabled={saving} className="bg-violet-600 hover:bg-violet-700 text-white gap-2">
+                {saving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
+                {saving ? 'Guardando...' : isEditing ? 'Guardar cambios' : 'Crear producto'}
               </Button>
             </div>
           </form>

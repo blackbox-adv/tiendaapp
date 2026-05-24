@@ -520,6 +520,37 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   addProduct: async (product) => {
+    // Guard: prevent creation with temp store ID (wizard race condition)
+    if (product.storeId.startsWith('store-')) {
+      // Try to refresh store data from API first
+      try {
+        const token = getToken()
+        const storesRes = await fetch('/api/stores', {
+          headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        })
+        if (storesRes.ok) {
+          const apiStores = await storesRes.json()
+          const storesArray = Array.isArray(apiStores) ? apiStores : (apiStores?.data && Array.isArray(apiStores.data) ? apiStores.data : null)
+          if (storesArray && storesArray.length > 0) {
+            const realStore = transformApiStore(storesArray[0])
+            set((state) => ({
+              stores: state.stores.map((s) => s.id.startsWith('store-') ? realStore : s),
+              currentStore: realStore,
+              currentUser: state.currentUser ? { ...state.currentUser, storeId: realStore.id } : null,
+            }))
+            // Update product.storeId with real ID
+            product = { ...product, storeId: realStore.id }
+          }
+        }
+      } catch {
+        // If refresh fails, throw error
+      }
+      // Still temp? throw
+      if (product.storeId.startsWith('store-')) {
+        throw new Error('Tu tienda se esta creando. Espera un momento e intenta de nuevo.')
+      }
+    }
+
     const newProduct: Product = {
       ...product,
       id: `product-${Date.now()}`,
@@ -547,14 +578,38 @@ export const useAppStore = create<AppState>((set, get) => ({
       })
       if (res.ok) {
         const saved = await res.json()
+        // Replace entire temp product with server response (includes real id, storeId, createdAt, etc.)
+        const serverProduct = transformApiProduct(saved)
         set((state) => ({
-          products: state.products.map((p) => (p.id === newProduct.id ? { ...p, id: saved.id } : p)),
+          products: state.products.map((p) => (p.id === newProduct.id ? serverProduct : p)),
         }))
+      } else {
+        // API failed — remove the optimistic product and show error
+        const errorData = await res.json().catch(() => ({}))
+        const errorMsg = (errorData as Record<string, string>).error || 'Error al guardar producto en el servidor'
+        console.error('[Store] addProduct API error:', res.status, errorMsg)
+        set((state) => ({
+          products: state.products.filter((p) => p.id !== newProduct.id),
+        }))
+        throw new Error(errorMsg)
       }
-    } catch { /* fallback to local state */ }
+    } catch (error) {
+      // If it's our own thrown error, re-throw it
+      if (error instanceof Error && error.message !== 'Error al guardar producto en el servidor' && !error.message.startsWith('Has alcanzado')) {
+        // Network error — remove optimistic product
+        console.error('[Store] addProduct network error:', error)
+        set((state) => ({
+          products: state.products.filter((p) => p.id !== newProduct.id),
+        }))
+        throw new Error('Error de conexion al guardar el producto')
+      }
+      throw error
+    }
   },
 
   updateProduct: async (id, data) => {
+    // Save previous state for rollback
+    const previousProducts = get().products
     set((state) => ({
       products: state.products.map((p) => (p.id === id ? { ...p, ...data } : p)),
     }))
@@ -568,21 +623,28 @@ export const useAppStore = create<AppState>((set, get) => ({
       })
       if (res.ok) {
         const saved = await res.json()
+        // Replace with full server response to keep data consistent
+        const serverProduct = transformApiProduct(saved)
         set((state) => ({
-          products: state.products.map((p) => (p.id === id ? {
-            ...p,
-            name: saved.name ?? p.name,
-            description: saved.description ?? p.description,
-            price: saved.price ?? p.price,
-            originalPrice: saved.originalPrice ?? p.originalPrice,
-            imageUrl: saved.imageUrl ?? p.imageUrl,
-            featured: saved.featured ?? p.featured,
-            rating: saved.rating ?? p.rating,
-            isActive: saved.isActive ?? p.isActive,
-          } : p)),
+          products: state.products.map((p) => (p.id === id ? serverProduct : p)),
         }))
+      } else {
+        // API failed — rollback to previous state
+        const errorData = await res.json().catch(() => ({}))
+        const errorMsg = (errorData as Record<string, string>).error || 'Error al actualizar producto'
+        console.error('[Store] updateProduct API error:', res.status, errorMsg)
+        set({ products: previousProducts })
+        throw new Error(errorMsg)
       }
-    } catch { /* fallback to local state */ }
+    } catch (error) {
+      if (error instanceof Error && error.message !== 'Error al actualizar producto') {
+        // Network error — rollback
+        console.error('[Store] updateProduct network error:', error)
+        set({ products: previousProducts })
+        throw new Error('Error de conexion al actualizar el producto')
+      }
+      throw error
+    }
   },
 
   deleteProduct: async (id) => {
