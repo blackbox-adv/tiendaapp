@@ -16,7 +16,7 @@ const CATEGORIES = [
 ]
 import {
   Package, Eye, ShoppingBag, TrendingUp, ArrowRight,
-  QrCode, Copy, Check, Download, Bell, Star, MessageSquare, BarChart3
+  QrCode, Copy, Check, Download, Bell, Star, MessageSquare, BarChart3, CheckCheck, Trash2
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -28,61 +28,168 @@ import {
   PieChart, Pie, Cell, AreaChart, Area,
 } from 'recharts'
 
-// ── Notification Dropdown ──
+// ── Notification Dropdown (Real API-backed) ──
+
+interface ApiNotification {
+  id: string
+  title: string
+  message: string
+  type: string
+  icon: string
+  link: string | null
+  userId: string | null
+  read: boolean
+  createdAt: string
+  senderId: string | null
+}
 
 function NotificationDropdown() {
-  const { currentStore, products } = useAppStore()
+  const { currentStore, products, navigate } = useAppStore()
   const [open, setOpen] = useState(false)
+  const [notifications, setNotifications] = useState<ApiNotification[]>([])
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [loading, setLoading] = useState(false)
 
   const storeProducts = products.filter((p) => p.storeId === currentStore?.id && p.isActive)
-  const notifications = [
-    {
-      id: '1',
-      title: 'Bienvenido a TiendApp',
-      message: 'Tu tienda está lista. Comienza agregando productos.',
-      time: 'Ahora',
-      read: false,
-      icon: '🚀',
-    },
-    ...(storeProducts.length === 0
-      ? [{
-          id: '2',
-          title: 'Agrega tu primer producto',
-          message: 'Una tienda sin productos no recibe clientes. ¡Empieza ya!',
-          time: 'Pendiente',
-          read: false,
-          icon: '📦',
-        }]
-      : []),
-    ...(storeProducts.filter((p) => p.featured).length === 0 && storeProducts.length > 0
-      ? [{
-          id: '3',
-          title: 'Destaca tus mejores productos',
-          message: 'Los productos destacados aparecen primero en tu tienda.',
-          time: 'Consejo',
-          read: false,
-          icon: '⭐',
-        }]
-      : []),
-    {
-      id: '4',
-      title: 'Comparte tu QR code',
-      message: 'Imprime el código QR de tu tienda y compártelo con tus clientes.',
-      time: 'Tip',
-      read: false,
-      icon: '📱',
-    },
-    {
-      id: '5',
-      title: 'Conecta tu WhatsApp',
-      message: 'Asegúrate de tener tu número de WhatsApp actualizado en la configuración.',
-      time: 'Importante',
-      read: true,
-      icon: '💬',
-    },
-  ]
 
-  const unreadCount = notifications.filter((n) => !n.read).length
+  // Fetch notifications from API
+  const fetchNotifications = async () => {
+    const token = localStorage.getItem('tiendapp_token')
+    if (!token) return
+    try {
+      setLoading(true)
+      const res = await fetch('/api/notifications', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.data) {
+          setNotifications(data.data.notifications || [])
+          setUnreadCount(data.data.unreadCount || 0)
+        }
+      }
+    } catch {
+      // Silently fail
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Fetch on mount and when dropdown opens
+  useEffect(() => {
+    fetchNotifications()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (open) fetchNotifications()
+  }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Mark one as read
+  const markAsRead = async (id: string) => {
+    const token = localStorage.getItem('tiendapp_token')
+    if (!token) return
+    try {
+      await fetch('/api/notifications', {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notificationId: id }),
+      })
+      setNotifications((prev) => prev.map((n) => n.id === id ? { ...n, read: true } : n))
+      setUnreadCount((prev) => Math.max(0, prev - 1))
+    } catch {
+      // Silently fail
+    }
+  }
+
+  // Mark all as read
+  const markAllAsRead = async () => {
+    const token = localStorage.getItem('tiendapp_token')
+    if (!token) return
+    try {
+      await fetch('/api/notifications', {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ markAll: true }),
+      })
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
+      setUnreadCount(0)
+      toast.success('Notificaciones leidas')
+    } catch {
+      // Silently fail
+    }
+  }
+
+  // Delete notification
+  const deleteNotification = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    const token = localStorage.getItem('tiendapp_token')
+    if (!token) return
+    try {
+      await fetch(`/api/notifications?id=${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      setNotifications((prev) => prev.filter((n) => n.id !== id))
+      toast.success('Notificacion eliminada')
+    } catch {
+      // Silently fail
+    }
+  }
+
+  // Smart tips based on store state
+  const tips: ApiNotification[] = []
+  if (storeProducts.length === 0) {
+    tips.push({
+      id: 'tip-no-products', title: 'Agrega tu primer producto', message: 'Una tienda sin productos no recibe clientes. ¡Empieza ya!',
+      type: 'info', icon: '📦', link: 'dashboard-products', userId: null, read: true, createdAt: new Date().toISOString(), senderId: null,
+    })
+  }
+
+  // Type color map
+  const typeColors: Record<string, string> = {
+    info: 'bg-blue-100 text-blue-600',
+    success: 'bg-green-100 text-green-600',
+    warning: 'bg-amber-100 text-amber-600',
+    promo: 'bg-violet-100 text-violet-600',
+    system: 'bg-gray-100 text-gray-600',
+  }
+
+  // Icon fallback
+  const typeIcons: Record<string, string> = {
+    info: 'ℹ️',
+    success: '✅',
+    warning: '⚠️',
+    promo: '🎁',
+    system: '🔧',
+  }
+
+  // Format time
+  const formatTime = (dateStr: string) => {
+    const date = new Date(dateStr)
+    const now = new Date()
+    const diff = now.getTime() - date.getTime()
+    const minutes = Math.floor(diff / 60000)
+    const hours = Math.floor(diff / 3600000)
+    const days = Math.floor(diff / 86400000)
+    if (minutes < 1) return 'Ahora'
+    if (minutes < 60) return `Hace ${minutes}m`
+    if (hours < 24) return `Hace ${hours}h`
+    if (days < 7) return `Hace ${days}d`
+    return date.toLocaleDateString('es-PE', { day: 'numeric', month: 'short' })
+  }
+
+  // Handle click on notification
+  const handleNotifClick = (notif: ApiNotification) => {
+    if (!notif.read) markAsRead(notif.id)
+    if (notif.link) {
+      setOpen(false)
+      // Navigate if it's a dashboard route
+      const page = notif.link as any
+      navigate({ page })
+    }
+  }
+
+  const allNotifications = [...notifications, ...tips]
 
   return (
     <div className="relative">
@@ -92,8 +199,8 @@ function NotificationDropdown() {
       >
         <Bell className="w-4 h-4 text-gray-600" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-            {unreadCount}
+          <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+            {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
       </button>
@@ -104,30 +211,81 @@ function NotificationDropdown() {
           <div className="absolute right-0 top-12 z-50 w-80 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden">
             <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
               <h3 className="font-semibold text-sm text-gray-900">Notificaciones</h3>
-              {unreadCount > 0 && (
-                <Badge variant="secondary" className="text-xs">{unreadCount} nuevas</Badge>
-              )}
+              <div className="flex items-center gap-2">
+                {unreadCount > 0 && (
+                  <Badge variant="secondary" className="text-xs">{unreadCount} nuevas</Badge>
+                )}
+                {notifications.length > 0 && unreadCount > 0 && (
+                  <button
+                    onClick={markAllAsRead}
+                    className="text-[10px] text-violet-600 hover:text-violet-800 font-medium flex items-center gap-0.5"
+                    title="Marcar todas como leidas"
+                  >
+                    <CheckCheck className="w-3 h-3" />
+                    Leer todo
+                  </button>
+                )}
+              </div>
             </div>
             <div className="max-h-80 overflow-y-auto">
-              {notifications.map((notif) => (
-                <div
-                  key={notif.id}
-                  className={`px-4 py-3 border-b border-gray-50 hover:bg-gray-50 transition-colors cursor-pointer ${
-                    !notif.read ? 'bg-violet-50/50' : ''
-                  }`}
-                >
-                  <div className="flex gap-3">
-                    <span className="text-lg flex-shrink-0 mt-0.5">{notif.icon}</span>
-                    <div className="min-w-0">
-                      <p className={`text-sm font-medium ${!notif.read ? 'text-gray-900' : 'text-gray-600'}`}>
-                        {notif.title}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{notif.message}</p>
-                      <p className="text-[10px] text-gray-400 mt-1">{notif.time}</p>
+              {loading ? (
+                <div className="px-4 py-6 text-center">
+                  <div className="w-5 h-5 border-2 border-violet-200 border-t-violet-600 rounded-full animate-spin mx-auto" />
+                  <p className="text-xs text-gray-400 mt-2">Cargando...</p>
+                </div>
+              ) : allNotifications.length === 0 ? (
+                <div className="px-4 py-6 text-center">
+                  <Bell className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                  <p className="text-sm text-gray-500">No hay notificaciones</p>
+                  <p className="text-xs text-gray-400">Las notificaciones de la plataforma aparecen aqui</p>
+                </div>
+              ) : (
+                allNotifications.map((notif) => (
+                  <div
+                    key={notif.id}
+                    onClick={() => handleNotifClick(notif)}
+                    className={`px-4 py-3 border-b border-gray-50 hover:bg-gray-50 transition-colors ${
+                      !notif.read ? 'bg-violet-50/50 cursor-pointer' : notif.link ? 'cursor-pointer' : ''
+                    }`}
+                  >
+                    <div className="flex gap-3">
+                      <span className="text-lg flex-shrink-0 mt-0.5">
+                        {notif.icon !== 'bell' ? notif.icon : (typeIcons[notif.type] || '🔔')}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-1">
+                          <p className={`text-sm font-medium ${!notif.read ? 'text-gray-900' : 'text-gray-600'}`}>
+                            {notif.title}
+                          </p>
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            {!notif.read && (
+                              <div className="w-2 h-2 rounded-full bg-violet-500" />
+                            )}
+                            {notif.id !== 'tip-no-products' && (
+                              <button
+                                onClick={(e) => deleteNotification(notif.id, e)}
+                                className="opacity-0 group-hover:opacity-100 hover:opacity-100 p-0.5 text-gray-300 hover:text-red-500 transition-all"
+                                title="Eliminar"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{notif.message}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <p className="text-[10px] text-gray-400">{formatTime(notif.createdAt)}</p>
+                          {notif.type && notif.type !== 'info' && (
+                            <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${typeColors[notif.type] || typeColors.info}`}>
+                              {notif.type}
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         </>

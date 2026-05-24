@@ -47,6 +47,7 @@ model User {
   stores       Store[]
   subscriptions Subscription[]
   payments     Payment[]
+  sentNotifications Notification[] @relation("SentNotifications")
 
   @@index([role])                                 // For admin queries
   @@index([isActive])                             // For filtering active users
@@ -211,4 +212,25 @@ model PlatformSetting {
   updatedAt DateTime @updatedAt
 
   @@index([key])                                  // Settings lookup
+}
+
+model Notification {
+  id         String   @id @default(cuid())
+  title      String
+  message    String
+  type       String   @default("info")            // info, success, warning, promo, system
+  icon       String   @default("bell")             // Emoji or icon name
+  link       String?                              // Optional navigation link
+  userId     String?                              // null = broadcast (all users)
+  read       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  // Who sent it (admin)
+  senderId   String?
+  sender     User?    @relation("SentNotifications", fields: [senderId], references: [id], onDelete: SetNull)
+
+  @@index([userId, read])                         // Unread count per user
+  @@index([userId, createdAt(sort: Desc)])        // User's notifications sorted by date
+  @@index([createdAt(sort: Desc)])                // Global sorted list
+  @@index([type])                                 // Filter by type
 }

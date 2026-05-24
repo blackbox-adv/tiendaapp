@@ -51,6 +51,7 @@ import { AdminUsers } from '@/components/admin/AdminUsers'
 import { AdminPlans } from '@/components/admin/AdminPlans'
 import { AdminSettings } from '@/components/admin/AdminSettings'
 import { AdminPaymentsPage } from '@/components/admin/AdminPaymentsPage'
+import { AdminNotificationsPage } from '@/components/admin/AdminNotificationsPage'
 
 const pageVariants = {
   initial: { opacity: 0, y: 12 },
@@ -113,6 +114,7 @@ export default function AppRouter() {
         'plans': 'admin-plans',
         'payments': 'admin-payments',
         'settings': 'admin-settings',
+        'notifications': 'admin-notifications',
       }
       if (adminRoutes[sub]) {
         navigate({ page: adminRoutes[sub] } as PageRoute)
@@ -275,7 +277,8 @@ export default function AppRouter() {
       case 'admin-users':
       case 'admin-plans':
       case 'admin-payments':
-      case 'admin-settings': {
+      case 'admin-settings':
+      case 'admin-notifications': {
         const adminContent = () => {
           switch (route.page) {
             case 'admin': return <AdminOverview />
@@ -284,6 +287,7 @@ export default function AppRouter() {
             case 'admin-plans': return <AdminPlans />
             case 'admin-payments': return <AdminPaymentsPage />
             case 'admin-settings': return <AdminSettings />
+            case 'admin-notifications': return <AdminNotificationsPage />
           }
         }
         return (

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useAppStore } from '@/lib/store'
-import { LayoutDashboard, Store, Users, CreditCard, Settings, LogOut, Zap, Banknote, Menu, X } from 'lucide-react'
+import { LayoutDashboard, Store, Users, CreditCard, Settings, LogOut, Zap, Banknote, Menu, X, Bell } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import type { PageRoute } from '@/lib/types'
@@ -12,6 +12,7 @@ const navItems: { page: PageRoute['page']; label: string; icon: React.ElementTyp
   { page: 'admin-stores', label: 'Tiendas', icon: Store },
   { page: 'admin-users', label: 'Usuarios', icon: Users },
   { page: 'admin-payments', label: 'Pagos', icon: Banknote },
+  { page: 'admin-notifications', label: 'Notificaciones', icon: Bell },
   { page: 'admin-plans', label: 'Planes', icon: CreditCard },
   { page: 'admin-settings', label: 'Configuración', icon: Settings },
 ]

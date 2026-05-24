@@ -24,6 +24,7 @@ export type PageRoute =
   | { page: 'admin-plans' }
   | { page: 'admin-payments' }
   | { page: 'admin-settings' }
+  | { page: 'admin-notifications' }
 
 export interface User {
   id: string
