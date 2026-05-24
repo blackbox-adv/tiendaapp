@@ -222,3 +222,41 @@ Stage Summary:
 - FIXED: All 3 upload components send proper folder parameter
 - FIXED: Testimonials now show real people photos instead of emoji figurines
 - Deployed to https://tienda.blackboxperu.com
+
+---
+Task ID: 4
+Agent: Main Agent
+Task: Add dedicated Popup Promocional page and full notification system
+
+Work Log:
+- Created PopupManager component with step-by-step visual UI for creating promo popups
+- Added 'dashboard-popup' route to types, AppRouter, and deep-link support
+- Added 'Popup Promocional' with Megaphone icon to Sidebar navigation
+- Replaced popup section in StoreSettings with link to dedicated page
+- Removed unused popup state/handlers from StoreSettings
+- Restored accidentally deleted /api/upload/route.ts
+
+- Built complete notification system:
+  - Added Notification model to Prisma schema with indexes
+  - Added Notification table to /api/admin/migrate auto-migration
+  - Created /api/notifications (GET/PUT/DELETE) for user-facing notifications
+  - Created /api/admin/notifications (POST/GET/DELETE) for admin broadcast
+  - Refactored NotificationDropdown to use real API data instead of hardcoded
+  - Mark as read, mark all as read, delete notifications
+  - Smart tips for new stores still shown
+  - Type-based color coding and icon fallbacks
+
+- Created AdminNotificationsPage with:
+  - Broadcast (all users) and targeted (specific user) sending
+  - Type selector, emoji icon picker, optional navigation link
+  - Live preview, stats dashboard, notification history
+  - Sender attribution tracking
+- Added admin-notifications route and sidebar entry
+- All changes built and pushed to GitHub
+
+Stage Summary:
+- Popup Promocional has a dedicated intuitive page with live preview
+- Notification system fully functional with real API backend
+- Super admin can broadcast or target notifications to users
+- Store owners see real notifications in bell dropdown with mark-as-read
+- Deployed to https://tienda.blackboxperu.com
