@@ -295,6 +295,10 @@ export async function POST(request: NextRequest) {
         return 'STORE_LIMIT'
       }
       console.error('[STORES] Transaction error:', err)
+      // Include Prisma error details for debugging
+      const errCode = err && typeof err === 'object' && 'code' in err ? (err as { code: string }).code : undefined
+      const errMeta = err && typeof err === 'object' && 'meta' in err ? (err as { meta: unknown }).meta : undefined
+      console.error('[STORES] Transaction error details:', { code: errCode, meta: JSON.stringify(errMeta) })
       return null
     })
 
@@ -313,8 +317,11 @@ export async function POST(request: NextRequest) {
 
     return apiSuccess(serializeDecimals(store), 201, request)
   } catch (error: unknown) {
-    console.error('[STORES] POST error:', error instanceof Error ? error.message : String(error))
-    return apiError('Error creando tienda', 500, undefined, request)
+    const errCode = error && typeof error === 'object' && 'code' in error ? (error as { code: string }).code : undefined
+    const errMeta = error && typeof error === 'object' && 'meta' in error ? (error as { meta: unknown }).meta : undefined
+    console.error('[STORES] POST error:', error instanceof Error ? error.message : String(error), { code: errCode, meta: JSON.stringify(errMeta) })
+    const details = errCode ? { prismaCode: errCode, hint: JSON.stringify(errMeta || '').substring(0, 300) } : undefined
+    return apiError('Error creando tienda', 500, details, request)
   }
 }
 
