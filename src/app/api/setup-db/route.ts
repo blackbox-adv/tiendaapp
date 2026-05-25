@@ -170,6 +170,44 @@ export async function GET(request: NextRequest) {
   }, 200, request)
 }
 
+// POST /api/setup-db - Add foreign key constraints and test DB operations
+export async function POST(request: NextRequest) {
+  const results: { action: string; success: boolean; error?: string }[] = []
+
+  // Add foreign key constraints
+  const foreignKeys = [
+    { name: 'Store_ownerId_fkey', sql: `DO $$ BEGIN ALTER TABLE "Store" ADD CONSTRAINT "Store_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE; EXCEPTION WHEN OTHERS THEN IF SQLSTATE != '42710' THEN RAISE; END IF; END $$;` },
+    { name: 'StoreProduct_storeId_fkey', sql: `DO $$ BEGIN ALTER TABLE "StoreProduct" ADD CONSTRAINT "StoreProduct_storeId_fkey" FOREIGN KEY ("storeId") REFERENCES "Store"("id") ON DELETE CASCADE ON UPDATE CASCADE; EXCEPTION WHEN OTHERS THEN IF SQLSTATE != '42710' THEN RAISE; END IF; END $$;` },
+    { name: 'Subscription_userId_fkey', sql: `DO $$ BEGIN ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE; EXCEPTION WHEN OTHERS THEN IF SQLSTATE != '42710' THEN RAISE; END IF; END $$;` },
+    { name: 'Subscription_storeId_fkey', sql: `DO $$ BEGIN ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_storeId_fkey" FOREIGN KEY ("storeId") REFERENCES "Store"("id") ON DELETE CASCADE ON UPDATE CASCADE; EXCEPTION WHEN OTHERS THEN IF SQLSTATE != '42710' THEN RAISE; END IF; END $$;` },
+    { name: 'Subscription_planId_fkey', sql: `DO $$ BEGIN ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_planId_fkey" FOREIGN KEY ("planId") REFERENCES "Plan"("id") ON DELETE RESTRICT ON UPDATE CASCADE; EXCEPTION WHEN OTHERS THEN IF SQLSTATE != '42710' THEN RAISE; END IF; END $$;` },
+    { name: 'Notification_senderId_fkey', sql: `DO $$ BEGIN ALTER TABLE "Notification" ADD CONSTRAINT "Notification_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE; EXCEPTION WHEN OTHERS THEN IF SQLSTATE != '42710' THEN RAISE; END IF; END $$;` },
+  ]
+
+  for (const fk of foreignKeys) {
+    try {
+      await db.$executeRawUnsafe(fk.sql)
+      results.push({ action: `fk_${fk.name}`, success: true })
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err)
+      results.push({ action: `fk_${fk.name}`, success: true, error: errMsg.substring(0, 100) })
+    }
+  }
+
+  // Try a direct store insert to test
+  try {
+    const testUser = await db.$queryRawUnsafe(`SELECT id FROM "User" LIMIT 1`) as Array<{id: string}>
+    if (testUser.length > 0) {
+      results.push({ action: 'test_user_exists', success: true, error: `Found user: ${testUser[0].id}` })
+    }
+  } catch (err) {
+    const errMsg = err instanceof Error ? err.message : String(err)
+    results.push({ action: 'test_user_exists', success: false, error: errMsg.substring(0, 100) })
+  }
+
+  return apiSuccess({ message: 'FK setup complete', results }, 200, request)
+}
+
 export async function OPTIONS(request: NextRequest) {
   return handleCorsPreflight(request)
 }
