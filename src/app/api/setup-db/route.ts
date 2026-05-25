@@ -205,6 +205,39 @@ export async function POST(request: NextRequest) {
     results.push({ action: 'test_user_exists', success: false, error: errMsg.substring(0, 100) })
   }
 
+  // Check for CHECK constraints on Store table that might be causing failures
+  try {
+    const constraints = await db.$queryRawUnsafe(`
+      SELECT conname, pg_get_constraintdef(oid) as definition
+      FROM pg_constraint
+      WHERE conrelid = '"Store"'::regclass AND contype = 'c'
+    `) as Array<{ conname: string; definition: string }>
+    for (const c of constraints) {
+      results.push({ action: `check_constraint_${c.conname}`, success: true, error: c.definition.substring(0, 200) })
+    }
+    if (constraints.length === 0) {
+      results.push({ action: 'check_constraints_on_Store', success: true, error: 'No CHECK constraints found' })
+    }
+  } catch (err) {
+    const errMsg = err instanceof Error ? err.message : String(err)
+    results.push({ action: 'check_constraints_on_Store', success: false, error: errMsg.substring(0, 200) })
+  }
+
+  // Also check all constraints on Store table
+  try {
+    const allConstraints = await db.$queryRawUnsafe(`
+      SELECT conname, contype, pg_get_constraintdef(oid) as definition
+      FROM pg_constraint
+      WHERE conrelid = '"Store"'::regclass
+    `) as Array<{ conname: string; contype: string; definition: string }>
+    for (const c of allConstraints) {
+      results.push({ action: `constraint_${c.contype}_${c.conname}`, success: true, error: c.definition.substring(0, 200) })
+    }
+  } catch (err) {
+    const errMsg = err instanceof Error ? err.message : String(err)
+    results.push({ action: 'all_constraints_on_Store', success: false, error: errMsg.substring(0, 200) })
+  }
+
   return apiSuccess({ message: 'FK setup complete', results }, 200, request)
 }
 
