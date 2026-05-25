@@ -289,26 +289,7 @@ export async function POST(request: NextRequest) {
           category: sanitizedCategory,
         },
       })
-    }).catch((err) => {
-      if (err instanceof Error && err.message === 'STORE_LIMIT') {
-        return 'STORE_LIMIT'
-      }
-      // Re-throw to let the outer catch provide details
-      throw err
     })
-
-    if (store === 'STORE_LIMIT') {
-      return apiError(
-        `Has alcanzado el limite de 1 tienda(s). Actualiza tu plan para mas.`,
-        403,
-        undefined,
-        request
-      )
-    }
-
-    if (store === null) {
-      return apiError('Error creando tienda', 500, undefined, request)
-    }
 
     return apiSuccess(serializeDecimals(store), 201, request)
   } catch (error: unknown) {
