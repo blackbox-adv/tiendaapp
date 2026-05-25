@@ -155,7 +155,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Include Prisma error code and meta for debugging (safe to expose - no user data)
-    const details = errCode ? { prismaCode: errCode, hint: String(errMeta || '').substring(0, 200) } : undefined
+    const details = errCode ? { prismaCode: errCode, hint: JSON.stringify(errMeta || '').substring(0, 200) } : undefined
 
     return apiError('Error creando usuario. Intenta de nuevo o contacta soporte.', 500, details, request)
   }
