@@ -129,8 +129,8 @@ export async function POST(request: NextRequest) {
       if (err instanceof Error && err.message === 'PRODUCT_LIMIT') {
         return 'PRODUCT_LIMIT'
       }
-      console.error('[PRODUCTS] Transaction error:', err)
-      return null
+      // Re-throw to let outer catch provide details
+      throw err
     })
 
     if (product === 'PRODUCT_LIMIT') {
