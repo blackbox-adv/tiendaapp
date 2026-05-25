@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
       }
     } catch { /* use default */ }
 
-    // CRITICAL FIX: Use transaction to prevent race condition on product limit check
+    // Use raw SQL for product creation to avoid PgBouncer binary format issues with Prisma
     const product = await db.$transaction(async (tx) => {
       const currentCount = await tx.storeProduct.count({ where: { storeId } })
 
@@ -110,21 +110,31 @@ export async function POST(request: NextRequest) {
       const sanitizedImageUrl = sanitizeUrl(imageUrl || '')
       const sanitizedCategory = sanitizeBasic(category || '')
 
-      return tx.storeProduct.create({
-        data: {
-          storeId,
-          name: sanitizedName,
-          description: sanitizedDescription,
-          price: parseFloat(price.toString()),
-          originalPrice: originalPrice ? parseFloat(originalPrice.toString()) : null,
-          imageUrl: sanitizedImageUrl,
-          category: sanitizedCategory,
-          color: color || null,
-          isActive: isActive !== undefined ? isActive : true,
-          featured: featured === true,
-          rating: rating ? parseFloat(rating.toString()) : 0,
-        },
-      })
+      // Generate ID
+      const { nanoid } = await import('nanoid')
+      const productId = `prod-${nanoid(24)}`
+
+      // Use raw SQL to avoid PgBouncer binary format issues (22P03 error)
+      await tx.$executeRawUnsafe(`
+        INSERT INTO "StoreProduct" ("id", "storeId", "name", "description", "price", "originalPrice", "imageUrl", "category", "color", "isActive", "featured", "rating", "createdAt", "updatedAt")
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), NOW())
+      `,
+        productId,
+        storeId,
+        sanitizedName,
+        sanitizedDescription,
+        parseFloat(price.toString()),
+        originalPrice ? parseFloat(originalPrice.toString()) : null,
+        sanitizedImageUrl,
+        sanitizedCategory,
+        color || null,
+        isActive !== undefined ? isActive : true,
+        featured === true,
+        rating ? parseFloat(rating.toString()) : 0,
+      )
+
+      // Fetch the created product
+      return tx.storeProduct.findUnique({ where: { id: productId } })
     }).catch((err) => {
       if (err instanceof Error && err.message === 'PRODUCT_LIMIT') {
         return 'PRODUCT_LIMIT'
