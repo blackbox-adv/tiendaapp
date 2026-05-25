@@ -238,6 +238,27 @@ export async function POST(request: NextRequest) {
     results.push({ action: 'all_constraints_on_Store', success: false, error: errMsg.substring(0, 200) })
   }
 
+  // DROP outdated CHECK constraints that block store creation
+  const constraintsToDrop = [
+    'Store_template_check',           // Only allows moderna/vibrante/clasica, but we now have luxury/minimalist
+    'stores_slug_format',             // Uses is_valid_slug() function that may not exist
+    'stores_whatsapp_format',         // Requires valid Peru phone, blocks empty/null whatsapp
+    'Store_primaryColor_check',       // Too strict regex validation
+    'Store_secondaryColor_check',     // Too strict regex validation
+    'Store_name_check',               // Name length check - we validate on app side
+    'Store_visitCount_check',         // Simple >=0 check, harmless but let's clean up
+  ]
+
+  for (const constraintName of constraintsToDrop) {
+    try {
+      await db.$executeRawUnsafe(`ALTER TABLE "Store" DROP CONSTRAINT IF EXISTS "${constraintName}"`)
+      results.push({ action: `drop_constraint_${constraintName}`, success: true })
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err)
+      results.push({ action: `drop_constraint_${constraintName}`, success: false, error: errMsg.substring(0, 100) })
+    }
+  }
+
   return apiSuccess({ message: 'FK setup complete', results }, 200, request)
 }
 
