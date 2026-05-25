@@ -557,7 +557,9 @@ export const useAppStore = create<AppState>((set, get) => ({
       createdAt: new Date().toISOString(),
     }
     set((state) => ({ products: [...state.products, newProduct] }))
+
     // Persist to API
+    let apiError: string | null = null
     try {
       const token = getToken()
       const res = await fetch('/api/store-products', {
@@ -584,26 +586,23 @@ export const useAppStore = create<AppState>((set, get) => ({
           products: state.products.map((p) => (p.id === newProduct.id ? serverProduct : p)),
         }))
       } else {
-        // API failed — remove the optimistic product and show error
+        // API returned an error status
         const errorData = await res.json().catch(() => ({}))
-        const errorMsg = (errorData as Record<string, string>).error || 'Error al guardar producto en el servidor'
-        console.error('[Store] addProduct API error:', res.status, errorMsg)
-        set((state) => ({
-          products: state.products.filter((p) => p.id !== newProduct.id),
-        }))
-        throw new Error(errorMsg)
+        apiError = (errorData as Record<string, string>).error || `Error del servidor (${res.status})`
+        console.error('[Store] addProduct API error:', res.status, apiError)
       }
     } catch (error) {
-      // If it's our own thrown error, re-throw it
-      if (error instanceof Error && error.message !== 'Error al guardar producto en el servidor' && !error.message.startsWith('Has alcanzado')) {
-        // Network error — remove optimistic product
-        console.error('[Store] addProduct network error:', error)
-        set((state) => ({
-          products: state.products.filter((p) => p.id !== newProduct.id),
-        }))
-        throw new Error('Error de conexion al guardar el producto')
-      }
-      throw error
+      // Network error (fetch itself threw)
+      console.error('[Store] addProduct network error:', error)
+      apiError = 'Error de conexion. Verifica tu internet e intenta de nuevo.'
+    }
+
+    // If there was any error, remove optimistic product and throw
+    if (apiError) {
+      set((state) => ({
+        products: state.products.filter((p) => p.id !== newProduct.id),
+      }))
+      throw new Error(apiError)
     }
   },
 
@@ -614,6 +613,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       products: state.products.map((p) => (p.id === id ? { ...p, ...data } : p)),
     }))
     // Persist to API
+    let apiError: string | null = null
     try {
       const token = getToken()
       const res = await fetch('/api/store-products', {
@@ -629,21 +629,21 @@ export const useAppStore = create<AppState>((set, get) => ({
           products: state.products.map((p) => (p.id === id ? serverProduct : p)),
         }))
       } else {
-        // API failed — rollback to previous state
+        // API returned an error status
         const errorData = await res.json().catch(() => ({}))
-        const errorMsg = (errorData as Record<string, string>).error || 'Error al actualizar producto'
-        console.error('[Store] updateProduct API error:', res.status, errorMsg)
-        set({ products: previousProducts })
-        throw new Error(errorMsg)
+        apiError = (errorData as Record<string, string>).error || `Error del servidor (${res.status})`
+        console.error('[Store] updateProduct API error:', res.status, apiError)
       }
     } catch (error) {
-      if (error instanceof Error && error.message !== 'Error al actualizar producto') {
-        // Network error — rollback
-        console.error('[Store] updateProduct network error:', error)
-        set({ products: previousProducts })
-        throw new Error('Error de conexion al actualizar el producto')
-      }
-      throw error
+      // Network error (fetch itself threw)
+      console.error('[Store] updateProduct network error:', error)
+      apiError = 'Error de conexion. Verifica tu internet e intenta de nuevo.'
+    }
+
+    // If there was any error, rollback and throw
+    if (apiError) {
+      set({ products: previousProducts })
+      throw new Error(apiError)
     }
   },
 
