@@ -225,14 +225,44 @@ export async function PUT(request: NextRequest) {
     }
     if (data.rating !== undefined) data.rating = parseFloat(data.rating.toString())
 
-    const product = await db.storeProduct.update({
-      where: { id },
-      data,
-    })
+    // Use raw SQL UPDATE to avoid PgBouncer binary format issues with DECIMAL
+    const setClauses: string[] = []
+    const values: unknown[] = []
+    let paramIdx = 1
+
+    const addField = (fieldName: string, value: unknown) => {
+      if (value !== undefined) {
+        setClauses.push(`"${fieldName}" = $${paramIdx}`)
+        values.push(value)
+        paramIdx++
+      }
+    }
+
+    addField('name', data.name)
+    addField('description', data.description)
+    addField('price', data.price)
+    addField('originalPrice', data.originalPrice)
+    addField('imageUrl', data.imageUrl)
+    addField('category', data.category)
+    addField('color', data.color)
+    addField('isActive', data.isActive)
+    addField('featured', data.featured)
+    addField('rating', data.rating)
+    setClauses.push(`"updatedAt" = NOW()`)
+
+    // Add the WHERE parameter
+    values.push(id)
+
+    await db.$executeRawUnsafe(`
+      UPDATE "StoreProduct" SET ${setClauses.join(', ')} WHERE id = $${paramIdx}
+    `, ...values)
+
+    // Fetch the updated product
+    const product = await db.storeProduct.findUnique({ where: { id } })
 
     // On-demand revalidation: update store page cache
     try {
-      const storeData = await db.store.findUnique({ where: { id: product.storeId }, select: { slug: true } })
+      const storeData = await db.store.findUnique({ where: { id: product?.storeId || '' }, select: { slug: true } })
       if (storeData?.slug) revalidatePath(`/store/${storeData.slug}`)
       revalidatePath(`/store/${storeData?.slug || ''}/product/${id}`)
     } catch { /* non-critical */ }
