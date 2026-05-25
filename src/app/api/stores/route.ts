@@ -232,7 +232,6 @@ export async function POST(request: NextRequest) {
     const { name, description, category, logo, primaryColor, secondaryColor, whatsappNumber, template } =
       validation.data
 
-    // CRITICAL FIX: Use transaction to prevent race condition on store limit check
     const store = await db.$transaction(async (tx) => {
       // Check store limit per plan (owner gets 1 store on free, up to 3 on premium)
       const existingStores = await tx.store.count({
@@ -294,12 +293,8 @@ export async function POST(request: NextRequest) {
       if (err instanceof Error && err.message === 'STORE_LIMIT') {
         return 'STORE_LIMIT'
       }
-      console.error('[STORES] Transaction error:', err)
-      // Include Prisma error details for debugging
-      const errCode = err && typeof err === 'object' && 'code' in err ? (err as { code: string }).code : undefined
-      const errMeta = err && typeof err === 'object' && 'meta' in err ? (err as { meta: unknown }).meta : undefined
-      console.error('[STORES] Transaction error details:', { code: errCode, meta: JSON.stringify(errMeta) })
-      return null
+      // Re-throw to let the outer catch provide details
+      throw err
     })
 
     if (store === 'STORE_LIMIT') {
