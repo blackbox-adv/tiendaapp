@@ -260,3 +260,24 @@ Stage Summary:
 - Super admin can broadcast or target notifications to users
 - Store owners see real notifications in bell dropdown with mark-as-read
 - Deployed to https://tienda.blackboxperu.com
+
+---
+Task ID: 1
+Agent: Main Agent
+Task: Add plan change feature in admin panel for popup testing access
+
+Work Log:
+- Explored TiendApp codebase to understand popup feature and subscription system
+- Found that popup requires Pro/Premium plan (client-side check in PopupManager and PromoPopup)
+- Added "Cambiar Plan" (Change Plan) button to AdminUsers.tsx
+- Created plan change dialog with Free/Pro/Premium options and radio-button selection
+- Dialog calls POST /api/subscriptions with super_admin auth to create/update subscription
+- Fixed .gitignore: changed `/upload/` to `/public/uploads/` to stop deleting api/upload route
+- Recreated /api/upload/route.ts (was deleted by previous .gitignore pattern)
+- Committed and pushed to GitHub (deploys to Vercel automatically)
+
+Stage Summary:
+- Admin panel now has plan management feature for any user
+- User can login as admin and upgrade their own store to Pro/Premium
+- After plan change, user needs to reload the page for changes to take effect
+- Popup feature should work correctly after upgrading plan to Pro or Premium
