@@ -3,13 +3,15 @@ import { authenticateRequest } from '@/lib/auth'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || ''
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 
 function getSupabase() {
+  if (!supabaseUrl || !supabaseKey) return null
   return createClient(supabaseUrl, supabaseKey)
 }
 
+// POST /api/upload - Upload image to Supabase Storage
 export async function POST(request: NextRequest) {
   const auth = await authenticateRequest(request)
   if (auth.error) {
@@ -20,55 +22,72 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
     const file = formData.get('file') as File | null
-    const folder = (formData.get('folder') as string) || 'product'
+    const subfolder = (formData.get('subfolder') as string) || 'product'
 
     if (!file) {
-      return apiError('No se encontro archivo', 400, undefined, request)
+      return apiError('No se encontro el archivo', 400, undefined, request)
     }
 
     // Validate file type
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
     if (!allowedTypes.includes(file.type)) {
-      return apiError('Tipo de archivo no permitido. Solo JPG, PNG, WebP y GIF', 400, undefined, request)
+      return apiError('Tipo de archivo no valido. Solo JPG, PNG, WebP y GIF.', 400, undefined, request)
     }
 
-    // Validate file size (5MB)
+    // Validate file size (5MB max)
     if (file.size > 5 * 1024 * 1024) {
-      return apiError('El archivo no debe superar los 5MB', 400, undefined, request)
+      return apiError('El archivo es muy grande. Maximo 5MB.', 400, undefined, request)
     }
 
-    // Generate unique filename
-    const ext = file.name.split('.').pop() || 'jpg'
-    const fileName = `${folder}/${auth.user.userId}/${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${ext}`
-
-    // Upload to Supabase Storage
+    // Try Supabase Storage first
     const supabase = getSupabase()
-    const { data, error } = await supabase.storage
-      .from('product-images')
-      .upload(fileName, file, {
-        contentType: file.type,
-        upsert: false,
-      })
+    if (supabase) {
+      const ext = file.name.split('.').pop() || 'jpg'
+      const fileName = `${subfolder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
 
-    if (error) {
-      console.error('[Upload] Supabase upload error:', error.message)
-      return apiError('Error al subir imagen: ' + error.message, 500, undefined, request)
+      const buffer = Buffer.from(await file.arrayBuffer())
+      const { data, error } = await supabase.storage
+        .from('product-images')
+        .upload(fileName, buffer, {
+          contentType: file.type,
+          upsert: false,
+        })
+
+      if (error) {
+        console.error('[UPLOAD] Supabase error:', error.message)
+        return apiError('Error al subir imagen: ' + error.message, 500, undefined, request)
+      }
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(data.path)
+
+      return apiSuccess({ url: urlData.publicUrl }, 200, request)
     }
 
-    // Get public URL
-    const { data: urlData } = supabase.storage
-      .from('product-images')
-      .getPublicUrl(data.path)
+    // Fallback: save to public/uploads (for local dev)
+    const ext = file.name.split('.').pop() || 'jpg'
+    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
 
-    const publicUrl = urlData.publicUrl
+    // Ensure uploads directory exists
+    const fs = await import('fs/promises')
+    const path = await import('path')
+    const uploadDir = path.join(process.cwd(), 'public', 'uploads')
+    await fs.mkdir(uploadDir, { recursive: true })
 
-    return apiSuccess({ url: publicUrl, path: data.path }, 201, request)
+    const buffer = Buffer.from(await file.arrayBuffer())
+    await fs.writeFile(path.join(uploadDir, fileName), buffer)
+
+    const url = `/uploads/${fileName}`
+    return apiSuccess({ url }, 200, request)
   } catch (error: unknown) {
-    console.error('[Upload] Error:', error instanceof Error ? error.message : String(error))
+    console.error('[UPLOAD] Error:', error instanceof Error ? error.message : String(error))
     return apiError('Error al subir imagen', 500, undefined, request)
   }
 }
 
+// OPTIONS /api/upload - CORS preflight
 export async function OPTIONS(request: NextRequest) {
   return handleCorsPreflight(request)
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useAppStore } from '@/lib/store'
-import { Search, Users, Shield, User, ToggleLeft, ToggleRight, KeyRound, Trash2, Pencil } from 'lucide-react'
+import { Search, Users, Shield, User, ToggleLeft, ToggleRight, KeyRound, Trash2, Pencil, Crown, Zap, Gift, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
@@ -76,6 +76,15 @@ export function AdminUsers() {
   const [editPhone, setEditPhone] = useState('')
   const [editSaving, setEditSaving] = useState(false)
   const [editError, setEditError] = useState('')
+
+  // Change plan dialog
+  const [planDialogOpen, setPlanDialogOpen] = useState(false)
+  const [planTarget, setPlanTarget] = useState<ApiUser | null>(null)
+  const [availablePlans, setAvailablePlans] = useState<{ id: string; type: string; name: string; price: number; maxProducts: number }[]>([])
+  const [selectedPlanId, setSelectedPlanId] = useState<string>('')
+  const [planSaving, setPlanSaving] = useState(false)
+  const [planError, setPlanError] = useState('')
+  const [planSuccess, setPlanSuccess] = useState(false)
 
   useEffect(() => { loadUsers() }, [])
 
@@ -191,6 +200,77 @@ export function AdminUsers() {
     }
   }
 
+  function openPlanDialog(user: ApiUser) {
+    setPlanTarget(user)
+    setSelectedPlanId('')
+    setPlanError('')
+    setPlanSuccess(false)
+    setPlanDialogOpen(true)
+    // Fetch plans
+    fetch('/api/plans')
+      .then(res => res.json())
+      .then(data => {
+        const plans = Array.isArray(data) ? data : (data.data || [])
+        setAvailablePlans(plans)
+        // Auto-select current plan
+        const latestSub = user.subscriptions[user.subscriptions.length - 1]
+        if (latestSub?.plan?.id) {
+          setSelectedPlanId(latestSub.plan.id)
+        } else {
+          const freePlan = plans.find((p: { type: string }) => p.type === 'free')
+          if (freePlan) setSelectedPlanId(freePlan.id)
+        }
+      })
+      .catch(() => setPlanError('Error al cargar planes'))
+  }
+
+  async function confirmChangePlan() {
+    if (!planTarget || !selectedPlanId) return
+    const userStore = planTarget.stores[0]
+    if (!userStore) {
+      setPlanError('Este usuario no tiene tienda. Crea una tienda primero.')
+      return
+    }
+    setPlanSaving(true)
+    setPlanError('')
+    try {
+      const token = localStorage.getItem('tiendapp_token')
+      const res = await fetch('/api/subscriptions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          userId: planTarget.id,
+          storeId: userStore.id,
+          planId: selectedPlanId,
+          status: 'active',
+        }),
+      })
+      if (res.ok) {
+        setPlanSuccess(true)
+        // Update local user data
+        const selectedPlan = availablePlans.find(p => p.id === selectedPlanId)
+        setUsers(prev => prev.map(u => {
+          if (u.id === planTarget.id) {
+            const newSub = { status: 'active', plan: { id: selectedPlanId, name: selectedPlan?.name || '', price: selectedPlan?.price || 0 } }
+            return { ...u, subscriptions: [...u.subscriptions.filter(s => s.status !== 'active'), newSub] }
+          }
+          return u
+        }))
+        setTimeout(() => setPlanDialogOpen(false), 1500)
+      } else {
+        const data = await res.json().catch(() => ({}))
+        setPlanError(data.error || 'Error al cambiar el plan')
+      }
+    } catch {
+      setPlanError('Error de conexión')
+    } finally {
+      setPlanSaving(false)
+    }
+  }
+
   async function confirmResetPassword() {
     if (!resetTarget) return
     if (newPassword.length < 8) {
@@ -302,6 +382,9 @@ export function AdminUsers() {
                   <Button variant="outline" size="sm" className="flex-1 text-xs h-7" onClick={() => openEditDialog(user)}>
                     <Pencil className="w-3 h-3 mr-1" /> Editar
                   </Button>
+                  <Button variant="outline" size="sm" className="flex-1 text-xs h-7" onClick={() => openPlanDialog(user)}>
+                    <Crown className="w-3 h-3 mr-1" /> Plan
+                  </Button>
                   <Button variant="outline" size="sm" className="text-xs h-7" onClick={() => openResetDialog(user.id, user.email)}>
                     <KeyRound className="w-3 h-3 mr-1" /> Clave
                   </Button>
@@ -402,6 +485,98 @@ export function AdminUsers() {
                 <Button onClick={confirmResetPassword} disabled={!newPassword || newPassword.length < 8}>Guardar</Button>
               </DialogFooter>
             </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Change Plan Dialog */}
+      <Dialog open={planDialogOpen} onOpenChange={setPlanDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Cambiar plan de suscripción</DialogTitle>
+            <DialogDescription>
+              Cambiar el plan de <span className="font-semibold text-gray-900">{planTarget?.name}</span>
+              {planTarget?.stores[0] ? (
+                <span> para la tienda <span className="font-semibold text-gray-900">{planTarget.stores[0].name}</span></span>
+              ) : (
+                <span className="text-red-500 block mt-1">Este usuario no tiene tienda.</span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          {planSuccess ? (
+            <div className="py-6 text-center">
+              <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-3">
+                <svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+              </div>
+              <p className="text-sm font-medium text-green-700">Plan actualizado correctamente</p>
+            </div>
+          ) : (
+            <>
+              <div className="space-y-3 py-2">
+                {availablePlans.length === 0 && (
+                  <div className="flex items-center justify-center py-4">
+                    <Loader2 className="w-5 h-5 animate-spin text-violet-600" />
+                  </div>
+                )}
+                {availablePlans.map(plan => {
+                  const planIconMap: Record<string, React.ElementType> = { free: Gift, pro: Zap, premium: Crown }
+                  const Icon = planIconMap[plan.type] || Gift
+                  const isSelected = selectedPlanId === plan.id
+                  const isCurrentPlan = planTarget?.subscriptions[planTarget.subscriptions.length - 1]?.plan?.id === plan.id
+                  return (
+                    <button
+                      key={plan.id}
+                      type="button"
+                      onClick={() => setSelectedPlanId(plan.id)}
+                      className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
+                        isSelected
+                          ? 'border-violet-500 bg-violet-50 shadow-sm'
+                          : 'border-gray-200 hover:border-gray-300 bg-white'
+                      }`}
+                    >
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                        plan.type === 'premium' ? 'bg-amber-100' : plan.type === 'pro' ? 'bg-violet-100' : 'bg-gray-100'
+                      }`}>
+                        <Icon className={`w-5 h-5 ${
+                          plan.type === 'premium' ? 'text-amber-600' : plan.type === 'pro' ? 'text-violet-600' : 'text-gray-500'
+                        }`} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-gray-900">{plan.name}</span>
+                          {isCurrentPlan && (
+                            <Badge className="bg-green-100 text-green-700 text-[10px] px-1.5 py-0">Actual</Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-500">
+                          S/{plan.price.toFixed(2)}/mes · {plan.maxProducts >= 100 ? '∞' : plan.maxProducts} productos
+                        </p>
+                      </div>
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                        isSelected ? 'border-violet-500 bg-violet-500' : 'border-gray-300'
+                      }`}>
+                        {isSelected && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+              {planError && <p className="text-xs text-red-500">{planError}</p>}
+            </>
+          )}
+          {!planSuccess && (
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setPlanDialogOpen(false)} disabled={planSaving}>Cancelar</Button>
+              <Button
+                onClick={confirmChangePlan}
+                disabled={planSaving || !selectedPlanId || !planTarget?.stores[0]}
+                className="bg-violet-600 hover:bg-violet-700 text-white"
+              >
+                {planSaving ? (
+                  <><Loader2 className="w-4 h-4 animate-spin mr-2" />Cambiando...</>
+                ) : 'Cambiar plan'}
+              </Button>
+            </DialogFooter>
           )}
         </DialogContent>
       </Dialog>

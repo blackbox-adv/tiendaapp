@@ -5,7 +5,8 @@ db/*.db
 .env
 .env.local
 .env.production
-/upload/
+# Only ignore root-level upload dir, not src/app/api/upload/
+/public/uploads/
 dev.log
 server.log
 mini-services/
