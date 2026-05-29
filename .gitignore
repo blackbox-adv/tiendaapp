@@ -10,3 +10,4 @@ db/*.db
 dev.log
 server.log
 mini-services/
+skills/

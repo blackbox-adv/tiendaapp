@@ -16,9 +16,12 @@ export function PromoPopup({ store, products, onProductClick }: PromoPopupProps)
   const [dismissPermanently, setDismissPermanently] = useState(false)
   const [popupProduct, setPopupProduct] = useState<Product | null>(null)
 
-  // Only render if popup is enabled and store has a paid plan
+  // Only render if popup is enabled.
+  // Plan check is enforced server-side when saving popup settings,
+  // so if popupEnabled is true the store already has a paid plan.
+  // We still check planId as a fallback for logged-in admin preview.
   const isPaidPlan = store.planId && store.planId !== 'free'
-  const shouldRender = store.popupEnabled === true && isPaidPlan
+  const shouldRender = store.popupEnabled === true && (isPaidPlan || !store.planId)
 
   useEffect(() => {
     if (!shouldRender) return

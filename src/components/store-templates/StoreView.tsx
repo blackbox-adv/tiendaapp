@@ -52,7 +52,7 @@ export function StoreView({ slug }: { slug: string }) {
               description: data.description || '',
               logo: data.logo || '🛍️',
               categoryId: data.category || '',
-              planId: '',
+              planId: data.planType || 'free',
               colors: {
                 primary: data.primaryColor || '#7C3AED',
                 secondary: data.secondaryColor || '#10B981',

@@ -32,12 +32,20 @@ export async function GET(request: NextRequest) {
               'rating', p.rating, 'storeId', p."storeId", 'createdAt', p."createdAt"
             )
           ) FILTER (WHERE p.id IS NOT NULL AND p."isActive" = true), '[]') as products,
-          json_build_object('id', u.id, 'name', u.name) as owner
+          json_build_object('id', u.id, 'name', u.name) as owner,
+          sub_p.type as "planType"
         FROM "Store" s
         LEFT JOIN "StoreProduct" p ON p."storeId" = s.id AND p."isActive" = true
         LEFT JOIN "User" u ON u.id = s."ownerId"
+        LEFT JOIN LATERAL (
+          SELECT pl.type
+          FROM "Subscription" sub
+          JOIN "Plan" pl ON pl.id = sub."planId"
+          WHERE sub."storeId" = s.id AND sub.status = 'active'
+          ORDER BY sub."createdAt" DESC LIMIT 1
+        ) sub_p ON true
         WHERE s.slug = $1
-        GROUP BY s.id, u.id, u.name
+        GROUP BY s.id, u.id, u.name, sub_p.type
         LIMIT 1
       `, slug)
 
