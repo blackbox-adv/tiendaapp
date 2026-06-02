@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
 import { useAppStore } from '@/lib/store'
 import { ArrowLeft, X, Store } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -18,6 +19,20 @@ import type { Product, Store as StoreType } from '@/lib/types'
 
 export function StoreView({ slug }: { slug: string }) {
   const { stores, products, navigate, goBack } = useAppStore()
+  const router = useRouter()
+  const pathname = usePathname()
+
+  // Detect if we're on a public URL page (rendered by Next.js, not AppRouter)
+  const isPublicPage = pathname.startsWith('/store/') || pathname.startsWith('/demo/')
+
+  // Smart product click: use URL navigation on public pages, Zustand in app
+  const handleProductClick = useCallback((productId: string) => {
+    if (isPublicPage) {
+      router.push(`/store/${slug}/product/${productId}`)
+    } else {
+      navigate({ page: 'product-detail', slug, productId })
+    }
+  }, [isPublicPage, router, slug, navigate])
 
   const store = stores.find((s) => s.slug === slug && s.isActive)
 
@@ -170,7 +185,7 @@ export function StoreView({ slug }: { slug: string }) {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Tienda no encontrada</h1>
           <p className="text-gray-500 mb-6">Esta tienda no existe o está desactivada.</p>
-          <Button onClick={() => navigate({ page: 'landing' })} className="bg-violet-600 hover:bg-violet-700 text-white gap-2">
+          <Button onClick={() => isPublicPage ? router.push('/') : navigate({ page: 'landing' })} className="bg-violet-600 hover:bg-violet-700 text-white gap-2">
             <ArrowLeft className="w-4 h-4" />
             Volver al inicio
           </Button>
@@ -223,7 +238,7 @@ export function StoreView({ slug }: { slug: string }) {
     <>
       {/* Top nav bar */}
       <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
-        <button onClick={goBack} className="flex items-center gap-2 text-gray-500 hover:text-gray-700 transition-colors">
+        <button onClick={() => isPublicPage ? router.back() : goBack()} className="flex items-center gap-2 text-gray-500 hover:text-gray-700 transition-colors">
           <ArrowLeft className="w-4 h-4" />
           <span className="text-sm hidden sm:inline">Volver</span>
         </button>
@@ -235,17 +250,17 @@ export function StoreView({ slug }: { slug: string }) {
       </div>
 
       {/* Render template */}
-      {displayStore!.template === 'moderna' && <ModernaTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} />}
-      {displayStore!.template === 'vibrante' && <VibranteTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} />}
-      {displayStore!.template === 'clasica' && <ClasicaTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} />}
-      {displayStore!.template === 'luxury' && <LuxuryTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} />}
-      {displayStore!.template === 'minimalist' && <MinimalistTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} />}
+      {displayStore!.template === 'moderna' && <ModernaTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} onProductClick={handleProductClick} />}
+      {displayStore!.template === 'vibrante' && <VibranteTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} onProductClick={handleProductClick} />}
+      {displayStore!.template === 'clasica' && <ClasicaTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} onProductClick={handleProductClick} />}
+      {displayStore!.template === 'luxury' && <LuxuryTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} onProductClick={handleProductClick} />}
+      {displayStore!.template === 'minimalist' && <MinimalistTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} onProductClick={handleProductClick} />}
 
       {/* WhatsApp Float */}
       <WhatsAppButton whatsappNumber={displayStore!.whatsappNumber} />
 
       {/* Promo Popup */}
-      <PromoPopup store={displayStore!} products={displayProducts} onProductClick={(productId) => navigate({ page: 'product-detail', slug, productId })} />
+      <PromoPopup store={displayStore!} products={displayProducts} onProductClick={handleProductClick} />
     </>
   )
 }

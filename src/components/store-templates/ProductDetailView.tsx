@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useRouter, usePathname } from 'next/navigation'
 import { useAppStore } from '@/lib/store'
 import { StoreLogo } from './StoreLogo'
 const CATEGORIES = [
@@ -38,8 +39,38 @@ import type { Product, Store } from '@/lib/types'
 
 export function ProductDetailView({ slug, productId, onDemoBack }: { slug: string; productId: string; onDemoBack?: () => void }) {
   const { stores, products, navigate, goBack } = useAppStore()
+  const router = useRouter()
+  const pathname = usePathname()
   const [showYape, setShowYape] = useState(false)
   const [quantity, setQuantity] = useState(1)
+
+  // Detect if we're on a public URL page (rendered by Next.js, not AppRouter)
+  const isPublicPage = pathname.startsWith('/store/') || pathname.startsWith('/demo/')
+
+  // Smart navigation: use URL navigation on public pages, Zustand navigation in app
+  const navigateToProduct = useCallback((productSlug: string, pId: string) => {
+    if (isPublicPage) {
+      router.push(`/store/${productSlug}/product/${pId}`)
+    } else {
+      navigate({ page: 'product-detail', slug: productSlug, productId: pId })
+    }
+  }, [isPublicPage, router, navigate])
+
+  const navigateToStore = useCallback((storeSlug: string) => {
+    if (isPublicPage) {
+      router.push(`/store/${storeSlug}`)
+    } else {
+      navigate({ page: 'store', slug: storeSlug })
+    }
+  }, [isPublicPage, router, navigate])
+
+  const navigateToLanding = useCallback(() => {
+    if (isPublicPage) {
+      router.push('/')
+    } else {
+      navigate({ page: 'landing' })
+    }
+  }, [isPublicPage, router, navigate])
 
   const zustandStore = stores.find((s) => s.slug === slug && s.isActive)
   const zustandProduct = products.find((p) => p.id === productId && p.isActive)
@@ -204,7 +235,7 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Producto no encontrado</h1>
         <p className="text-gray-500 mb-6">Este producto no existe o ya no está disponible.</p>
         <Button
-          onClick={() => onDemoBack ? onDemoBack() : (displayStore ? navigate({ page: 'store', slug }) : navigate({ page: 'landing' }))}
+          onClick={() => onDemoBack ? onDemoBack() : (displayStore ? navigateToStore(slug) : navigateToLanding())}
           className="gap-2 rounded-xl"
           style={{ backgroundColor: displayStore?.colors.primary || '#7C3AED' }}
         >
@@ -337,14 +368,14 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
       {/* Top nav bar */}
       <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
         <button
-          onClick={() => onDemoBack ? onDemoBack() : goBack()}
+          onClick={() => onDemoBack ? onDemoBack() : (isPublicPage ? router.back() : goBack())}
           className="flex items-center gap-2 text-gray-500 hover:text-gray-700 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span className="text-sm hidden sm:inline">Volver</span>
         </button>
         <button
-          onClick={() => navigate({ page: 'store', slug })}
+          onClick={() => navigateToStore(slug)}
           className="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors"
         >
           <StoreLogo logo={store.logo} size={24} />
@@ -360,14 +391,14 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
       <div className="bg-gray-50 border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-4 py-2.5 flex items-center gap-1.5 text-xs text-gray-400">
           <button
-            onClick={() => navigate({ page: 'landing' })}
+            onClick={() => navigateToLanding()}
             className="hover:text-gray-600 transition-colors"
           >
             Inicio
           </button>
           <ChevronRight className="w-3 h-3" />
           <button
-            onClick={() => navigate({ page: 'store', slug })}
+            onClick={() => navigateToStore(slug)}
             className="hover:text-gray-600 transition-colors"
           >
             {store.name}
@@ -760,7 +791,7 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
                   variant="outline"
                   size="sm"
                   className="text-xs rounded-lg gap-1"
-                  onClick={() => navigate({ page: 'store', slug })}
+                  onClick={() => navigateToStore(slug)}
                 >
                   Ver tienda
                 </Button>
@@ -775,7 +806,7 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-900">Productos relacionados</h2>
               <button
-                onClick={() => navigate({ page: 'store', slug })}
+                onClick={() => navigateToStore(slug)}
                 className="text-sm font-medium flex items-center gap-1 transition-colors hover:underline"
                 style={{ color: store.colors.primary }}
               >
@@ -789,7 +820,7 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
                   key={rp.id}
                   whileHover={{ y: -4 }}
                   className="group cursor-pointer rounded-2xl overflow-hidden bg-white border border-gray-100 hover:border-gray-200 hover:shadow-lg transition-all duration-300"
-                  onClick={() => navigate({ page: 'product-detail', slug, productId: rp.id })}
+                  onClick={() => navigateToProduct(slug, rp.id)}
                 >
                   <div className="relative aspect-square bg-gray-50 overflow-hidden">
                     <img
@@ -832,7 +863,7 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
         {/* Back to store link */}
         <div className="mt-12 pb-8 text-center">
           <button
-            onClick={() => navigate({ page: 'store', slug })}
+            onClick={() => navigateToStore(slug)}
             className="inline-flex items-center gap-2 text-sm font-medium transition-colors hover:underline"
             style={{ color: store.colors.primary }}
           >

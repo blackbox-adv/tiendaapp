@@ -377,3 +377,49 @@ Stage Summary:
 - Customers see real QR codes from banking apps, not invalid generated ones
 - Build passes successfully, pushed 3 commits to GitHub
 - Migration SQL ready for Supabase (will auto-apply via /api/setup-db)
+
+---
+Task ID: fix-related-products-navigation
+Agent: Main Agent
+Task: Fix related products navigation and Yape/Plin QR on public product pages
+
+Work Log:
+- Analyzed the navigation flow for related products in ProductDetailView
+- Found CRITICAL BUG: navigate() from Zustand doesn't work on public URL pages (/store/[slug]/product/[id]) because the page is rendered by Next.js, not AppRouter
+- Found BUG: ProductPublicClient.tsx was missing yapeQrUrl, plinQrUrl, yapeNumber, plinNumber fields in transformStore
+- Found BUG: ProductPublicClient.tsx had planId: '' instead of proper planType value
+- Found BUG: StoreView.tsx didn't pass onProductClick to templates, so all product clicks used Zustand navigate()
+- Found that product page server query didn't include planType (comes from Subscription→Plan join)
+
+Changes made:
+1. ProductDetailView.tsx:
+   - Added useRouter and usePathname from next/navigation
+   - Created smart navigation helpers: navigateToProduct, navigateToStore, navigateToLanding
+   - These detect public pages via pathname and use router.push() for URL navigation
+   - Updated ALL navigation calls (related products, breadcrumbs, back button, store info, footer link)
+   - Back button uses router.back() on public pages
+   
+2. StoreView.tsx:
+   - Added useRouter and usePathname from next/navigation
+   - Created handleProductClick callback with smart navigation
+   - Pass onProductClick={handleProductClick} to ALL 5 templates
+   - Pass handleProductClick to PromoPopup
+   - Fixed "Volver" button to use router.back() on public pages
+   - Fixed "Volver al inicio" button to use router.push('/') on public pages
+
+3. ProductPublicClient.tsx:
+   - Added yapeQrUrl, plinQrUrl, yapeNumber, plinNumber to transformStore
+   - Fixed planId: '' → (s.planType as string) || 'free'
+
+4. Product page server (page.tsx):
+   - Added Subscription→Plan join to fetch planType for store
+   - Added serializeDecimals import and usage for clean data passing to client
+
+Build verified successfully with zero compilation errors.
+
+Stage Summary:
+- Related products can now be opened on public URL pages via Next.js router navigation
+- All navigation (back, store, landing, products) works correctly in both contexts
+- Yape/Plin QR codes now display correctly on product detail pages
+- Plan type is correctly resolved on product detail pages
+- Build passes successfully

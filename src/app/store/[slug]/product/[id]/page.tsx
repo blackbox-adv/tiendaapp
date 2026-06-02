@@ -2,6 +2,7 @@ import { db } from '@/lib/db'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { ProductPublicClient } from './ProductPublicClient'
+import { serializeDecimals } from '@/lib/utils'
 
 // ISR: revalidate every 5 minutes
 export const revalidate = 300
@@ -80,6 +81,20 @@ export default async function ProductPage({ params }: Props) {
     if (product && product.store) {
       store = product.store as Record<string, unknown>
 
+      // Fetch plan type for this store via the latest subscription
+      try {
+        const latestSub = await db.subscription.findFirst({
+          where: { storeId: store.id as string, status: 'active' },
+          orderBy: { createdAt: 'desc' },
+          include: { plan: { select: { type: true } } },
+        })
+        if (latestSub?.plan?.type) {
+          store = { ...store, planType: latestSub.plan.type }
+        }
+      } catch {
+        // Subscription lookup failed, default to 'free'
+      }
+
       // Fetch related products (same store, same category, different product)
       if (product.isActive) {
         const allRelated = await db.storeProduct.findMany({
@@ -126,7 +141,7 @@ export default async function ProductPage({ params }: Props) {
           ),
         }}
       />
-      <ProductPublicClient store={store} product={product} relatedProducts={relatedProducts} />
+      <ProductPublicClient store={serializeDecimals(store)} product={serializeDecimals(product)} relatedProducts={serializeDecimals(relatedProducts)} />
     </>
   )
 }

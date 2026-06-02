@@ -13,7 +13,7 @@ function transformStore(s: Record<string, unknown>): Store {
     description: (s.description as string) || '',
     logo: (s.logo as string) || '',
     categoryId: (s.category as string) || '',
-    planId: '',
+    planId: (s.planType as string) || 'free',
     colors: {
       primary: (s.primaryColor as string) || '#7C3AED',
       secondary: (s.secondaryColor as string) || '#10B981',
@@ -33,6 +33,10 @@ function transformStore(s: Record<string, unknown>): Store {
     popupCustomImage: (s.popupCustomImage as string) || null,
     popupTitle: (s.popupTitle as string) || null,
     popupButtonText: (s.popupButtonText as string) || 'Ver oferta',
+    yapeQrUrl: (s.yapeQrUrl as string) || null,
+    plinQrUrl: (s.plinQrUrl as string) || null,
+    yapeNumber: (s.yapeNumber as string) || null,
+    plinNumber: (s.plinNumber as string) || null,
   }
 }
 
