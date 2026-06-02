@@ -33,7 +33,7 @@ const templates = [
     color: 'from-violet-500 to-purple-700',
     icon: Sparkles,
     plan: 'free',
-    demoSlug: 'demo-moderna',
+    demoSlug: 'moderna',
   },
   {
     id: 'vibrante',
@@ -42,7 +42,7 @@ const templates = [
     color: 'from-rose-500 to-orange-500',
     icon: Palette,
     plan: 'pro',
-    demoSlug: 'demo-vibrante',
+    demoSlug: 'vibrante',
   },
   {
     id: 'clasica',
@@ -51,7 +51,7 @@ const templates = [
     color: 'from-amber-600 to-amber-900',
     icon: Store,
     plan: 'pro',
-    demoSlug: 'demo-clasica',
+    demoSlug: 'clasica',
   },
   {
     id: 'luxury',
@@ -60,7 +60,7 @@ const templates = [
     color: 'from-zinc-800 to-zinc-950',
     icon: Gem,
     plan: 'premium',
-    demoSlug: 'demo-luxury',
+    demoSlug: 'luxury',
   },
   {
     id: 'minimalist',
@@ -69,7 +69,7 @@ const templates = [
     color: 'from-stone-400 to-stone-700',
     icon: Minus,
     plan: 'premium',
-    demoSlug: 'demo-minimalist',
+    demoSlug: 'minimalist',
   },
 ];
 

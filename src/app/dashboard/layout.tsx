@@ -2,7 +2,7 @@
 
 import { useAppStore } from '@/lib/store';
 import { useRouter } from 'next/navigation';
-import Sidebar from '@/components/dashboard/Sidebar';
+import { Sidebar } from '@/components/dashboard/Sidebar';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import { Loader2 } from 'lucide-react';
 
