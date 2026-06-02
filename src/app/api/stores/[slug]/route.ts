@@ -1,9 +1,10 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { getServerSession } from '@/lib/auth-config';
+import { authenticateRequest } from '@/lib/auth';
+import { apiError } from '@/lib/api-response';
 
 export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
@@ -31,14 +32,13 @@ export async function GET(
 }
 
 export async function PUT(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const session = await getServerSession();
-
-    if (!session?.user) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    const auth = await authenticateRequest(request);
+    if (auth.error || !auth.user) {
+      return apiError('No autorizado', 401, undefined, request);
     }
 
     const { slug } = await params;
@@ -53,7 +53,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Tienda no encontrada' }, { status: 404 });
     }
 
-    const userId = (session.user as any).id;
+    const userId = auth.user.userId;
     const isOwner = store.users.some((u) => u.userId === userId && u.role === 'owner');
 
     if (!isOwner) {

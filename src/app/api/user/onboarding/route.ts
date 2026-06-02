@@ -1,16 +1,16 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { getServerSession } from '@/lib/auth-config';
+import { authenticateRequest } from '@/lib/auth';
+import { apiError } from '@/lib/api-response';
 
-export async function PUT(request: Request) {
+export async function PUT(request: NextRequest) {
   try {
-    const session = await getServerSession();
-
-    if (!session?.user) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    const auth = await authenticateRequest(request);
+    if (auth.error || !auth.user) {
+      return apiError('No autorizado', 401, undefined, request);
     }
 
-    const userId = (session.user as any).id;
+    const userId = auth.user.userId;
 
     await db.user.update({
       where: { id: userId },

@@ -1,13 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { getServerSession } from '@/lib/auth-config';
+import { authenticateRequest } from '@/lib/auth';
+import { apiError } from '@/lib/api-response';
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession();
-
-    if (!session?.user) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    const auth = await authenticateRequest(request);
+    if (auth.error || !auth.user) {
+      return apiError('No autorizado', 401, undefined, request);
     }
 
     const { searchParams } = new URL(request.url);
@@ -29,12 +29,11 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession();
-
-    if (!session?.user) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    const auth = await authenticateRequest(request);
+    if (auth.error || !auth.user) {
+      return apiError('No autorizado', 401, undefined, request);
     }
 
     const body = await request.json();
