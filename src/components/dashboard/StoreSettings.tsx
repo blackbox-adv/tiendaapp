@@ -13,7 +13,7 @@ const CATEGORIES = [
   { id: 'juguetes', name: 'Juguetes' },
   { id: 'otros', name: 'Otros' },
 ]
-import { Save, Eye, Store, LayoutTemplate, Upload, X, ImageIcon, Truck, ShieldCheck, RotateCcw, Megaphone } from 'lucide-react'
+import { Save, Eye, Store, LayoutTemplate, Upload, X, ImageIcon, Truck, ShieldCheck, RotateCcw, Megaphone, QrCode, Smartphone } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -40,6 +40,14 @@ export function StoreSettings() {
   const [hasSecurePayment, setHasSecurePayment] = useState(currentStore?.hasSecurePayment ?? false)
   const [hasReturns, setHasReturns] = useState(currentStore?.hasReturns ?? false)
   const [saving, setSaving] = useState(false)
+
+  // Yape / Plin QR configuration
+  const [yapeQrUrl, setYapeQrUrl] = useState(currentStore?.yapeQrUrl || '')
+  const [plinQrUrl, setPlinQrUrl] = useState(currentStore?.plinQrUrl || '')
+  const [yapeNumber, setYapeNumber] = useState(currentStore?.yapeNumber || '')
+  const [plinNumber, setPlinNumber] = useState(currentStore?.plinNumber || '')
+  const [uploadingYapeQr, setUploadingYapeQr] = useState(false)
+  const [uploadingPlinQr, setUploadingPlinQr] = useState(false)
 
   // Plan info
   const planId = currentStore?.planId || 'free'
@@ -138,6 +146,98 @@ export function StoreSettings() {
     }
   }, [])
 
+  const handleYapeQrUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Formato no válido', { description: 'Solo se permiten JPG, PNG y WebP' })
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Archivo muy grande', { description: 'La imagen no debe superar los 5MB' })
+      return
+    }
+
+    setUploadingYapeQr(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('folder', 'yape-qr')
+
+      const token = localStorage.getItem('tiendapp_token')
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        if (data.url) {
+          setYapeQrUrl(data.url)
+        } else {
+          toast.error('Error al subir', { description: 'No se recibió la URL de la imagen' })
+        }
+      } else {
+        const data = await res.json().catch(() => ({}))
+        toast.error('Error al subir el QR', { description: data.error || 'No se pudo subir la imagen' })
+      }
+    } catch {
+      toast.error('Error de conexión', { description: 'No se pudo subir el QR de Yape' })
+    } finally {
+      setUploadingYapeQr(false)
+    }
+  }, [])
+
+  const handlePlinQrUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Formato no válido', { description: 'Solo se permiten JPG, PNG y WebP' })
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Archivo muy grande', { description: 'La imagen no debe superar los 5MB' })
+      return
+    }
+
+    setUploadingPlinQr(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('folder', 'plin-qr')
+
+      const token = localStorage.getItem('tiendapp_token')
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        if (data.url) {
+          setPlinQrUrl(data.url)
+        } else {
+          toast.error('Error al subir', { description: 'No se recibió la URL de la imagen' })
+        }
+      } else {
+        const data = await res.json().catch(() => ({}))
+        toast.error('Error al subir el QR', { description: data.error || 'No se pudo subir la imagen' })
+      }
+    } catch {
+      toast.error('Error de conexión', { description: 'No se pudo subir el QR de Plin' })
+    } finally {
+      setUploadingPlinQr(false)
+    }
+  }, [])
+
   if (!currentStore) {
     return (
       <div className="space-y-6">
@@ -221,6 +321,11 @@ export function StoreSettings() {
         popupCustomImage: currentStore?.popupCustomImage ?? null,
         popupTitle: currentStore?.popupTitle ?? null,
         popupButtonText: currentStore?.popupButtonText ?? 'Ver oferta',
+        // Yape / Plin QR settings
+        yapeQrUrl: yapeQrUrl || null,
+        plinQrUrl: plinQrUrl || null,
+        yapeNumber: yapeNumber || null,
+        plinNumber: plinNumber || null,
       })
       if (result.success) {
         toast.success('Tienda actualizada', { description: 'Los cambios se guardaron correctamente.' })
@@ -515,6 +620,133 @@ export function StoreSettings() {
                 >
                   <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${hasReturns ? 'translate-x-5' : ''}`} />
                 </button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Yape / Plin QR Configuration */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <QrCode className="w-5 h-5 text-purple-600" />
+                Pagos con Yape / Plin
+              </CardTitle>
+              <CardDescription className="text-sm text-gray-500">
+                Configura tus códigos QR para que tus clientes puedan pagarte con Yape o Plin directamente
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Yape Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center">
+                    <span className="text-white text-xs font-black">Y</span>
+                  </div>
+                  <h3 className="text-sm font-bold text-gray-900">Yape</h3>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="yape-number">Número de Yape</Label>
+                    <Input
+                      id="yape-number"
+                      value={yapeNumber}
+                      onChange={(e) => setYapeNumber(e.target.value)}
+                      placeholder="+51 9XX XXX XXX"
+                      type="tel"
+                    />
+                    <p className="text-xs text-gray-400">El número que aparece en tu cuenta de Yape</p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Código QR de Yape</Label>
+                    <div className="flex items-center gap-2">
+                      <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleYapeQrUpload} className="hidden" id="yape-qr-upload" />
+                      <label htmlFor="yape-qr-upload" className="cursor-pointer inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+                        {uploadingYapeQr ? 'Subiendo...' : <><Upload className="w-4 h-4" /> Subir QR</>}
+                      </label>
+                      {yapeQrUrl && (
+                        <button
+                          type="button"
+                          onClick={() => setYapeQrUrl('')}
+                          className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-400">Captura de pantalla del QR desde la app de Yape</p>
+                  </div>
+                </div>
+
+                {yapeQrUrl && (
+                  <div className="flex justify-start">
+                    <div className="w-32 h-32 rounded-xl border border-gray-200 overflow-hidden bg-white p-1">
+                      <img src={yapeQrUrl} alt="QR Yape" className="w-full h-full object-contain" />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="border-t border-gray-100" />
+
+              {/* Plin Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-green-600 flex items-center justify-center">
+                    <span className="text-white text-xs font-black">P</span>
+                  </div>
+                  <h3 className="text-sm font-bold text-gray-900">Plin</h3>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="plin-number">Número de Plin</Label>
+                    <Input
+                      id="plin-number"
+                      value={plinNumber}
+                      onChange={(e) => setPlinNumber(e.target.value)}
+                      placeholder="+51 9XX XXX XXX"
+                      type="tel"
+                    />
+                    <p className="text-xs text-gray-400">El número que aparece en tu cuenta de Plin</p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Código QR de Plin</Label>
+                    <div className="flex items-center gap-2">
+                      <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handlePlinQrUpload} className="hidden" id="plin-qr-upload" />
+                      <label htmlFor="plin-qr-upload" className="cursor-pointer inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+                        {uploadingPlinQr ? 'Subiendo...' : <><Upload className="w-4 h-4" /> Subir QR</>}
+                      </label>
+                      {plinQrUrl && (
+                        <button
+                          type="button"
+                          onClick={() => setPlinQrUrl('')}
+                          className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-400">Captura de pantalla del QR desde la app de Plin</p>
+                  </div>
+                </div>
+
+                {plinQrUrl && (
+                  <div className="flex justify-start">
+                    <div className="w-32 h-32 rounded-xl border border-gray-200 overflow-hidden bg-white p-1">
+                      <img src={plinQrUrl} alt="QR Plin" className="w-full h-full object-contain" />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="p-3 rounded-xl bg-purple-50 border border-purple-100">
+                <div className="flex items-start gap-2">
+                  <Smartphone className="w-4 h-4 text-purple-600 mt-0.5 flex-shrink-0" />
+                  <p className="text-xs text-purple-700">
+                    <b>Tip:</b> Abre la app de Yape o Plin, genera tu código QR y toma una captura de pantalla. Luego súbela aquí. Tus clientes podrán escanearla directamente para pagarte.
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>

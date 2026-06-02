@@ -59,6 +59,10 @@ export interface Store {
   popupCustomImage: string | null
   popupTitle: string | null
   popupButtonText: string
+  yapeQrUrl: string | null
+  plinQrUrl: string | null
+  yapeNumber: string | null
+  plinNumber: string | null
   userId: string
   isActive: boolean
   createdAt: string

@@ -86,6 +86,7 @@ export async function GET(request: NextRequest) {
           s."hasShipping", s."hasSecurePayment", s."hasReturns",
           s."popupEnabled", s."popupType", s."popupProductId",
           s."popupCustomImage", s."popupTitle", s."popupButtonText",
+          s."yapeQrUrl", s."plinQrUrl", s."yapeNumber", s."plinNumber",
           u.name as "ownerName", u.email as "ownerEmail",
           COALESCE(pc.cnt, 0)::int as "productCount",
           sub_s.status::text as "subStatus",
@@ -138,6 +139,10 @@ export async function GET(request: NextRequest) {
         popupCustomImage: s.popupCustomImage,
         popupTitle: s.popupTitle,
         popupButtonText: s.popupButtonText,
+        yapeQrUrl: s.yapeQrUrl,
+        plinQrUrl: s.plinQrUrl,
+        yapeNumber: s.yapeNumber,
+        plinNumber: s.plinNumber,
         owner: { id: s.ownerId, name: s.ownerName, email: s.ownerEmail },
         _count: { products: Number(s.productCount) || 0 },
         subscriptions: s.planName ? [{
@@ -202,6 +207,10 @@ export async function GET(request: NextRequest) {
       popupCustomImage: s.popupCustomImage,
       popupTitle: s.popupTitle,
       popupButtonText: s.popupButtonText,
+      yapeQrUrl: s.yapeQrUrl,
+      plinQrUrl: s.plinQrUrl,
+      yapeNumber: s.yapeNumber,
+      plinNumber: s.plinNumber,
       // Include subscription info for frontend transformApiStore
       subscriptions: s.planName ? [{
         status: s.subStatus || 'active',

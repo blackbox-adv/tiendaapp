@@ -10,12 +10,12 @@ function getSupabaseClient() {
   return createClient(supabaseUrl, supabaseKey);
 }
 
-export async function uploadFile(file: File): Promise<{ url: string }> {
+export async function uploadFile(file: File, folder?: string): Promise<{ url: string }> {
   const supabase = getSupabaseClient();
 
   if (supabase) {
     // Upload to Supabase Storage
-    const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+    const fileName = `${folder ? folder + '/' : ''}${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
     const { data, error } = await supabase.storage
       .from('uploads')
       .upload(fileName, file, {
@@ -26,7 +26,7 @@ export async function uploadFile(file: File): Promise<{ url: string }> {
     if (error) {
       console.error('Supabase upload error:', error);
       // Fallback to local
-      return uploadToLocal(file);
+      return uploadToLocal(file, folder);
     }
 
     const { data: urlData } = supabase.storage
@@ -37,12 +37,13 @@ export async function uploadFile(file: File): Promise<{ url: string }> {
   }
 
   // Fallback: save to local filesystem
-  return uploadToLocal(file);
+  return uploadToLocal(file, folder);
 }
 
-async function uploadToLocal(file: File): Promise<{ url: string }> {
+async function uploadToLocal(file: File, folder?: string): Promise<{ url: string }> {
   const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-  const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+  const subDir = folder ? folder : '';
+  const uploadsDir = path.join(process.cwd(), 'public', 'uploads', subDir);
 
   try {
     await mkdir(uploadsDir, { recursive: true });
@@ -56,5 +57,5 @@ async function uploadToLocal(file: File): Promise<{ url: string }> {
 
   await writeFile(filePath, buffer);
 
-  return { url: `/uploads/${fileName}` };
+  return { url: `/uploads/${subDir ? subDir + '/' : ''}${fileName}` };
 }

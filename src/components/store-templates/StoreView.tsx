@@ -72,6 +72,10 @@ export function StoreView({ slug }: { slug: string }) {
               popupCustomImage: data.popupCustomImage || null,
               popupTitle: data.popupTitle || null,
               popupButtonText: data.popupButtonText || 'Ver oferta',
+              yapeQrUrl: data.yapeQrUrl || null,
+              plinQrUrl: data.plinQrUrl || null,
+              yapeNumber: data.yapeNumber || null,
+              plinNumber: data.plinNumber || null,
             })
             if (data.products && Array.isArray(data.products)) {
               // Helper to safely convert Prisma Decimal / string / number to JS number

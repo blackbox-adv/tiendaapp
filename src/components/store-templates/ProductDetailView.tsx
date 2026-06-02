@@ -85,6 +85,10 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
               popupCustomImage: data.popupCustomImage || null,
               popupTitle: data.popupTitle || null,
               popupButtonText: data.popupButtonText || 'Ver oferta',
+              yapeQrUrl: data.yapeQrUrl || null,
+              plinQrUrl: data.plinQrUrl || null,
+              yapeNumber: data.yapeNumber || null,
+              plinNumber: data.plinNumber || null,
             }
             setApiStore(mappedStore)
 
@@ -556,99 +560,191 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
             </div>
 
             {/* Yape/Plin Payment Option */}
-            <div className="mt-4">
-              <button
-                type="button"
-                onClick={() => setShowYape(!showYape)}
-                className="w-full flex items-center justify-between p-4 rounded-2xl border-2 border-purple-200 hover:border-purple-300 bg-purple-50/50 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
-                    <QrCode className="w-5 h-5 text-purple-600" />
-                  </div>
-                  <div className="text-left">
-                    <p className="text-sm font-semibold text-gray-900">Pagar con Yape / Plin</p>
-                    <p className="text-xs text-gray-500">Escanea el QR y confirma tu pago</p>
-                  </div>
-                </div>
-                <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${showYape ? 'rotate-180' : ''}`} />
-              </button>
+            {(() => {
+              // Only show Yape/Plin section if the store has at least one QR image or number configured
+              const hasYapeConfig = store.yapeQrUrl || store.yapeNumber
+              const hasPlinConfig = store.plinQrUrl || store.plinNumber
+              if (!hasYapeConfig && !hasPlinConfig) return null
 
-              <AnimatePresence>
-                {showYape && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="overflow-hidden"
+              return (
+                <div className="mt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowYape(!showYape)}
+                    className="w-full flex items-center justify-between p-4 rounded-2xl border-2 border-purple-200 hover:border-purple-300 bg-purple-50/50 transition-colors"
                   >
-                    <div className="p-6 mt-2 rounded-2xl border border-purple-100 bg-white space-y-4">
-                      {/* QR Code */}
-                      <div className="text-center">
-                        <div className="inline-block p-3 bg-white rounded-2xl shadow-sm border border-gray-100">
-                          <img
-                            src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(store.whatsappNumber)}&bgcolor=ffffff&color=7C3AED`}
-                            alt="QR Yape/Plin"
-                            className="w-48 h-48"
-                          />
-                        </div>
-                        <p className="text-xs text-gray-400 mt-3">Escanea con Yape o Plin</p>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
+                        <QrCode className="w-5 h-5 text-purple-600" />
                       </div>
-
-                      {/* Amount to pay */}
-                      <div className="text-center p-4 rounded-xl bg-purple-50">
-                        <p className="text-xs text-gray-500 mb-1">Monto a transferir</p>
-                        <p className="text-2xl font-bold" style={{ color: store.colors.primary }}>
-                          S/{totalPrice.toFixed(2)}
+                      <div className="text-left">
+                        <p className="text-sm font-semibold text-gray-900">
+                          Pagar con {hasYapeConfig && hasPlinConfig ? 'Yape / Plin' : hasYapeConfig ? 'Yape' : 'Plin'}
                         </p>
-                        <p className="text-xs text-gray-400 mt-1">
-                          {quantity > 1 ? `${quantity}x ${product.name}` : `por ${product.name}`}
-                        </p>
+                        <p className="text-xs text-gray-500">Escanea el QR y confirma tu pago</p>
                       </div>
-
-                      {/* Steps */}
-                      <div className="space-y-3">
-                        <div className="flex items-start gap-3">
-                          <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <span className="text-xs font-bold text-purple-600">1</span>
-                          </div>
-                          <p className="text-sm text-gray-600">Abre <b>Yape</b> o <b>Plin</b> en tu celular</p>
-                        </div>
-                        <div className="flex items-start gap-3">
-                          <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <span className="text-xs font-bold text-purple-600">2</span>
-                          </div>
-                          <p className="text-sm text-gray-600">Escanea el codigo QR y transfiere <b>S/{totalPrice.toFixed(2)}</b></p>
-                        </div>
-                        <div className="flex items-start gap-3">
-                          <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <span className="text-xs font-bold text-purple-600">3</span>
-                          </div>
-                          <p className="text-sm text-gray-600">Confirma tu pago enviando el comprobante por WhatsApp</p>
-                        </div>
-                      </div>
-
-                      {/* Confirm via WhatsApp */}
-                      <Button
-                        className="w-full text-white gap-3 rounded-2xl py-5 text-sm font-bold shadow-lg hover:opacity-90 transition-opacity"
-                        style={{ backgroundColor: '#25D366' }}
-                        onClick={() => {
-                          const qtyText = quantity > 1 ? ` (${quantity} unidades)` : ''
-                          const msg = encodeURIComponent(
-                            `Hola! Acabo de realizar el pago por Yape/Plin de S/${totalPrice.toFixed(2)} por: ${product.name}${qtyText}\nPor favor confirmar mi pedido.`
-                          )
-                          window.open(`https://wa.me/${store.whatsappNumber.replace(/[^0-9]/g, '')}?text=${msg}`, '_blank')
-                        }}
-                      >
-                        <MessageCircle className="w-5 h-5" />
-                        Enviar comprobante por WhatsApp
-                      </Button>
                     </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+                    <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${showYape ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  <AnimatePresence>
+                    {showYape && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="p-6 mt-2 rounded-2xl border border-purple-100 bg-white space-y-5">
+                          {/* Yape Section */}
+                          {hasYapeConfig && (
+                            <div className="space-y-3">
+                              <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center">
+                                  <span className="text-white text-xs font-black">Y</span>
+                                </div>
+                                <h3 className="text-sm font-bold text-gray-900">Pagar con Yape</h3>
+                              </div>
+
+                              {store.yapeQrUrl ? (
+                                <div className="text-center">
+                                  <div className="inline-block p-3 bg-white rounded-2xl shadow-sm border border-gray-100">
+                                    <img
+                                      src={store.yapeQrUrl}
+                                      alt="QR Yape"
+                                      className="w-48 h-48 object-contain"
+                                      onError={(e) => {
+                                        const target = e.target as HTMLImageElement
+                                        target.style.display = 'none'
+                                        const parent = target.parentElement
+                                        if (parent) {
+                                          parent.innerHTML = '<div class="w-48 h-48 flex items-center justify-center bg-purple-50 rounded-xl"><span class="text-purple-400 text-sm">QR no disponible</span></div>'
+                                        }
+                                      }}
+                                    />
+                                  </div>
+                                  <p className="text-xs text-gray-400 mt-2">Abre Yape y escanea este QR</p>
+                                </div>
+                              ) : (
+                                <div className="text-center p-4 rounded-xl bg-purple-50">
+                                  <p className="text-sm text-gray-600">
+                                    Envía <b>S/{totalPrice.toFixed(2)}</b> al número:
+                                  </p>
+                                  <p className="text-lg font-bold text-purple-700 mt-1">{store.yapeNumber}</p>
+                                </div>
+                              )}
+
+                              {store.yapeNumber && !store.yapeQrUrl && (
+                                <p className="text-xs text-gray-400 text-center">
+                                  Abre Yape, selecciona &quot;Yapear&quot; e ingresa el número manualmente
+                                </p>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Plin Section */}
+                          {hasPlinConfig && (
+                            <div className="space-y-3">
+                              {hasYapeConfig && <div className="border-t border-gray-100" />}
+                              <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-lg bg-green-600 flex items-center justify-center">
+                                  <span className="text-white text-xs font-black">P</span>
+                                </div>
+                                <h3 className="text-sm font-bold text-gray-900">Pagar con Plin</h3>
+                              </div>
+
+                              {store.plinQrUrl ? (
+                                <div className="text-center">
+                                  <div className="inline-block p-3 bg-white rounded-2xl shadow-sm border border-gray-100">
+                                    <img
+                                      src={store.plinQrUrl}
+                                      alt="QR Plin"
+                                      className="w-48 h-48 object-contain"
+                                      onError={(e) => {
+                                        const target = e.target as HTMLImageElement
+                                        target.style.display = 'none'
+                                        const parent = target.parentElement
+                                        if (parent) {
+                                          parent.innerHTML = '<div class="w-48 h-48 flex items-center justify-center bg-green-50 rounded-xl"><span class="text-green-400 text-sm">QR no disponible</span></div>'
+                                        }
+                                      }}
+                                    />
+                                  </div>
+                                  <p className="text-xs text-gray-400 mt-2">Abre Plin y escanea este QR</p>
+                                </div>
+                              ) : (
+                                <div className="text-center p-4 rounded-xl bg-green-50">
+                                  <p className="text-sm text-gray-600">
+                                    Envía <b>S/{totalPrice.toFixed(2)}</b> al número:
+                                  </p>
+                                  <p className="text-lg font-bold text-green-700 mt-1">{store.plinNumber}</p>
+                                </div>
+                              )}
+
+                              {store.plinNumber && !store.plinQrUrl && (
+                                <p className="text-xs text-gray-400 text-center">
+                                  Abre Plin, selecciona &quot;Pagar&quot; e ingresa el número manualmente
+                                </p>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Amount to pay */}
+                          <div className="text-center p-4 rounded-xl bg-purple-50">
+                            <p className="text-xs text-gray-500 mb-1">Monto a transferir</p>
+                            <p className="text-2xl font-bold" style={{ color: store.colors.primary }}>
+                              S/{totalPrice.toFixed(2)}
+                            </p>
+                            <p className="text-xs text-gray-400 mt-1">
+                              {quantity > 1 ? `${quantity}x ${product.name}` : `por ${product.name}`}
+                            </p>
+                          </div>
+
+                          {/* Steps */}
+                          <div className="space-y-3">
+                            <div className="flex items-start gap-3">
+                              <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <span className="text-xs font-bold text-purple-600">1</span>
+                              </div>
+                              <p className="text-sm text-gray-600">Abre <b>Yape</b> o <b>Plin</b> en tu celular</p>
+                            </div>
+                            <div className="flex items-start gap-3">
+                              <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <span className="text-xs font-bold text-purple-600">2</span>
+                              </div>
+                              <p className="text-sm text-gray-600">Escanea el QR o ingresa el número y transfiere <b>S/{totalPrice.toFixed(2)}</b></p>
+                            </div>
+                            <div className="flex items-start gap-3">
+                              <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <span className="text-xs font-bold text-purple-600">3</span>
+                              </div>
+                              <p className="text-sm text-gray-600">Confirma tu pago enviando el comprobante por WhatsApp</p>
+                            </div>
+                          </div>
+
+                          {/* Confirm via WhatsApp */}
+                          <Button
+                            className="w-full text-white gap-3 rounded-2xl py-5 text-sm font-bold shadow-lg hover:opacity-90 transition-opacity"
+                            style={{ backgroundColor: '#25D366' }}
+                            onClick={() => {
+                              const qtyText = quantity > 1 ? ` (${quantity} unidades)` : ''
+                              const msg = encodeURIComponent(
+                                `Hola! Acabo de realizar el pago por Yape/Plin de S/${totalPrice.toFixed(2)} por: ${product.name}${qtyText}\nPor favor confirmar mi pedido.`
+                              )
+                              window.open(`https://wa.me/${store.whatsappNumber.replace(/[^0-9]/g, '')}?text=${msg}`, '_blank')
+                            }}
+                          >
+                            <MessageCircle className="w-5 h-5" />
+                            Enviar comprobante por WhatsApp
+                          </Button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )
+            })()}
 
             {/* Store info */}
             <div className="mt-8 p-4 rounded-xl border border-gray-100 bg-gray-50/50">

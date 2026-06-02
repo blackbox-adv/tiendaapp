@@ -100,6 +100,11 @@ export const updateStoreSchema = createStoreSchema.partial().extend({
   popupButtonText: z.string().max(50).optional(),
   // Override whatsappNumber: lenient validation for updates (don't block save for format issues)
   whatsappNumber: z.string().max(30).optional(),
+  // Yape / Plin QR fields
+  yapeQrUrl: z.string().max(1000).optional().nullable(),
+  plinQrUrl: z.string().max(1000).optional().nullable(),
+  yapeNumber: z.string().max(30).optional().nullable(),
+  plinNumber: z.string().max(30).optional().nullable(),
 })
 
 // ── Product schemas ──

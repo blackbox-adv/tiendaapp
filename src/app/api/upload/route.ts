@@ -12,6 +12,7 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
+    const folder = (formData.get('folder') as string) || undefined;
 
     if (!file) {
       return NextResponse.json({ error: 'No se proporcionó ningún archivo' }, { status: 400 });
@@ -35,7 +36,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await uploadFile(file);
+    const result = await uploadFile(file, folder);
     return NextResponse.json({ url: result.url });
   } catch (error) {
     console.error('Upload error:', error);

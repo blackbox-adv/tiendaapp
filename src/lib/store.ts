@@ -39,6 +39,11 @@ function transformApiStore(apiStore: Record<string, unknown>): Store {
     popupCustomImage: (apiStore.popupCustomImage as string | null) ?? null,
     popupTitle: (apiStore.popupTitle as string | null) ?? null,
     popupButtonText: (apiStore.popupButtonText as string) ?? 'Ver oferta',
+    // Yape / Plin payment QR fields
+    yapeQrUrl: (apiStore.yapeQrUrl as string | null) ?? null,
+    plinQrUrl: (apiStore.plinQrUrl as string | null) ?? null,
+    yapeNumber: (apiStore.yapeNumber as string | null) ?? null,
+    plinNumber: (apiStore.plinNumber as string | null) ?? null,
   }
 }
 
@@ -471,6 +476,10 @@ export const useAppStore = create<AppState>((set, get) => ({
       popupCustomImage: null,
       popupTitle: null,
       popupButtonText: 'Ver oferta',
+      yapeQrUrl: null,
+      plinQrUrl: null,
+      yapeNumber: null,
+      plinNumber: null,
     }
 
     set((state) => ({
@@ -703,6 +712,11 @@ export const useAppStore = create<AppState>((set, get) => ({
       if (data.popupCustomImage !== undefined) apiData.popupCustomImage = data.popupCustomImage
       if (data.popupTitle !== undefined) apiData.popupTitle = data.popupTitle
       if (data.popupButtonText !== undefined) apiData.popupButtonText = data.popupButtonText
+      // Yape / Plin fields
+      if (data.yapeQrUrl !== undefined) apiData.yapeQrUrl = data.yapeQrUrl
+      if (data.plinQrUrl !== undefined) apiData.plinQrUrl = data.plinQrUrl
+      if (data.yapeNumber !== undefined) apiData.yapeNumber = data.yapeNumber
+      if (data.plinNumber !== undefined) apiData.plinNumber = data.plinNumber
 
       const res = await fetch('/api/stores', {
         method: 'PUT',

@@ -79,6 +79,12 @@ model Store {
   popupTitle       String?                           // e.g. "2x1 solo este mes"
   popupButtonText  String   @default("Ver oferta")  // CTA button text
 
+  // Yape / Plin payment QR configuration
+  yapeQrUrl        String?                           // Uploaded Yape QR image URL (from Yape app)
+  plinQrUrl        String?                           // Uploaded Plin QR image URL (from Plin app)
+  yapeNumber       String?                           // Yape phone number (for manual entry display)
+  plinNumber       String?                           // Plin phone number (for manual entry display)
+
   isActive       Boolean  @default(true)
   visitCount     Int      @default(0)
   createdAt      DateTime @default(now())
