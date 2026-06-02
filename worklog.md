@@ -307,3 +307,26 @@ Stage Summary:
 - User store "Tienda BlackBox" now has Premium plan
 - Popup feature is now accessible for this user
 - Subscription API fixed for PgBouncer compatibility
+---
+Task ID: 1
+Agent: main
+Task: Fix demo pages stuck loading + upload route + sidebar import
+
+Work Log:
+- Identified root cause: Two conflicting dynamic routes at /demo/[slug] and /demo/[template] causing routing ambiguity
+- The [slug] route fetched from API (/api/stores/{slug}) which could hang with PgBouncer timeouts
+- The [template] route uses hardcoded demo data (no API dependencies) and renders instantly
+- Removed /demo/[slug]/page.tsx (API-dependent, broken) 
+- Removed orphaned components/demo/DemoTemplateClient.tsx
+- Fixed demoSlug values in dashboard/template and onboarding pages (changed "demo-moderna" to "moderna" etc.)
+- Fixed Sidebar import in dashboard layout (named export not default)
+- Recreated /api/upload/route.ts that was missing again
+- Verified build compiles successfully with no warnings
+- Pushed changes to GitHub
+
+Stage Summary:
+- Demos now use only /demo/[template] route with hardcoded data (no API calls)
+- All demo links (landing, dashboard, onboarding) now point to correct template IDs
+- Upload API route restored
+- Build is clean and deploying to Vercel
+
