@@ -65,7 +65,7 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
               description: data.description || '',
               logo: data.logo || '\uD83D\uDED2',
               categoryId: data.category || '',
-              planId: '',
+              planId: data.planType || 'free',
               colors: {
                 primary: data.primaryColor || '#7C3AED',
                 secondary: data.secondaryColor || '#10B981',
@@ -89,17 +89,26 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
             setApiStore(mappedStore)
 
             if (data.products && Array.isArray(data.products)) {
+              // Helper to safely convert Prisma Decimal / string / number to JS number
+              const toNum = (v: unknown): number => {
+                if (typeof v === 'number') return v
+                if (typeof v === 'string') return parseFloat(v) || 0
+                if (v && typeof v === 'object' && 'd' in (v as object) && 'e' in (v as object) && 's' in (v as object)) {
+                  return parseFloat(String(v)) || 0
+                }
+                return 0
+              }
               const mapped: Product[] = data.products.map((p: Record<string, unknown>) => ({
                 id: p.id as string,
                 name: (p.name as string) || '',
                 description: (p.description as string) || '',
-                price: (p.price as number) || 0,
-                originalPrice: (p.originalPrice as number) || null,
+                price: toNum(p.price),
+                originalPrice: p.originalPrice != null ? toNum(p.originalPrice) : null,
                 categoryId: (p.category as string) || '',
                 imageUrl: (p.imageUrl as string) || '',
                 isActive: (p.isActive as boolean) ?? true,
                 featured: (p.featured as boolean) ?? false,
-                rating: (p.rating as number) || 0,
+                rating: toNum(p.rating),
                 storeId: (p.storeId as string) || '',
                 createdAt: (p.createdAt as string) || new Date().toISOString(),
               }))

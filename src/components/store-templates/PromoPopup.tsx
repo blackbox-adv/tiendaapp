@@ -9,9 +9,10 @@ interface PromoPopupProps {
   store: Store
   products: Product[]
   onProductClick?: (productId: string) => void
+  onCustomCtaClick?: () => void
 }
 
-export function PromoPopup({ store, products, onProductClick }: PromoPopupProps) {
+export function PromoPopup({ store, products, onProductClick, onCustomCtaClick }: PromoPopupProps) {
   const [isVisible, setIsVisible] = useState(false)
   const [dismissPermanently, setDismissPermanently] = useState(false)
   const [popupProduct, setPopupProduct] = useState<Product | null>(null)
@@ -61,6 +62,17 @@ export function PromoPopup({ store, products, onProductClick }: PromoPopupProps)
     // Navigate to product if it's a product popup
     if (store.popupType === 'product' && popupProduct && onProductClick) {
       onProductClick(popupProduct.id)
+    } else if (store.popupType === 'custom') {
+      // For custom image popup: open WhatsApp or call custom handler
+      if (onCustomCtaClick) {
+        onCustomCtaClick()
+      } else if (store.whatsappNumber) {
+        const promoTitle = store.popupTitle || 'Promocion especial'
+        const msg = encodeURIComponent(
+          `Hola! Vi la promocion "${promoTitle}" en tu tienda en TiendApp y me interesa. Podrias darme mas informacion?`
+        )
+        window.open(`https://wa.me/${store.whatsappNumber.replace(/[^0-9]/g, '')}?text=${msg}`, '_blank')
+      }
     }
   }
 
