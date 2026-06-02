@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useSession, signOut } from 'next-auth/react';
+import { useAppStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -41,9 +41,9 @@ const planLabels: Record<string, { text: string; color: string }> = {
 };
 
 export default function DashboardHeader() {
-  const { data: session } = useSession();
+  const { currentUser, logout } = useAppStore();
   const [open, setOpen] = useState(false);
-  const plan = session?.user?.plan || 'free';
+  const plan = currentUser?.planId || 'free';
   const planInfo = planLabels[plan] || planLabels.free;
 
   return (
@@ -80,7 +80,7 @@ export default function DashboardHeader() {
               <div className="mt-4 px-1">
                 <p className="text-sm text-gray-500">Hola,</p>
                 <p className="font-semibold text-gray-900 truncate">
-                  {session?.user?.name || 'Usuario'}
+                  {currentUser?.name || 'Usuario'}
                 </p>
               </div>
 
@@ -105,7 +105,7 @@ export default function DashboardHeader() {
                 <Button
                   variant="ghost"
                   className="w-full justify-start text-gray-500 hover:text-red-600 hover:bg-red-50"
-                  onClick={() => signOut({ callbackUrl: '/' })}
+                  onClick={() => logout()}
                 >
                   <LogOut className="w-5 h-5 mr-3" />
                   Cerrar sesión

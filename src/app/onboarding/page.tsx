@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import { useAppStore } from '@/lib/store';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -81,7 +81,7 @@ const planLabels: Record<string, { text: string; color: string }> = {
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { currentUser } = useAppStore();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -91,7 +91,7 @@ export default function OnboardingPage() {
   const [storeSlug, setStoreSlug] = useState('');
   const [storeDescription, setStoreDescription] = useState('');
   const [storeWhatsapp, setStoreWhatsapp] = useState('');
-  const [storeEmail, setStoreEmail] = useState(session?.user?.email || '');
+  const [storeEmail, setStoreEmail] = useState(currentUser?.email || '');
   const [storeAddress, setStoreAddress] = useState('');
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
@@ -234,7 +234,7 @@ export default function OnboardingPage() {
                 const Icon = tmpl.icon;
                 const planInfo = planLabels[tmpl.plan];
                 const isSelected = selectedTemplate === tmpl.id;
-                const isRestricted = tmpl.plan !== 'free' && session?.user?.plan === 'free';
+                const isRestricted = tmpl.plan !== 'free' && currentUser?.planId === 'free';
 
                 return (
                   <Card

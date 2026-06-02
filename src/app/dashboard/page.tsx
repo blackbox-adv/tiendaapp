@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useAppStore } from '@/lib/store';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -41,7 +41,7 @@ interface UserData {
 }
 
 export default function DashboardPage() {
-  const { data: session } = useSession();
+  const { currentUser } = useAppStore();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -115,7 +115,7 @@ export default function DashboardPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Panel de control</h1>
         <p className="text-gray-500 text-sm mt-1">
-          Bienvenido, {session?.user?.name || 'Usuario'}
+          Bienvenido, {currentUser?.name || 'Usuario'}
         </p>
       </div>
 

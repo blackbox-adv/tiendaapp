@@ -1,6 +1,6 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { useAppStore } from '@/lib/store';
 import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/dashboard/Sidebar';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
@@ -11,10 +11,10 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { data: session, status } = useSession();
+  const { currentUser, isSyncing } = useAppStore();
   const router = useRouter();
 
-  if (status === 'loading') {
+  if (isSyncing) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center space-y-4">
@@ -25,7 +25,7 @@ export default function DashboardLayout({
     );
   }
 
-  if (status === 'unauthenticated') {
+  if (!currentUser) {
     router.push('/auth/login');
     return null;
   }

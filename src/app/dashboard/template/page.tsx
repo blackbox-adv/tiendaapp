@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useAppStore } from '@/lib/store';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -89,7 +89,7 @@ interface StoreData {
 
 export default function TemplatePage() {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { currentUser } = useAppStore();
   const [store, setStore] = useState<StoreData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -177,7 +177,7 @@ export default function TemplatePage() {
     );
   }
 
-  const userPlan = session?.user?.plan || 'free';
+  const userPlan = currentUser?.planId || 'free';
 
   const canUseTemplate = (templatePlan: string) => {
     if (templatePlan === 'free') return true;

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { useAppStore } from '@/lib/store';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ import { Store, AlertCircle, Loader2 } from 'lucide-react';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { register } = useAppStore();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -36,31 +37,15 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
-      });
+      const result = await register(name, email, password);
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || 'Error al crear la cuenta');
+      if (!result.success) {
+        setError(result.error || 'Error al crear la cuenta');
         return;
       }
 
-      const result = await signIn('credentials', {
-        email,
-        password,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        router.push('/auth/login');
-      } else {
-        router.push('/onboarding');
-        router.refresh();
-      }
+      router.push('/onboarding');
+      router.refresh();
     } catch {
       setError('Error al crear la cuenta. Intenta de nuevo.');
     } finally {
