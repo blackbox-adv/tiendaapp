@@ -330,3 +330,50 @@ Stage Summary:
 - Upload API route restored
 - Build is clean and deploying to Vercel
 
+
+---
+Task ID: yape-qr-fix
+Agent: Main Agent
+Task: Fix Yape/Plin QR payment implementation - was encoding WhatsApp number as invalid QR
+
+Work Log:
+- Analyzed full Yape/Plin QR implementation across codebase
+- Found CRITICAL BUG: ProductDetailView was generating QR from store.whatsappNumber (plain text) - Yape/Plin apps can't recognize this format
+- Found NO configuration for store owners to upload their actual Yape/Plin QR codes from their banking apps
+- Found NO separate Yape/Plin phone number configuration (was using same WhatsApp number)
+- Found hardcoded payment info in PlanManager dialog (+51 999 888 777, TiendApp SAC)
+- Found bug: StorePublicClient.tsx had planId: '' instead of planType
+
+Changes made:
+1. Added yapeQrUrl, plinQrUrl, yapeNumber, plinNumber fields to Store Prisma model
+2. Updated TypeScript types (Store interface in types.ts)
+3. Added Yape/Plin fields to Zustand store transform (store.ts)
+4. Added Yape/Plin fields to updateStoreSettings API mapping
+5. Updated Zod validation schemas (validations.ts)
+6. Fixed StorePublicClient.tsx planId bug (was '' → planType || 'free')
+7. Added yapeQrUrl/plinQrUrl/yapeNumber/plinNumber to StorePublicClient transform
+8. Added fields to StoreView.tsx API fallback mapping
+9. Added fields to ProductDetailView.tsx API fallback mapping
+10. REBUILT ProductDetailView Yape/Plin section:
+    - Only shows when store has Yape or Plin configured
+    - Shows separate Yape and Plin sections with brand colors
+    - Uses uploaded QR images (from banking app screenshots) instead of generated QR
+    - Falls back to phone number display if no QR image uploaded
+    - Shows amount to pay, steps, and WhatsApp confirmation button
+11. Added full Yape/Plin QR configuration section to StoreSettings:
+    - Yape: phone number input + QR image upload + preview
+    - Plin: phone number input + QR image upload + preview
+    - Tip box explaining how to get QR from banking apps
+12. Updated upload utility to support folder parameter
+13. Updated upload API route to pass folder parameter
+14. Added Yape/Plin fields to setup-db auto-migration endpoint
+15. Added fields to all API store mapping (admin listing + owner listing raw SQL)
+16. Added fields to demo stores in DemoTemplateClient
+17. Created migration SQL file
+
+Stage Summary:
+- Yape/Plin QR payment now works correctly with uploaded QR images
+- Store owners can configure Yape/Plin from Settings page
+- Customers see real QR codes from banking apps, not invalid generated ones
+- Build passes successfully, pushed 3 commits to GitHub
+- Migration SQL ready for Supabase (will auto-apply via /api/setup-db)
