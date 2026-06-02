@@ -29,6 +29,10 @@ export async function GET(request: NextRequest) {
     { table: 'Store', column: 'popupButtonText', sql: `ALTER TABLE "Store" ADD COLUMN IF NOT EXISTS "popupButtonText" TEXT NOT NULL DEFAULT 'Ver oferta'` },
     { table: 'Store', column: 'visitCount', sql: `ALTER TABLE "Store" ADD COLUMN IF NOT EXISTS "visitCount" INTEGER NOT NULL DEFAULT 0` },
     { table: 'Store', column: 'bannerUrl', sql: `ALTER TABLE "Store" ADD COLUMN IF NOT EXISTS "bannerUrl" TEXT NOT NULL DEFAULT ''` },
+    { table: 'Store', column: 'yapeQrUrl', sql: `ALTER TABLE "Store" ADD COLUMN IF NOT EXISTS "yapeQrUrl" TEXT` },
+    { table: 'Store', column: 'plinQrUrl', sql: `ALTER TABLE "Store" ADD COLUMN IF NOT EXISTS "plinQrUrl" TEXT` },
+    { table: 'Store', column: 'yapeNumber', sql: `ALTER TABLE "Store" ADD COLUMN IF NOT EXISTS "yapeNumber" TEXT` },
+    { table: 'Store', column: 'plinNumber', sql: `ALTER TABLE "Store" ADD COLUMN IF NOT EXISTS "plinNumber" TEXT` },
 
     // StoreProduct table
     { table: 'StoreProduct', column: 'color', sql: `ALTER TABLE "StoreProduct" ADD COLUMN IF NOT EXISTS "color" TEXT` },
