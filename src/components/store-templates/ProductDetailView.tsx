@@ -31,6 +31,8 @@ import {
   ChevronDown,
   Minus,
   Plus,
+  X,
+  ZoomIn,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -42,6 +44,7 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
   const router = useRouter()
   const pathname = usePathname()
   const [showYape, setShowYape] = useState(false)
+  const [showZoom, setShowZoom] = useState(false)
   const [quantity, setQuantity] = useState(1)
 
   // Detect if we're on a public URL page (rendered by Next.js, not AppRouter)
@@ -418,15 +421,24 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
           {/* Product Image */}
           <div className="relative">
-            <div className="aspect-square bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 sticky top-16">
+            <div
+              className="aspect-square bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 sticky top-16 cursor-zoom-in group"
+              onClick={() => setShowZoom(true)}
+            >
               <img
                 src={product.imageUrl}
                 alt={product.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                 onError={(e) => {
                   ;(e.target as HTMLImageElement).src = imgFallback
                 }}
               />
+              {/* Zoom hint overlay */}
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg">
+                  <ZoomIn className="w-6 h-6 text-gray-700" />
+                </div>
+              </div>
               {/* Badges */}
               <ProductBadges product={product} primaryColor={store.colors.primary} store={store} />
             </div>
@@ -872,6 +884,53 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
           </button>
         </div>
       </motion.div>
+
+      {/* Image Zoom Modal */}
+      <AnimatePresence>
+        {showZoom && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center p-4"
+            onClick={() => setShowZoom(false)}
+          >
+            {/* Close button */}
+            <button
+              onClick={() => setShowZoom(false)}
+              className="absolute top-4 right-4 z-10 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-colors"
+            >
+              <X className="w-5 h-5 text-white" />
+            </button>
+
+            {/* Product name */}
+            <p className="absolute top-5 left-5 text-white/80 text-sm font-medium truncate max-w-[60%]">
+              {product.name}
+            </p>
+
+            {/* Zoomed image */}
+            <motion.img
+              initial={{ scale: 0.85, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.85, opacity: 0 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              src={product.imageUrl}
+              alt={product.name}
+              className="max-w-full max-h-[85vh] object-contain rounded-lg select-none"
+              onClick={(e) => e.stopPropagation()}
+              onError={(e) => {
+                ;(e.target as HTMLImageElement).src = imgFallback
+              }}
+            />
+
+            {/* Hint */}
+            <p className="absolute bottom-5 left-1/2 -translate-x-1/2 text-white/50 text-xs">
+              Toca fuera de la imagen para cerrar
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
