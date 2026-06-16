@@ -38,13 +38,17 @@ export function Hero() {
           </h1>
 
           {/* Subtitle */}
-          <p className="text-lg sm:text-xl text-violet-100 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Sin conocimientos técnicos. Integra WhatsApp, elige tu plantilla favorita
-            y comienza a vender hoy mismo. La plataforma más fácil de usar del Perú.
+          <p className="text-lg sm:text-xl text-violet-100 max-w-2xl mx-auto mb-6 leading-relaxed">
+            Sin saber programar. Recibe pedidos por <strong className="text-white">WhatsApp</strong>,
+            cobra con <strong className="text-white">Yape</strong> y <strong className="text-white">Plin</strong>,
+            elige tu plantilla y vende hoy mismo. Sin comisión por venta.
+          </p>
+          <p className="text-sm text-violet-200/90 max-w-xl mx-auto mb-10">
+            🇵🇪 Hecho en Perú · Sin tarjeta de crédito · Cancelas cuando quieras
           </p>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
             <Button
               size="lg"
               onClick={() => navigate({ page: 'register' })}
@@ -64,12 +68,17 @@ export function Hero() {
             </Button>
           </div>
 
+          {/* Trust microcopy */}
+          <p className="text-sm text-violet-200/80 mb-16">
+            ✅ Sin tarjeta de crédito · ✅ Plan gratis para siempre · ✅ Cancelas cuando quieras
+          </p>
+
           {/* Stats */}
           <div className="grid grid-cols-3 gap-8 max-w-lg mx-auto">
             {[
-              { icon: ShoppingBag, value: '5+', label: 'Plantillas' },
-              { icon: Star, value: '4.9', label: 'Calificacion' },
-              { icon: Zap, value: '24/7', label: 'Soporte' },
+              { icon: Zap, value: '5 min', label: 'Para crear tu tienda' },
+              { icon: ShoppingBag, value: '0%', label: 'Comisión por venta' },
+              { icon: Star, value: 'S/0', label: 'Para empezar gratis' },
             ].map((stat, i) => (
               <motion.div
                 key={stat.label}
