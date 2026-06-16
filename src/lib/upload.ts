@@ -15,9 +15,10 @@ export async function uploadFile(file: File, folder?: string): Promise<{ url: st
 
   if (supabase) {
     // Upload to Supabase Storage
+    const bucket = 'product-images';
     const fileName = `${folder ? folder + '/' : ''}${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
     const { data, error } = await supabase.storage
-      .from('uploads')
+      .from(bucket)
       .upload(fileName, file, {
         contentType: file.type,
         upsert: false,
@@ -30,7 +31,7 @@ export async function uploadFile(file: File, folder?: string): Promise<{ url: st
     }
 
     const { data: urlData } = supabase.storage
-      .from('uploads')
+      .from(bucket)
       .getPublicUrl(data.path);
 
     return { url: urlData.publicUrl };

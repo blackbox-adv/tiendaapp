@@ -49,8 +49,8 @@ export function AdminPlans() {
       ])
 
       if (payRes.ok) { const d = await payRes.json(); setPayments(d.data || d.payments || []) }
-      if (subRes.ok) setSubscriptions(await subRes.json())
-      if (plansRes.ok) setPlans(await plansRes.json())
+      if (subRes.ok) { const d = await subRes.json(); setSubscriptions(d.subscriptions || d.data || (Array.isArray(d) ? d : [])) }
+      if (plansRes.ok) { const d = await plansRes.json(); setPlans(d.plans || d.data || (Array.isArray(d) ? d : [])) }
     } catch (err) {
       console.error('Error loading plans:', err)
     } finally {

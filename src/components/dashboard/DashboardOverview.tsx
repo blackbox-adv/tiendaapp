@@ -244,7 +244,7 @@ function NotificationDropdown() {
                   <div
                     key={notif.id}
                     onClick={() => handleNotifClick(notif)}
-                    className={`px-4 py-3 border-b border-gray-50 hover:bg-gray-50 transition-colors ${
+                    className={`group px-4 py-3 border-b border-gray-50 hover:bg-gray-50 transition-colors ${
                       !notif.read ? 'bg-violet-50/50 cursor-pointer' : notif.link ? 'cursor-pointer' : ''
                     }`}
                   >
@@ -315,12 +315,20 @@ function QRCodeCard() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const downloadQR = () => {
-    const link = document.createElement('a')
-    link.href = qrUrl
-    link.download = `qr-${currentStore.slug}.png`
-    link.click()
-    toast.success('QR descargado', { description: 'Imprime el código y compártelo con tus clientes.' })
+  const downloadQR = async () => {
+    try {
+      const response = await fetch(qrUrl)
+      const blob = await response.blob()
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `qr-${currentStore.slug}.png`
+      link.click()
+      URL.revokeObjectURL(url)
+      toast.success('QR descargado', { description: 'Imprime el código y compártelo con tus clientes.' })
+    } catch {
+      window.open(qrUrl, '_blank')
+    }
   }
 
   return (

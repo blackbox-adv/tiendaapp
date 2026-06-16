@@ -25,11 +25,20 @@ export function StoreQRCode() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const downloadQR = () => {
-    const link = document.createElement('a')
-    link.href = qrUrl
-    link.download = `qr-${currentStore.slug}.png`
-    link.click()
+  const downloadQR = async () => {
+    try {
+      const response = await fetch(qrUrl)
+      const blob = await response.blob()
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `qr-${currentStore.slug}.png`
+      link.click()
+      URL.revokeObjectURL(url)
+    } catch {
+      // Fallback: open in new tab
+      window.open(qrUrl, '_blank')
+    }
   }
 
   return (

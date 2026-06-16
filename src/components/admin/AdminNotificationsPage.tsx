@@ -86,8 +86,9 @@ export function AdminNotificationsPage() {
       })
       if (res.ok) {
         const data = await res.json()
-        if (data.data?.users) {
-          setUsers(data.data.users.map((u: any) => ({
+        const usersArray = data.data?.users || data.users || (Array.isArray(data) ? data : [])
+        if (Array.isArray(usersArray)) {
+          setUsers(usersArray.map((u: any) => ({
             id: u.id,
             name: u.name,
             email: u.email,

@@ -30,16 +30,21 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
 
   // Fetch plan name from API
   const [planName, setPlanName] = useState('')
+  const [planPrice, setPlanPrice] = useState(0)
   useEffect(() => {
     fetch('/api/plans').then(r => r.ok ? r.json() : []).then(data => {
-      if (Array.isArray(data)) {
-        const plan = data.find((p: { id: string; type: string; name: string }) => p.id === currentUser.planId || p.type === currentUser.planId)
-        if (plan) setPlanName(plan.name)
+      const plans = Array.isArray(data) ? data : (data.plans || data.data || [])
+      if (Array.isArray(plans)) {
+        const plan = plans.find((p: { id: string; type: string; name: string; price: number }) => p.id === currentUser.planId || p.type === currentUser.planId)
+        if (plan) {
+          setPlanName(plan.name)
+          setPlanPrice(typeof plan.price === 'number' ? plan.price : parseFloat(String(plan.price)) || 0)
+        }
       }
     }).catch(() => setPlanName('Gratis'))
   }, [currentUser.planId])
 
-  const currentPlan = planName ? { name: planName, price: 0, productLimit: 100 } : null
+  const currentPlan = planName ? { name: planName, price: planPrice, productLimit: 100 } : null
 
   const handleNav = (page: PageRoute['page']) => {
     navigate({ page } as PageRoute)
