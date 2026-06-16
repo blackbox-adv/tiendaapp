@@ -8,10 +8,12 @@ import type { PageRoute } from '@/lib/types'
 // Landing
 import { Navbar } from '@/components/landing/Navbar'
 import { Hero } from '@/components/landing/Hero'
+import { HowItWorks } from '@/components/landing/HowItWorks'
 import { Features } from '@/components/landing/Features'
 import { Pricing } from '@/components/landing/Pricing'
 import { Templates } from '@/components/landing/Templates'
 import { Testimonials } from '@/components/landing/Testimonials'
+import { FAQ } from '@/components/landing/FAQ'
 import { Footer } from '@/components/landing/Footer'
 
 // Auth
@@ -164,10 +166,12 @@ export default function AppRouter() {
           <motion.div key="landing" variants={pageVariants} initial="initial" animate="animate" exit="exit" className="min-h-screen">
             <Navbar />
             <Hero />
+            <HowItWorks />
             <Features />
             <Pricing />
             <Templates />
             <Testimonials />
+            <FAQ />
             <Footer />
           </motion.div>
         )

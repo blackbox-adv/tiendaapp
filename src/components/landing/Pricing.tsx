@@ -202,8 +202,15 @@ export function Pricing() {
                         : 'bg-violet-600 text-white hover:bg-violet-700'
                     }`}
                   >
-                    {plan.price === 0 ? 'Comenzar gratis' : 'Comenzar ahora'}
+                    {plan.type === 'free' && 'Crear mi tienda gratis'}
+                    {plan.type === 'pro' && 'Empezar con Pro'}
+                    {plan.type === 'premium' && 'Empezar con Premium'}
                   </Button>
+                  <p className={`text-xs text-center mt-3 ${plan.popular ? 'text-violet-100' : 'text-gray-400'}`}>
+                    {plan.price === 0
+                      ? 'Sin tarjeta · Sin compromiso'
+                      : 'Paga con Yape, Plin o transferencia'}
+                  </p>
                 </motion.div>
               )
             })}

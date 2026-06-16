@@ -2,20 +2,49 @@
 
 import { motion } from 'framer-motion'
 import {
-  Layout, Smartphone, MessageCircle, BarChart3, Globe, ShieldCheck,
-  Palette, Rocket, Package
+  Smartphone, MessageCircle, Wallet, Clock, Rocket, Package,
 } from 'lucide-react'
 
+// Features escritas como BENEFICIOS (qué gana el emprendedor),
+// no como características técnicas. Lenguaje claro y enfocado en
+// casos de uso reales del emprendedor peruano.
 const features = [
-  { icon: Layout, title: 'Plantillas Profesionales', description: 'Elige entre plantillas diseñadas por expertos que se adaptan a tu marca y estilo.' },
-  { icon: Smartphone, title: '100% Responsive', description: 'Tu tienda se verá perfecta en celulares, tablets y computadoras automáticamente.' },
-  { icon: MessageCircle, title: 'Integración WhatsApp', description: 'Tus clientes pueden contactarte y realizar pedidos directamente por WhatsApp.' },
-  { icon: BarChart3, title: 'Estadísticas Avanzadas', description: 'Conoce el rendimiento de tu tienda con métricas y reportes en tiempo real.' },
-  { icon: Globe, title: 'Dominio Personalizado', description: 'Usa tu propio dominio para darle un toque profesional a tu tienda online.' },
-  { icon: ShieldCheck, title: 'Seguridad SSL', description: 'Tus datos y los de tus clientes están protegidos con certificado SSL gratuito.' },
-  { icon: Palette, title: 'Personalización Total', description: 'Colores, fuentes y diseños personalizables para que tu tienda sea única.' },
-  { icon: Rocket, title: 'Configuración Rápida', description: 'En menos de 5 minutos tendrás tu tienda lista para recibir pedidos.' },
-  { icon: Package, title: 'Catálogo de Productos', description: 'Gestiona tus productos con imágenes, precios, categorías y stock ilimitado.' },
+  {
+    icon: Wallet,
+    title: 'Cobra con Yape y Plin al instante',
+    description:
+      'Tus clientes ven tu QR de Yape o Plin directo en la tienda y te pagan al toque. El dinero llega a tu cuenta, no pasa por nosotros. Sin comisión por venta, sin esperas, sin trámites.',
+  },
+  {
+    icon: MessageCircle,
+    title: 'Pedidos directos por WhatsApp',
+    description:
+      'El cliente toca un botón y te escribe por WhatsApp con el pedido listo. Tú despachas. Es el mismo flujo que ya usas con tus clientes, solo que ahora lo hacen desde una tienda profesional.',
+  },
+  {
+    icon: Clock,
+    title: 'Tu tienda lista en 5 minutos',
+    description:
+      'Sin programar, sin contratar diseñador. Registras, eliges plantilla, subes tus productos y compartes el link. Hoy mismo puedes estar recibiendo tu primer pedido.',
+  },
+  {
+    icon: Smartphone,
+    title: 'Se ve perfecto en celular',
+    description:
+      'Tus clientes compran desde su celular, y la tienda carga rápido con botones grandes y claros. El 90% de tus ventas vendrán del móvil, y todo está optimizado para esa experiencia.',
+  },
+  {
+    icon: Package,
+    title: 'Catálogo ilimitado con fotos',
+    description:
+      'Sube todos los productos que quieras con foto, precio, descripción y stock. Organízalos por categorías. Tus clientes ven todo ordenado, no andan preguntando "¿qué tienes?" por WhatsApp.',
+  },
+  {
+    icon: Rocket,
+    title: 'Vende en todo el Perú',
+    description:
+      'Comparte tu link por WhatsApp, Instagram, Facebook o TikTok. Llegas a clientes fuera de tu ciudad sin pagar envíos ni intermediarios. Tú despachas, tú cobras, tú decides.',
+  },
 ]
 
 const container = {
@@ -28,7 +57,7 @@ const container = {
 
 const item = {
   hidden: { opacity: 0, y: 30 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" as const } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' as const } },
 }
 
 export function Features() {
@@ -39,15 +68,18 @@ export function Features() {
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
           className="text-center mb-16"
         >
-          <span className="text-sm font-semibold text-violet-600 uppercase tracking-wider">Funciones</span>
+          <span className="text-sm font-semibold text-violet-600 uppercase tracking-wider">
+            Beneficios
+          </span>
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mt-3 mb-4">
             Todo lo que necesitas para vender online
           </h2>
           <p className="text-lg text-gray-500 max-w-2xl mx-auto">
-            Herramientas profesionales para que tu tienda online destaque y genere más ventas.
+            Hecho para emprendedores peruanos. Sin código, sin comisiones por venta y sin
+            complicaciones. Tú te enfocas en vender, nosotros en la tecnología.
           </p>
         </motion.div>
 
