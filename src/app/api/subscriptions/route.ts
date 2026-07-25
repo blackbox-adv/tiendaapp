@@ -145,13 +145,20 @@ export async function POST(request: NextRequest) {
       : null
 
     if (existing) {
-      // Update existing subscription using raw SQL
-      const nextBillingSql = nextBillingDate ? `'${nextBillingDate.toISOString()}'` : 'NULL'
-      await db.$queryRawUnsafe(`
-        UPDATE "Subscription"
-        SET "planId" = $1, status = 'active', "startDate" = NOW(), "nextBillingDate" = ${nextBillingSql}
-        WHERE id = $2
-      `, planId, existing.id)
+      // Update existing subscription using raw SQL (parameterized for security)
+      if (nextBillingDate) {
+        await db.$queryRawUnsafe(`
+          UPDATE "Subscription"
+          SET "planId" = $1, status = 'active', "startDate" = NOW(), "nextBillingDate" = $2
+          WHERE id = $3
+        `, planId, nextBillingDate.toISOString(), existing.id)
+      } else {
+        await db.$queryRawUnsafe(`
+          UPDATE "Subscription"
+          SET "planId" = $1, status = 'active', "startDate" = NOW(), "nextBillingDate" = NULL
+          WHERE id = $2
+        `, planId, existing.id)
+      }
 
       // Return the updated subscription with relations
       const updated = await db.$queryRawUnsafe(`
@@ -188,12 +195,18 @@ export async function POST(request: NextRequest) {
     // Create new subscription using raw SQL to avoid PgBouncer issues
     const subId = `sub-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
     const effectiveStoreId = storeId || ''
-    const nextBillingSql = nextBillingDate ? `'${nextBillingDate.toISOString()}'` : 'NULL'
 
-    await db.$queryRawUnsafe(`
-      INSERT INTO "Subscription" (id, "userId", "storeId", "planId", status, "startDate", "nextBillingDate", "billingCycle", "amountPaid", "createdAt", "updatedAt")
-      VALUES ($1, $2, $3, $4, 'active', NOW(), ${nextBillingSql}, 'monthly', 0, NOW(), NOW())
-    `, subId, userId, effectiveStoreId, planId)
+    if (nextBillingDate) {
+      await db.$queryRawUnsafe(`
+        INSERT INTO "Subscription" (id, "userId", "storeId", "planId", status, "startDate", "nextBillingDate", "billingCycle", "amountPaid", "createdAt", "updatedAt")
+        VALUES ($1, $2, $3, $4, 'active', NOW(), $5, 'monthly', 0, NOW(), NOW())
+      `, subId, userId, effectiveStoreId, planId, nextBillingDate.toISOString())
+    } else {
+      await db.$queryRawUnsafe(`
+        INSERT INTO "Subscription" (id, "userId", "storeId", "planId", status, "startDate", "nextBillingDate", "billingCycle", "amountPaid", "createdAt", "updatedAt")
+        VALUES ($1, $2, $3, $4, 'active', NOW(), NULL, 'monthly', 0, NOW(), NOW())
+      `, subId, userId, effectiveStoreId, planId)
+    }
 
     // Fetch the created subscription with relations
     const created = await db.$queryRawUnsafe(`
@@ -219,7 +232,7 @@ export async function POST(request: NextRequest) {
     return apiSuccess(serializeDecimals(result), 201, request)
   } catch (error: unknown) {
     console.error('[SUBSCRIPTIONS] POST error:', error instanceof Error ? error.message : String(error))
-    return apiError('Error creando suscripción: ' + (error instanceof Error ? error.message : String(error)), 500, undefined, request)
+    return apiError('Error creando suscripción', 500, undefined, request)
   }
 }
 

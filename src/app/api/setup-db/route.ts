@@ -1,10 +1,15 @@
 import { db } from '@/lib/db'
 import { NextRequest } from 'next/server'
-import { apiSuccess, handleCorsPreflight } from '@/lib/api-response'
+import { authenticateRequest, requireRole } from '@/lib/auth'
+import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 
-// GET /api/setup-db - Auto-migrate: add missing columns (no auth required, idempotent)
+// GET /api/setup-db - Auto-migrate: add missing columns (super_admin only)
 // This ensures the production database schema matches the Prisma schema
 export async function GET(request: NextRequest) {
+  const auth = await authenticateRequest(request)
+  if (auth.error) return apiError(auth.error, auth.status, undefined, request)
+  if (!auth.user) return apiError('No autenticado', 401, undefined, request)
+  if (!requireRole(auth.user, ['super_admin'])) return apiError('Solo administradores pueden modificar el schema', 403, undefined, request)
   const results: { table: string; column: string; action: string; success: boolean; error?: string }[] = []
 
   // All columns that might be missing from older schema versions

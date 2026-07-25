@@ -1,7 +1,21 @@
-import { NextResponse } from 'next/server'
-import { apiSuccess, handleCorsPreflight } from '@/lib/api-response'
+import { NextRequest } from 'next/server'
+import { authenticateRequest, requireRole } from '@/lib/auth'
+import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 
-export async function GET(request: Request) {
+// GET /api/health - Auth required in production, public in dev
+export async function GET(request: NextRequest) {
+  // In production, require admin auth to prevent info leakage
+  if (process.env.NODE_ENV === 'production') {
+    const auth = await authenticateRequest(request)
+    if (auth.error) {
+      // Still return basic health status for monitoring, but hide details
+      return apiSuccess({ status: 'ok', timestamp: new Date().toISOString() }, 200, request)
+    }
+    if (!auth.user || !requireRole(auth.user, ['super_admin'])) {
+      // Non-admin: return basic health status only
+      return apiSuccess({ status: 'ok', timestamp: new Date().toISOString() }, 200, request)
+    }
+  }
   try {
     const checks: Record<string, string> = {}
     checks['DATABASE_URL'] = process.env.DATABASE_URL ? 'OK' : 'MISSING'
@@ -61,7 +75,7 @@ export async function GET(request: Request) {
     const allOk = Object.values(checks).every(v => v === 'OK' || v === 'SET' || v.match(/^\d+$/))
     return apiSuccess({ status: allOk ? 'healthy' : 'unhealthy', timestamp: new Date().toISOString(), checks }, allOk ? 200 : 500, request)
   } catch {
-    return NextResponse.json({ status: 'ok', timestamp: new Date().toISOString() })
+    return apiSuccess({ status: 'ok', timestamp: new Date().toISOString() }, 200, request)
   }
 }
 

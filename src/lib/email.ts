@@ -15,7 +15,7 @@ function getResend(): Resend {
 }
 
 const FROM_EMAIL = 'TiendApp <noreply@blackboxperu.com>'
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blackboxperu.com'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://tienda.blackboxperu.com'
 
 // ── Email Templates ──
 

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { authenticateRequest } from '@/lib/auth';
-import { apiError } from '@/lib/api-response';
+import { apiError, apiSuccess } from '@/lib/api-response';
+import { serializeDecimals } from '@/lib/utils';
 
 export async function GET(
   request: NextRequest,
@@ -24,7 +25,10 @@ export async function GET(
       return NextResponse.json({ error: 'Store not found' }, { status: 404 });
     }
 
-    return NextResponse.json(store);
+    // Increment visit count (fire-and-forget)
+    db.store.update({ where: { slug }, data: { visitCount: { increment: 1 } } }).catch(() => {});
+
+    return NextResponse.json(serializeDecimals(store));
   } catch (error) {
     console.error('Error fetching store:', error);
     return NextResponse.json({ error: 'Failed to fetch store' }, { status: 500 });
@@ -46,22 +50,19 @@ export async function PUT(
 
     const store = await db.store.findUnique({
       where: { slug },
-      include: { users: true },
     });
 
     if (!store) {
       return NextResponse.json({ error: 'Tienda no encontrada' }, { status: 404 });
     }
 
-    const userId = auth.user.userId;
-    const isOwner = store.users.some((u) => u.userId === userId && u.role === 'owner');
-
-    if (!isOwner) {
+    // Check ownership: store.ownerId must match auth.user.userId (or super_admin)
+    if (store.ownerId !== auth.user.userId && auth.user.role !== 'super_admin') {
       return NextResponse.json({ error: 'No tienes permisos para editar esta tienda' }, { status: 403 });
     }
 
-    const updateData: any = {};
-    const allowedFields = ['name', 'description', 'template', 'whatsapp', 'email', 'address', 'logo', 'banner'];
+    const updateData: Record<string, unknown> = {};
+    const allowedFields = ['name', 'description', 'template', 'primaryColor', 'secondaryColor', 'category', 'logo', 'bannerUrl', 'whatsappNumber', 'hasShipping', 'hasSecurePayment', 'hasReturns', 'popupEnabled', 'popupType', 'popupProductId', 'popupCustomImage', 'popupTitle', 'popupButtonText', 'yapeQrUrl', 'plinQrUrl', 'yapeNumber', 'plinNumber'];
 
     for (const field of allowedFields) {
       if (body[field] !== undefined) {
@@ -74,7 +75,7 @@ export async function PUT(
       data: updateData,
     });
 
-    return NextResponse.json(updatedStore);
+    return apiSuccess(serializeDecimals(updatedStore), 200, request);
   } catch (error) {
     console.error('Update store error:', error);
     return NextResponse.json({ error: 'Error al actualizar la tienda' }, { status: 500 });

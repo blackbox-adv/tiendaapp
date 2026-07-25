@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
 
     await db.user.update({
       where: { id: user.id },
-      data: { password: hashedPassword },
+      data: { password: hashedPassword, tokenVersion: { increment: 1 } },
     });
 
     return NextResponse.json({ message: 'Contraseña actualizada correctamente' });

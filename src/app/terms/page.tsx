@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Terminos y Condiciones | TiendApp',
     description: 'Terminos y condiciones de uso de la plataforma TiendApp.',
-    url: 'https://tiendapp.pe/terms',
+    url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://tienda.blackboxperu.com'}/terms`,
     type: 'website',
     siteName: 'TiendApp',
   },

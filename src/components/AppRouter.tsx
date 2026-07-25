@@ -70,6 +70,7 @@ export default function AppRouter() {
 
   // Deep-link detection: sync Zustand route with actual browser URL
   useEffect(() => {
+    if (typeof window === 'undefined') return
     const pathname = window.location.pathname
 
     const routeMap: Record<string, () => void> = {

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { db } from '@/lib/db';
+import { generateToken } from '@/lib/auth';
+import { sendWelcomeEmail } from '@/lib/email';
 
 export async function POST(request: Request) {
   try {
@@ -14,9 +16,9 @@ export async function POST(request: Request) {
       );
     }
 
-    if (password.length < 6) {
+    if (password.length < 8) {
       return NextResponse.json(
-        { error: 'La contraseña debe tener al menos 6 caracteres' },
+        { error: 'La contraseña debe tener al menos 8 caracteres' },
         { status: 400 }
       );
     }
@@ -34,14 +36,29 @@ export async function POST(request: Request) {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    // Find free plan for initial subscription
+    const freePlan = await db.plan.findFirst({ where: { type: 'free' } });
+
     const user = await db.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
-        plan: 'free',
         onboardingDone: false,
       },
+    });
+
+    // Send welcome email (non-blocking)
+    sendWelcomeEmail(name, email).catch((err) => {
+      console.error('[REGISTER] Welcome email failed (non-blocking):', err);
+    });
+
+    // Generate JWT token
+    const token = generateToken({
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+      tokenVersion: user.tokenVersion ?? 0,
     });
 
     return NextResponse.json(
@@ -49,6 +66,9 @@ export async function POST(request: Request) {
         id: user.id,
         email: user.email,
         name: user.name,
+        role: user.role,
+        onboardingDone: user.onboardingDone,
+        token,
       },
       { status: 201 }
     );

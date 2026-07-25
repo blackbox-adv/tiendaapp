@@ -115,14 +115,14 @@ export async function DELETE(request: NextRequest) {
 
     const sql = db.$queryRawUnsafe.bind(db)
 
-    // Get store info before deletion
+    // Get store info before deletion (parameterized query)
     type StoreInfo = { name: string; pc: number }
     const [storeInfo]: StoreInfo[] = await sql(`
       SELECT s.name, COALESCE(pc.cnt, 0)::int as pc
       FROM "Store" s
       LEFT JOIN (SELECT "storeId", COUNT(*)::int as cnt FROM "StoreProduct" GROUP BY "storeId") pc ON pc."storeId" = s.id
-      WHERE s.id = '${storeId}'
-    `)
+      WHERE s.id = $1
+    `, storeId)
 
     if (!storeInfo) return apiError('Tienda no encontrada', 404, undefined, request)
 
@@ -171,7 +171,8 @@ export async function PUT(request: NextRequest) {
         return apiError('ID de tienda invalido', 400, undefined, request)
       }
       await db.$executeRawUnsafe(
-        `UPDATE "Store" SET "isActive" = ${isActiveVal}, "updatedAt" = NOW() WHERE id = '${id}'`
+        `UPDATE "Store" SET "isActive" = $1, "updatedAt" = NOW() WHERE id = $2`,
+        isActiveVal, id
       )
       return apiSuccess({ id, isActive: isActiveVal }, 200, request)
     }

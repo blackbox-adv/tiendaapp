@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Politica de Privacidad | TiendApp',
     description: 'Politica de privacidad de la plataforma TiendApp.',
-    url: 'https://tiendapp.pe/privacy',
+    url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://tienda.blackboxperu.com'}/privacy`,
     type: 'website',
     siteName: 'TiendApp',
   },

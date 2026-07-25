@@ -2,11 +2,11 @@ import { NextResponse } from 'next/server'
 
 // ── CORS Configuration ──
 const ALLOWED_ORIGINS = [
-  'https://tiendapp.pe',
-  'https://www.tiendapp.pe',
   'https://tienda.blackboxperu.com',
   'https://blackboxperu.com',
   'https://www.blackboxperu.com',
+  'https://tiendapp.pe',
+  'https://www.tiendapp.pe',
   'http://localhost:3000',
 ]
 
@@ -37,7 +37,10 @@ export function corsHeaders(request?: Request): Record<string, string> {
   if (isAllowed) {
     headers['Access-Control-Allow-Origin'] = origin
   } else if (process.env.NODE_ENV !== 'production') {
-    headers['Access-Control-Allow-Origin'] = origin || '*'
+    // In dev/staging, only allow known preview origins (never wildcard '*')
+    if (origin && (origin.includes('space.chatglm.site') || origin.includes('space.z.ai') || origin.includes('localhost'))) {
+      headers['Access-Control-Allow-Origin'] = origin
+    }
   }
 
   return headers

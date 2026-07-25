@@ -97,15 +97,11 @@ export async function PUT(request: NextRequest) {
           create: { key, value: String(value) },
         })
       } catch {
-        // If upsert fails (e.g., column name mismatch), try raw SQL
-        // Check what columns the table actually has
-        const safeValue = String(value).replace(/'/g, "''")
+        // If upsert fails (e.g., column name mismatch), try raw SQL with parameterized queries
         try {
           await db.$executeRawUnsafe(
-            `INSERT INTO "PlatformSetting" ("key", "value") ` +
-            `VALUES ('${key}', '${safeValue}') ` +
-            `ON CONFLICT ("key") ` +
-            `DO UPDATE SET "value" = EXCLUDED."value"`
+            `INSERT INTO "PlatformSetting" ("key", "value") VALUES ($1, $2) ON CONFLICT ("key") DO UPDATE SET "value" = EXCLUDED."value"`,
+            key, String(value)
           )
         } catch (rawErr) {
           console.error('[SETTINGS] Raw SQL also failed:', rawErr instanceof Error ? rawErr.message : String(rawErr))
@@ -113,10 +109,8 @@ export async function PUT(request: NextRequest) {
           const id = uuidv4()
           try {
             await db.$executeRawUnsafe(
-              `INSERT INTO "PlatformSetting" ("id", "key", "value") ` +
-              `VALUES ('${id}', '${key}', '${safeValue}') ` +
-              `ON CONFLICT ("key") ` +
-              `DO UPDATE SET "value" = EXCLUDED."value"`
+              `INSERT INTO "PlatformSetting" ("id", "key", "value") VALUES ($1, $2, $3) ON CONFLICT ("key") DO UPDATE SET "value" = EXCLUDED."value"`,
+              id, key, String(value)
             )
           } catch (rawErr2) {
             console.error('[SETTINGS] All SQL attempts failed:', rawErr2 instanceof Error ? rawErr2.message : String(rawErr2))

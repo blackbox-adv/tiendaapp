@@ -36,6 +36,7 @@ model User {
   role      String   @default("store_owner")      // super_admin, store_owner
   phone     String?
   avatar    String?
+  onboardingDone    Boolean  @default(false)
   isActive          Boolean  @default(true)
   lastLogin         DateTime?
   resetToken        String?
@@ -85,6 +86,7 @@ model Store {
   yapeNumber       String?                           // Yape phone number (for manual entry display)
   plinNumber       String?                           // Plin phone number (for manual entry display)
 
+  isDemo         Boolean  @default(false)
   isActive       Boolean  @default(true)
   visitCount     Int      @default(0)
   createdAt      DateTime @default(now())
@@ -94,6 +96,7 @@ model Store {
   owner         User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
   products      StoreProduct[]
+  categories    Category[]
   subscriptions Subscription[]
   payments     Payment[]
 
@@ -193,6 +196,19 @@ model Payment {
   @@index([status])                               // Payment status filter
   @@index([createdAt(sort: Desc)])                // Recent payments
   @@index([externalRef])                          // Gateway reference lookup & idempotency
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String
+  icon      String?
+  storeId   String
+  store     Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([storeId, name])
 }
 
 model AuditLog {

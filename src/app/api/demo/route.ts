@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { serializeDecimals } from '@/lib/utils';
 
 export async function GET() {
   try {
@@ -11,7 +12,7 @@ export async function GET() {
       },
       orderBy: { createdAt: 'asc' },
     });
-    return NextResponse.json(stores);
+    return NextResponse.json(serializeDecimals(stores));
   } catch (error) {
     console.error('Error fetching demo stores:', error);
     return NextResponse.json({ error: 'Failed to fetch demo stores' }, { status: 500 });

@@ -14,7 +14,7 @@ export function StoreQRCode() {
 
   const storeUrl = typeof window !== 'undefined'
     ? `${window.location.origin}/store/${currentStore.slug}`
-    : `https://tiendapp.pe/store/${currentStore.slug}`
+    : `${process.env.NEXT_PUBLIC_APP_URL || 'https://tienda.blackboxperu.com'}/store/${currentStore.slug}`
 
   // QR Code URL using a free QR API
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(storeUrl)}&bgcolor=ffffff&color=333333`

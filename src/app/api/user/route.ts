@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { authenticateRequest } from '@/lib/auth';
-import { apiError } from '@/lib/api-response';
+import { apiError, apiSuccess } from '@/lib/api-response';
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,28 +18,53 @@ export async function GET(request: NextRequest) {
         id: true,
         name: true,
         email: true,
-        plan: true,
+        role: true,
         onboardingDone: true,
+        avatar: true,
+        phone: true,
+        isActive: true,
+        createdAt: true,
         stores: {
           select: {
-            store: {
+            id: true,
+            slug: true,
+            name: true,
+            description: true,
+            template: true,
+            logo: true,
+            whatsappNumber: true,
+            category: true,
+            primaryColor: true,
+            secondaryColor: true,
+            hasShipping: true,
+            hasSecurePayment: true,
+            hasReturns: true,
+            popupEnabled: true,
+            popupType: true,
+            popupButtonText: true,
+            isDemo: true,
+            isActive: true,
+            _count: {
+              select: {
+                products: true,
+                categories: true,
+              },
+            },
+          },
+        },
+        subscriptions: {
+          where: { status: 'active' },
+          select: {
+            id: true,
+            status: true,
+            plan: {
               select: {
                 id: true,
-                slug: true,
                 name: true,
-                description: true,
-                template: true,
-                logo: true,
-                whatsapp: true,
-                email: true,
-                address: true,
-                plan: true,
-                _count: {
-                  select: {
-                    products: true,
-                    categories: true,
-                  },
-                },
+                type: true,
+                price: true,
+                maxProducts: true,
+                features: true,
               },
             },
           },
@@ -51,10 +76,20 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
 
-    return NextResponse.json(user);
+    return apiSuccess({
+      ...user,
+      subscriptions: user.subscriptions.map(sub => ({
+        ...sub,
+        plan: {
+          ...sub.plan,
+          price: Number(sub.plan.price),
+          features: sub.plan.features,
+        },
+      })),
+    }, 200, request);
   } catch (error) {
     console.error('Get user error:', error);
-    return NextResponse.json({ error: 'Error al obtener usuario' }, { status: 500 });
+    return apiError('Error al obtener usuario', 500, undefined, request);
   }
 }
 
@@ -68,8 +103,8 @@ export async function PUT(request: NextRequest) {
     const userId = auth.user.userId;
     const body = await request.json();
 
-    const updateData: any = {};
-    const allowedFields = ['name'];
+    const updateData: Record<string, unknown> = {};
+    const allowedFields = ['name', 'phone', 'avatar'];
 
     for (const field of allowedFields) {
       if (body[field] !== undefined) {
@@ -84,13 +119,16 @@ export async function PUT(request: NextRequest) {
         id: true,
         name: true,
         email: true,
-        plan: true,
+        role: true,
+        onboardingDone: true,
+        avatar: true,
+        phone: true,
       },
     });
 
-    return NextResponse.json(user);
+    return apiSuccess(user, 200, request);
   } catch (error) {
     console.error('Update user error:', error);
-    return NextResponse.json({ error: 'Error al actualizar usuario' }, { status: 500 });
+    return apiError('Error al actualizar usuario', 500, undefined, request);
   }
 }

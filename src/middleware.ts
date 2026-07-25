@@ -57,7 +57,7 @@ const CSP_POLICY = [
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com",
   "img-src 'self' data: blob: https://images.unsplash.com https://*.tile.openstreetmap.org https://lh3.googleusercontent.com https://*.supabase.co https://api.qrserver.com",
-  "connect-src 'self' https://wa.me https://api.culqi.com https://*.supabase.co",
+  "connect-src 'self' https://wa.me https://api.culqi.com https://*.supabase.co https://api.qullqui.com",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",

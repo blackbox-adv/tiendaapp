@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { authenticateRequest } from '@/lib/auth';
-import { apiError } from '@/lib/api-response';
+import { apiError, apiSuccess } from '@/lib/api-response';
 
 export async function PUT(request: NextRequest) {
   try {
@@ -17,12 +17,9 @@ export async function PUT(request: NextRequest) {
       data: { onboardingDone: true },
     });
 
-    return NextResponse.json({ message: 'Onboarding completado' });
+    return apiSuccess({ message: 'Onboarding completado', onboardingDone: true }, 200, request);
   } catch (error) {
     console.error('Onboarding error:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar onboarding' },
-      { status: 500 }
-    );
+    return apiError('Error al actualizar onboarding', 500, undefined, request);
   }
 }

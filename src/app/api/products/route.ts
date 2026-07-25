@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { authenticateRequest } from '@/lib/auth';
-import { apiError } from '@/lib/api-response';
+import { apiError, apiSuccess } from '@/lib/api-response';
+import { serializeDecimals } from '@/lib/utils';
+import { validateBody, createProductSchema } from '@/lib/validations';
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,18 +16,18 @@ export async function GET(request: NextRequest) {
     const storeId = searchParams.get('storeId');
 
     if (!storeId) {
-      return NextResponse.json({ error: 'storeId es requerido' }, { status: 400 });
+      return apiError('storeId es requerido', 400, undefined, request);
     }
 
-    const products = await db.product.findMany({
-      where: { storeId },
+    const products = await db.storeProduct.findMany({
+      where: { storeId, isActive: true },
       orderBy: { createdAt: 'desc' },
     });
 
-    return NextResponse.json(products);
+    return apiSuccess(serializeDecimals(products), 200, request);
   } catch (error) {
     console.error('Get products error:', error);
-    return NextResponse.json({ error: 'Error al obtener productos' }, { status: 500 });
+    return apiError('Error al obtener productos', 500, undefined, request);
   }
 }
 
@@ -37,29 +39,51 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, description, price, image, category, storeId } = body;
-
-    if (!name || price === undefined || !storeId) {
-      return NextResponse.json(
-        { error: 'Nombre, precio y tienda son requeridos' },
-        { status: 400 }
-      );
+    const validation = validateBody(createProductSchema, body);
+    if (!validation.success) {
+      return apiError(validation.error, 400, undefined, request);
     }
 
-    const product = await db.product.create({
+    const { name, description, price, imageUrl, category, storeId, originalPrice, color, isActive, featured } = validation.data;
+
+    // Check store ownership
+    const store = await db.store.findUnique({ where: { id: storeId }, select: { ownerId: true } });
+    if (!store) {
+      return apiError('Tienda no encontrada', 404, undefined, request);
+    }
+    if (store.ownerId !== auth.user.userId && auth.user.role !== 'super_admin') {
+      return apiError('No tienes permisos para esta tienda', 403, undefined, request);
+    }
+
+    // Check product limit based on plan
+    const productCount = await db.storeProduct.count({ where: { storeId } });
+    const subscription = await db.subscription.findFirst({
+      where: { userId: auth.user.userId, storeId, status: 'active' },
+      include: { plan: true },
+    });
+    const maxProducts = subscription?.plan?.maxProducts || 10;
+    if (productCount >= maxProducts) {
+      return apiError(`Limite de productos alcanzado (${maxProducts}). Actualiza tu plan.`, 403, undefined, request);
+    }
+
+    const product = await db.storeProduct.create({
       data: {
         name,
-        description: description || null,
-        price: parseFloat(price),
-        image: image || null,
-        category: category || null,
+        description: description || '',
+        price,
+        originalPrice: originalPrice || null,
+        imageUrl: imageUrl || '',
+        category: category || '',
+        color: color || null,
+        isActive: isActive ?? true,
+        featured: featured ?? false,
         storeId,
       },
     });
 
-    return NextResponse.json(product, { status: 201 });
+    return apiSuccess(serializeDecimals(product), 201, request);
   } catch (error) {
     console.error('Create product error:', error);
-    return NextResponse.json({ error: 'Error al crear producto' }, { status: 500 });
+    return apiError('Error al crear producto', 500, undefined, request);
   }
 }

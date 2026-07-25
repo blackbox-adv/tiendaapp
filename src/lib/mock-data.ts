@@ -203,6 +203,7 @@ export const MOCK_STORES: Store[] = [
     createdAt: '2024-03-15T10:00:00.000Z',
     hasShipping: true, hasSecurePayment: true, hasReturns: false,
     popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
+    yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
   },
   {
     id: 'store-2',
@@ -221,6 +222,7 @@ export const MOCK_STORES: Store[] = [
     createdAt: '2024-05-20T14:30:00.000Z',
     hasShipping: true, hasSecurePayment: false, hasReturns: false,
     popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
+    yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
   },
   {
     id: 'store-3',
@@ -239,6 +241,7 @@ export const MOCK_STORES: Store[] = [
     createdAt: '2024-06-10T09:15:00.000Z',
     hasShipping: true, hasSecurePayment: true, hasReturns: true,
     popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
+    yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
   },
   {
     id: 'store-4',
@@ -257,6 +260,7 @@ export const MOCK_STORES: Store[] = [
     createdAt: '2024-07-01T16:45:00.000Z',
     hasShipping: false, hasSecurePayment: true, hasReturns: false,
     popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
+    yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
   },
 ]
 

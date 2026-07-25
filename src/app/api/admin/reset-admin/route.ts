@@ -13,10 +13,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { email, confirmationCode, newPassword } = body
 
-    // Simple confirmation code - change this after first use
-    // This is intentionally simple for the initial setup scenario
-    // In production, you'd use email-based verification
-    const validCode = 'TIENDAPP-RESET-2024'
+    // Confirmation code from environment variable (rotate after first use)
+    // In production, use email-based verification instead
+    const validCode = process.env.ADMIN_RESET_CODE || 'CHANGE-ME-IN-PRODUCTION'
     if (confirmationCode !== validCode) {
       return apiError('Codigo de confirmacion invalido', 401, undefined, request)
     }
@@ -62,7 +61,6 @@ export async function POST(request: NextRequest) {
       {
         message: 'Contraseña actualizada exitosamente',
         email: user.email,
-        password: password === 'admin1234' ? 'admin1234' : '***',
       },
       200,
       request

@@ -1,52 +1,53 @@
 import type { MetadataRoute } from 'next'
 import { db } from '@/lib/db'
 
-const BUILD_DATE = '2026-05-06'
+// Dynamic lastModified dates will be used for static pages
+// (updatedAt from DB for dynamic pages)
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tiendapp.pe'
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tienda.blackboxperu.com'
 
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
-      lastModified: new Date(BUILD_DATE),
+      lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 1,
     },
     {
       url: `${baseUrl}/register`,
-      lastModified: new Date(BUILD_DATE),
+      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.9,
     },
     {
       url: `${baseUrl}/login`,
-      lastModified: new Date(BUILD_DATE),
+      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
       url: `${baseUrl}/about`,
-      lastModified: new Date(BUILD_DATE),
+      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.6,
     },
     {
       url: `${baseUrl}/contact`,
-      lastModified: new Date(BUILD_DATE),
+      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.6,
     },
     {
       url: `${baseUrl}/terms`,
-      lastModified: new Date(BUILD_DATE),
+      lastModified: new Date(),
       changeFrequency: 'yearly',
       priority: 0.3,
     },
     {
       url: `${baseUrl}/privacy`,
-      lastModified: new Date(BUILD_DATE),
+      lastModified: new Date(),
       changeFrequency: 'yearly',
       priority: 0.3,
     },

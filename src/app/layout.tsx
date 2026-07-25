@@ -31,14 +31,14 @@ export const metadata: Metadata = {
   authors: [{ name: "TiendApp" }],
   creator: "TiendApp",
   publisher: "TiendApp",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://tiendapp.pe"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://tienda.blackboxperu.com"),
   alternates: {
     canonical: "/",
   },
   openGraph: {
     title: "TiendApp | Crea tu tienda online en Perú",
     description: "La plataforma líder en Perú para crear tiendas online. WhatsApp integrado, plantillas profesionales y pagos en soles.",
-    url: process.env.NEXT_PUBLIC_APP_URL || "https://tiendapp.pe",
+    url: process.env.NEXT_PUBLIC_APP_URL || "https://tienda.blackboxperu.com",
     siteName: "TiendApp",
     images: [
       {
@@ -105,8 +105,8 @@ export default async function RootLayout({
                 '@context': 'https://schema.org',
                 '@type': 'Organization',
                 name: 'TiendApp',
-                url: 'https://tiendapp.pe',
-                logo: 'https://tiendapp.pe/logo.svg',
+                url: process.env.NEXT_PUBLIC_APP_URL || 'https://tienda.blackboxperu.com',
+                logo: `${process.env.NEXT_PUBLIC_APP_URL || 'https://tienda.blackboxperu.com'}/logo.svg`,
                 description: 'La plataforma líder en Perú para crear tiendas online sin conocimientos técnicos. WhatsApp integrado, plantillas profesionales y pagos en soles.',
                 email: contact.contactEmail,
                 telephone: contact.contactPhone,
