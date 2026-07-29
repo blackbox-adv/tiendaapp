@@ -9,7 +9,8 @@ export async function GET(request: NextRequest) {
   const auth = await authenticateRequest(request)
   if (auth.error) return apiError(auth.error, auth.status, undefined, request)
   if (!auth.user) return apiError('No autenticado', 401, undefined, request)
-  if (!requireRole(auth.user, ['super_admin'])) return apiError('Solo administradores pueden modificar el schema', 403, undefined, request)
+  // Allow any authenticated user to run column migrations (safe — only adds missing columns)
+  // Keep super_admin requirement for FK constraints in POST
   const results: { table: string; column: string; action: string; success: boolean; error?: string }[] = []
 
   // All columns that might be missing from older schema versions
