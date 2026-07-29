@@ -50,6 +50,7 @@ export async function GET(request: NextRequest) {
     { table: 'StoreProduct', column: 'category', sql: `ALTER TABLE "StoreProduct" ADD COLUMN IF NOT EXISTS "category" TEXT NOT NULL DEFAULT ''` },
     { table: 'StoreProduct', column: 'description', sql: `ALTER TABLE "StoreProduct" ADD COLUMN IF NOT EXISTS "description" TEXT NOT NULL DEFAULT ''` },
     { table: 'StoreProduct', column: 'imageUrl', sql: `ALTER TABLE "StoreProduct" ADD COLUMN IF NOT EXISTS "imageUrl" TEXT NOT NULL DEFAULT ''` },
+    { table: 'StoreProduct', column: 'stock', sql: `ALTER TABLE "StoreProduct" ADD COLUMN IF NOT EXISTS "stock" INTEGER NOT NULL DEFAULT -1` },
 
     // Subscription table
     { table: 'Subscription', column: 'nextBillingDate', sql: `ALTER TABLE "Subscription" ADD COLUMN IF NOT EXISTS "nextBillingDate" TIMESTAMP(3)` },
