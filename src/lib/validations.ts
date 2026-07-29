@@ -146,6 +146,7 @@ export const createProductSchema = z.object({
     .optional()
     .default(''),
   color: z.string().max(50).optional().nullable(),
+  stock: z.number().int().min(-1, 'Stock -1 = sin límite, 0+ = unidades disponibles').max(999999).optional().default(-1),
   isActive: z.boolean().optional().default(true),
   featured: z.boolean().optional().default(false),
   rating: z

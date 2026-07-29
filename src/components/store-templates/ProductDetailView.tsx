@@ -639,17 +639,44 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
 
             {/* WhatsApp CTA */}
             <div className="mt-8 flex flex-col gap-3">
-              <Button
-                className="w-full text-white gap-3 rounded-2xl py-6 text-base font-bold shadow-lg hover:opacity-90 transition-opacity"
-                style={{ backgroundColor: '#25D366' }}
-                onClick={openWhatsApp}
-              >
-                <MessageCircle className="w-5 h-5" />
-                Comprar por WhatsApp
-              </Button>
-              <p className="text-xs text-center text-gray-400">
-                Se abrira WhatsApp para coordinar la compra con el vendedor
-              </p>
+              {product.stock === 0 ? (
+                <>
+                  <div className="w-full text-center py-6 rounded-2xl bg-gray-100 text-gray-500 font-bold text-base">
+                    Producto agotado
+                  </div>
+                  <p className="text-xs text-center text-gray-400">
+                    Consulta al vendedor por disponibilidad
+                  </p>
+                  <Button
+                    variant="outline"
+                    className="w-full gap-3 rounded-2xl py-4 text-sm font-medium"
+                    onClick={openWhatsApp}
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    Consultar por WhatsApp
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    className="w-full text-white gap-3 rounded-2xl py-6 text-base font-bold shadow-lg hover:opacity-90 transition-opacity"
+                    style={{ backgroundColor: '#25D366' }}
+                    onClick={openWhatsApp}
+                  >
+                    <MessageCircle className="w-5 h-5" />
+                    Comprar por WhatsApp
+                  </Button>
+                  <p className="text-xs text-center text-gray-400">
+                    Se abrira WhatsApp para coordinar la compra con el vendedor
+                  </p>
+                </>
+              )}
+              {/* Stock indicator */}
+              {product.stock != null && product.stock > 0 && product.stock <= 5 && (
+                <p className="text-xs text-center text-amber-600 font-medium">
+                  ¡Solo quedan {product.stock} unidades!
+                </p>
+              )}
             </div>
 
             {/* Yape/Plin Payment Option */}

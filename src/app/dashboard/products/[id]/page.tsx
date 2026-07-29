@@ -74,6 +74,7 @@ export default function EditProductPage() {
   const [originalPrice, setOriginalPrice] = useState('');
   const [category, setCategory] = useState('');
   const [color, setColor] = useState('');
+  const [stock, setStock] = useState(-1); // -1 = unlimited
   const [featured, setFeatured] = useState(false);
   const [rating, setRating] = useState(0);
   const [isActive, setIsActive] = useState(true);
@@ -120,6 +121,7 @@ export default function EditProductPage() {
           setColor(p.color || '');
           setFeatured(p.featured || false);
           setRating(p.rating || 0);
+          setStock(p.stock !== undefined ? p.stock : -1);
           setIsActive(p.isActive !== false);
           setCoverPreview(p.imageUrl || null);
           setExistingImages(Array.isArray(p.images) ? p.images : []);
@@ -252,6 +254,7 @@ export default function EditProductPage() {
           images: allImages,
           category: category || '',
           color: color || null,
+          stock,
           isActive,
           featured,
           rating,
@@ -533,6 +536,26 @@ export default function EditProductPage() {
                   )}
                 </div>
               </div>
+            </div>
+
+            {/* Stock */}
+            <div className="space-y-2">
+              <Label htmlFor="stock">Stock / Inventario</Label>
+              <div className="flex items-center gap-3">
+                <Input
+                  id="stock"
+                  type="number"
+                  min="-1"
+                  placeholder="-1 = Sin límite"
+                  value={stock}
+                  onChange={(e) => setStock(parseInt(e.target.value) || -1)}
+                  className="w-32"
+                />
+                <span className="text-xs text-gray-400">
+                  {stock === -1 ? 'Sin límite' : stock === 0 ? 'Agotado' : `${stock} unidades`}
+                </span>
+              </div>
+              <p className="text-[11px] text-gray-400">-1 = sin límite, 0 = agotado, número positivo = unidades disponibles</p>
             </div>
 
             {/* Rating */}

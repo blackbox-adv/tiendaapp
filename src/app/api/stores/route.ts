@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
               'id', p.id, 'name', p.name, 'description', p.description,
               'price', p.price, 'originalPrice', p."originalPrice",
               'imageUrl', p."imageUrl", 'images', p.images,
-              'category', p.category, 'color', p.color,
+              'category', p.category, 'color', p.color, 'stock', p.stock,
               'isActive', p."isActive", 'featured', p.featured,
               'rating', p.rating, 'storeId', p."storeId", 'createdAt', p."createdAt"
             )

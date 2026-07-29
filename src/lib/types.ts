@@ -78,6 +78,7 @@ export interface Product {
   imageUrl: string
   images: string[]      // Array of additional image URLs for gallery
   color: string | null  // Product color variant
+  stock?: number        // -1 = unlimited, 0 = out of stock, >0 = available units (default: -1)
   isActive: boolean
   featured: boolean
   rating: number

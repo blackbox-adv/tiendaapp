@@ -123,8 +123,8 @@ export async function POST(request: NextRequest) {
 
       // Use raw SQL to avoid PgBouncer binary format issues (22P03 error)
       await tx.$executeRawUnsafe(`
-        INSERT INTO "StoreProduct" ("id", "storeId", "name", "description", "price", "originalPrice", "imageUrl", "images", "category", "color", "isActive", "featured", "rating", "createdAt", "updatedAt")
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW())
+        INSERT INTO "StoreProduct" ("id", "storeId", "name", "description", "price", "originalPrice", "imageUrl", "images", "category", "color", "stock", "isActive", "featured", "rating", "createdAt", "updatedAt")
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW(), NOW())
       `,
         productId,
         storeId,
@@ -136,6 +136,7 @@ export async function POST(request: NextRequest) {
         sanitizedImages,
         sanitizedCategory,
         color || null,
+        validation.data.stock !== undefined ? validation.data.stock : -1,
         isActive !== undefined ? isActive : true,
         featured === true,
         rating ? parseFloat(rating.toString()) : 0,
@@ -262,6 +263,7 @@ export async function PUT(request: NextRequest) {
     }
     addField('category', data.category)
     addField('color', data.color)
+    addField('stock', data.stock)
     addField('isActive', data.isActive)
     addField('featured', data.featured)
     addField('rating', data.rating)
