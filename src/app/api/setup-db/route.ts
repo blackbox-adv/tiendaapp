@@ -41,6 +41,7 @@ export async function GET(request: NextRequest) {
 
     // StoreProduct table
     { table: 'StoreProduct', column: 'color', sql: `ALTER TABLE "StoreProduct" ADD COLUMN IF NOT EXISTS "color" TEXT` },
+    { table: 'StoreProduct', column: 'images', sql: `ALTER TABLE "StoreProduct" ADD COLUMN IF NOT EXISTS "images" JSONB NOT NULL DEFAULT '[]'` },
     { table: 'StoreProduct', column: 'featured', sql: `ALTER TABLE "StoreProduct" ADD COLUMN IF NOT EXISTS "featured" BOOLEAN NOT NULL DEFAULT false` },
     { table: 'StoreProduct', column: 'rating', sql: `ALTER TABLE "StoreProduct" ADD COLUMN IF NOT EXISTS "rating" DECIMAL(2,1) NOT NULL DEFAULT 0` },
     { table: 'StoreProduct', column: 'isActive', sql: `ALTER TABLE "StoreProduct" ADD COLUMN IF NOT EXISTS "isActive" BOOLEAN NOT NULL DEFAULT true` },
@@ -165,6 +166,58 @@ export async function GET(request: NextRequest) {
   } catch (err) {
     const errMsg = err instanceof Error ? err.message : String(err)
     results.push({ table: 'PlatformSetting', column: '*', action: 'error', success: false, error: errMsg.substring(0, 200) })
+  }
+
+  // Create StoreOrder table if not exists
+  try {
+    await db.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS "StoreOrder" (
+        "id" TEXT NOT NULL,
+        "orderNumber" TEXT NOT NULL,
+        "status" TEXT NOT NULL DEFAULT 'pending',
+        "customerName" TEXT NOT NULL,
+        "customerPhone" TEXT NOT NULL,
+        "customerEmail" TEXT,
+        "totalAmount" DECIMAL(10,2) NOT NULL DEFAULT 0,
+        "items" JSONB NOT NULL DEFAULT '[]',
+        "whatsappMessage" TEXT,
+        "notes" TEXT,
+        "storeId" TEXT NOT NULL,
+        "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT "StoreOrder_pkey" PRIMARY KEY ("id")
+      )
+    `)
+    results.push({ table: 'StoreOrder', column: '*', action: 'created_or_exists', success: true })
+  } catch (err) {
+    const errMsg = err instanceof Error ? err.message : String(err)
+    results.push({ table: 'StoreOrder', column: '*', action: 'error', success: false, error: errMsg.substring(0, 200) })
+  }
+
+  // Create StoreOrder indexes
+  const orderIndexes = [
+    `CREATE INDEX IF NOT EXISTS "StoreOrder_storeId_idx" ON "StoreOrder"("storeId")`,
+    `CREATE INDEX IF NOT EXISTS "StoreOrder_storeId_status_idx" ON "StoreOrder"("storeId", "status")`,
+    `CREATE INDEX IF NOT EXISTS "StoreOrder_status_idx" ON "StoreOrder"("status")`,
+    `CREATE INDEX IF NOT EXISTS "StoreOrder_orderNumber_idx" ON "StoreOrder"("orderNumber")`,
+    `CREATE INDEX IF NOT EXISTS "StoreOrder_createdAt_idx" ON "StoreOrder"("createdAt" DESC)`,
+    `CREATE UNIQUE INDEX IF NOT EXISTS "StoreOrder_orderNumber_key" ON "StoreOrder"("orderNumber")`,
+  ]
+  for (const idxSql of orderIndexes) {
+    try {
+      await db.$executeRawUnsafe(idxSql)
+    } catch {
+      // Index may already exist
+    }
+  }
+
+  // Add StoreOrder foreign key to Store
+  try {
+    await db.$executeRawUnsafe(`DO $$ BEGIN ALTER TABLE "StoreOrder" ADD CONSTRAINT "StoreOrder_storeId_fkey" FOREIGN KEY ("storeId") REFERENCES "Store"("id") ON DELETE CASCADE ON UPDATE CASCADE; EXCEPTION WHEN OTHERS THEN IF SQLSTATE != '42710' THEN RAISE; END IF; END $$;`)
+    results.push({ table: 'StoreOrder', column: 'fk_storeId', action: 'fk_added_or_exists', success: true })
+  } catch (err) {
+    const errMsg = err instanceof Error ? err.message : String(err)
+    results.push({ table: 'StoreOrder', column: 'fk_storeId', action: 'error', success: false, error: errMsg.substring(0, 200) })
   }
 
   const errors = results.filter(r => !r.success)

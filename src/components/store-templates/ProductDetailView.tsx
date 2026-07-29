@@ -46,6 +46,7 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
   const [showYape, setShowYape] = useState(false)
   const [showZoom, setShowZoom] = useState(false)
   const [quantity, setQuantity] = useState(1)
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0)
 
   // Detect if we're on a public URL page (rendered by Next.js, not AppRouter)
   const isPublicPage = pathname.startsWith('/store/') || pathname.startsWith('/demo/')
@@ -144,6 +145,8 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
                 originalPrice: p.originalPrice != null ? toNum(p.originalPrice) : null,
                 categoryId: (p.category as string) || '',
                 imageUrl: (p.imageUrl as string) || '',
+                images: Array.isArray(p.images) ? (p.images as string[]) : [],
+                color: (p.color as string) || null,
                 isActive: (p.isActive as boolean) ?? true,
                 featured: (p.featured as boolean) ?? false,
                 rating: toNum(p.rating),
@@ -419,29 +422,72 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
       >
         {/* Main content: Image + Info */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-          {/* Product Image */}
+          {/* Product Image Gallery */}
           <div className="relative">
-            <div
-              className="aspect-square bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 sticky top-16 cursor-zoom-in group"
-              onClick={() => setShowZoom(true)}
-            >
-              <img
-                src={product.imageUrl}
-                alt={product.name}
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                onError={(e) => {
-                  ;(e.target as HTMLImageElement).src = imgFallback
-                }}
-              />
-              {/* Zoom hint overlay */}
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg">
-                  <ZoomIn className="w-6 h-6 text-gray-700" />
-                </div>
-              </div>
-              {/* Badges */}
-              <ProductBadges product={product} primaryColor={store.colors.primary} store={store} />
-            </div>
+            {(() => {
+              // Build all images: primary imageUrl first, then images array
+              const allImages = [product.imageUrl, ...(product.images || [])].filter(Boolean)
+              const currentImage = allImages[selectedImageIndex] || product.imageUrl
+              return (
+                <>
+                  {/* Main Image */}
+                  <div
+                    className="aspect-square bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 sticky top-16 cursor-zoom-in group"
+                    onClick={() => setShowZoom(true)}
+                  >
+                    <AnimatePresence mode="wait">
+                      <motion.img
+                        key={currentImage}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        src={currentImage}
+                        alt={product.name}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                        onError={(e) => {
+                          ;(e.target as HTMLImageElement).src = imgFallback
+                        }}
+                      />
+                    </AnimatePresence>
+                    {/* Zoom hint overlay */}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg">
+                        <ZoomIn className="w-6 h-6 text-gray-700" />
+                      </div>
+                    </div>
+                    {/* Badges */}
+                    <ProductBadges product={product} primaryColor={store.colors.primary} store={store} />
+                  </div>
+
+                  {/* Thumbnail Strip */}
+                  {allImages.length > 1 && (
+                    <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
+                      {allImages.map((img, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setSelectedImageIndex(idx)}
+                          className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
+                            idx === selectedImageIndex
+                              ? 'border-gray-900 ring-1 ring-gray-900/20 scale-[1.05]'
+                              : 'border-gray-200 hover:border-gray-400 opacity-70 hover:opacity-100'
+                          }`}
+                        >
+                          <img
+                            src={img}
+                            alt={`${product.name} - ${idx + 1}`}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              ;(e.target as HTMLImageElement).src = imgFallback
+                            }}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )
+            })()}
           </div>
 
           {/* Product Info */}
@@ -459,10 +505,23 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
               </div>
             )}
 
-            {/* Product Name */}
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight leading-tight">
-              {product.name}
-            </h1>
+            {/* Product Name + Color Badge */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight leading-tight">
+                {product.name}
+              </h1>
+              {product.color && (
+                <span
+                  className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border border-gray-200 bg-gray-50 text-gray-700"
+                >
+                  <span
+                    className="w-3 h-3 rounded-full border border-gray-300 flex-shrink-0"
+                    style={{ backgroundColor: product.color.toLowerCase() }}
+                  />
+                  {product.color}
+                </span>
+              )}
+            </div>
 
             {/* Rating & Featured Badge */}
             <div className="flex items-center gap-3 mt-3 flex-wrap">
@@ -910,19 +969,70 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
             </p>
 
             {/* Zoomed image */}
-            <motion.img
-              initial={{ scale: 0.85, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.85, opacity: 0 }}
-              transition={{ duration: 0.25, ease: 'easeOut' }}
-              src={product.imageUrl}
-              alt={product.name}
-              className="max-w-full max-h-[85vh] object-contain rounded-lg select-none"
-              onClick={(e) => e.stopPropagation()}
-              onError={(e) => {
-                ;(e.target as HTMLImageElement).src = imgFallback
-              }}
-            />
+            {(() => {
+              const allImages = [product.imageUrl, ...(product.images || [])].filter(Boolean)
+              const currentImage = allImages[selectedImageIndex] || product.imageUrl
+              return (
+                <motion.img
+                  key={currentImage}
+                  initial={{ scale: 0.85, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.85, opacity: 0 }}
+                  transition={{ duration: 0.25, ease: 'easeOut' }}
+                  src={currentImage}
+                  alt={product.name}
+                  className="max-w-full max-h-[85vh] object-contain rounded-lg select-none"
+                  onClick={(e) => e.stopPropagation()}
+                  onError={(e) => {
+                    ;(e.target as HTMLImageElement).src = imgFallback
+                  }}
+                />
+              )
+            })()}
+
+            {/* Thumbnail navigation in zoom */}
+            {(() => {
+              const allImages = [product.imageUrl, ...(product.images || [])].filter(Boolean)
+              if (allImages.length <= 1) return null
+              return (
+                <div className="absolute bottom-14 left-1/2 -translate-x-1/2 flex gap-2 bg-black/50 backdrop-blur-sm rounded-full p-1.5">
+                  {allImages.map((img, idx) => (
+                    <button
+                      key={idx}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setSelectedImageIndex(idx)
+                      }}
+                      className={`w-10 h-10 rounded-full overflow-hidden border-2 transition-all duration-200 ${
+                        idx === selectedImageIndex
+                          ? 'border-white scale-110'
+                          : 'border-white/40 hover:border-white/70 opacity-60 hover:opacity-90'
+                      }`}
+                    >
+                      <img
+                        src={img}
+                        alt={`${product.name} - ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          ;(e.target as HTMLImageElement).src = imgFallback
+                        }}
+                      />
+                    </button>
+                  ))}
+                </div>
+              )
+            })()}
+
+            {/* Image counter */}
+            {(() => {
+              const allImages = [product.imageUrl, ...(product.images || [])].filter(Boolean)
+              if (allImages.length <= 1) return null
+              return (
+                <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/50 text-xs">
+                  {selectedImageIndex + 1} / {allImages.length}
+                </p>
+              )
+            })()}
 
             {/* Hint */}
             <p className="absolute bottom-5 left-1/2 -translate-x-1/2 text-white/50 text-xs">

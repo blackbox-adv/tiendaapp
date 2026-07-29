@@ -76,11 +76,29 @@ export interface Product {
   originalPrice: number | null
   categoryId: string
   imageUrl: string
+  images: string[]      // Array of additional image URLs for gallery
+  color: string | null  // Product color variant
   isActive: boolean
   featured: boolean
   rating: number
   storeId: string
   createdAt: string
+}
+
+export interface StoreOrder {
+  id: string
+  orderNumber: string
+  status: 'pending' | 'confirmed' | 'cancelled'
+  customerName: string
+  customerPhone: string
+  customerEmail: string | null
+  totalAmount: number
+  items: Array<{ productId: string; name: string; price: number; quantity: number; imageUrl: string }>
+  whatsappMessage: string | null
+  notes: string | null
+  storeId: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface Category {

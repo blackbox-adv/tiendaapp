@@ -97,6 +97,7 @@ model Store {
 
   products      StoreProduct[]
   categories    Category[]
+  orders        StoreOrder[]
   subscriptions Subscription[]
   payments     Payment[]
 
@@ -113,7 +114,8 @@ model StoreProduct {
   description   String   @default("")
   price         Decimal  @db.Decimal(10,2)        // FIXED: Float → Decimal for monetary values
   originalPrice Decimal? @db.Decimal(10,2)        // FIXED: Float → Decimal for monetary values
-  imageUrl      String   @default("")
+  imageUrl      String   @default("")           // Primary/cover image (backward compatible)
+  images        Json     @default("[]")          // Array of image URLs for gallery
   category      String   @default("")
   color         String?
   isActive      Boolean  @default(true)
@@ -196,6 +198,38 @@ model Payment {
   @@index([status])                               // Payment status filter
   @@index([createdAt(sort: Desc)])                // Recent payments
   @@index([externalRef])                          // Gateway reference lookup & idempotency
+}
+
+model StoreOrder {
+  id            String   @id @default(cuid())
+  orderNumber   String   @unique @default(cuid())  // Auto-generated order number
+  status        String   @default("pending")     // pending, confirmed, cancelled
+
+  // Customer info
+  customerName  String
+  customerPhone String
+  customerEmail String?
+
+  // Order details
+  totalAmount   Decimal  @db.Decimal(10,2)
+  items         Json     @default("[]")           // Array of {productId, name, price, quantity, imageUrl}
+
+  // Communication
+  whatsappMessage String?                         // Pre-filled WhatsApp message for order
+  notes         String?                           // Customer or admin notes
+
+  storeId       String
+  store         Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([storeId])                              // Orders by store
+  @@index([storeId, status])                      // Orders by store + status
+  @@index([status])                               // Orders by status
+  @@index([orderNumber])                          // Order number lookup
+  @@index([createdAt(sort: Desc)])                // Recent orders
+  @@index([customerPhone])                        // Customer phone lookup
 }
 
 model Category {

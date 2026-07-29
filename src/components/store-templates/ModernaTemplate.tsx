@@ -14,7 +14,7 @@ const CATEGORIES = [
   { id: 'juguetes', name: 'Juguetes' },
   { id: 'otros', name: 'Otros' },
 ]
-import { Star, ShoppingBag, Search, X } from 'lucide-react'
+import { Star, ShoppingBag, Search, X, ImageIcon } from 'lucide-react'
 import { StoreFeatureBadges } from './StoreFeatureBadges'
 import { CombosSection } from './CombosSection'
 import { Badge } from '@/components/ui/badge'
@@ -304,6 +304,12 @@ export function ModernaTemplate({ store, products, storeSlug, planId, onProductC
                           %
                         </div>
                       )}
+                      {((product.images?.length || 0) + (product.imageUrl ? 1 : 0)) > 1 && (
+                        <div className="absolute top-2.5 right-2.5 px-1.5 py-0.5 rounded-md bg-black/50 text-white text-[10px] font-medium flex items-center gap-1">
+                          <ImageIcon className="w-3 h-3" />
+                          {(product.images?.length || 0) + 1}
+                        </div>
+                      )}
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
                         <span
                           className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white text-xs font-semibold px-4 py-2 rounded-full"
@@ -317,6 +323,9 @@ export function ModernaTemplate({ store, products, storeSlug, planId, onProductC
                       <h3 className="text-sm font-medium text-gray-800 truncate tracking-tight">
                         {product.name}
                       </h3>
+                      {product.color && (
+                        <span className="text-[11px] text-gray-400 font-medium">{product.color}</span>
+                      )}
                       {product.rating > 0 && (
                         <div className="flex items-center gap-1 mt-1">
                           <div className="flex">

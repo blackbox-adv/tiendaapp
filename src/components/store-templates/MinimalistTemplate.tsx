@@ -14,7 +14,7 @@ const CATEGORIES = [
   { id: 'juguetes', name: 'Juguetes' },
   { id: 'otros', name: 'Otros' },
 ]
-import { Star, ShoppingBag, Search, X, ChevronRight } from 'lucide-react'
+import { Star, ShoppingBag, Search, X, ChevronRight, ImageIcon } from 'lucide-react'
 import { StoreFeatureBadges } from './StoreFeatureBadges'
 import { CombosSection } from './CombosSection'
 import { useAppStore } from '@/lib/store'
@@ -322,6 +322,12 @@ export function MinimalistTemplate({ store, products, storeSlug, planId, onProdu
                           -{Math.round(((Number(product.originalPrice) - Number(product.price)) / Number(product.originalPrice)) * 100)}%
                         </div>
                       )}
+                      {((product.images?.length || 0) + (product.imageUrl ? 1 : 0)) > 1 && (
+                        <div className="absolute top-2.5 right-2.5 px-1.5 py-0.5 rounded-md bg-black/50 text-white text-[10px] font-medium flex items-center gap-1">
+                          <ImageIcon className="w-3 h-3" />
+                          {(product.images?.length || 0) + 1}
+                        </div>
+                      )}
                       {/* "Ver detalle" — simple text link on hover, not button */}
                       <div className="absolute bottom-3 left-0 right-0 text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <span className="text-xs font-medium text-white/80 bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full">
@@ -335,6 +341,9 @@ export function MinimalistTemplate({ store, products, storeSlug, planId, onProdu
                       <h3 className="text-sm font-normal text-gray-700 truncate">
                         {product.name}
                       </h3>
+                      {product.color && (
+                        <span className="text-[11px] text-gray-400 font-medium">{product.color}</span>
+                      )}
                       {renderStars(product.rating)}
                       <div className="flex items-center gap-2 mt-1.5">
                         <span className="text-sm font-semibold text-gray-900">

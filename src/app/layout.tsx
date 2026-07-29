@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { CookieConsent } from "@/components/CookieConsent";
+import { CartProvider } from "@/lib/cart-context";
 import { getPlatformContact } from "@/lib/platform-settings";
 
 const geistSans = Geist({
@@ -97,6 +98,7 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+          <CartProvider>
           {/* Organization JSON-LD for brand SEO */}
           <script
             type="application/ld+json"
@@ -185,6 +187,7 @@ export default async function RootLayout({
           {children}
           <Toaster />
           <SonnerToaster position="top-right" richColors closeButton />
+          </CartProvider>
         </ThemeProvider>
       </body>
     </html>

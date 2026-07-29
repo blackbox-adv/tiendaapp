@@ -52,7 +52,7 @@ export async function PUT(
     }
 
     const updateData: Record<string, unknown> = {};
-    const allowedFields = ['name', 'description', 'price', 'originalPrice', 'imageUrl', 'category', 'color', 'isActive', 'featured'];
+    const allowedFields = ['name', 'description', 'price', 'originalPrice', 'imageUrl', 'images', 'category', 'color', 'isActive', 'featured'];
     const data = validation.data;
 
     for (const field of allowedFields) {

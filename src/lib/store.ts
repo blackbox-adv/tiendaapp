@@ -90,6 +90,8 @@ function transformApiProduct(apiProduct: Record<string, unknown>): Product {
     originalPrice: rawOriginalPrice != null ? toNum(rawOriginalPrice) : null,
     categoryId: (apiProduct.category as string) || '',
     imageUrl: (apiProduct.imageUrl as string) || '',
+    images: Array.isArray(apiProduct.images) ? apiProduct.images as string[] : [],
+    color: (apiProduct.color as string) || null,
     isActive: (apiProduct.isActive as boolean) ?? true,
     featured: (apiProduct.featured as boolean) ?? false,
     rating: toNum(rawRating),

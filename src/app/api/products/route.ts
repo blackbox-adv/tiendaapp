@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
       return apiError(validation.error, 400, undefined, request);
     }
 
-    const { name, description, price, imageUrl, category, storeId, originalPrice, color, isActive, featured } = validation.data;
+    const { name, description, price, imageUrl, images, category, storeId, originalPrice, color, isActive, featured } = validation.data;
 
     // Check store ownership
     const store = await db.store.findUnique({ where: { id: storeId }, select: { ownerId: true } });
@@ -73,6 +73,7 @@ export async function POST(request: NextRequest) {
         price,
         originalPrice: originalPrice || null,
         imageUrl: imageUrl || '',
+        images: images || [],
         category: category || '',
         color: color || null,
         isActive: isActive ?? true,

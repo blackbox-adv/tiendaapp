@@ -14,7 +14,7 @@ const CATEGORIES = [
   { id: 'juguetes', name: 'Juguetes' },
   { id: 'otros', name: 'Otros' },
 ]
-import { Star, MessageCircle, ShoppingBag, Search, X, SlidersHorizontal } from 'lucide-react'
+import { Star, MessageCircle, ShoppingBag, Search, X, SlidersHorizontal, ImageIcon } from 'lucide-react'
 import { StoreFeatureBadges } from './StoreFeatureBadges'
 import { CombosSection } from './CombosSection'
 import { Badge } from '@/components/ui/badge'
@@ -366,6 +366,12 @@ export function VibranteTemplate({ store, products, storeSlug, planId, onProduct
                         -{Math.round(((Number(product.originalPrice) - Number(product.price)) / Number(product.originalPrice)) * 100)}%
                       </Badge>
                     )}
+                    {((product.images?.length || 0) + (product.imageUrl ? 1 : 0)) > 1 && (
+                      <div className="absolute top-3 right-3 px-1.5 py-0.5 rounded-md bg-black/50 text-white text-[10px] font-medium flex items-center gap-1">
+                        <ImageIcon className="w-3 h-3" />
+                        {(product.images?.length || 0) + 1}
+                      </div>
+                    )}
                     {/* Hover overlay with "Ver detalle" */}
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
                       <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white text-sm font-bold px-5 py-2.5 rounded-full bg-white/20 backdrop-blur-sm">
@@ -379,6 +385,9 @@ export function VibranteTemplate({ store, products, storeSlug, planId, onProduct
                     <h3 className="text-lg font-extrabold text-gray-900 leading-tight">
                       {product.name}
                     </h3>
+                    {product.color && (
+                      <span className="text-[11px] text-gray-400 font-medium">{product.color}</span>
+                    )}
                     {product.rating > 0 && (
                       <div className="flex items-center gap-1 mt-1.5">
                         <div className="flex">

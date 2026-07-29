@@ -14,7 +14,7 @@ const CATEGORIES = [
   { id: 'juguetes', name: 'Juguetes' },
   { id: 'otros', name: 'Otros' },
 ]
-import { Star, ShoppingBag, Search, X, Diamond, Crown } from 'lucide-react'
+import { Star, ShoppingBag, Search, X, Diamond, Crown, ImageIcon } from 'lucide-react'
 import { StoreFeatureBadges } from './StoreFeatureBadges'
 import { CombosSection } from './CombosSection'
 import { Badge } from '@/components/ui/badge'
@@ -415,6 +415,12 @@ export function LuxuryTemplate({ store, products, storeSlug, planId, onProductCl
                             Destacado
                           </div>
                         )}
+                        {((product.images?.length || 0) + (product.imageUrl ? 1 : 0)) > 1 && (
+                          <div className="absolute top-3 right-3 px-1.5 py-0.5 rounded-md bg-black/50 text-white text-[10px] font-medium flex items-center gap-1" style={!product.featured ? {} : { top: '2rem' }}>
+                            <ImageIcon className="w-3 h-3" />
+                            {(product.images?.length || 0) + 1}
+                          </div>
+                        )}
                         {/* Hover overlay — "Ver detalle" gold button */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end justify-center pb-6">
                           <motion.span
@@ -444,6 +450,9 @@ export function LuxuryTemplate({ store, products, storeSlug, planId, onProductCl
                         >
                           {product.name}
                         </h3>
+                        {product.color && (
+                          <span className="text-[11px] font-medium" style={{ color: '#8a8a9a' }}>{product.color}</span>
+                        )}
                         {renderStars(product.rating)}
                         <div className="flex items-center gap-2.5 mt-2">
                           <span

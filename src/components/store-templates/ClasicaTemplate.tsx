@@ -14,7 +14,7 @@ const CATEGORIES = [
   { id: 'juguetes', name: 'Juguetes' },
   { id: 'otros', name: 'Otros' },
 ]
-import { Star, MessageCircle, ShoppingBag, Heart, Search, X } from 'lucide-react'
+import { Star, MessageCircle, ShoppingBag, Heart, Search, X, ImageIcon } from 'lucide-react'
 import { StoreFeatureBadges } from './StoreFeatureBadges'
 import { CombosSection } from './CombosSection'
 import { Badge } from '@/components/ui/badge'
@@ -368,6 +368,12 @@ export function ClasicaTemplate({ store, products, storeSlug, planId, onProductC
                         Ver detalle
                       </span>
                     </div>
+                    {((product.images?.length || 0) + (product.imageUrl ? 1 : 0)) > 1 && (
+                      <div className="absolute top-2.5 right-2.5 px-1.5 py-0.5 rounded-md bg-black/50 text-white text-[10px] font-medium flex items-center gap-1">
+                        <ImageIcon className="w-3 h-3" />
+                        {(product.images?.length || 0) + 1}
+                      </div>
+                    )}
                   </div>
 
                   {/* Text — right side */}
@@ -381,6 +387,9 @@ export function ClasicaTemplate({ store, products, storeSlug, planId, onProductC
                           >
                             {product.name}
                           </h3>
+                          {product.color && (
+                            <span className="text-[11px] text-gray-400 font-medium">{product.color}</span>
+                          )}
                           {product.rating > 0 && (
                             <div className="flex items-center gap-1 mt-1">
                               <div className="flex">

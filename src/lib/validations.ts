@@ -135,6 +135,11 @@ export const createProductSchema = z.object({
     .max(1000, 'URL de imagen muy larga')
     .optional()
     .default(''),
+  images: z
+    .array(z.string().max(1000, 'URL de imagen muy larga'))
+    .max(8, 'Máximo 8 imágenes adicionales')
+    .optional()
+    .default([]),
   category: z
     .string()
     .max(50, 'Categoria no puede exceder 50 caracteres')

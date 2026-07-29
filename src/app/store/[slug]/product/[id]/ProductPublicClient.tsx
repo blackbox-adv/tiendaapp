@@ -56,6 +56,8 @@ function transformProduct(p: Record<string, unknown>): Product {
     originalPrice: p.originalPrice != null ? toNum(p.originalPrice) : null,
     categoryId: (p.category as string) || '',
     imageUrl: (p.imageUrl as string) || '',
+    images: Array.isArray(p.images) ? (p.images as string[]) : [],
+    color: (p.color as string) || null,
     isActive: (p.isActive as boolean) ?? true,
     featured: (p.featured as boolean) ?? false,
     rating: toNum(p.rating),

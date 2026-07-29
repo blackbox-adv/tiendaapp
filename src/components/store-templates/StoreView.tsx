@@ -15,6 +15,7 @@ import { ClasicaTemplate } from './ClasicaTemplate'
 import { LuxuryTemplate } from './LuxuryTemplate'
 import { MinimalistTemplate } from './MinimalistTemplate'
 import { PromoPopup } from './PromoPopup'
+import { CartButton } from './CartButton'
 import type { Product, Store as StoreType } from '@/lib/types'
 
 export function StoreView({ slug }: { slug: string }) {
@@ -111,6 +112,8 @@ export function StoreView({ slug }: { slug: string }) {
                 originalPrice: p.originalPrice != null ? toNum(p.originalPrice) : null,
                 categoryId: (p.category as string) || '',
                 imageUrl: (p.imageUrl as string) || '',
+                images: Array.isArray(p.images) ? (p.images as string[]) : [],
+                color: (p.color as string) || null,
                 isActive: (p.isActive as boolean) ?? true,
                 featured: (p.featured as boolean) ?? false,
                 rating: toNum(p.rating),
@@ -258,6 +261,9 @@ export function StoreView({ slug }: { slug: string }) {
 
       {/* WhatsApp Float */}
       <WhatsAppButton whatsappNumber={displayStore!.whatsappNumber} />
+
+      {/* Cart Button */}
+      <CartButton storeId={displayStore!.id} whatsappNumber={displayStore!.whatsappNumber} storeName={displayStore!.name} />
 
       {/* Promo Popup */}
       <PromoPopup store={displayStore!} products={displayProducts} onProductClick={handleProductClick} />

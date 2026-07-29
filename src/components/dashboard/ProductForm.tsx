@@ -34,7 +34,7 @@ export function ProductForm({ productId }: { productId?: string }) {
   )
 
   const formDefaults = useMemo(() => {
-    if (!editProduct) return { name: '', description: '', price: '', originalPrice: '', categoryId: '', imageUrl: '', featured: false, rating: 0 }
+    if (!editProduct) return { name: '', description: '', price: '', originalPrice: '', categoryId: '', imageUrl: '', images: [] as string[], color: '', featured: false, rating: 0 }
     return {
       name: editProduct.name,
       description: editProduct.description,
@@ -42,6 +42,8 @@ export function ProductForm({ productId }: { productId?: string }) {
       originalPrice: editProduct.originalPrice?.toString() || '',
       categoryId: editProduct.categoryId,
       imageUrl: editProduct.imageUrl,
+      images: editProduct.images || [],
+      color: editProduct.color || '',
       featured: editProduct.featured,
       rating: editProduct.rating,
     }
@@ -53,10 +55,13 @@ export function ProductForm({ productId }: { productId?: string }) {
   const [originalPrice, setOriginalPrice] = useState(formDefaults.originalPrice)
   const [categoryId, setCategoryId] = useState(formDefaults.categoryId)
   const [imageUrl, setImageUrl] = useState(formDefaults.imageUrl)
+  const [images, setImages] = useState<string[]>(formDefaults.images)
+  const [color, setColor] = useState(formDefaults.color)
   const [featured, setFeatured] = useState(formDefaults.featured)
   const [rating, setRating] = useState(formDefaults.rating)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [uploading, setUploading] = useState(false)
+  const [uploadingAdditional, setUploadingAdditional] = useState(false)
 
   const validate = () => {
     const errs: Record<string, string> = {}
@@ -83,6 +88,8 @@ export function ProductForm({ productId }: { productId?: string }) {
       originalPrice: originalPrice ? parseFloat(originalPrice) : null,
       categoryId,
       imageUrl: imageUrl.trim(),
+      images,
+      color: color.trim() || null,
       isActive: true,
       featured,
       rating,
@@ -161,6 +168,71 @@ export function ProductForm({ productId }: { productId?: string }) {
       setUploading(false)
     }
   }, [])
+
+  const handleAdditionalImageUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (images.length >= 8) {
+      toast.error('Límite alcanzado', { description: 'Solo se permiten un máximo de 8 imágenes adicionales.' })
+      return
+    }
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Formato inválido', { description: 'Solo se permiten JPG, PNG, WebP y GIF' })
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Archivo muy grande', { description: 'La imagen no debe superar los 5MB' })
+      return
+    }
+
+    setUploadingAdditional(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('folder', 'product')
+
+      const token = localStorage.getItem('tiendapp_token')
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        if (data.url) {
+          setImages(prev => [...prev, data.url])
+        } else {
+          toast.error('Error', { description: 'No se recibió la URL de la imagen' })
+        }
+      } else {
+        const data = await res.json().catch(() => ({}))
+        toast.error('Error al subir', { description: data.error || 'Error al subir la imagen' })
+      }
+    } catch {
+      toast.error('Error de conexión', { description: 'Error al subir la imagen' })
+    } finally {
+      setUploadingAdditional(false)
+    }
+  }, [images.length])
+
+  const handleRemoveImage = useCallback((index: number) => {
+    setImages(prev => prev.filter((_, i) => i !== index))
+  }, [])
+
+  const handleAddImageUrl = useCallback(() => {
+    const url = prompt('Ingresa la URL de la imagen:')
+    if (!url?.trim()) return
+    if (images.length >= 8) {
+      toast.error('Límite alcanzado', { description: 'Solo se permiten un máximo de 8 imágenes adicionales.' })
+      return
+    }
+    setImages(prev => [...prev, url.trim()])
+  }, [images.length])
 
   const sampleImages = [
     'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop',
@@ -250,6 +322,17 @@ export function ProductForm({ productId }: { productId?: string }) {
                 </SelectContent>
               </Select>
               {errors.categoryId && <p className="text-xs text-red-500">{errors.categoryId}</p>}
+            </div>
+
+            {/* Color */}
+            <div className="space-y-2">
+              <Label>Color</Label>
+              <Input
+                placeholder="Ej: Negro, Rojo, Azul"
+                value={color}
+                onChange={(e) => setColor(e.target.value)}
+              />
+              <p className="text-xs text-gray-400">Variante de color del producto (opcional)</p>
             </div>
 
             {/* Image Upload & URL */}
@@ -410,6 +493,78 @@ export function ProductForm({ productId }: { productId?: string }) {
                 <p className="text-sm mt-1">Vista previa de la imagen</p>
               </div>
             )}
+
+            {/* Additional Images */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label>Imágenes adicionales (máximo 8)</Label>
+                <span className="text-xs text-gray-400">{images.length}/8</span>
+              </div>
+
+              {/* Current images grid */}
+              {images.length > 0 && (
+                <div className="grid grid-cols-4 gap-2">
+                  {images.map((img, index) => (
+                    <div key={index} className="relative group rounded-lg overflow-hidden border border-gray-200 aspect-square bg-gray-50">
+                      <img
+                        src={img}
+                        alt={`Imagen ${index + 2}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none'
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage(index)}
+                        className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100"
+                      >
+                        <X className="w-3 h-3 text-white" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Add image buttons */}
+              {images.length < 8 && (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    onChange={handleAdditionalImageUpload}
+                    className="hidden"
+                    id="additional-image-upload"
+                  />
+                  <label
+                    htmlFor="additional-image-upload"
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg border border-dashed border-gray-300 hover:border-violet-300 hover:bg-violet-50/30 cursor-pointer transition-colors text-sm text-gray-600"
+                  >
+                    {uploadingAdditional ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-violet-200 border-t-violet-600 rounded-full animate-spin" />
+                        <span>Subiendo...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4" />
+                        <span>Subir imagen</span>
+                      </>
+                    )}
+                  </label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleAddImageUrl}
+                    className="gap-2 text-sm"
+                  >
+                    <ImageIcon className="w-4 h-4" />
+                    Agregar URL
+                  </Button>
+                </div>
+              )}
+            </div>
 
             {/* Featured Toggle */}
             <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50">
