@@ -16,6 +16,10 @@ import {
   RefreshCw,
   ArrowRight,
   Loader2,
+  Eye,
+  ShoppingCart,
+  DollarSign,
+  AlertTriangle,
 } from 'lucide-react';
 
 interface StoreData {
@@ -45,6 +49,11 @@ export default function DashboardPage() {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [analytics, setAnalytics] = useState<{
+    products: { total: number; active: number; outOfStock: number };
+    orders: { total: number; totalRevenue: number; byStatus: Record<string, number> };
+    visits: { total: number };
+  } | null>(null);
 
   const fetchUserData = async () => {
     setLoading(true);
@@ -67,6 +76,19 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchUserData();
   }, []);
+
+  // Fetch analytics when store is available
+  useEffect(() => {
+    const storeData = userData?.stores?.[0]?.store;
+    if (storeData?.id) {
+      fetch(`/api/analytics?storeId=${storeData.id}`)
+        .then((res) => res.ok ? res.json() : null)
+        .then((data) => {
+          if (data?.data) setAnalytics(data.data);
+        })
+        .catch(() => {});
+    }
+  }, [userData]);
 
   if (loading) {
     return (
@@ -152,7 +174,7 @@ export default function DashboardPage() {
       </Card>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <Card className="border-0 shadow-sm">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
@@ -160,7 +182,7 @@ export default function DashboardPage() {
                 <Package className="w-5 h-5 text-violet-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{store._count?.products ?? 0}</p>
+                <p className="text-2xl font-bold text-gray-900">{analytics?.products?.total ?? store._count?.products ?? 0}</p>
                 <p className="text-gray-500 text-xs">Productos</p>
               </div>
             </div>
@@ -169,17 +191,61 @@ export default function DashboardPage() {
         <Card className="border-0 shadow-sm">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
-                <FolderOpen className="w-5 h-5 text-amber-600" />
+              <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                <Eye className="w-5 h-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{store._count?.categories ?? 0}</p>
-                <p className="text-gray-500 text-xs">Categorías</p>
+                <p className="text-2xl font-bold text-gray-900">{analytics?.visits?.total ?? 0}</p>
+                <p className="text-gray-500 text-xs">Visitas</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-0 shadow-sm">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
+                <ShoppingCart className="w-5 h-5 text-emerald-600" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-gray-900">{analytics?.orders?.total ?? 0}</p>
+                <p className="text-gray-500 text-xs">Pedidos</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-0 shadow-sm">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+                <DollarSign className="w-5 h-5 text-amber-600" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-gray-900">S/ {analytics ? Number(analytics.orders.totalRevenue).toFixed(0) : '0'}</p>
+                <p className="text-gray-500 text-xs">Ingresos</p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Alerts */}
+      {analytics && (analytics.products.outOfStock > 0 || analytics.orders.byStatus?.pending > 0) && (
+        <div className="flex flex-wrap gap-2">
+          {analytics.products.outOfStock > 0 && (
+            <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 gap-1 py-1 px-3">
+              <AlertTriangle className="w-3 h-3" />
+              {analytics.products.outOfStock} producto{analytics.products.outOfStock > 1 ? 's' : ''} agotado{analytics.products.outOfStock > 1 ? 's' : ''}
+            </Badge>
+          )}
+          {analytics.orders.byStatus?.pending > 0 && (
+            <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 gap-1 py-1 px-3">
+              <ShoppingCart className="w-3 h-3" />
+              {analytics.orders.byStatus.pending} pedido{analytics.orders.byStatus.pending > 1 ? 's' : ''} pendiente{analytics.orders.byStatus.pending > 1 ? 's' : ''}
+            </Badge>
+          )}
+        </div>
+      )}
 
       {/* Quick Actions */}
       <div>
