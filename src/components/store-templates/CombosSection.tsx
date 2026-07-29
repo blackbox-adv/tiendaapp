@@ -5,17 +5,7 @@ import { motion } from 'framer-motion'
 import { Package, MessageCircle } from 'lucide-react'
 import type { Store, Product } from '@/lib/types'
 
-const CATEGORIES = [
-  { id: 'ropa', name: 'Ropa' },
-  { id: 'accesorios', name: 'Accesorios' },
-  { id: 'electronica', name: 'Electronica' },
-  { id: 'hogar', name: 'Hogar' },
-  { id: 'belleza', name: 'Belleza' },
-  { id: 'deportes', name: 'Deportes' },
-  { id: 'alimentos', name: 'Alimentos' },
-  { id: 'juguetes', name: 'Juguetes' },
-  { id: 'otros', name: 'Otros' },
-]
+import { DEFAULT_CATEGORIES, getStoreCategories } from '@/lib/store-categories'
 
 interface Combo {
   categoryId: string
@@ -59,7 +49,7 @@ function getCombos(products: Product[]): Combo[] {
     const packPrice = Math.round(totalPrice * 0.95 * 100) / 100 // 5% discount
     const discount = totalPrice - packPrice
 
-    const cat = CATEGORIES.find((c) => c.id === catId)
+    const cat = getStoreCategories(products).find((c) => c.id === catId)
     combos.push({
       categoryId: catId,
       categoryName: cat?.name || catId,

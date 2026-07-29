@@ -27,7 +27,8 @@ export async function GET(request: NextRequest) {
             json_build_object(
               'id', p.id, 'name', p.name, 'description', p.description,
               'price', p.price, 'originalPrice', p."originalPrice",
-              'imageUrl', p."imageUrl", 'category', p.category,
+              'imageUrl', p."imageUrl", 'images', p.images,
+              'category', p.category, 'color', p.color,
               'isActive', p."isActive", 'featured', p.featured,
               'rating', p.rating, 'storeId', p."storeId", 'createdAt', p."createdAt"
             )

@@ -32,7 +32,9 @@ export async function GET(request: NextRequest) {
         price: true,
         originalPrice: true,
         imageUrl: true,
+        images: true,
         category: true,
+        color: true,
         isActive: true,
         featured: true,
         rating: true,
@@ -63,7 +65,7 @@ export async function POST(request: NextRequest) {
       return apiError(validation.error, 400, undefined, request)
     }
 
-    const { storeId, name, description, price, originalPrice, imageUrl, category, color, isActive, featured, rating } =
+    const { storeId, name, description, price, originalPrice, imageUrl, images, category, color, isActive, featured, rating } =
       validation.data
 
     // Check ownership FIRST — use simple query to avoid PgBouncer timeout with Prisma include
@@ -114,10 +116,15 @@ export async function POST(request: NextRequest) {
       const { nanoid } = await import('nanoid')
       const productId = `prod-${nanoid(24)}`
 
+      // Sanitize images array
+      const sanitizedImages = Array.isArray(images) && images.length > 0
+        ? JSON.stringify(images.map((url: string) => sanitizeUrl(url)).filter(Boolean))
+        : '[]'
+
       // Use raw SQL to avoid PgBouncer binary format issues (22P03 error)
       await tx.$executeRawUnsafe(`
-        INSERT INTO "StoreProduct" ("id", "storeId", "name", "description", "price", "originalPrice", "imageUrl", "category", "color", "isActive", "featured", "rating", "createdAt", "updatedAt")
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), NOW())
+        INSERT INTO "StoreProduct" ("id", "storeId", "name", "description", "price", "originalPrice", "imageUrl", "images", "category", "color", "isActive", "featured", "rating", "createdAt", "updatedAt")
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW())
       `,
         productId,
         storeId,
@@ -126,6 +133,7 @@ export async function POST(request: NextRequest) {
         parseFloat(price.toString()),
         originalPrice ? parseFloat(originalPrice.toString()) : null,
         sanitizedImageUrl,
+        sanitizedImages,
         sanitizedCategory,
         color || null,
         isActive !== undefined ? isActive : true,
@@ -243,6 +251,15 @@ export async function PUT(request: NextRequest) {
     addField('price', data.price)
     addField('originalPrice', data.originalPrice)
     addField('imageUrl', data.imageUrl)
+    // Handle images array (JSON string for raw SQL)
+    if (data.images !== undefined) {
+      const sanitizedImages = Array.isArray(data.images) && data.images.length > 0
+        ? JSON.stringify(data.images.map((url: string) => sanitizeUrl(url)).filter(Boolean))
+        : '[]'
+      setClauses.push(`"images" = $${paramIdx}`)
+      values.push(sanitizedImages)
+      paramIdx++
+    }
     addField('category', data.category)
     addField('color', data.color)
     addField('isActive', data.isActive)

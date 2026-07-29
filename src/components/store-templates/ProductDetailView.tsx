@@ -5,17 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAppStore } from '@/lib/store'
 import { StoreLogo } from './StoreLogo'
-const CATEGORIES = [
-  { id: 'ropa', name: 'Ropa' },
-  { id: 'accesorios', name: 'Accesorios' },
-  { id: 'electronica', name: 'Electronica' },
-  { id: 'hogar', name: 'Hogar' },
-  { id: 'belleza', name: 'Belleza' },
-  { id: 'deportes', name: 'Deportes' },
-  { id: 'alimentos', name: 'Alimentos' },
-  { id: 'juguetes', name: 'Juguetes' },
-  { id: 'otros', name: 'Otros' },
-]
+import { DEFAULT_CATEGORIES, getStoreCategories } from '@/lib/store-categories'
 import {
   ArrowLeft,
   MessageCircle,
@@ -256,7 +246,8 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
   const product = displayProduct
   const store = displayStore
 
-  const category = CATEGORIES.find((c) => c.id === product.categoryId)
+  const categories = getStoreCategories(products)
+  const category = categories.find((c) => c.id === product.categoryId)
   const discount = product.originalPrice
     ? Math.round(((Number(product.originalPrice) - Number(product.price)) / Number(product.originalPrice)) * 100)
     : 0

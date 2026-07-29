@@ -14,6 +14,8 @@ import {
   Package,
   Edit,
   Trash2,
+  Star,
+  EyeOff,
 } from 'lucide-react';
 
 interface Product {
@@ -21,8 +23,15 @@ interface Product {
   name: string;
   description: string | null;
   price: number;
-  image: string | null;
+  originalPrice: number | null;
+  imageUrl: string;
+  images: string[];
   category: string | null;
+  color: string | null;
+  isActive: boolean;
+  featured: boolean;
+  rating: number;
+  storeId: string;
 }
 
 interface StoreData {
@@ -31,6 +40,7 @@ interface StoreData {
   name: string;
   template: string;
   products: Product[];
+  categories: { id: string; name: string }[];
 }
 
 export default function ProductsPage() {
@@ -52,7 +62,6 @@ export default function ProductsPage() {
       const data = await res.json();
       const storeData = data.stores?.[0]?.store;
       if (storeData) {
-        // Fetch full store with products
         const storeRes = await fetch(`/api/stores/${storeData.slug}`);
         if (storeRes.ok) {
           const fullStore = await storeRes.json();
@@ -179,63 +188,120 @@ export default function ProductsPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredProducts.map((product) => (
-            <Card key={product.id} className="border-0 shadow-sm hover:shadow-md transition-shadow">
-              <div className="aspect-video bg-gray-100 rounded-t-lg relative overflow-hidden">
-                {product.image ? (
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Package className="w-10 h-10 text-gray-300" />
-                  </div>
-                )}
-                {product.category && (
-                  <Badge className="absolute top-2 left-2 bg-white/90 text-gray-700 text-[10px]">
-                    {product.category}
-                  </Badge>
-                )}
-              </div>
-              <CardContent className="p-4">
-                <h3 className="font-semibold text-sm text-gray-900 line-clamp-1">
-                  {product.name}
-                </h3>
-                {product.description && (
-                  <p className="text-gray-400 text-xs mt-1 line-clamp-2">
-                    {product.description}
-                  </p>
-                )}
-                <div className="flex items-center justify-between mt-3">
-                  <span className="font-bold text-violet-600">
-                    S/ {product.price.toFixed(2)}
-                  </span>
-                  <div className="flex gap-1">
-                    <Link href={`/dashboard/products/${product.id}`}>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                    </Link>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
-                      onClick={() => handleDelete(product.id)}
-                      disabled={deleting === product.id}
-                    >
-                      {deleting === product.id ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Trash2 className="w-4 h-4" />
-                      )}
-                    </Button>
-                  </div>
+          {filteredProducts.map((product) => {
+            const totalImages = (product.images?.length || 0) + (product.imageUrl ? 1 : 0);
+            const priceNum = typeof product.price === 'object'
+              ? parseFloat(String(product.price))
+              : Number(product.price);
+            const origPrice = product.originalPrice
+              ? typeof product.originalPrice === 'object'
+                ? parseFloat(String(product.originalPrice))
+                : Number(product.originalPrice)
+              : null;
+
+            return (
+              <Card key={product.id} className="border-0 shadow-sm hover:shadow-md transition-shadow">
+                <div className="aspect-video bg-gray-100 rounded-t-lg relative overflow-hidden">
+                  {product.imageUrl ? (
+                    <img
+                      src={product.imageUrl}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Package className="w-10 h-10 text-gray-300" />
+                    </div>
+                  )}
+                  {/* Badges */}
+                  {product.category && (
+                    <Badge className="absolute top-2 left-2 bg-white/90 text-gray-700 text-[10px]">
+                      {product.category}
+                    </Badge>
+                  )}
+                  {product.featured && (
+                    <Badge className="absolute top-2 right-2 bg-amber-100 text-amber-700 text-[10px] border-0">
+                      Destacado
+                    </Badge>
+                  )}
+                  {!product.isActive && (
+                    <div className="absolute inset-0 bg-gray-900/50 flex items-center justify-center">
+                      <Badge className="bg-gray-800 text-white text-xs">Inactivo</Badge>
+                    </div>
+                  )}
+                  {totalImages > 1 && (
+                    <Badge className="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] border-0">
+                      {totalImages} fotos
+                    </Badge>
+                  )}
+                  {origPrice && origPrice > priceNum && (
+                    <Badge className="absolute bottom-2 left-2 bg-red-500 text-white text-[10px] border-0">
+                      -{Math.round((1 - priceNum / origPrice) * 100)}%
+                    </Badge>
+                  )}
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+                <CardContent className="p-4">
+                  <h3 className="font-semibold text-sm text-gray-900 line-clamp-1">
+                    {product.name}
+                  </h3>
+                  {product.description && (
+                    <p className="text-gray-400 text-xs mt-1 line-clamp-2">
+                      {product.description}
+                    </p>
+                  )}
+                  <div className="flex items-center gap-2 mt-2">
+                    {product.rating > 0 && (
+                      <div className="flex items-center gap-0.5">
+                        <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                        <span className="text-xs text-gray-500">{product.rating}</span>
+                      </div>
+                    )}
+                    {product.color && (
+                      <div className="flex items-center gap-1">
+                        <div
+                          className="w-3 h-3 rounded-full border border-gray-300"
+                          style={{ backgroundColor: product.color.toLowerCase() }}
+                        />
+                        <span className="text-xs text-gray-500">{product.color}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between mt-3">
+                    <div>
+                      <span className="font-bold text-violet-600">
+                        S/ {priceNum.toFixed(2)}
+                      </span>
+                      {origPrice && origPrice > priceNum && (
+                        <span className="text-xs text-gray-400 line-through ml-1">
+                          S/ {origPrice.toFixed(2)}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex gap-1">
+                      <Link href={`/dashboard/products/${product.id}`}>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      </Link>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                        onClick={() => handleDelete(product.id)}
+                        disabled={deleting === product.id}
+                      >
+                        {deleting === product.id ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="w-4 h-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>

@@ -3,17 +3,7 @@
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { StoreLogo } from './StoreLogo'
-const CATEGORIES = [
-  { id: 'ropa', name: 'Ropa' },
-  { id: 'accesorios', name: 'Accesorios' },
-  { id: 'electronica', name: 'Electronica' },
-  { id: 'hogar', name: 'Hogar' },
-  { id: 'belleza', name: 'Belleza' },
-  { id: 'deportes', name: 'Deportes' },
-  { id: 'alimentos', name: 'Alimentos' },
-  { id: 'juguetes', name: 'Juguetes' },
-  { id: 'otros', name: 'Otros' },
-]
+import { DEFAULT_CATEGORIES, getStoreCategories } from '@/lib/store-categories'
 import { Star, MessageCircle, ShoppingBag, Heart, Search, X, ImageIcon } from 'lucide-react'
 import { StoreFeatureBadges } from './StoreFeatureBadges'
 import { CombosSection } from './CombosSection'
@@ -68,7 +58,7 @@ export function ClasicaTemplate({ store, products, storeSlug, planId, onProductC
     return result
   }, [products, selectedCategory, searchQuery, priceRange, sortBy])
 
-  const storeCategories = [...new Set(products.map((p) => p.categoryId))]
+  const categories = getStoreCategories(products)
 
   const openWhatsApp = async (product: Product) => {
     try {
@@ -232,21 +222,19 @@ export function ClasicaTemplate({ store, products, storeSlug, planId, onProductC
           >
             Todos ({products.length})
           </button>
-          {storeCategories.map((catId) => {
-            const cat = CATEGORIES.find((c) => c.id === catId)
-            if (!cat) return null
-            const count = products.filter((p) => p.categoryId === catId).length
+          {categories.map((cat) => {
+            const count = products.filter((p) => p.categoryId === cat.id).length
             return (
               <button
-                key={catId}
-                onClick={() => setSelectedCategory(catId)}
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id)}
                 className={`px-5 py-2 text-sm font-medium whitespace-nowrap transition-all border-2 ${
-                  selectedCategory === catId
+                  selectedCategory === cat.id
                     ? 'text-white'
                     : 'bg-white hover:bg-amber-50'
                 }`}
                 style={
-                  selectedCategory === catId
+                  selectedCategory === cat.id
                     ? { backgroundColor: store.colors.primary, borderColor: store.colors.primary }
                     : { borderColor: '#D4B896', color: '#6B4F3A' }
                 }

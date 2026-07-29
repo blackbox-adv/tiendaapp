@@ -3,17 +3,7 @@
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { StoreLogo } from './StoreLogo'
-const CATEGORIES = [
-  { id: 'ropa', name: 'Ropa' },
-  { id: 'accesorios', name: 'Accesorios' },
-  { id: 'electronica', name: 'Electronica' },
-  { id: 'hogar', name: 'Hogar' },
-  { id: 'belleza', name: 'Belleza' },
-  { id: 'deportes', name: 'Deportes' },
-  { id: 'alimentos', name: 'Alimentos' },
-  { id: 'juguetes', name: 'Juguetes' },
-  { id: 'otros', name: 'Otros' },
-]
+import { DEFAULT_CATEGORIES, getStoreCategories } from '@/lib/store-categories'
 import { Star, ShoppingBag, Search, X, Diamond, Crown, ImageIcon } from 'lucide-react'
 import { StoreFeatureBadges } from './StoreFeatureBadges'
 import { CombosSection } from './CombosSection'
@@ -80,7 +70,7 @@ export function LuxuryTemplate({ store, products, storeSlug, planId, onProductCl
     return result
   }, [products, selectedCategory, searchQuery, priceRange, sortBy])
 
-  const storeCategories = [...new Set(products.map((p) => p.categoryId))]
+  const categories = getStoreCategories(products)
 
   const renderStars = (rating: number) => {
     if (rating <= 0) return null
@@ -267,18 +257,15 @@ export function LuxuryTemplate({ store, products, storeSlug, planId, onProductCl
                 />
               )}
             </button>
-            {storeCategories.map((catId) => {
-              const cat = CATEGORIES.find((c) => c.id === catId)
-              if (!cat) return null
-              return (
+            {categories.map((cat) => (
                 <button
-                  key={catId}
-                  onClick={() => setSelectedCategory(catId)}
+                  key={cat.id}
+                  onClick={() => setSelectedCategory(cat.id)}
                   className="relative px-4 py-2 text-xs font-medium tracking-[0.1em] uppercase whitespace-nowrap transition-all duration-300"
-                  style={{ color: selectedCategory === catId ? GOLD : '#6a6a7a' }}
+                  style={{ color: selectedCategory === cat.id ? GOLD : '#6a6a7a' }}
                 >
                   {cat.name}
-                  {selectedCategory === catId && (
+                  {selectedCategory === cat.id && (
                     <motion.div
                       layoutId="luxury-cat-underline"
                       className="absolute bottom-0 left-0 right-0 h-px"
@@ -287,8 +274,7 @@ export function LuxuryTemplate({ store, products, storeSlug, planId, onProductCl
                     />
                   )}
                 </button>
-              )
-            })}
+            ))}
           </div>
 
           {/* Filters row — Pro & Premium only */}

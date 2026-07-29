@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,9 +22,9 @@ import {
   Upload,
   Package,
   X,
-  ImageIcon,
   Star,
   Plus,
+  Trash2,
 } from 'lucide-react';
 
 interface Category {
@@ -40,9 +40,29 @@ interface StoreData {
   categories: Category[];
 }
 
-export default function NewProductPage() {
+interface ProductData {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  originalPrice: number | null;
+  imageUrl: string;
+  images: string[];
+  category: string;
+  color: string | null;
+  isActive: boolean;
+  featured: boolean;
+  rating: number;
+  storeId: string;
+}
+
+export default function EditProductPage() {
   const router = useRouter();
+  const params = useParams();
+  const productId = params.id as string;
+
   const [store, setStore] = useState<StoreData | null>(null);
+  const [product, setProduct] = useState<ProductData | null>(null);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState('');
@@ -59,30 +79,50 @@ export default function NewProductPage() {
   const [isActive, setIsActive] = useState(true);
 
   // Cover image
-  const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const [newCoverFile, setNewCoverFile] = useState<File | null>(null);
   const [coverUploading, setCoverUploading] = useState(false);
 
-  // Additional images (gallery)
-  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
+  // Gallery images (existing URLs + new files)
+  const [existingImages, setExistingImages] = useState<string[]>([]);
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
+  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
   const [galleryUploading, setGalleryUploading] = useState(false);
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    async function fetchStore() {
+    async function fetchData() {
       try {
-        const res = await fetch('/api/user');
-        if (res.ok) {
-          const data = await res.json();
-          const storeData = data.stores?.[0]?.store;
-          if (storeData) {
-            const storeRes = await fetch(`/api/stores/${storeData.slug}`);
-            if (storeRes.ok) {
-              const fullStore = await storeRes.json();
-              setStore(fullStore);
-            }
+        // Get user and store
+        const userRes = await fetch('/api/user');
+        if (!userRes.ok) return;
+        const userData = await userRes.json();
+        const storeData = userData.stores?.[0]?.store;
+        if (storeData) {
+          const storeRes = await fetch(`/api/stores/${storeData.slug}`);
+          if (storeRes.ok) {
+            const fullStore = await storeRes.json();
+            setStore(fullStore);
           }
+        }
+
+        // Get product
+        const productRes = await fetch(`/api/store-products/${productId}`);
+        if (productRes.ok) {
+          const productData = await productRes.json();
+          const p = productData.data || productData;
+          setProduct(p);
+          setName(p.name || '');
+          setDescription(p.description || '');
+          setPrice(typeof p.price === 'object' ? String(p.price) : String(p.price || ''));
+          setOriginalPrice(p.originalPrice ? String(p.originalPrice) : '');
+          setCategory(p.category || '');
+          setColor(p.color || '');
+          setFeatured(p.featured || false);
+          setRating(p.rating || 0);
+          setIsActive(p.isActive !== false);
+          setCoverPreview(p.imageUrl || null);
+          setExistingImages(Array.isArray(p.images) ? p.images : []);
         }
       } catch {
         // ignore
@@ -90,10 +130,9 @@ export default function NewProductPage() {
         setFetching(false);
       }
     }
-    fetchStore();
-  }, []);
+    if (productId) fetchData();
+  }, [productId]);
 
-  // Upload a single file to /api/upload
   const uploadImage = async (file: File): Promise<string | null> => {
     const formData = new FormData();
     formData.append('file', file);
@@ -112,7 +151,7 @@ export default function NewProductPage() {
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setCoverFile(file);
+      setNewCoverFile(file);
       const reader = new FileReader();
       reader.onloadend = () => setCoverPreview(reader.result as string);
       reader.readAsDataURL(file);
@@ -123,8 +162,9 @@ export default function NewProductPage() {
     const files = e.target.files;
     if (!files) return;
     const newFiles = Array.from(files);
-    if (galleryFiles.length + newFiles.length > 8) {
-      setError('Máximo 8 imágenes adicionales');
+    const totalImages = existingImages.length + galleryFiles.length + newFiles.length;
+    if (totalImages > 8) {
+      setError('Máximo 8 imágenes adicionales en total');
       return;
     }
     setGalleryFiles((prev) => [...prev, ...newFiles]);
@@ -137,9 +177,31 @@ export default function NewProductPage() {
     });
   };
 
+  const removeExistingImage = (index: number) => {
+    setExistingImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const removeGalleryImage = (index: number) => {
     setGalleryFiles((prev) => prev.filter((_, i) => i !== index));
     setGalleryPreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleDelete = async () => {
+    if (!confirm('¿Estás seguro de eliminar este producto?')) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/products/${productId}`, { method: 'DELETE' });
+      if (res.ok) {
+        router.push('/dashboard/products');
+        router.refresh();
+      } else {
+        setError('Error al eliminar el producto');
+      }
+    } catch {
+      setError('Error de conexión');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -148,47 +210,46 @@ export default function NewProductPage() {
     setError('');
 
     try {
-      // Upload cover image
-      let imageUrl: string | null = null;
-      if (coverFile) {
+      // Upload new cover if changed
+      let imageUrl = product?.imageUrl || '';
+      if (newCoverFile) {
         setCoverUploading(true);
-        imageUrl = await uploadImage(coverFile);
+        const uploaded = await uploadImage(newCoverFile);
         setCoverUploading(false);
-        if (!imageUrl) {
+        if (!uploaded) {
           setError('Error al subir la imagen principal');
           setLoading(false);
           return;
         }
+        imageUrl = uploaded;
       }
 
-      // Upload gallery images
-      let images: string[] = [];
+      // Upload new gallery images
+      let newImageUrls: string[] = [];
       if (galleryFiles.length > 0) {
         setGalleryUploading(true);
         const uploadResults = await Promise.all(
           galleryFiles.map((file) => uploadImage(file))
         );
-        images = uploadResults.filter((url): url is string => url !== null);
+        newImageUrls = uploadResults.filter((url): url is string => url !== null);
         setGalleryUploading(false);
-        if (images.length !== galleryFiles.length) {
-          setError('Algunas imágenes no se pudieron subir');
-          setLoading(false);
-          return;
-        }
       }
 
-      // Create product via /api/store-products
+      // Combine existing + new gallery images
+      const allImages = [...existingImages, ...newImageUrls];
+
+      // Update via /api/store-products PUT
       const res = await fetch('/api/store-products', {
-        method: 'POST',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          storeId: store?.id,
+          id: productId,
           name,
           description: description || '',
           price: parseFloat(price),
           originalPrice: originalPrice ? parseFloat(originalPrice) : null,
-          imageUrl: imageUrl || '',
-          images,
+          imageUrl,
+          images: allImages,
           category: category || '',
           color: color || null,
           isActive,
@@ -199,7 +260,7 @@ export default function NewProductPage() {
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error || 'Error al crear el producto');
+        setError(data.error || 'Error al actualizar el producto');
         return;
       }
 
@@ -220,14 +281,14 @@ export default function NewProductPage() {
     );
   }
 
-  if (!store) {
+  if (!product) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
         <Package className="w-12 h-12 text-gray-300" />
-        <h2 className="text-xl font-bold text-gray-900">No tienes tienda</h2>
-        <Link href="/onboarding">
+        <h2 className="text-xl font-bold text-gray-900">Producto no encontrado</h2>
+        <Link href="/dashboard/products">
           <Button className="bg-violet-600 hover:bg-violet-700 text-white">
-            Crear tienda
+            Volver a productos
           </Button>
         </Link>
       </div>
@@ -236,14 +297,25 @@ export default function NewProductPage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      <div className="flex items-center gap-4">
-        <Link href="/dashboard/products">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Volver
-          </Button>
-        </Link>
-        <h1 className="text-2xl font-bold text-gray-900">Agregar producto</h1>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Link href="/dashboard/products">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Volver
+            </Button>
+          </Link>
+          <h1 className="text-2xl font-bold text-gray-900">Editar producto</h1>
+        </div>
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={handleDelete}
+          disabled={loading}
+        >
+          <Trash2 className="w-4 h-4 mr-1" />
+          Eliminar
+        </Button>
       </div>
 
       <Card className="border-0 shadow-sm">
@@ -273,7 +345,7 @@ export default function NewProductPage() {
                       size="sm"
                       className="absolute -top-2 -right-2 w-5 h-5 rounded-full p-0"
                       onClick={() => {
-                        setCoverFile(null);
+                        setNewCoverFile(null);
                         setCoverPreview(null);
                       }}
                     >
@@ -301,12 +373,33 @@ export default function NewProductPage() {
             <div className="space-y-2">
               <Label>Imágenes adicionales (máximo 8)</Label>
               <div className="flex flex-wrap gap-2">
+                {/* Existing images */}
+                {existingImages.map((img, idx) => (
+                  <div key={`existing-${idx}`} className="relative">
+                    <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden">
+                      <img
+                        src={img}
+                        alt={`Galería ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="absolute -top-1 -right-1 w-4 h-4 rounded-full p-0 text-[10px]"
+                      onClick={() => removeExistingImage(idx)}
+                    >
+                      ×
+                    </Button>
+                  </div>
+                ))}
+                {/* New gallery images */}
                 {galleryPreviews.map((preview, idx) => (
-                  <div key={idx} className="relative">
+                  <div key={`new-${idx}`} className="relative">
                     <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden">
                       <img
                         src={preview}
-                        alt={`Galería ${idx + 1}`}
+                        alt={`Nueva ${idx + 1}`}
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -320,7 +413,7 @@ export default function NewProductPage() {
                     </Button>
                   </div>
                 ))}
-                {galleryPreviews.length < 8 && (
+                {existingImages.length + galleryFiles.length < 8 && (
                   <label className="cursor-pointer">
                     <div className="w-20 h-20 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center hover:border-violet-400 hover:bg-violet-50 transition-colors">
                       <Plus className="w-5 h-5 text-gray-400" />
@@ -402,13 +495,12 @@ export default function NewProductPage() {
                     <SelectValue placeholder="Seleccionar categoría" />
                   </SelectTrigger>
                   <SelectContent>
-                    {store.categories?.map((cat) => (
+                    {store?.categories?.map((cat) => (
                       <SelectItem key={cat.id} value={cat.name}>
                         {cat.name}
                       </SelectItem>
                     ))}
-                    {/* Fallback if no categories from DB */}
-                    {(!store.categories || store.categories.length === 0) && (
+                    {(!store?.categories || store.categories.length === 0) && (
                       <>
                         <SelectItem value="Ropa">Ropa</SelectItem>
                         <SelectItem value="Accesorios">Accesorios</SelectItem>
@@ -503,7 +595,7 @@ export default function NewProductPage() {
                     : 'Guardando...'}
                 </>
               ) : (
-                'Guardar producto'
+                'Guardar cambios'
               )}
             </Button>
           </form>

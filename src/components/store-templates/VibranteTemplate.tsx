@@ -3,17 +3,7 @@
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { StoreLogo } from './StoreLogo'
-const CATEGORIES = [
-  { id: 'ropa', name: 'Ropa' },
-  { id: 'accesorios', name: 'Accesorios' },
-  { id: 'electronica', name: 'Electronica' },
-  { id: 'hogar', name: 'Hogar' },
-  { id: 'belleza', name: 'Belleza' },
-  { id: 'deportes', name: 'Deportes' },
-  { id: 'alimentos', name: 'Alimentos' },
-  { id: 'juguetes', name: 'Juguetes' },
-  { id: 'otros', name: 'Otros' },
-]
+import { DEFAULT_CATEGORIES, getStoreCategories } from '@/lib/store-categories'
 import { Star, MessageCircle, ShoppingBag, Search, X, SlidersHorizontal, ImageIcon } from 'lucide-react'
 import { StoreFeatureBadges } from './StoreFeatureBadges'
 import { CombosSection } from './CombosSection'
@@ -75,7 +65,7 @@ export function VibranteTemplate({ store, products, storeSlug, planId, onProduct
     return result
   }, [products, selectedCategory, searchQuery, priceRange, sortBy])
 
-  const storeCategories = [...new Set(products.map((p) => p.categoryId))]
+  const categories = getStoreCategories(products)
   const primaryRgb = hexToRgb(store.colors.primary)
   const secondaryRgb = hexToRgb(store.colors.secondary)
 
@@ -227,17 +217,14 @@ export function VibranteTemplate({ store, products, storeSlug, planId, onProduct
           >
             Todos
           </motion.button>
-          {storeCategories.map((catId) => {
-            const cat = CATEGORIES.find((c) => c.id === catId)
-            if (!cat) return null
-            return (
+          {categories.map((cat) => (
               <motion.button
-                key={catId}
+                key={cat.id}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setSelectedCategory(catId)}
+                onClick={() => setSelectedCategory(cat.id)}
                 className="px-5 py-2 rounded-full text-sm font-bold whitespace-nowrap shadow-sm transition-all duration-200"
                 style={
-                  selectedCategory === catId
+                  selectedCategory === cat.id
                     ? {
                         backgroundColor: store.colors.primary,
                         color: '#fff',
@@ -251,8 +238,7 @@ export function VibranteTemplate({ store, products, storeSlug, planId, onProduct
               >
                 {cat.name}
               </motion.button>
-            )
-          })}
+          ))}
         </div>
 
           {/* Filters row — Pro & Premium only */}
