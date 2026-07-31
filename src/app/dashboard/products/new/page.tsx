@@ -73,12 +73,17 @@ export default function NewProductPage() {
   useEffect(() => {
     async function fetchStore() {
       try {
-        const res = await fetch('/api/user');
+        const token = localStorage.getItem('tiendapp_token');
+        const res = await fetch('/api/user', {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
         if (res.ok) {
           const data = await res.json();
           const storeData = data.stores?.[0]?.store;
           if (storeData) {
-            const storeRes = await fetch(`/api/stores/${storeData.slug}`);
+            const storeRes = await fetch(`/api/stores/${storeData.slug}`, {
+              headers: token ? { Authorization: `Bearer ${token}` } : {},
+            });
             if (storeRes.ok) {
               const fullStore = await storeRes.json();
               setStore(fullStore);
@@ -99,8 +104,10 @@ export default function NewProductPage() {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('folder', 'products');
+    const token = localStorage.getItem('tiendapp_token');
     const uploadRes = await fetch('/api/upload', {
       method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
       body: formData,
     });
     if (uploadRes.ok) {
@@ -179,9 +186,13 @@ export default function NewProductPage() {
       }
 
       // Create product via /api/store-products
+      const authToken = localStorage.getItem('tiendapp_token');
       const res = await fetch('/api/store-products', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+        },
         body: JSON.stringify({
           storeId: store?.id,
           name,

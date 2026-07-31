@@ -40,7 +40,10 @@ export default function CategoriesPage() {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('/api/user');
+      const token = localStorage.getItem('tiendapp_token');
+      const res = await fetch('/api/user', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       if (!res.ok) {
         setError('Error al cargar las categorías');
         return;
@@ -48,7 +51,9 @@ export default function CategoriesPage() {
       const data = await res.json();
       const storeData = data.stores?.[0]?.store;
       if (storeData) {
-        const storeRes = await fetch(`/api/stores/${storeData.slug}`);
+        const storeRes = await fetch(`/api/stores/${storeData.slug}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
         if (storeRes.ok) {
           const fullStore = await storeRes.json();
           setStore(fullStore);
@@ -70,9 +75,13 @@ export default function CategoriesPage() {
     if (!newCatName.trim() || !store) return;
     setCreating(true);
     try {
+      const catToken = localStorage.getItem('tiendapp_token');
       const res = await fetch('/api/categories', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(catToken ? { Authorization: `Bearer ${catToken}` } : {}),
+        },
         body: JSON.stringify({
           name: newCatName.trim(),
           storeId: store.id,
@@ -94,7 +103,11 @@ export default function CategoriesPage() {
     if (!confirm('¿Estás seguro de eliminar esta categoría?')) return;
     setDeleting(catId);
     try {
-      const res = await fetch(`/api/categories/${catId}`, { method: 'DELETE' });
+      const delToken = localStorage.getItem('tiendapp_token');
+      const res = await fetch(`/api/categories/${catId}`, {
+        method: 'DELETE',
+        headers: delToken ? { Authorization: `Bearer ${delToken}` } : {},
+      });
       if (res.ok) {
         setStore((prev) =>
           prev

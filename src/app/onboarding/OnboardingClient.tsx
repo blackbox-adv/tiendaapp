@@ -128,19 +128,31 @@ export default function OnboardingPage() {
       if (logoFile) {
         const formData = new FormData();
         formData.append('file', logoFile);
+        formData.append('folder', 'logo');
+        const token = localStorage.getItem('tiendapp_token');
         const uploadRes = await fetch('/api/upload', {
           method: 'POST',
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
           body: formData,
         });
         if (uploadRes.ok) {
           const uploadData = await uploadRes.json();
           logoUrl = uploadData.url;
+        } else {
+          const uploadError = await uploadRes.json().catch(() => ({}));
+          setError(`Error al subir el logo: ${uploadError.error || 'Intenta de nuevo'}`);
+          setLoading(false);
+          return;
         }
       }
 
+      const token = localStorage.getItem('tiendapp_token');
       const res = await fetch('/api/stores', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({
           name: storeName,
           slug: storeSlug,

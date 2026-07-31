@@ -94,13 +94,15 @@ export default function EditProductPage() {
   useEffect(() => {
     async function fetchData() {
       try {
+        const token = localStorage.getItem('tiendapp_token');
+        const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
         // Get user and store
-        const userRes = await fetch('/api/user');
+        const userRes = await fetch('/api/user', { headers: authHeaders });
         if (!userRes.ok) return;
         const userData = await userRes.json();
         const storeData = userData.stores?.[0]?.store;
         if (storeData) {
-          const storeRes = await fetch(`/api/stores/${storeData.slug}`);
+          const storeRes = await fetch(`/api/stores/${storeData.slug}`, { headers: authHeaders });
           if (storeRes.ok) {
             const fullStore = await storeRes.json();
             setStore(fullStore);
@@ -108,7 +110,7 @@ export default function EditProductPage() {
         }
 
         // Get product
-        const productRes = await fetch(`/api/store-products/${productId}`);
+        const productRes = await fetch(`/api/store-products/${productId}`, { headers: authHeaders });
         if (productRes.ok) {
           const productData = await productRes.json();
           const p = productData.data || productData;
@@ -139,8 +141,10 @@ export default function EditProductPage() {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('folder', 'products');
+    const token = localStorage.getItem('tiendapp_token');
     const uploadRes = await fetch('/api/upload', {
       method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
       body: formData,
     });
     if (uploadRes.ok) {
@@ -192,7 +196,11 @@ export default function EditProductPage() {
     if (!confirm('¿Estás seguro de eliminar este producto?')) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/products/${productId}`, { method: 'DELETE' });
+      const delToken = localStorage.getItem('tiendapp_token');
+      const res = await fetch(`/api/products/${productId}`, {
+        method: 'DELETE',
+        headers: delToken ? { Authorization: `Bearer ${delToken}` } : {},
+      });
       if (res.ok) {
         router.push('/dashboard/products');
         router.refresh();
@@ -241,9 +249,13 @@ export default function EditProductPage() {
       const allImages = [...existingImages, ...newImageUrls];
 
       // Update via /api/store-products PUT
+      const updateToken = localStorage.getItem('tiendapp_token');
       const res = await fetch('/api/store-products', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(updateToken ? { Authorization: `Bearer ${updateToken}` } : {}),
+        },
         body: JSON.stringify({
           id: productId,
           name,

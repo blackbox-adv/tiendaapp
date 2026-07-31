@@ -101,7 +101,10 @@ export default function TemplatePage() {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('/api/user');
+      const token = localStorage.getItem('tiendapp_token');
+      const res = await fetch('/api/user', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       if (!res.ok) {
         setError('Error al cargar datos');
         return;
@@ -126,9 +129,13 @@ export default function TemplatePage() {
     if (!selectedTemplate || !store) return;
     setChanging(true);
     try {
+      const tmplToken = localStorage.getItem('tiendapp_token');
       const res = await fetch(`/api/stores/${store.slug}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(tmplToken ? { Authorization: `Bearer ${tmplToken}` } : {}),
+        },
         body: JSON.stringify({ template: selectedTemplate }),
       });
 

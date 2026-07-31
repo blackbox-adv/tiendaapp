@@ -54,7 +54,10 @@ export default function ProductsPage() {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('/api/user');
+      const token = localStorage.getItem('tiendapp_token');
+      const res = await fetch('/api/user', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       if (!res.ok) {
         setError('Error al cargar los productos');
         return;
@@ -62,7 +65,9 @@ export default function ProductsPage() {
       const data = await res.json();
       const storeData = data.stores?.[0]?.store;
       if (storeData) {
-        const storeRes = await fetch(`/api/stores/${storeData.slug}`);
+        const storeRes = await fetch(`/api/stores/${storeData.slug}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
         if (storeRes.ok) {
           const fullStore = await storeRes.json();
           setStore(fullStore);
@@ -83,7 +88,11 @@ export default function ProductsPage() {
     if (!confirm('¿Estás seguro de eliminar este producto?')) return;
     setDeleting(productId);
     try {
-      const res = await fetch(`/api/products/${productId}`, { method: 'DELETE' });
+      const delToken = localStorage.getItem('tiendapp_token');
+      const res = await fetch(`/api/products/${productId}`, {
+        method: 'DELETE',
+        headers: delToken ? { Authorization: `Bearer ${delToken}` } : {},
+      });
       if (res.ok) {
         setStore((prev) =>
           prev

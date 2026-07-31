@@ -59,7 +59,10 @@ export default function DashboardPage() {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('/api/user');
+      const token = localStorage.getItem('tiendapp_token');
+      const res = await fetch('/api/user', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       if (!res.ok) {
         setError('Error al cargar los datos');
         return;
@@ -81,7 +84,10 @@ export default function DashboardPage() {
   useEffect(() => {
     const storeData = userData?.stores?.[0]?.store;
     if (storeData?.id) {
-      fetch(`/api/analytics?storeId=${storeData.id}`)
+      const analyticsToken = localStorage.getItem('tiendapp_token');
+      fetch(`/api/analytics?storeId=${storeData.id}`, {
+        headers: analyticsToken ? { Authorization: `Bearer ${analyticsToken}` } : {},
+      })
         .then((res) => res.ok ? res.json() : null)
         .then((data) => {
           if (data?.data) setAnalytics(data.data);
