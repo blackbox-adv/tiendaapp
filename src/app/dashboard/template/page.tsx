@@ -103,7 +103,7 @@ export default function TemplatePage() {
     try {
       const token = localStorage.getItem('tiendapp_token');
       const res = await fetch('/api/user', {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        headers: (token ? { Authorization: `Bearer ${token}` } : {}) as Record<string, string>,
       });
       if (!res.ok) {
         setError('Error al cargar datos');
@@ -134,7 +134,7 @@ export default function TemplatePage() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          ...(tmplToken ? { Authorization: `Bearer ${tmplToken}` } : {}),
+          ...(tmplToken ? { Authorization: `Bearer ${tmplToken}` } : {} as Record<string, string>),
         },
         body: JSON.stringify({ template: selectedTemplate }),
       });

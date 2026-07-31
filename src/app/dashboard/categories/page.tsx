@@ -42,7 +42,7 @@ export default function CategoriesPage() {
     try {
       const token = localStorage.getItem('tiendapp_token');
       const res = await fetch('/api/user', {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        headers: (token ? { Authorization: `Bearer ${token}` } : {}) as Record<string, string>,
       });
       if (!res.ok) {
         setError('Error al cargar las categorías');
@@ -52,7 +52,7 @@ export default function CategoriesPage() {
       const storeData = data.stores?.[0]?.store;
       if (storeData) {
         const storeRes = await fetch(`/api/stores/${storeData.slug}`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          headers: (token ? { Authorization: `Bearer ${token}` } : {}) as Record<string, string>,
         });
         if (storeRes.ok) {
           const fullStore = await storeRes.json();
@@ -80,7 +80,7 @@ export default function CategoriesPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(catToken ? { Authorization: `Bearer ${catToken}` } : {}),
+          ...(catToken ? { Authorization: `Bearer ${catToken}` } : {} as Record<string, string>),
         },
         body: JSON.stringify({
           name: newCatName.trim(),
@@ -106,7 +106,7 @@ export default function CategoriesPage() {
       const delToken = localStorage.getItem('tiendapp_token');
       const res = await fetch(`/api/categories/${catId}`, {
         method: 'DELETE',
-        headers: delToken ? { Authorization: `Bearer ${delToken}` } : {},
+        headers: (delToken ? { Authorization: `Bearer ${delToken}` } : {}) as Record<string, string>,
       });
       if (res.ok) {
         setStore((prev) =>

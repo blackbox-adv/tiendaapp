@@ -132,7 +132,7 @@ export default function OnboardingPage() {
         const token = localStorage.getItem('tiendapp_token');
         const uploadRes = await fetch('/api/upload', {
           method: 'POST',
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          headers: (token ? { Authorization: `Bearer ${token}` } : {}) as Record<string, string>,
           body: formData,
         });
         if (uploadRes.ok) {
@@ -151,7 +151,7 @@ export default function OnboardingPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...(token ? { Authorization: `Bearer ${token}` } : {} as Record<string, string>),
         },
         body: JSON.stringify({
           name: storeName,

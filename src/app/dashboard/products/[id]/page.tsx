@@ -95,7 +95,7 @@ export default function EditProductPage() {
     async function fetchData() {
       try {
         const token = localStorage.getItem('tiendapp_token');
-        const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
+        const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
         // Get user and store
         const userRes = await fetch('/api/user', { headers: authHeaders });
         if (!userRes.ok) return;
@@ -144,7 +144,7 @@ export default function EditProductPage() {
     const token = localStorage.getItem('tiendapp_token');
     const uploadRes = await fetch('/api/upload', {
       method: 'POST',
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      headers: (token ? { Authorization: `Bearer ${token}` } : {}) as Record<string, string>,
       body: formData,
     });
     if (uploadRes.ok) {
@@ -199,7 +199,7 @@ export default function EditProductPage() {
       const delToken = localStorage.getItem('tiendapp_token');
       const res = await fetch(`/api/products/${productId}`, {
         method: 'DELETE',
-        headers: delToken ? { Authorization: `Bearer ${delToken}` } : {},
+        headers: (delToken ? { Authorization: `Bearer ${delToken}` } : {}) as Record<string, string>,
       });
       if (res.ok) {
         router.push('/dashboard/products');
@@ -254,7 +254,7 @@ export default function EditProductPage() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          ...(updateToken ? { Authorization: `Bearer ${updateToken}` } : {}),
+          ...(updateToken ? { Authorization: `Bearer ${updateToken}` } : {} as Record<string, string>),
         },
         body: JSON.stringify({
           id: productId,

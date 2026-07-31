@@ -56,7 +56,7 @@ export default function ProductsPage() {
     try {
       const token = localStorage.getItem('tiendapp_token');
       const res = await fetch('/api/user', {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        headers: (token ? { Authorization: `Bearer ${token}` } : {}) as Record<string, string>,
       });
       if (!res.ok) {
         setError('Error al cargar los productos');
@@ -66,7 +66,7 @@ export default function ProductsPage() {
       const storeData = data.stores?.[0]?.store;
       if (storeData) {
         const storeRes = await fetch(`/api/stores/${storeData.slug}`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          headers: (token ? { Authorization: `Bearer ${token}` } : {}) as Record<string, string>,
         });
         if (storeRes.ok) {
           const fullStore = await storeRes.json();
@@ -91,7 +91,7 @@ export default function ProductsPage() {
       const delToken = localStorage.getItem('tiendapp_token');
       const res = await fetch(`/api/products/${productId}`, {
         method: 'DELETE',
-        headers: delToken ? { Authorization: `Bearer ${delToken}` } : {},
+        headers: (delToken ? { Authorization: `Bearer ${delToken}` } : {}) as Record<string, string>,
       });
       if (res.ok) {
         setStore((prev) =>

@@ -75,14 +75,14 @@ export default function NewProductPage() {
       try {
         const token = localStorage.getItem('tiendapp_token');
         const res = await fetch('/api/user', {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          headers: (token ? { Authorization: `Bearer ${token}` } : {}) as Record<string, string>,
         });
         if (res.ok) {
           const data = await res.json();
           const storeData = data.stores?.[0]?.store;
           if (storeData) {
             const storeRes = await fetch(`/api/stores/${storeData.slug}`, {
-              headers: token ? { Authorization: `Bearer ${token}` } : {},
+              headers: (token ? { Authorization: `Bearer ${token}` } : {}) as Record<string, string>,
             });
             if (storeRes.ok) {
               const fullStore = await storeRes.json();
@@ -107,7 +107,7 @@ export default function NewProductPage() {
     const token = localStorage.getItem('tiendapp_token');
     const uploadRes = await fetch('/api/upload', {
       method: 'POST',
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      headers: (token ? { Authorization: `Bearer ${token}` } : {}) as Record<string, string>,
       body: formData,
     });
     if (uploadRes.ok) {
@@ -191,7 +191,7 @@ export default function NewProductPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {} as Record<string, string>),
         },
         body: JSON.stringify({
           storeId: store?.id,

@@ -61,7 +61,7 @@ export default function DashboardPage() {
     try {
       const token = localStorage.getItem('tiendapp_token');
       const res = await fetch('/api/user', {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        headers: (token ? { Authorization: `Bearer ${token}` } : {}) as Record<string, string>,
       });
       if (!res.ok) {
         setError('Error al cargar los datos');
@@ -86,7 +86,7 @@ export default function DashboardPage() {
     if (storeData?.id) {
       const analyticsToken = localStorage.getItem('tiendapp_token');
       fetch(`/api/analytics?storeId=${storeData.id}`, {
-        headers: analyticsToken ? { Authorization: `Bearer ${analyticsToken}` } : {},
+        headers: (analyticsToken ? { Authorization: `Bearer ${analyticsToken}` } : {}) as Record<string, string>,
       })
         .then((res) => res.ok ? res.json() : null)
         .then((data) => {

@@ -26,3 +26,10 @@ export async function apiFetch(url: string, options: RequestInit = {}) {
 
   return res
 }
+
+// Get auth headers for fetch calls (type-safe alternative to inline token logic)
+export function getAuthHeaders(): Record<string, string> {
+  if (typeof window === 'undefined') return {}
+  const token = localStorage.getItem('tiendapp_token')
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}

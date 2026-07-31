@@ -15,7 +15,7 @@ function getSupabaseClient() {
 // Ensure the Supabase bucket exists (called lazily on first upload)
 let bucketInitialized = false;
 
-async function ensureBucketExists(supabase: ReturnType<typeof createClient>): Promise<boolean> {
+async function ensureBucketExists(supabase: ReturnType<typeof createClient<any>>): Promise<boolean> {
   if (bucketInitialized) return true;
 
   try {
