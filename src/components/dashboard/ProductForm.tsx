@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAppStore } from '@/lib/store'
 const CATEGORIES = [
   { id: 'ropa', name: 'Ropa' },
@@ -25,7 +26,8 @@ import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 
 export function ProductForm({ productId }: { productId?: string }) {
-  const { currentStore, products, navigate, addProduct, updateProduct } = useAppStore()
+  const { currentStore, products, syncFromAPI } = useAppStore()
+  const router = useRouter()
 
   const isEditing = !!productId
   const editProduct = useMemo(
@@ -97,18 +99,42 @@ export function ProductForm({ productId }: { productId?: string }) {
     }
 
     try {
+      const token = localStorage.getItem('tiendapp_token')
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      }
+
       if (isEditing && productId) {
-        await updateProduct(productId, productData)
+        const res = await fetch('/api/store-products', {
+          method: 'PUT',
+          headers,
+          body: JSON.stringify({ id: productId, ...productData }),
+        })
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}))
+          throw new Error(errData.error || 'Error al actualizar el producto')
+        }
         toast.success('Producto actualizado', {
           description: `"${name.trim()}" fue actualizado correctamente.`,
         })
       } else {
-        await addProduct(productData)
+        const res = await fetch('/api/store-products', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(productData),
+        })
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}))
+          throw new Error(errData.error || 'Error al crear el producto')
+        }
         toast.success('Producto creado', {
           description: `"${name.trim()}" fue agregado a tu tienda.`,
         })
       }
-      navigate({ page: 'dashboard-products' })
+      // Refresh products from API
+      await syncFromAPI()
+      router.push('/dashboard/products')
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Error al guardar el producto'
       toast.error('Error al guardar', {
@@ -244,7 +270,7 @@ export function ProductForm({ productId }: { productId?: string }) {
     <div className="space-y-6 animate-fadeIn max-w-2xl">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" onClick={() => navigate({ page: 'dashboard-products' })} size="icon">
+        <Button variant="ghost" onClick={() => router.push('/dashboard/products')} size="icon">
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <div>
@@ -607,7 +633,7 @@ export function ProductForm({ productId }: { productId?: string }) {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => navigate({ page: 'dashboard-products' })}
+                onClick={() => router.push('/dashboard/products')}
               >
                 Cancelar
               </Button>

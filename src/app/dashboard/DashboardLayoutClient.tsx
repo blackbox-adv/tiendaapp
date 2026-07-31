@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
 import { useRouter } from 'next/navigation';
 import { Sidebar } from '@/components/dashboard/Sidebar';
@@ -11,8 +12,16 @@ export default function DashboardLayoutClient({
 }: {
   children: React.ReactNode;
 }) {
-  const { currentUser, isSyncing } = useAppStore();
+  const { currentUser, isSyncing, syncFromAPI } = useAppStore();
   const router = useRouter();
+
+  // Sync Zustand store from API on mount (if not already syncing)
+  useEffect(() => {
+    const token = localStorage.getItem('tiendapp_token');
+    if (token && !currentUser) {
+      syncFromAPI();
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (isSyncing) {
     return (

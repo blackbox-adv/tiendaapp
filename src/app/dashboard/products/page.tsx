@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useAppStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -15,101 +16,57 @@ import {
   Edit,
   Trash2,
   Star,
-  EyeOff,
 } from 'lucide-react';
-
-interface Product {
-  id: string;
-  name: string;
-  description: string | null;
-  price: number;
-  originalPrice: number | null;
-  imageUrl: string;
-  images: string[];
-  category: string | null;
-  color: string | null;
-  isActive: boolean;
-  featured: boolean;
-  rating: number;
-  storeId: string;
-}
-
-interface StoreData {
-  id: string;
-  slug: string;
-  name: string;
-  template: string;
-  products: Product[];
-  categories: { id: string; name: string }[];
-}
+import { toast } from 'sonner';
 
 export default function ProductsPage() {
-  const [store, setStore] = useState<StoreData | null>(null);
+  const { currentStore, products, syncFromAPI } = useAppStore();
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [deleting, setDeleting] = useState<string | null>(null);
 
-  const fetchStore = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const token = localStorage.getItem('tiendapp_token');
-      const res = await fetch('/api/user', {
-        headers: (token ? { Authorization: `Bearer ${token}` } : {}) as Record<string, string>,
-      });
-      if (!res.ok) {
-        setError('Error al cargar los productos');
-        return;
+  // Sync products from API on mount
+  useEffect(() => {
+    async function init() {
+      if (products.length === 0) {
+        await syncFromAPI();
       }
-      const data = await res.json();
-      const storeData = data.stores?.[0]?.store;
-      if (storeData) {
-        const storeRes = await fetch(`/api/stores/${storeData.slug}`, {
-          headers: (token ? { Authorization: `Bearer ${token}` } : {}) as Record<string, string>,
-        });
-        if (storeRes.ok) {
-          const fullStore = await storeRes.json();
-          setStore(fullStore);
-        }
-      }
-    } catch {
-      setError('Error de conexión');
-    } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    fetchStore();
-  }, []);
+    init();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleDelete = async (productId: string) => {
     if (!confirm('¿Estás seguro de eliminar este producto?')) return;
     setDeleting(productId);
     try {
-      const delToken = localStorage.getItem('tiendapp_token');
-      const res = await fetch(`/api/products/${productId}`, {
+      const token = localStorage.getItem('tiendapp_token');
+      const res = await fetch(`/api/store-products?id=${productId}`, {
         method: 'DELETE',
-        headers: (delToken ? { Authorization: `Bearer ${delToken}` } : {}) as Record<string, string>,
+        headers: (token ? { Authorization: `Bearer ${token}` } : {}) as Record<string, string>,
       });
       if (res.ok) {
-        setStore((prev) =>
-          prev
-            ? { ...prev, products: prev.products.filter((p) => p.id !== productId) }
-            : null
-        );
+        await syncFromAPI();
+        toast.success('Producto eliminado');
+      } else {
+        toast.error('Error al eliminar el producto');
       }
     } catch {
-      // ignore
+      toast.error('Error de conexión');
     } finally {
       setDeleting(null);
     }
   };
 
-  const filteredProducts = store?.products.filter((p) =>
+  const handleRefresh = async () => {
+    setLoading(true);
+    await syncFromAPI();
+    setLoading(false);
+  };
+
+  const filteredProducts = products.filter((p) =>
     p.name.toLowerCase().includes(search.toLowerCase())
-  ) || [];
+  );
 
   if (loading) {
     return (
@@ -119,19 +76,7 @@ export default function ProductsPage() {
     );
   }
 
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 gap-4">
-        <p className="text-red-500">{error}</p>
-        <Button variant="outline" onClick={fetchStore}>
-          <RefreshCw className="w-4 h-4 mr-2" />
-          Reintentar
-        </Button>
-      </div>
-    );
-  }
-
-  if (!store) {
+  if (!currentStore) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
         <Package className="w-12 h-12 text-gray-300" />
@@ -155,12 +100,18 @@ export default function ProductsPage() {
             {filteredProducts.length} producto{filteredProducts.length !== 1 ? 's' : ''}
           </p>
         </div>
-        <Link href="/dashboard/products/new">
-          <Button className="bg-violet-600 hover:bg-violet-700 text-white">
-            <Plus className="w-4 h-4 mr-2" />
-            Agregar producto
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={handleRefresh}>
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Actualizar
           </Button>
-        </Link>
+          <Link href="/dashboard/products/new">
+            <Button className="bg-violet-600 hover:bg-violet-700 text-white">
+              <Plus className="w-4 h-4 mr-2" />
+              Agregar producto
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Search */}
@@ -199,14 +150,8 @@ export default function ProductsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredProducts.map((product) => {
             const totalImages = (product.images?.length || 0) + (product.imageUrl ? 1 : 0);
-            const priceNum = typeof product.price === 'object'
-              ? parseFloat(String(product.price))
-              : Number(product.price);
-            const origPrice = product.originalPrice
-              ? typeof product.originalPrice === 'object'
-                ? parseFloat(String(product.originalPrice))
-                : Number(product.originalPrice)
-              : null;
+            const priceNum = Number(product.price);
+            const origPrice = product.originalPrice ? Number(product.originalPrice) : null;
 
             return (
               <Card key={product.id} className="border-0 shadow-sm hover:shadow-md transition-shadow">
@@ -216,16 +161,16 @@ export default function ProductsPage() {
                       src={product.imageUrl}
                       alt={product.name}
                       className="w-full h-full object-cover"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <Package className="w-10 h-10 text-gray-300" />
                     </div>
                   )}
-                  {/* Badges */}
-                  {product.category && (
+                  {product.categoryId && (
                     <Badge className="absolute top-2 left-2 bg-white/90 text-gray-700 text-[10px]">
-                      {product.category}
+                      {product.categoryId}
                     </Badge>
                   )}
                   {product.featured && (

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
+import { useAppStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,43 +27,19 @@ import {
   Plus,
   Trash2,
 } from 'lucide-react';
+import { toast } from 'sonner';
 
-interface Category {
-  id: string;
-  name: string;
-  icon?: string | null;
-}
-
-interface StoreData {
-  id: string;
-  slug: string;
-  name: string;
-  categories: Category[];
-}
-
-interface ProductData {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  originalPrice: number | null;
-  imageUrl: string;
-  images: string[];
-  category: string;
-  color: string | null;
-  isActive: boolean;
-  featured: boolean;
-  rating: number;
-  storeId: string;
-}
+const CATEGORIES = [
+  'Ropa', 'Accesorios', 'Electrónica', 'Hogar', 'Belleza',
+  'Deportes', 'Alimentos', 'Juguetes', 'Otros',
+];
 
 export default function EditProductPage() {
   const router = useRouter();
   const params = useParams();
   const productId = params.id as string;
+  const { currentStore, products, syncFromAPI } = useAppStore();
 
-  const [store, setStore] = useState<StoreData | null>(null);
-  const [product, setProduct] = useState<ProductData | null>(null);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState('');
@@ -74,7 +51,7 @@ export default function EditProductPage() {
   const [originalPrice, setOriginalPrice] = useState('');
   const [category, setCategory] = useState('');
   const [color, setColor] = useState('');
-  const [stock, setStock] = useState(-1); // -1 = unlimited
+  const [stock, setStock] = useState(-1);
   const [featured, setFeatured] = useState(false);
   const [rating, setRating] = useState(0);
   const [isActive, setIsActive] = useState(true);
@@ -83,50 +60,47 @@ export default function EditProductPage() {
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [newCoverFile, setNewCoverFile] = useState<File | null>(null);
   const [coverUploading, setCoverUploading] = useState(false);
+  const [currentImageUrl, setCurrentImageUrl] = useState('');
 
-  // Gallery images (existing URLs + new files)
+  // Gallery images
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
   const [galleryUploading, setGalleryUploading] = useState(false);
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
+  // Load product data
   useEffect(() => {
     async function fetchData() {
       try {
-        const token = localStorage.getItem('tiendapp_token');
-        const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
-        // Get user and store
-        const userRes = await fetch('/api/user', { headers: authHeaders });
-        if (!userRes.ok) return;
-        const userData = await userRes.json();
-        const storeData = userData.stores?.[0]?.store;
-        if (storeData) {
-          const storeRes = await fetch(`/api/stores/${storeData.slug}`, { headers: authHeaders });
-          if (storeRes.ok) {
-            const fullStore = await storeRes.json();
-            setStore(fullStore);
+        // Try to get from Zustand store first
+        let product = products.find((p) => p.id === productId);
+
+        // If not found, try API
+        if (!product) {
+          const token = localStorage.getItem('tiendapp_token');
+          const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+          const productRes = await fetch(`/api/store-products/${productId}`, { headers: authHeaders });
+          if (productRes.ok) {
+            const productData = await productRes.json();
+            product = productData.data || productData;
           }
         }
 
-        // Get product
-        const productRes = await fetch(`/api/store-products/${productId}`, { headers: authHeaders });
-        if (productRes.ok) {
-          const productData = await productRes.json();
-          const p = productData.data || productData;
-          setProduct(p);
-          setName(p.name || '');
-          setDescription(p.description || '');
-          setPrice(typeof p.price === 'object' ? String(p.price) : String(p.price || ''));
-          setOriginalPrice(p.originalPrice ? String(p.originalPrice) : '');
-          setCategory(p.category || '');
-          setColor(p.color || '');
-          setFeatured(p.featured || false);
-          setRating(p.rating || 0);
-          setStock(p.stock !== undefined ? p.stock : -1);
-          setIsActive(p.isActive !== false);
-          setCoverPreview(p.imageUrl || null);
-          setExistingImages(Array.isArray(p.images) ? p.images : []);
+        if (product) {
+          setName(product.name || '');
+          setDescription(product.description || '');
+          setPrice(typeof product.price === 'object' ? String(product.price) : String(product.price || ''));
+          setOriginalPrice(product.originalPrice ? String(product.originalPrice) : '');
+          setCategory(product.categoryId || '');
+          setColor(product.color || '');
+          setFeatured(product.featured || false);
+          setRating(product.rating || 0);
+          setStock(product.stock !== undefined ? product.stock : -1);
+          setIsActive(product.isActive !== false);
+          setCoverPreview(product.imageUrl || null);
+          setCurrentImageUrl(product.imageUrl || '');
+          setExistingImages(Array.isArray(product.images) ? product.images : []);
         }
       } catch {
         // ignore
@@ -135,7 +109,7 @@ export default function EditProductPage() {
       }
     }
     if (productId) fetchData();
-  }, [productId]);
+  }, [productId, products]);
 
   const uploadImage = async (file: File): Promise<string | null> => {
     const formData = new FormData();
@@ -149,7 +123,7 @@ export default function EditProductPage() {
     });
     if (uploadRes.ok) {
       const uploadData = await uploadRes.json();
-      return uploadData.url;
+      return uploadData.url || uploadData.data?.url;
     }
     return null;
   };
@@ -197,13 +171,14 @@ export default function EditProductPage() {
     setLoading(true);
     try {
       const delToken = localStorage.getItem('tiendapp_token');
-      const res = await fetch(`/api/products/${productId}`, {
+      const res = await fetch(`/api/store-products?id=${productId}`, {
         method: 'DELETE',
         headers: (delToken ? { Authorization: `Bearer ${delToken}` } : {}) as Record<string, string>,
       });
       if (res.ok) {
+        toast.success('Producto eliminado');
+        await syncFromAPI();
         router.push('/dashboard/products');
-        router.refresh();
       } else {
         setError('Error al eliminar el producto');
       }
@@ -221,7 +196,7 @@ export default function EditProductPage() {
 
     try {
       // Upload new cover if changed
-      let imageUrl = product?.imageUrl || '';
+      let imageUrl = currentImageUrl;
       if (newCoverFile) {
         setCoverUploading(true);
         const uploaded = await uploadImage(newCoverFile);
@@ -279,8 +254,9 @@ export default function EditProductPage() {
         return;
       }
 
+      toast.success('Producto actualizado', { description: `"${name}" fue actualizado correctamente.` });
+      await syncFromAPI();
       router.push('/dashboard/products');
-      router.refresh();
     } catch {
       setError('Error de conexión');
     } finally {
@@ -296,7 +272,7 @@ export default function EditProductPage() {
     );
   }
 
-  if (!product) {
+  if (!name && !fetching) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
         <Package className="w-12 h-12 text-gray-300" />
@@ -322,12 +298,7 @@ export default function EditProductPage() {
           </Link>
           <h1 className="text-2xl font-bold text-gray-900">Editar producto</h1>
         </div>
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={handleDelete}
-          disabled={loading}
-        >
+        <Button variant="destructive" size="sm" onClick={handleDelete} disabled={loading}>
           <Trash2 className="w-4 h-4 mr-1" />
           Eliminar
         </Button>
@@ -349,23 +320,9 @@ export default function EditProductPage() {
                 {coverPreview ? (
                   <div className="relative">
                     <div className="w-28 h-28 bg-gray-100 rounded-xl overflow-hidden">
-                      <img
-                        src={coverPreview}
-                        alt="Preview"
-                        className="w-full h-full object-cover"
-                      />
+                      <img src={coverPreview} alt="Preview" className="w-full h-full object-cover" />
                     </div>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      className="absolute -top-2 -right-2 w-5 h-5 rounded-full p-0"
-                      onClick={() => {
-                        setNewCoverFile(null);
-                        setCoverPreview(null);
-                      }}
-                    >
-                      ×
-                    </Button>
+                    <Button variant="destructive" size="sm" className="absolute -top-2 -right-2 w-5 h-5 rounded-full p-0" onClick={() => { setNewCoverFile(null); setCoverPreview(null); }}>×</Button>
                   </div>
                 ) : (
                   <label className="cursor-pointer">
@@ -373,12 +330,7 @@ export default function EditProductPage() {
                       <Upload className="w-6 h-6 text-gray-400" />
                       <span className="text-[10px] text-gray-400 mt-1">Portada</span>
                     </div>
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp"
-                      className="hidden"
-                      onChange={handleCoverChange}
-                    />
+                    <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleCoverChange} />
                   </label>
                 )}
               </div>
@@ -388,44 +340,20 @@ export default function EditProductPage() {
             <div className="space-y-2">
               <Label>Imágenes adicionales (máximo 8)</Label>
               <div className="flex flex-wrap gap-2">
-                {/* Existing images */}
                 {existingImages.map((img, idx) => (
                   <div key={`existing-${idx}`} className="relative">
                     <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden">
-                      <img
-                        src={img}
-                        alt={`Galería ${idx + 1}`}
-                        className="w-full h-full object-cover"
-                      />
+                      <img src={img} alt={`Galería ${idx + 1}`} className="w-full h-full object-cover" />
                     </div>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      className="absolute -top-1 -right-1 w-4 h-4 rounded-full p-0 text-[10px]"
-                      onClick={() => removeExistingImage(idx)}
-                    >
-                      ×
-                    </Button>
+                    <Button variant="destructive" size="sm" className="absolute -top-1 -right-1 w-4 h-4 rounded-full p-0 text-[10px]" onClick={() => removeExistingImage(idx)}>×</Button>
                   </div>
                 ))}
-                {/* New gallery images */}
                 {galleryPreviews.map((preview, idx) => (
                   <div key={`new-${idx}`} className="relative">
                     <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden">
-                      <img
-                        src={preview}
-                        alt={`Nueva ${idx + 1}`}
-                        className="w-full h-full object-cover"
-                      />
+                      <img src={preview} alt={`Nueva ${idx + 1}`} className="w-full h-full object-cover" />
                     </div>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      className="absolute -top-1 -right-1 w-4 h-4 rounded-full p-0 text-[10px]"
-                      onClick={() => removeGalleryImage(idx)}
-                    >
-                      ×
-                    </Button>
+                    <Button variant="destructive" size="sm" className="absolute -top-1 -right-1 w-4 h-4 rounded-full p-0 text-[10px]" onClick={() => removeGalleryImage(idx)}>×</Button>
                   </div>
                 ))}
                 {existingImages.length + galleryFiles.length < 8 && (
@@ -434,14 +362,7 @@ export default function EditProductPage() {
                       <Plus className="w-5 h-5 text-gray-400" />
                       <span className="text-[9px] text-gray-400 mt-0.5">Agregar</span>
                     </div>
-                    <input
-                      ref={galleryInputRef}
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp"
-                      multiple
-                      className="hidden"
-                      onChange={handleGalleryChange}
-                    />
+                    <input ref={galleryInputRef} type="file" accept="image/jpeg,image/png,image/webp" multiple className="hidden" onChange={handleGalleryChange} />
                   </label>
                 )}
               </div>
@@ -450,53 +371,24 @@ export default function EditProductPage() {
             {/* Name */}
             <div className="space-y-2">
               <Label htmlFor="name">Nombre del producto *</Label>
-              <Input
-                id="name"
-                placeholder="Nombre del producto"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
+              <Input id="name" placeholder="Nombre del producto" value={name} onChange={(e) => setName(e.target.value)} required />
             </div>
 
             {/* Description */}
             <div className="space-y-2">
               <Label htmlFor="description">Descripción</Label>
-              <Textarea
-                id="description"
-                placeholder="Describe tu producto..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={3}
-              />
+              <Textarea id="description" placeholder="Describe tu producto..." value={description} onChange={(e) => setDescription(e.target.value)} rows={3} />
             </div>
 
             {/* Price & Original Price */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="price">Precio (S/) *</Label>
-                <Input
-                  id="price"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  placeholder="0.00"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  required
-                />
+                <Input id="price" type="number" step="0.01" min="0" placeholder="0.00" value={price} onChange={(e) => setPrice(e.target.value)} required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="originalPrice">Precio anterior (S/)</Label>
-                <Input
-                  id="originalPrice"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  placeholder="0.00 (opcional)"
-                  value={originalPrice}
-                  onChange={(e) => setOriginalPrice(e.target.value)}
-                />
+                <Input id="originalPrice" type="number" step="0.01" min="0" placeholder="0.00 (opcional)" value={originalPrice} onChange={(e) => setOriginalPrice(e.target.value)} />
                 <p className="text-[11px] text-gray-400">Se mostrará como descuento</p>
               </div>
             </div>
@@ -510,41 +402,18 @@ export default function EditProductPage() {
                     <SelectValue placeholder="Seleccionar categoría" />
                   </SelectTrigger>
                   <SelectContent>
-                    {store?.categories?.map((cat) => (
-                      <SelectItem key={cat.id} value={cat.name}>
-                        {cat.name}
-                      </SelectItem>
+                    {CATEGORIES.map((cat) => (
+                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                     ))}
-                    {(!store?.categories || store.categories.length === 0) && (
-                      <>
-                        <SelectItem value="Ropa">Ropa</SelectItem>
-                        <SelectItem value="Accesorios">Accesorios</SelectItem>
-                        <SelectItem value="Electrónica">Electrónica</SelectItem>
-                        <SelectItem value="Hogar">Hogar</SelectItem>
-                        <SelectItem value="Belleza">Belleza</SelectItem>
-                        <SelectItem value="Deportes">Deportes</SelectItem>
-                        <SelectItem value="Alimentos">Alimentos</SelectItem>
-                        <SelectItem value="Otros">Otros</SelectItem>
-                      </>
-                    )}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="color">Color / Variante</Label>
                 <div className="flex gap-2">
-                  <Input
-                    id="color"
-                    placeholder="Ej: Rojo, Azul..."
-                    value={color}
-                    onChange={(e) => setColor(e.target.value)}
-                    className="flex-1"
-                  />
+                  <Input id="color" placeholder="Ej: Rojo, Azul..." value={color} onChange={(e) => setColor(e.target.value)} className="flex-1" />
                   {color && (
-                    <div
-                      className="w-10 h-10 rounded-lg border border-gray-300 flex-shrink-0"
-                      style={{ backgroundColor: color.toLowerCase() }}
-                    />
+                    <div className="w-10 h-10 rounded-lg border border-gray-300 flex-shrink-0" style={{ backgroundColor: color.toLowerCase() }} />
                   )}
                 </div>
               </div>
@@ -554,15 +423,7 @@ export default function EditProductPage() {
             <div className="space-y-2">
               <Label htmlFor="stock">Stock / Inventario</Label>
               <div className="flex items-center gap-3">
-                <Input
-                  id="stock"
-                  type="number"
-                  min="-1"
-                  placeholder="-1 = Sin límite"
-                  value={stock}
-                  onChange={(e) => setStock(parseInt(e.target.value) || -1)}
-                  className="w-32"
-                />
+                <Input id="stock" type="number" min="-1" placeholder="-1 = Sin límite" value={stock} onChange={(e) => setStock(parseInt(e.target.value) || -1)} className="w-32" />
                 <span className="text-xs text-gray-400">
                   {stock === -1 ? 'Sin límite' : stock === 0 ? 'Agotado' : `${stock} unidades`}
                 </span>
@@ -575,24 +436,11 @@ export default function EditProductPage() {
               <Label>Calificación</Label>
               <div className="flex items-center gap-1">
                 {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    type="button"
-                    onClick={() => setRating(star === rating ? 0 : star)}
-                    className="focus:outline-none"
-                  >
-                    <Star
-                      className={`w-6 h-6 transition-colors ${
-                        star <= rating
-                          ? 'fill-yellow-400 text-yellow-400'
-                          : 'text-gray-300 hover:text-yellow-300'
-                      }`}
-                    />
+                  <button key={star} type="button" onClick={() => setRating(star === rating ? 0 : star)} className="focus:outline-none">
+                    <Star className={`w-6 h-6 transition-colors ${star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 hover:text-yellow-300'}`} />
                   </button>
                 ))}
-                {rating > 0 && (
-                  <span className="text-sm text-gray-500 ml-2">{rating}.0</span>
-                )}
+                {rating > 0 && <span className="text-sm text-gray-500 ml-2">{rating}.0</span>}
               </div>
             </div>
 
@@ -623,11 +471,7 @@ export default function EditProductPage() {
               {loading || coverUploading || galleryUploading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  {coverUploading
-                    ? 'Subiendo imagen principal...'
-                    : galleryUploading
-                    ? 'Subiendo imágenes...'
-                    : 'Guardando...'}
+                  {coverUploading ? 'Subiendo imagen principal...' : galleryUploading ? 'Subiendo imágenes...' : 'Guardando...'}
                 </>
               ) : (
                 'Guardar cambios'

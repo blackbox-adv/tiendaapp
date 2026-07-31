@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAppStore } from '@/lib/store'
 import type { PageRoute } from '@/lib/types'
@@ -30,30 +31,9 @@ import { PrivacyPage } from '@/components/info/PrivacyPage'
 // Wizard
 import { StoreWizard } from '@/components/wizard/StoreWizard'
 
-// Dashboard
-import { Sidebar } from '@/components/dashboard/Sidebar'
-import { DashboardOverview } from '@/components/dashboard/DashboardOverview'
-import { ProductList } from '@/components/dashboard/ProductList'
-import { ProductForm } from '@/components/dashboard/ProductForm'
-import { StoreSettings } from '@/components/dashboard/StoreSettings'
-import { TemplateGallery } from '@/components/dashboard/TemplateGallery'
-import { PlanManager } from '@/components/dashboard/PlanManager'
-import { StoreQRCode } from '@/components/dashboard/StoreQRCode'
-import { PopupManager } from '@/components/dashboard/PopupManager'
-
 // Store templates
 import { StoreView } from '@/components/store-templates/StoreView'
 import { ProductDetailView } from '@/components/store-templates/ProductDetailView'
-
-// Admin
-import { AdminSidebar } from '@/components/admin/AdminSidebar'
-import { AdminOverview } from '@/components/admin/AdminOverview'
-import { AdminStores } from '@/components/admin/AdminStores'
-import { AdminUsers } from '@/components/admin/AdminUsers'
-import { AdminPlans } from '@/components/admin/AdminPlans'
-import { AdminSettings } from '@/components/admin/AdminSettings'
-import { AdminPaymentsPage } from '@/components/admin/AdminPaymentsPage'
-import { AdminNotificationsPage } from '@/components/admin/AdminNotificationsPage'
 
 const pageVariants = {
   initial: { opacity: 0, y: 12 },
@@ -62,11 +42,21 @@ const pageVariants = {
   transition: { duration: 0.3, ease: "easeInOut" as const },
 }
 
+// Routes that are handled by Next.js App Router pages
+const NEXTJS_ROUTES = [
+  '/dashboard',
+  '/dashboard/products',
+  '/dashboard/categories',
+  '/dashboard/settings',
+  '/dashboard/template',
+]
+
 export default function AppRouter() {
   const route = useAppStore((s) => s.route)
   const currentUser = useAppStore((s) => s.currentUser)
   const isSyncing = useAppStore((s) => s.isSyncing)
   const navigate = useAppStore((s) => s.navigate)
+  const nextRouter = useRouter()
 
   // Deep-link detection: sync Zustand route with actual browser URL
   useEffect(() => {
@@ -83,44 +73,17 @@ export default function AppRouter() {
       '/privacy': () => navigate({ page: 'privacy' }),
     }
 
-    // Deep-link for dashboard sub-routes
-    if (pathname === '/dashboard') {
-      navigate({ page: 'dashboard' })
+    // Deep-link for dashboard sub-routes — redirect to Next.js pages
+    if (pathname === '/dashboard' || pathname.startsWith('/dashboard/')) {
+      // Next.js App Router handles dashboard pages — don't override
       return
-    }
-    if (pathname.startsWith('/dashboard/')) {
-      const sub = pathname.replace('/dashboard/', '')
-      const dashboardRoutes: Record<string, PageRoute['page']> = {
-        'products': 'dashboard-products',
-        'settings': 'dashboard-settings',
-        'templates': 'dashboard-templates',
-        'qr': 'dashboard-qr',
-        'popup': 'dashboard-popup',
-        'plan': 'dashboard-plan',
-      }
-      if (dashboardRoutes[sub]) {
-        navigate({ page: dashboardRoutes[sub] } as PageRoute)
-        return
-      }
     }
 
-    // Deep-link for admin sub-routes
-    if (pathname === '/admin') {
-      navigate({ page: 'admin' })
-      return
-    }
-    if (pathname.startsWith('/admin/')) {
-      const sub = pathname.replace('/admin/', '')
-      const adminRoutes: Record<string, PageRoute['page']> = {
-        'stores': 'admin-stores',
-        'users': 'admin-users',
-        'plans': 'admin-plans',
-        'payments': 'admin-payments',
-        'settings': 'admin-settings',
-        'notifications': 'admin-notifications',
-      }
-      if (adminRoutes[sub]) {
-        navigate({ page: adminRoutes[sub] } as PageRoute)
+    // Deep-link for admin sub-routes — redirect to Next.js pages
+    if (pathname === '/admin' || pathname.startsWith('/admin/')) {
+      // Admin pages handled by AppRouter
+      if (pathname === '/admin') {
+        navigate({ page: 'admin' })
         return
       }
     }
@@ -130,11 +93,52 @@ export default function AppRouter() {
       return
     }
 
+    // Onboarding handled by Next.js
+    if (pathname.startsWith('/onboarding')) {
+      return
+    }
+
+    // Auth pages handled by Next.js
+    if (pathname.startsWith('/auth/')) {
+      return
+    }
+
     const handler = routeMap[pathname]
     if (handler) {
       handler()
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Redirect dashboard routes to Next.js pages
+  useEffect(() => {
+    if (route.page.startsWith('dashboard') || route.page === 'wizard') {
+      const dashboardRedirects: Record<string, string> = {
+        'dashboard': '/dashboard',
+        'dashboard-products': '/dashboard/products',
+        'dashboard-product-form': '/dashboard/products/new',
+        'dashboard-settings': '/dashboard/settings',
+        'dashboard-templates': '/dashboard/template',
+        'dashboard-qr': '/dashboard/settings',
+        'dashboard-popup': '/dashboard/settings',
+        'dashboard-plan': '/dashboard/settings',
+        'wizard': '/onboarding',
+      }
+
+      const redirectUrl = dashboardRedirects[route.page]
+      if (redirectUrl) {
+        // Check if we're already on the target page
+        if (typeof window !== 'undefined' && window.location.pathname !== redirectUrl) {
+          // For product form with specific product ID
+          if (route.page === 'dashboard-product-form' && route.productId) {
+            nextRouter.push(`/dashboard/products/${route.productId}`)
+          } else {
+            nextRouter.push(redirectUrl)
+          }
+        }
+        return
+      }
+    }
+  }, [route.page, nextRouter])
 
   // Route guards — wait for sync to complete before redirecting
   const requiresAuth = route.page.startsWith('dashboard') || route.page === 'wizard'
@@ -153,7 +157,10 @@ export default function AppRouter() {
   }
 
   if (requiresAuth && !currentUser) {
-    navigate({ page: 'login' })
+    // Redirect to Next.js login page
+    if (typeof window !== 'undefined') {
+      window.location.href = '/auth/login'
+    }
     return null
   } else if (requiresAdmin && (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'super_admin'))) {
     navigate({ page: 'landing' })
@@ -226,13 +233,6 @@ export default function AppRouter() {
           </motion.div>
         )
 
-      case 'wizard':
-        return (
-          <motion.div key="wizard" variants={pageVariants} initial="initial" animate="animate" exit="exit" className="min-h-screen bg-gray-50">
-            <StoreWizard />
-          </motion.div>
-        )
-
       case 'store':
         return (
           <motion.div key={`store-${route.slug}`} variants={pageVariants} initial="initial" animate="animate" exit="exit" className="min-h-screen">
@@ -247,6 +247,8 @@ export default function AppRouter() {
           </motion.div>
         )
 
+      // Dashboard and admin routes are handled by Next.js App Router pages
+      // The redirect useEffect above handles the navigation
       case 'dashboard':
       case 'dashboard-products':
       case 'dashboard-product-form':
@@ -254,28 +256,16 @@ export default function AppRouter() {
       case 'dashboard-templates':
       case 'dashboard-qr':
       case 'dashboard-plan':
-      case 'dashboard-popup': {
-        const dashboardContent = () => {
-          switch (route.page) {
-            case 'dashboard': return <DashboardOverview />
-            case 'dashboard-products': return <ProductList />
-            case 'dashboard-product-form': return <ProductForm productId={route.productId} />
-            case 'dashboard-settings': return <StoreSettings />
-            case 'dashboard-templates': return <TemplateGallery />
-            case 'dashboard-qr': return <StoreQRCode />
-            case 'dashboard-plan': return <PlanManager />
-            case 'dashboard-popup': return <PopupManager />
-          }
-        }
+      case 'dashboard-popup':
+      case 'wizard':
         return (
-          <motion.div key="dashboard" variants={pageVariants} initial="initial" animate="animate" exit="exit" className="min-h-screen flex">
-            <Sidebar />
-            <main className="flex-1 bg-gray-50 p-4 pt-16 md:pt-8 md:p-8 overflow-auto">
-              {dashboardContent()}
-            </main>
-          </motion.div>
+          <div className="min-h-screen flex items-center justify-center bg-gray-50">
+            <div className="text-center space-y-3">
+              <div className="w-10 h-10 border-3 border-violet-200 border-t-violet-600 rounded-full animate-spin mx-auto" />
+              <p className="text-sm text-gray-500">Redirigiendo...</p>
+            </div>
+          </div>
         )
-      }
 
       case 'admin':
       case 'admin-stores':
@@ -284,6 +274,17 @@ export default function AppRouter() {
       case 'admin-payments':
       case 'admin-settings':
       case 'admin-notifications': {
+        // Admin pages are still handled by Zustand SPA for now
+        // TODO: Migrate admin to Next.js App Router pages
+        const AdminSidebar = require('@/components/admin/AdminSidebar').AdminSidebar
+        const AdminOverview = require('@/components/admin/AdminOverview').AdminOverview
+        const AdminStores = require('@/components/admin/AdminStores').AdminStores
+        const AdminUsers = require('@/components/admin/AdminUsers').AdminUsers
+        const AdminPlans = require('@/components/admin/AdminPlans').AdminPlans
+        const AdminPaymentsPage = require('@/components/admin/AdminPaymentsPage').AdminPaymentsPage
+        const AdminSettings = require('@/components/admin/AdminSettings').AdminSettings
+        const AdminNotificationsPage = require('@/components/admin/AdminNotificationsPage').AdminNotificationsPage
+
         const adminContent = () => {
           switch (route.page) {
             case 'admin': return <AdminOverview />

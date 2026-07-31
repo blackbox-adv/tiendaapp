@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAppStore } from '@/lib/store'
 const CATEGORIES = [
   { id: 'ropa', name: 'Ropa' },
@@ -27,7 +28,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from 'sonner'
 
 export function ProductList() {
-  const { currentStore, products, navigate, deleteProduct } = useAppStore()
+  const { currentStore, products, deleteProduct } = useAppStore()
+  const router = useRouter()
   const [search, setSearch] = useState('')
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
 
@@ -63,14 +65,27 @@ export function ProductList() {
     (p) => p.storeId === currentStore.id && p.isActive && p.name.toLowerCase().includes(search.toLowerCase())
   )
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (deleteTarget) {
       const product = products.find(p => p.id === deleteTarget)
-      deleteProduct(deleteTarget)
+      try {
+        const token = localStorage.getItem('tiendapp_token')
+        const res = await fetch(`/api/store-products?id=${deleteTarget}`, {
+          method: 'DELETE',
+          headers: (token ? { Authorization: `Bearer ${token}` } : {}) as Record<string, string>,
+        })
+        if (res.ok) {
+          deleteProduct(deleteTarget)
+          toast.success('Producto eliminado', {
+            description: product ? `"${product.name}" fue eliminado correctamente.` : 'El producto fue eliminado correctamente.',
+          })
+        } else {
+          toast.error('Error al eliminar el producto')
+        }
+      } catch {
+        toast.error('Error de conexión')
+      }
       setDeleteTarget(null)
-      toast.success('Producto eliminado', {
-        description: product ? `"${product.name}" fue eliminado correctamente.` : 'El producto fue eliminado correctamente.',
-      })
     }
   }
 
@@ -85,7 +100,7 @@ export function ProductList() {
           <p className="text-gray-500 mt-1">{storeProducts.length} productos en tu tienda</p>
         </div>
         <Button
-          onClick={() => navigate({ page: 'dashboard-product-form' })}
+          onClick={() => router.push('/dashboard/products/new')}
           className="bg-violet-600 hover:bg-violet-700 text-white gap-2"
         >
           <Plus className="w-4 h-4" />
@@ -115,7 +130,7 @@ export function ProductList() {
             </p>
             {!search && (
               <Button
-                onClick={() => navigate({ page: 'dashboard-product-form' })}
+                onClick={() => router.push('/dashboard/products/new')}
                 className="mt-4 bg-violet-600 hover:bg-violet-700 text-white gap-2"
               >
                 <Plus className="w-4 h-4" />
@@ -161,7 +176,7 @@ export function ProductList() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => navigate({ page: 'dashboard-product-form', productId: product.id })}
+                      onClick={() => router.push(`/dashboard/products/${product.id}`)}
                       className="flex-1 text-violet-600 border-violet-200 hover:bg-violet-50 gap-1"
                     >
                       <Edit3 className="w-3.5 h-3.5" />

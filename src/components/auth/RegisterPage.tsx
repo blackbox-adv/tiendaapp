@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { useAppStore } from '@/lib/store'
 import { Zap, Mail, Lock, User, ArrowRight, Info, Check } from 'lucide-react'
@@ -13,6 +14,7 @@ import { Card, CardContent } from '@/components/ui/card'
 export function RegisterPage() {
   const register = useAppStore((s) => s.register)
   const navigate = useAppStore((s) => s.navigate)
+  const router = useRouter()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -51,6 +53,8 @@ export function RegisterPage() {
     if (result && typeof result === 'object' && 'success' in result) {
       if (result.success) {
         toast.success('Cuenta creada', { description: 'Bienvenido a TiendApp. Configura tu tienda.' })
+        // Redirect to onboarding
+        router.push('/onboarding')
       } else {
         const errorMessage = (result as { error?: string }).error || 'Error al registrarse'
         setError(errorMessage)
@@ -74,7 +78,7 @@ export function RegisterPage() {
       >
         {/* Logo */}
         <div className="text-center mb-8">
-          <button onClick={() => navigate({ page: 'landing' })} className="inline-flex items-center gap-2 mb-4">
+          <button onClick={() => router.push('/')} className="inline-flex items-center gap-2 mb-4">
             <div className="w-10 h-10 rounded-xl bg-violet-600 flex items-center justify-center">
               <Zap className="w-6 h-6 text-white" />
             </div>

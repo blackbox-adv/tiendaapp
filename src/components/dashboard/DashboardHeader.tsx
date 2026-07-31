@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useAppStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -19,19 +20,16 @@ import {
   Package,
   Palette,
   Settings,
-  QrCode,
-  CreditCard,
+  FolderOpen,
   LogOut,
 } from 'lucide-react';
 
 const navItems = [
   { href: '/dashboard', label: 'Panel', icon: LayoutDashboard },
   { href: '/dashboard/products', label: 'Productos', icon: Package },
-  { href: '/dashboard/categories', label: 'Categorías', icon: Package },
+  { href: '/dashboard/categories', label: 'Categorías', icon: FolderOpen },
   { href: '/dashboard/template', label: 'Plantillas', icon: Palette },
   { href: '/dashboard/settings', label: 'Configuración', icon: Settings },
-  { href: '#', label: 'Código QR', icon: QrCode },
-  { href: '#', label: 'Plan', icon: CreditCard },
 ];
 
 const planLabels: Record<string, { text: string; color: string }> = {
@@ -42,9 +40,15 @@ const planLabels: Record<string, { text: string; color: string }> = {
 
 export default function DashboardHeader() {
   const { currentUser, logout } = useAppStore();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const plan = currentUser?.planId || 'free';
   const planInfo = planLabels[plan] || planLabels.free;
+
+  const isActive = (href: string) => {
+    if (href === '/dashboard') return pathname === '/dashboard';
+    return pathname.startsWith(href);
+  };
 
   return (
     <header className="lg:hidden sticky top-0 z-40 bg-white border-b border-gray-200 px-4 py-3">
@@ -87,12 +91,17 @@ export default function DashboardHeader() {
               <nav className="mt-6 space-y-1">
                 {navItems.map((item) => {
                   const Icon = item.icon;
+                  const active = isActive(item.href);
                   return (
                     <Link
-                      key={item.label}
+                      key={item.href}
                       href={item.href}
                       onClick={() => setOpen(false)}
-                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                        active
+                          ? 'bg-violet-100 text-violet-700'
+                          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                      }`}
                     >
                       <Icon className="w-5 h-5" />
                       {item.label}
@@ -105,7 +114,7 @@ export default function DashboardHeader() {
                 <Button
                   variant="ghost"
                   className="w-full justify-start text-gray-500 hover:text-red-600 hover:bg-red-50"
-                  onClick={() => logout()}
+                  onClick={() => { logout(); setOpen(false); }}
                 >
                   <LogOut className="w-5 h-5 mr-3" />
                   Cerrar sesión

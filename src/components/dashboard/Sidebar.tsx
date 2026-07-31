@@ -1,37 +1,36 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { useAppStore } from '@/lib/store'
 import {
   LayoutDashboard, Package, Settings, Palette, CreditCard,
-  LogOut, ExternalLink, Store, Menu, X, QrCode, Megaphone
+  LogOut, ExternalLink, Store, Menu, X, QrCode, Megaphone, FolderOpen
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
-import type { PageRoute } from '@/lib/types'
 
-const navItems: { page: PageRoute['page']; label: string; icon: React.ElementType }[] = [
-  { page: 'dashboard', label: 'Panel', icon: LayoutDashboard },
-  { page: 'dashboard-products', label: 'Productos', icon: Package },
-  { page: 'dashboard-templates', label: 'Plantillas', icon: Palette },
-  { page: 'dashboard-popup', label: 'Popup Promocional', icon: Megaphone },
-  { page: 'dashboard-qr', label: 'Codigo QR', icon: QrCode },
-  { page: 'dashboard-settings', label: 'Configuracion', icon: Settings },
-  { page: 'dashboard-plan', label: 'Plan', icon: CreditCard },
+const navItems = [
+  { href: '/dashboard', label: 'Panel', icon: LayoutDashboard },
+  { href: '/dashboard/products', label: 'Productos', icon: Package },
+  { href: '/dashboard/categories', label: 'Categorías', icon: FolderOpen },
+  { href: '/dashboard/template', label: 'Plantillas', icon: Palette },
+  { href: '/dashboard/settings', label: 'Configuración', icon: Settings },
 ]
 
 function SidebarContent({ onClose }: { onClose?: () => void }) {
-  const { currentUser, currentStore, navigate, logout } = useAppStore()
-  const route = useAppStore((s) => s.route)
-
-  if (!currentUser) return null
+  const { currentUser, currentStore, logout } = useAppStore()
+  const pathname = usePathname()
 
   // Fetch plan name from API
   const [planName, setPlanName] = useState('')
   const [planPrice, setPlanPrice] = useState(0)
+
   useEffect(() => {
+    if (!currentUser) return
     fetch('/api/plans').then(r => r.ok ? r.json() : []).then(data => {
       const plans = Array.isArray(data) ? data : (data.plans || data.data || [])
       if (Array.isArray(plans)) {
@@ -42,19 +41,21 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
         }
       }
     }).catch(() => setPlanName('Gratis'))
-  }, [currentUser.planId])
+  }, [currentUser?.planId])
 
-  const currentPlan = planName ? { name: planName, price: planPrice, productLimit: 100 } : null
+  const currentPlan = planName ? { name: planName, price: planPrice } : null
 
-  const handleNav = (page: PageRoute['page']) => {
-    navigate({ page } as PageRoute)
-    onClose?.()
-  }
+  if (!currentUser) return null
 
   const handleLogout = () => {
     logout()
     onClose?.()
     toast.info('Sesión cerrada', { description: 'Has cerrado sesión correctamente.' })
+  }
+
+  const isActive = (href: string) => {
+    if (href === '/dashboard') return pathname === '/dashboard'
+    return pathname.startsWith(href)
   }
 
   return (
@@ -83,20 +84,22 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-1">
         {navItems.map((item) => {
-          const isActive = route.page === item.page
+          const Icon = item.icon
+          const active = isActive(item.href)
           return (
-            <button
-              key={item.page}
-              onClick={() => handleNav(item.page)}
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={onClose}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                isActive
+                active
                   ? 'bg-violet-600 text-white shadow-lg shadow-violet-600/30'
                   : 'text-violet-200 hover:text-white hover:bg-white/10'
               }`}
             >
-              <item.icon className="w-5 h-5" />
+              <Icon className="w-5 h-5" />
               {item.label}
-            </button>
+            </Link>
           )
         })}
       </nav>
@@ -106,14 +109,14 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
         <>
           <Separator className="bg-white/10" />
           <div className="px-3 py-4">
-            <Button
-              variant="ghost"
-              onClick={() => navigate({ page: 'store', slug: currentStore.slug })}
-              className="w-full text-violet-200 hover:text-white hover:bg-white/10 justify-start gap-3"
+            <Link
+              href={`/store/${currentStore.slug}`}
+              target="_blank"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-violet-200 hover:text-white hover:bg-white/10 transition-all"
             >
               <ExternalLink className="w-4 h-4" />
-              <span className="text-sm">Ver mi tienda</span>
-            </Button>
+              <span>Ver mi tienda</span>
+            </Link>
           </div>
         </>
       )}

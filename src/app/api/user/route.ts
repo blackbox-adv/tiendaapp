@@ -1,8 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { NextRequest } from 'next/server';
 import { authenticateRequest } from '@/lib/auth';
 import { apiError, apiSuccess } from '@/lib/api-response';
+import { serializeDecimals } from '@/lib/utils';
 
+// GET /api/user - Get current user data with stores and subscription info
+// Uses raw SQL to avoid PgBouncer timeout with Prisma include
 export async function GET(request: NextRequest) {
   try {
     const auth = await authenticateRequest(request);
@@ -12,6 +15,7 @@ export async function GET(request: NextRequest) {
 
     const userId = auth.user.userId;
 
+    // 1) Get basic user info
     const user = await db.user.findUnique({
       where: { id: userId },
       select: {
@@ -24,75 +28,94 @@ export async function GET(request: NextRequest) {
         phone: true,
         isActive: true,
         createdAt: true,
-        stores: {
-          select: {
-            id: true,
-            slug: true,
-            name: true,
-            description: true,
-            template: true,
-            logo: true,
-            whatsappNumber: true,
-            category: true,
-            primaryColor: true,
-            secondaryColor: true,
-            hasShipping: true,
-            hasSecurePayment: true,
-            hasReturns: true,
-            popupEnabled: true,
-            popupType: true,
-            popupButtonText: true,
-            isDemo: true,
-            isActive: true,
-            _count: {
-              select: {
-                products: true,
-                categories: true,
-              },
-            },
-          },
-        },
-        subscriptions: {
-          where: { status: 'active' },
-          select: {
-            id: true,
-            status: true,
-            plan: {
-              select: {
-                id: true,
-                name: true,
-                type: true,
-                price: true,
-                maxProducts: true,
-                features: true,
-              },
-            },
-          },
-        },
       },
     });
 
     if (!user) {
-      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
+      return apiError('Usuario no encontrado', 404, undefined, request);
     }
 
-    return apiSuccess({
+    // 2) Get user's stores with product/category counts using raw SQL
+    const storeRows = await db.$queryRawUnsafe(`
+      SELECT s.id, s.slug, s.name, s.description, s.template, s.logo,
+        s."whatsappNumber", s.category, s."primaryColor", s."secondaryColor",
+        s."hasShipping", s."hasSecurePayment", s."hasReturns",
+        s."popupEnabled", s."popupType", s."popupButtonText",
+        s."isDemo", s."isActive",
+        COALESCE(pc.cnt, 0)::int as "productCount",
+        COALESCE(cc.cnt, 0)::int as "categoryCount"
+      FROM "Store" s
+      LEFT JOIN (
+        SELECT "storeId", COUNT(*)::int as cnt FROM "StoreProduct" WHERE "isActive" = true GROUP BY "storeId"
+      ) pc ON pc."storeId" = s.id
+      LEFT JOIN (
+        SELECT "storeId", COUNT(*)::int as cnt FROM "Category" GROUP BY "storeId"
+      ) cc ON cc."storeId" = s.id
+      WHERE s."ownerId" = $1
+      ORDER BY s."createdAt" DESC
+    `, userId) as Array<Record<string, unknown>>;
+
+    const stores = storeRows.map((s) => ({
+      id: s.id,
+      slug: s.slug,
+      name: s.name,
+      description: s.description,
+      template: s.template,
+      logo: s.logo,
+      whatsappNumber: s.whatsappNumber,
+      category: s.category,
+      primaryColor: s.primaryColor,
+      secondaryColor: s.secondaryColor,
+      hasShipping: s.hasShipping,
+      hasSecurePayment: s.hasSecurePayment,
+      hasReturns: s.hasReturns,
+      popupEnabled: s.popupEnabled,
+      popupType: s.popupType,
+      popupButtonText: s.popupButtonText,
+      isDemo: s.isDemo,
+      isActive: s.isActive,
+      _count: {
+        products: Number(s.productCount) || 0,
+        categories: Number(s.categoryCount) || 0,
+      },
+    }));
+
+    // 3) Get active subscription with plan info using raw SQL
+    const subRows = await db.$queryRawUnsafe(`
+      SELECT sub.id, sub.status, sub."planId",
+        p.id as "planId", p.name as "planName", p.type as "planType",
+        p.price::text as "planPrice", p."maxProducts", p.features
+      FROM "Subscription" sub
+      JOIN "Plan" p ON p.id = sub."planId"
+      WHERE sub."userId" = $1 AND sub.status = 'active'
+      ORDER BY sub."createdAt" DESC LIMIT 1
+    `, userId) as Array<Record<string, unknown>>;
+
+    const subscriptions = subRows.map((s) => ({
+      id: s.id,
+      status: s.status,
+      plan: {
+        id: s.planId,
+        name: s.planName,
+        type: s.planType,
+        price: parseFloat(String(s.planPrice || '0')),
+        maxProducts: s.maxProducts,
+        features: s.features,
+      },
+    }));
+
+    return apiSuccess(serializeDecimals({
       ...user,
-      subscriptions: user.subscriptions.map(sub => ({
-        ...sub,
-        plan: {
-          ...sub.plan,
-          price: Number(sub.plan.price),
-          features: sub.plan.features,
-        },
-      })),
-    }, 200, request);
+      stores,
+      subscriptions,
+    }), 200, request);
   } catch (error) {
     console.error('Get user error:', error);
     return apiError('Error al obtener usuario', 500, undefined, request);
   }
 }
 
+// PUT /api/user - Update user profile
 export async function PUT(request: NextRequest) {
   try {
     const auth = await authenticateRequest(request);

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { useAppStore } from '@/lib/store'
 import { Zap, Mail, Lock, ArrowRight, Info } from 'lucide-react'
@@ -13,6 +14,7 @@ import { Card, CardContent } from '@/components/ui/card'
 export function LoginPage() {
   const login = useAppStore((s) => s.login)
   const navigate = useAppStore((s) => s.navigate)
+  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -28,6 +30,13 @@ export function LoginPage() {
 
     if (success) {
       toast.success('Sesión iniciada', { description: 'Bienvenido de vuelta a TiendApp.' })
+      // Redirect to Next.js dashboard page
+      const user = useAppStore.getState().currentUser
+      if (user?.role === 'admin') {
+        router.push('/dashboard')
+      } else {
+        router.push('/dashboard')
+      }
     } else {
       setError('Credenciales inválidas. Verifica tu email y contraseña.')
       toast.error('Error de inicio de sesión', { description: 'Credenciales inválidas.' })
@@ -43,7 +52,7 @@ export function LoginPage() {
       >
         {/* Logo */}
         <div className="text-center mb-8">
-          <button onClick={() => navigate({ page: 'landing' })} className="inline-flex items-center gap-2 mb-4">
+          <button onClick={() => router.push('/')} className="inline-flex items-center gap-2 mb-4">
             <div className="w-10 h-10 rounded-xl bg-violet-600 flex items-center justify-center">
               <Zap className="w-6 h-6 text-white" />
             </div>
@@ -111,7 +120,7 @@ export function LoginPage() {
               <p className="text-center text-sm">
                 <button
                   type="button"
-                  onClick={() => navigate({ page: 'reset-password' })}
+                  onClick={() => router.push('/reset-password')}
                   className="text-violet-600 hover:text-violet-700 font-medium"
                 >
                   ¿Olvidaste tu contraseña?
@@ -122,7 +131,7 @@ export function LoginPage() {
             <p className="text-center text-sm text-gray-500 mt-6">
               ¿No tienes cuenta?{' '}
               <button
-                onClick={() => navigate({ page: 'register' })}
+                onClick={() => router.push('/auth/register')}
                 className="text-violet-600 hover:text-violet-700 font-semibold"
               >
                 Regístrate gratis
