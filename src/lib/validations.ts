@@ -67,7 +67,10 @@ export const createStoreSchema = z.object({
     .max(50, 'Categoria no puede exceder 50 caracteres')
     .optional()
     .default('otros'),
-  logo: z.string().max(1000).optional().default(''),
+  logo: z.preprocess(
+    (v) => (v === null || v === undefined ? '' : v),
+    z.string().max(1000).optional().default('')
+  ),
   bannerUrl: z.string().max(1000).optional().default(''),
   primaryColor: z
     .string()

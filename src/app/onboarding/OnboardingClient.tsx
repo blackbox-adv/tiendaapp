@@ -158,7 +158,7 @@ export default function OnboardingPage() {
           description: storeDescription || '',
           template: selectedTemplate,
           whatsappNumber: storeWhatsapp || '',
-          logo: logoUrl,
+          logo: logoUrl || '',
         }),
       });
 
