@@ -11,3 +11,7 @@ dev.log
 server.log
 mini-services/
 skills/
+
+# DB local de desarrollo y artefactos de build
+prisma/*.db
+tsconfig.tsbuildinfo
