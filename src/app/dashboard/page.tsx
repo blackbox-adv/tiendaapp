@@ -81,8 +81,9 @@ export default function DashboardPage() {
   }, []);
 
   // Fetch analytics when store is available
+  // La API /api/user devuelve objetos planos (stores[0] = store), no anidados
   useEffect(() => {
-    const storeData = userData?.stores?.[0]?.store;
+    const storeData = userData?.stores?.[0] as StoreData | undefined;
     if (storeData?.id) {
       const analyticsToken = localStorage.getItem('tiendapp_token');
       fetch(`/api/analytics?storeId=${storeData.id}`, {
@@ -116,7 +117,8 @@ export default function DashboardPage() {
     );
   }
 
-  const store = userData?.stores?.[0]?.store as StoreData | undefined;
+  // La API /api/user devuelve la tienda plana en stores[0] (con .store indiferido por compat)
+  const store = (userData?.stores?.[0]?.store ?? userData?.stores?.[0]) as StoreData | undefined;
 
   if (!store) {
     return (
