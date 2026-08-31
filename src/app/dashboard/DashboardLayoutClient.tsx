@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAppStore } from '@/lib/store';
 import { useRouter } from 'next/navigation';
 import { Sidebar } from '@/components/dashboard/Sidebar';
@@ -14,16 +14,38 @@ export default function DashboardLayoutClient({
 }) {
   const { currentUser, isSyncing, syncFromAPI } = useAppStore();
   const router = useRouter();
+  // true cuando ya intentamos restaurar la sesión (con o sin token guardado)
+  const [authResolved, setAuthResolved] = useState(false);
 
-  // Sync Zustand store from API on mount (if not already syncing)
+  // Restore session from localStorage token on mount.
+  // ⚠️ Nunca llamar router.push durante el render: en el pase SSR el estado
+  // siempre es "sin sesión" (no hay localStorage) y Next inyecta el redirect
+  // en el flight payload — el cliente acaba en /auth/login aunque el token
+  // sea válido. Decidir el redirect SOLO en un efecto, después de intentar
+  // restaurar.
   useEffect(() => {
     const token = localStorage.getItem('tiendapp_token');
-    if (token && !currentUser) {
-      syncFromAPI();
+    if (currentUser) {
+      setAuthResolved(true);
+      return;
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    if (token) {
+      Promise.resolve(syncFromAPI()).finally(() => setAuthResolved(true));
+    } else {
+      setAuthResolved(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  if (isSyncing) {
+  // Redirect (en efecto, nunca en render) cuando no hay sesión posible
+  useEffect(() => {
+    if (authResolved && !isSyncing && !currentUser) {
+      router.replace('/auth/login');
+    }
+  }, [authResolved, isSyncing, currentUser, router]);
+
+  // Esperando restauración inicial o sincronización en curso → spinner
+  if (!authResolved || isSyncing) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center space-y-4">
@@ -34,8 +56,8 @@ export default function DashboardLayoutClient({
     );
   }
 
+  // Sesión confirmada como ausente → renderizar nada mientras el efecto navega
   if (!currentUser) {
-    router.push('/auth/login');
     return null;
   }
 

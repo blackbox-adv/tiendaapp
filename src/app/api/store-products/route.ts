@@ -17,8 +17,8 @@ export async function GET(request: NextRequest) {
       return apiError('storeId es requerido', 400, undefined, request)
     }
 
-    // Validate storeId format (must be a valid cuid)
-    if (!/^[a-z0-9_-]+$/.test(storeId)) {
+    // Validate storeId format (cuid es lowercase, pero aceptamos mayúsculas por robustez)
+    if (!/^[a-zA-Z0-9_-]+$/.test(storeId)) {
       return apiError('storeId invalido', 400, undefined, request)
     }
 

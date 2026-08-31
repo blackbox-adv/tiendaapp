@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAppStore } from '@/lib/store';
@@ -62,6 +62,18 @@ export default function NewProductPage() {
   const [galleryUploading, setGalleryUploading] = useState(false);
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
+  // Esperar a que la sesión/tienda esté restaurada antes de decidir "No tienes tienda".
+  // El layout ya lanza syncFromAPI al montar; aquí solo esperamos (con fallback).
+  const [storeResolved, setStoreResolved] = useState(false);
+  useEffect(() => {
+    if (currentStore) {
+      setStoreResolved(true);
+      return;
+    }
+    Promise.resolve(syncFromAPI()).finally(() => setStoreResolved(true));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const uploadImage = async (file: File): Promise<string | null> => {
     const formData = new FormData();
     formData.append('file', file);
@@ -118,6 +130,17 @@ export default function NewProductPage() {
       setError('No tienes una tienda configurada');
       return;
     }
+    // Defensa: si llegamos aquí con la tienda temporal del wizard (id "store-..."),
+    // re-sincronizar para obtener el store real de la API antes de crear productos.
+    let storeForSubmit = currentStore;
+    if (currentStore.id.startsWith('store-')) {
+      await syncFromAPI();
+      storeForSubmit = useAppStore.getState().currentStore ?? currentStore;
+      if (storeForSubmit.id.startsWith('store-')) {
+        setError('Tu tienda aún se está guardando. Espera unos segundos e intenta de nuevo.');
+        return;
+      }
+    }
     setLoading(true);
     setError('');
 
@@ -160,7 +183,7 @@ export default function NewProductPage() {
           ...(authToken ? { Authorization: `Bearer ${authToken}` } : {} as Record<string, string>),
         },
         body: JSON.stringify({
-          storeId: currentStore.id,
+          storeId: storeForSubmit.id,
           name,
           description: description || '',
           price: parseFloat(price),
@@ -191,6 +214,14 @@ export default function NewProductPage() {
       setLoading(false);
     }
   };
+
+  if (!storeResolved) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="w-8 h-8 animate-spin text-violet-600" />
+      </div>
+    );
+  }
 
   if (!currentStore) {
     return (

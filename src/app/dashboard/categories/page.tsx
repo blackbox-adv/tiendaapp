@@ -49,7 +49,8 @@ export default function CategoriesPage() {
         return;
       }
       const data = await res.json();
-      const storeData = data.stores?.[0]?.store;
+      // /api/user devuelve la tienda directamente en stores[0] (no anidada en .store)
+      const storeData = data.stores?.[0]?.store ?? data.stores?.[0];
       if (storeData) {
         const storeRes = await fetch(`/api/stores/${storeData.slug}`, {
           headers: (token ? { Authorization: `Bearer ${token}` } : {}) as Record<string, string>,

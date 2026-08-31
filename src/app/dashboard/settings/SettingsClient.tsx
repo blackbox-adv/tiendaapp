@@ -67,7 +67,8 @@ export default function SettingsClient() {
         return;
       }
       const data = await res.json();
-      const storeData = data.stores?.[0]?.store;
+      // /api/user devuelve la tienda directamente en stores[0] (no anidada en .store)
+      const storeData = data.stores?.[0]?.store ?? data.stores?.[0];
       if (storeData) {
         setStore(storeData);
         setName(storeData.name || '');

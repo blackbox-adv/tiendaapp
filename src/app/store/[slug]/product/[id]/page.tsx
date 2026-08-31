@@ -61,8 +61,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ProductPage({ params }: Props) {
   const { slug, id } = await params
 
-  // Validate format (acepta guion bajo además de guion: ids legibles tipo prod-pz-1)
-  if (!/^[a-z0-9_-]+$/.test(slug) || !/^[a-z0-9_-]+$/.test(id)) {
+  // Validate format. Los IDs generados por la API usan nanoid(24) que incluye
+  // MAYÚSCULAS (ej: prod-9ZVLs9NUSJPVjOZsD1AOdiom) — el regex debe aceptarlas
+  // o TODA ficha de producto creada desde el dashboard daría "Tienda no encontrada".
+  if (!/^[a-zA-Z0-9_-]+$/.test(slug) || !/^[a-zA-Z0-9_-]+$/.test(id)) {
     notFound()
   }
 
