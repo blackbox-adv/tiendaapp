@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Eye, Crown, ArrowRight, Check, Sparkles, Gem, Sun, Minimize2, Lock, Search, Filter, X } from 'lucide-react'
+import { PLAN_PRICES } from '@/lib/plans'
 
 type PlanType = 'free' | 'pro' | 'premium'
 
@@ -46,7 +47,7 @@ const templates: Template[] = [
     name: 'Vibrante',
     plan: 'pro',
     planLabel: 'Pro',
-    planPrice: 'S/29.99',
+    planPrice: `S/${PLAN_PRICES.pro?.toFixed(2)}`,
     description: 'Colores llamativos, categorías visuales, buscador integrado y promociones destacadas. Perfecto para tiendas juveniles, streetwear y productos con personalidad.',
     bestFor: ['Streetwear', 'Youth', 'Pop Culture'],
     features: [
@@ -66,7 +67,7 @@ const templates: Template[] = [
     name: 'Clásica',
     plan: 'pro',
     planLabel: 'Pro',
-    planPrice: 'S/29.99',
+    planPrice: `S/${PLAN_PRICES.pro?.toFixed(2)}`,
     description: 'Tonos cálidos, diseño en lista con buscador y estilo artesanal. Transmite confianza y tradición, ideal para artesanías, food y productos locales peruanos.',
     bestFor: ['Artesanías', 'Food', 'Local'],
     features: [
@@ -85,7 +86,7 @@ const templates: Template[] = [
     name: 'Luxury',
     plan: 'premium',
     planLabel: 'Premium',
-    planPrice: 'S/79.99',
+    planPrice: `S/${PLAN_PRICES.premium?.toFixed(2)}`,
     description: 'Elegancia oscura con acabados dorados, buscador avanzado, filtros y consultas privadas. Para marcas que quieren proyectar lujo y sofisticación absoluta.',
     bestFor: ['Joyería', 'Alta Moda', 'Exclusive'],
     features: [
@@ -105,7 +106,7 @@ const templates: Template[] = [
     name: 'Minimalist',
     plan: 'premium',
     planLabel: 'Premium',
-    planPrice: 'S/79.99',
+    planPrice: `S/${PLAN_PRICES.premium?.toFixed(2)}`,
     description: 'Ultra limpio, estilo Apple. Buscador avanzado, filtros, espacios amplios y tipografía precisa. Para marcas modernas que comunican con simplicidad.',
     bestFor: ['Design', 'Cosmetics', 'Modern'],
     features: [
@@ -222,11 +223,11 @@ export function Templates() {
             </div>
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-sm font-medium text-blue-700">
               <Search className="w-3.5 h-3.5" />
-              Pro · S/29.99/mes
+              Pro · S/{PLAN_PRICES.pro?.toFixed(2)}/mes
             </div>
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-sm font-medium text-amber-700">
               <Crown className="w-3.5 h-3.5" />
-              Premium · S/79.99/mes
+              Premium · S/{PLAN_PRICES.premium?.toFixed(2)}/mes
             </div>
           </div>
         </motion.div>

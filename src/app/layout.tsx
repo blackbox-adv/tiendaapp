@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { CookieConsent } from "@/components/CookieConsent";
 import { CartProvider } from "@/lib/cart-context";
 import { getPlatformContact } from "@/lib/platform-settings";
+import { PLAN_PRICES } from "@/lib/plans";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -151,7 +152,7 @@ export default async function RootLayout({
                     name: 'Cuánto cuesta TiendApp?',
                     acceptedAnswer: {
                       '@type': 'Answer',
-                      text: 'TiendApp tiene un plan gratuito con hasta 5 productos. El plan Pro cuesta S/29.99/mes con hasta 20 productos y buscador, y el plan Premium cuesta S/79.99/mes con hasta 100 productos, filtros avanzados y funciones premium.',
+                      text: `TiendApp tiene un plan gratuito con hasta 5 productos. El plan Pro cuesta S/${PLAN_PRICES.pro?.toFixed(2)}/mes con hasta 20 productos y buscador, y el plan Premium cuesta S/${PLAN_PRICES.premium?.toFixed(2)}/mes con hasta 100 productos, filtros avanzados y funciones premium.`,
                     },
                   },
                   {

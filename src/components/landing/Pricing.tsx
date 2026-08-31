@@ -6,6 +6,7 @@ import { useAppStore } from '@/lib/store'
 import { Check, Gift, Zap, Crown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { CANONICAL_PLANS } from '@/lib/plans'
 
 const iconMap: Record<string, React.ElementType> = { free: Gift, pro: Zap, premium: Crown }
 
@@ -20,67 +21,8 @@ interface Plan {
   popular: boolean
 }
 
-// Fallback plans in case the API is unavailable
-const FALLBACK_PLANS: Plan[] = [
-  {
-    id: 'free',
-    type: 'free',
-    name: 'Gratis',
-    price: 0,
-    maxProducts: 5,
-    description: 'Perfecto para comenzar',
-    features: [
-      'Hasta 5 productos',
-      '1 tienda online',
-      '1 plantilla básica (Moderna)',
-      'Botón de WhatsApp',
-      'Badge "Creado con TiendApp"',
-      'Soporte por email',
-    ],
-    popular: false,
-  },
-  {
-    id: 'pro',
-    type: 'pro',
-    name: 'Pro',
-    price: 29.99,
-    maxProducts: 20,
-    description: 'Para tiendas en crecimiento',
-    features: [
-      'Hasta 20 productos',
-      '1 tienda online',
-      '3 plantillas (Moderna, Vibrante, Clásica)',
-      'Buscador de productos',
-      'Botón de WhatsApp',
-      'Sin badge TiendApp',
-      'Dominio personalizado',
-      'Estadísticas avanzadas',
-      'Soporte prioritario',
-    ],
-    popular: true,
-  },
-  {
-    id: 'premium',
-    type: 'premium',
-    name: 'Premium',
-    price: 79.99,
-    maxProducts: 100,
-    description: 'Para negocios establecidos',
-    features: [
-      'Hasta 100 productos',
-      'Hasta 3 tiendas',
-      '5 plantillas + 2 exclusivas Premium',
-      'Buscador y filtros avanzados',
-      'Plantillas Luxury y Minimalist',
-      'Botón de WhatsApp',
-      'Dominio personalizado',
-      'Estadísticas avanzadas',
-      'Soporte 24/7',
-      'Sin marca TiendApp',
-    ],
-    popular: false,
-  },
-]
+// Fallback = los planes canónicos (fuente única de verdad: src/lib/plans.ts)
+const FALLBACK_PLANS: Plan[] = CANONICAL_PLANS.map((p) => ({ id: p.type, ...p, features: [...p.features] }))
 
 export function Pricing() {
   const navigate = useAppStore((s) => s.navigate)
