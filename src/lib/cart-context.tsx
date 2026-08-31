@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from 'react'
 
 // ── Cart item type ──
 export interface CartItem {
@@ -34,9 +34,50 @@ interface CartContextValue {
 
 const CartContext = createContext<CartContextValue | null>(null)
 
+// ── Persistencia local (sobrevive recargas de la página) ──
+const CART_STORAGE_KEY = 'tiendapp_cart_v1'
+
+function loadInitialCart(): CartItem[] {
+  if (typeof window === 'undefined') return []
+  try {
+    const raw = window.localStorage.getItem(CART_STORAGE_KEY)
+    if (!raw) return []
+    const parsed: unknown = JSON.parse(raw)
+    if (!Array.isArray(parsed)) return []
+    return parsed.filter(
+      (item): item is CartItem =>
+        !!item &&
+        typeof item.productId === 'string' &&
+        typeof item.name === 'string' &&
+        typeof item.price === 'number' &&
+        typeof item.quantity === 'number' &&
+        typeof item.storeId === 'string'
+    )
+  } catch {
+    return []
+  }
+}
+
 // ── CartProvider ──
 export function CartProvider({ children }: { children: ReactNode }) {
+  // Hidratación segura: SSR y primer render del cliente parten vacíos,
+  // luego se carga el pedido guardado para evitar mismatch de hydration.
   const [cartItems, setCartItems] = useState<CartItem[]>([])
+  const [hydrated, setHydrated] = useState(false)
+
+  useEffect(() => {
+    setCartItems(loadInitialCart())
+    setHydrated(true)
+  }, [])
+
+  useEffect(() => {
+    if (!hydrated) return
+    try {
+      window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems))
+    } catch {
+      // localStorage lleno o bloqueado: el pedido solo vive en memoria
+    }
+  }, [cartItems, hydrated])
 
   const addToCart = useCallback((product: CartProductInput, quantity: number = 1) => {
     setCartItems((prev) => {

@@ -41,7 +41,7 @@ export function CartButton({ storeId, whatsappNumber, storeName }: CartButtonPro
       .join('\n')
 
     const message = [
-      `Hola, quiero hacer un pedido de ${storeName || 'su tienda'}:`,
+      `Hola${storeName ? ` ${storeName}` : ''}! Quiero hacer este pedido:`,
       '',
       itemsText,
       '',
@@ -49,6 +49,8 @@ export function CartButton({ storeId, whatsappNumber, storeName }: CartButtonPro
       customerName ? `\nNombre: ${customerName}` : '',
       customerPhone ? `Teléfono: ${customerPhone}` : '',
       notes ? `\nNotas: ${notes}` : '',
+      '',
+      '¿Me confirman disponibilidad y tiempo de entrega? ¡Gracias!',
     ]
       .filter(Boolean)
       .join('\n')
@@ -128,7 +130,7 @@ export function CartButton({ storeId, whatsappNumber, storeName }: CartButtonPro
           setSubmitResult(null)
         }}
         className="fab-above-cookie fixed bottom-6 left-6 z-50 w-14 h-14 bg-violet-600 hover:bg-violet-700 text-white rounded-full flex items-center justify-center shadow-lg transition-colors"
-        aria-label={`Carrito de compras (${storeItemCount} items)`}
+        aria-label={`Ver mi pedido (${storeItemCount} productos)`}
       >
         <ShoppingCart className="w-6 h-6" />
         {storeItemCount > 0 && (
@@ -144,7 +146,7 @@ export function CartButton({ storeId, whatsappNumber, storeName }: CartButtonPro
           <SheetHeader className="p-4 pb-2">
             <SheetTitle className="flex items-center gap-2">
               <ShoppingCart className="w-5 h-5" />
-              {checkoutStep === 'cart' ? 'Mi Carrito' : 'Confirmar Pedido'}
+              {checkoutStep === 'cart' ? 'Mi pedido' : 'Confirmar Pedido'}
             </SheetTitle>
           </SheetHeader>
 
@@ -172,8 +174,8 @@ export function CartButton({ storeId, whatsappNumber, storeName }: CartButtonPro
                 {storeCartItems.length === 0 ? (
                   <div className="text-center py-12 text-gray-400">
                     <ShoppingCart className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p>Tu carrito está vacío</p>
-                    <p className="text-sm mt-1">Agrega productos para comenzar</p>
+                    <p>Tu pedido está vacío</p>
+                    <p className="text-sm mt-1">Agrega productos para armar tu pedido</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -198,32 +200,32 @@ export function CartButton({ storeId, whatsappNumber, storeName }: CartButtonPro
                       <span>S/ {storeTotal.toFixed(2)}</span>
                     </div>
 
+                    {whatsappNumber && (
+                      <Button
+                        className="w-full bg-[#25D366] hover:bg-[#1fb857] text-white"
+                        onClick={handleWhatsApp}
+                      >
+                        <MessageCircle className="w-4 h-4 mr-2" />
+                        Enviar pedido por WhatsApp
+                      </Button>
+                    )}
+
                     <Button
-                      className="w-full bg-violet-600 hover:bg-violet-700 text-white"
+                      variant="outline"
+                      className="w-full border-violet-300 text-violet-700 hover:bg-violet-50"
                       onClick={() => {
                         setCheckoutStep('checkout')
                         setSubmitResult(null)
                       }}
                     >
-                      Hacer pedido
+                      Hacer pedido con datos de entrega
                     </Button>
-
-                    {whatsappNumber && (
-                      <Button
-                        variant="outline"
-                        className="w-full border-green-500 text-green-700 hover:bg-green-50"
-                        onClick={handleWhatsApp}
-                      >
-                        <MessageCircle className="w-4 h-4 mr-2" />
-                        Pedir por WhatsApp
-                      </Button>
-                    )}
 
                     <button
                       onClick={clearCart}
                       className="w-full text-center text-sm text-gray-400 hover:text-red-500 transition-colors py-1"
                     >
-                      Vaciar carrito
+                      Vaciar pedido
                     </button>
                   </div>
                 </SheetFooter>

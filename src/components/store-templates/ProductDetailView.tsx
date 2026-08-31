@@ -12,6 +12,7 @@ import {
   Tag,
   Share2,
   ShoppingBag,
+  Check,
   ChevronRight,
   Truck,
   ShieldCheck,
@@ -27,6 +28,8 @@ import {
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ProductBadges } from './ProductBadges'
+import { useCart } from '@/lib/cart-context'
+import { CartButton } from './CartButton'
 import type { Product, Store } from '@/lib/types'
 
 export function ProductDetailView({ slug, productId, onDemoBack }: { slug: string; productId: string; onDemoBack?: () => void }) {
@@ -37,6 +40,8 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
   const [showZoom, setShowZoom] = useState(false)
   const [quantity, setQuantity] = useState(1)
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
+  const [addedToOrder, setAddedToOrder] = useState(false)
+  const { addToCart, totalItems } = useCart()
 
   // Detect if we're on a public URL page (rendered by Next.js, not AppRouter)
   const isPublicPage = pathname.startsWith('/store/') || pathname.startsWith('/demo/')
@@ -245,6 +250,22 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
   // Aliases for cleaner code below
   const product = displayProduct
   const store = displayStore
+
+  const handleAddToOrder = () => {
+    if (!store || product.stock === 0) return
+    addToCart(
+      {
+        productId: product.id,
+        name: product.name,
+        price: Number(product.price),
+        imageUrl: product.imageUrl || '',
+        storeId: store.id,
+      },
+      quantity
+    )
+    setAddedToOrder(true)
+    window.setTimeout(() => setAddedToOrder(false), 1800)
+  }
 
   const categories = getStoreCategories(products)
   const category = categories.find((c) => c.id === product.categoryId)
@@ -665,8 +686,26 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
                     <MessageCircle className="w-5 h-5" />
                     Comprar por WhatsApp
                   </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full gap-3 rounded-2xl py-5 text-sm font-bold transition-colors"
+                    style={{
+                      borderColor: addedToOrder ? '#16a34a' : store.colors.primary + '60',
+                      color: addedToOrder ? '#16a34a' : store.colors.primary,
+                      backgroundColor: addedToOrder ? '#f0fdf4' : 'transparent',
+                    }}
+                    onClick={handleAddToOrder}
+                  >
+                    {addedToOrder ? <Check className="w-5 h-5" /> : <ShoppingBag className="w-5 h-5" />}
+                    {addedToOrder ? 'Agregado al pedido' : 'Agregar al pedido'}
+                  </Button>
+                  {totalItems > 0 && !addedToOrder && (
+                    <p className="text-xs text-center text-violet-600 font-medium">
+                      Llevas {totalItems} producto{totalItems > 1 ? 's' : ''} en tu pedido
+                    </p>
+                  )}
                   <p className="text-xs text-center text-gray-400">
-                    Se abrira WhatsApp para coordinar la compra con el vendedor
+                    ¿Varios productos? Agregalos al pedido y envíalos todos juntos por WhatsApp
                   </p>
                 </>
               )}
@@ -1058,6 +1097,14 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
           </motion.div>
         )}
       </AnimatePresence>
+      {/* Pedido múltiple: FAB visible cuando hay productos agregados de esta tienda */}
+      {store && (
+        <CartButton
+          storeId={store.id}
+          whatsappNumber={store.whatsappNumber}
+          storeName={store.name}
+        />
+      )}
     </div>
   )
 }
