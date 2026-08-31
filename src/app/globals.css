@@ -131,3 +131,11 @@ html {
 .animate-pulse-green {
   animation: pulse-green 2s infinite;
 }
+
+/* Desplaza los botones flotantes (WhatsApp/carrito) por encima del banner
+   de cookies en móvil, para que el banner no los tape */
+@media (max-width: 767px) {
+  body.cookie-banner-visible .fab-above-cookie {
+    bottom: 14rem;
+  }
+}

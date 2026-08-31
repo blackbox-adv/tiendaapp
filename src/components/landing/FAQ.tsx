@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown } from 'lucide-react'
+import { supportWhatsappUrl } from '@/lib/support'
 
 interface FAQItem {
   question: string
@@ -43,6 +44,7 @@ const FAQ_ITEMS: FAQItem[] = [
 ]
 
 export function FAQ() {
+  const waHref = supportWhatsappUrl('Hola! Tengo una duda sobre TiendApp')
   const [openIndex, setOpenIndex] = useState<number | null>(0)
 
   return (
@@ -125,12 +127,12 @@ export function FAQ() {
         >
           ¿Tienes otra duda?{' '}
           <a
-            href="https://wa.me/51999999999"
-            target="_blank"
-            rel="noopener noreferrer"
+            href={waHref ?? '/contact'}
+            target={waHref ? '_blank' : undefined}
+            rel={waHref ? 'noopener noreferrer' : undefined}
             className="text-violet-600 font-medium hover:underline"
           >
-            Escríbenos por WhatsApp
+            {waHref ? 'Escríbenos por WhatsApp' : 'Contáctanos'}
           </a>{' '}
           y te respondemos en minutos.
         </motion.p>

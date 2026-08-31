@@ -127,7 +127,7 @@ export function CartButton({ storeId, whatsappNumber, storeName }: CartButtonPro
           setCheckoutStep('cart')
           setSubmitResult(null)
         }}
-        className="fixed bottom-6 left-6 z-50 w-14 h-14 bg-violet-600 hover:bg-violet-700 text-white rounded-full flex items-center justify-center shadow-lg transition-colors"
+        className="fab-above-cookie fixed bottom-6 left-6 z-50 w-14 h-14 bg-violet-600 hover:bg-violet-700 text-white rounded-full flex items-center justify-center shadow-lg transition-colors"
         aria-label={`Carrito de compras (${storeItemCount} items)`}
       >
         <ShoppingCart className="w-6 h-6" />

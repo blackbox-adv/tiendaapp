@@ -15,7 +15,7 @@ export function WhatsAppButton({ whatsappNumber, productName }: { whatsappNumber
       href={whatsappUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center shadow-lg animate-pulse-green transition-colors"
+      className="fab-above-cookie fixed bottom-6 right-6 z-50 w-14 h-14 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center shadow-lg animate-pulse-green transition-colors"
       aria-label="Contactar por WhatsApp"
     >
       <MessageCircle className="w-7 h-7" />

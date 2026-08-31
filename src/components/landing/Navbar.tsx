@@ -57,7 +57,7 @@ export function Navbar() {
               Plantillas
             </button>
             <button onClick={() => handleNav('#testimonials')} className="text-sm font-medium text-gray-700 hover:text-violet-600 transition-colors">
-              Testimonios
+              Tiendas reales
             </button>
           </div>
 
@@ -108,7 +108,7 @@ export function Navbar() {
               Plantillas
             </button>
             <button onClick={() => handleNav('#testimonials')} className="block w-full text-left text-sm font-medium text-gray-600 hover:text-violet-600 py-2">
-              Testimonios
+              Tiendas reales
             </button>
             <div className="pt-3 border-t border-gray-100 space-y-2">
               {currentUser ? (

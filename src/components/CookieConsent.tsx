@@ -12,17 +12,25 @@ export function CookieConsent() {
     const consent = localStorage.getItem(COOKIE_CONSENT_KEY)
     if (!consent) {
       setShow(true)
+      document.body.classList.add('cookie-banner-visible')
+    }
+    return () => {
+      document.body.classList.remove('cookie-banner-visible')
     }
   }, [])
 
-  function acceptAll() {
-    localStorage.setItem(COOKIE_CONSENT_KEY, JSON.stringify({ accepted: true, timestamp: Date.now() }))
+  function dismiss(value: Record<string, unknown>) {
+    localStorage.setItem(COOKIE_CONSENT_KEY, JSON.stringify(value))
     setShow(false)
+    document.body.classList.remove('cookie-banner-visible')
+  }
+
+  function acceptAll() {
+    dismiss({ accepted: true, timestamp: Date.now() })
   }
 
   function acceptEssential() {
-    localStorage.setItem(COOKIE_CONSENT_KEY, JSON.stringify({ accepted: true, essentialOnly: true, timestamp: Date.now() }))
-    setShow(false)
+    dismiss({ accepted: true, essentialOnly: true, timestamp: Date.now() })
   }
 
   if (!show) return null

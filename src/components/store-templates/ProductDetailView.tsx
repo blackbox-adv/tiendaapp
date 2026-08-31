@@ -351,7 +351,6 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
               {formattedRating}
             </span>
             <span className="text-sm text-gray-500">{getRatingLabel(rating)}</span>
-            <span className="text-sm text-gray-400">· {Math.floor(Math.random() * 50 + 5)} valoraciones</span>
           </div>
         ) : (
           <span className="text-xs text-gray-500 ml-0.5">{formattedRating}</span>
@@ -874,7 +873,7 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-gray-900 truncate">{store.name}</p>
-                  <p className="text-xs text-gray-400">Vendedor verificado en TiendApp</p>
+                  <p className="text-xs text-gray-400">Responde pedidos por WhatsApp</p>
                 </div>
                 <Button
                   variant="outline"

@@ -43,7 +43,7 @@ const FALLBACK_PLANS: Plan[] = [
     id: 'pro',
     type: 'pro',
     name: 'Pro',
-    price: 29.9,
+    price: 29.99,
     maxProducts: 20,
     description: 'Para tiendas en crecimiento',
     features: [
@@ -63,7 +63,7 @@ const FALLBACK_PLANS: Plan[] = [
     id: 'premium',
     type: 'premium',
     name: 'Premium',
-    price: 59.9,
+    price: 79.99,
     maxProducts: 100,
     description: 'Para negocios establecidos',
     features: [

@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
 
     // Build the WhatsApp message
     let message = ''
-    const storeUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://tiendapp.pe'}/tienda/${store.slug}`
+    const storeUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://tiendapp.pe'}/store/${store.slug}`
 
     if (customerMessage) {
       // Sanitize customer message: limit length
