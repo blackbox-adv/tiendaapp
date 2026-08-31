@@ -155,12 +155,9 @@ export default function OnboardingPage() {
         },
         body: JSON.stringify({
           name: storeName,
-          slug: storeSlug,
-          description: storeDescription || null,
+          description: storeDescription || '',
           template: selectedTemplate,
-          whatsapp: storeWhatsapp || null,
-          email: storeEmail || null,
-          address: storeAddress || null,
+          whatsappNumber: storeWhatsapp || '',
           logo: logoUrl,
         }),
       });

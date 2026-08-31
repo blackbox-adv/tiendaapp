@@ -27,10 +27,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     })
 
     if (!store) {
-      return { title: 'Tienda no encontrada | TiendApp' }
+      return { title: { absolute: 'Tienda no encontrada | TiendApp' } }
     }
 
-    const title = `${store.name} | TiendApp`
+    const title = store.name
     const description = store.description
       ? `${store.description} - Visita la tienda online de ${store.name} en TiendApp.`
       : `Visita la tienda online de ${store.name} en TiendApp. Productos y precios increibles.`

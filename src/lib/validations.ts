@@ -54,11 +54,14 @@ export const createStoreSchema = z.object({
     .min(2, 'Nombre de tienda requerido (min 2 caracteres)')
     .max(100, 'Nombre de tienda no puede exceder 100 caracteres')
     .trim(),
-  description: z
-    .string()
-    .max(500, 'Descripcion no puede exceder 500 caracteres')
-    .optional()
-    .default(''),
+  description: z.preprocess(
+    (v) => (v === null || v === undefined ? '' : v),
+    z
+      .string()
+      .max(500, 'Descripcion no puede exceder 500 caracteres')
+      .optional()
+      .default('')
+  ),
   category: z
     .string()
     .max(50, 'Categoria no puede exceder 50 caracteres')
@@ -76,9 +79,12 @@ export const createStoreSchema = z.object({
     .regex(/^#[0-9A-Fa-f]{6,8}$/, 'Color secundario invalido (formato: #RRGGBB o #RRGGBBAA)')
     .optional()
     .default('#10B981'),
-  whatsappNumber: peruWhatsappString
-    .optional()
-    .or(z.literal('')),
+  whatsappNumber: z.preprocess(
+    (v) => (v === null ? undefined : v),
+    peruWhatsappString
+      .optional()
+      .or(z.literal(''))
+  ),
   template: z
     .enum(['moderna', 'vibrante', 'clasica', 'luxury', 'minimalist'])
     .optional()

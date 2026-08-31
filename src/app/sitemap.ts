@@ -1,6 +1,10 @@
 import type { MetadataRoute } from 'next'
 import { db } from '@/lib/db'
 
+// Revalidar cada hora para que las tiendas nuevas/desactivadas
+// se reflejen en el sitemap sin necesitar un redeploy.
+export const revalidate = 3600
+
 // Dynamic lastModified dates will be used for static pages
 // (updatedAt from DB for dynamic pages)
 
@@ -16,13 +20,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1,
     },
     {
-      url: `${baseUrl}/register`,
+      url: `${baseUrl}/auth/register`,
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/login`,
+      url: `${baseUrl}/auth/login`,
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.8,

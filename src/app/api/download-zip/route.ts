@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Validate storeId format
-    if (!/^[a-z0-9-]+$/.test(storeId)) {
+    if (!/^[a-z0-9_-]+$/.test(storeId)) {
       return apiError('storeId invalido', 400, undefined, request)
     }
 

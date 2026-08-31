@@ -61,8 +61,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ProductPage({ params }: Props) {
   const { slug, id } = await params
 
-  // Validate format
-  if (!/^[a-z0-9-]+$/.test(slug) || !/^[a-z0-9-]+$/.test(id)) {
+  // Validate format (acepta guion bajo además de guion: ids legibles tipo prod-pz-1)
+  if (!/^[a-z0-9_-]+$/.test(slug) || !/^[a-z0-9_-]+$/.test(id)) {
     notFound()
   }
 
