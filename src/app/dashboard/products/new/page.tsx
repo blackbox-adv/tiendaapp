@@ -130,13 +130,16 @@ export default function NewProductPage() {
       setError('No tienes una tienda configurada');
       return;
     }
-    // Defensa: si llegamos aquí con la tienda temporal del wizard (id "store-..."),
+    // Defensa: si llegamos aquí con la tienda temporal del wizard (id `store-<timestamp>`),
     // re-sincronizar para obtener el store real de la API antes de crear productos.
+    // OJO: solo IDs con sufijo NUMÉRICO son temporales — los demos (store-demo-pizzeria)
+    // también empiezan con "store-" y antes quedaban bloqueados en falso positivo.
+    const isTempStore = (id: string) => /^store-\d+$/.test(id);
     let storeForSubmit = currentStore;
-    if (currentStore.id.startsWith('store-')) {
+    if (isTempStore(currentStore.id)) {
       await syncFromAPI();
       storeForSubmit = useAppStore.getState().currentStore ?? currentStore;
-      if (storeForSubmit.id.startsWith('store-')) {
+      if (isTempStore(storeForSubmit.id)) {
         setError('Tu tienda aún se está guardando. Espera unos segundos e intenta de nuevo.');
         return;
       }
