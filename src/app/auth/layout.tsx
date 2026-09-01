@@ -1,0 +1,12 @@
+// Auth pages require browser APIs — force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+import AuthLayoutClient from './AuthLayoutClient';
+
+export default function AuthLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return <AuthLayoutClient>{children}</AuthLayoutClient>;
+}

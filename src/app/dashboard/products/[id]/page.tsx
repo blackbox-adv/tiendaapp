@@ -1,0 +1,485 @@
+'use client';
+
+import { useState, useEffect, useRef } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import Link from 'next/link';
+import { useAppStore } from '@/lib/store';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  ArrowLeft,
+  Loader2,
+  Upload,
+  Package,
+  X,
+  Star,
+  Plus,
+  Trash2,
+} from 'lucide-react';
+import { toast } from 'sonner';
+
+const CATEGORIES = [
+  'Ropa', 'Accesorios', 'Electrónica', 'Hogar', 'Belleza',
+  'Deportes', 'Alimentos', 'Juguetes', 'Otros',
+];
+
+export default function EditProductPage() {
+  const router = useRouter();
+  const params = useParams();
+  const productId = params.id as string;
+  const { currentStore, products, syncFromAPI } = useAppStore();
+
+  const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
+  const [error, setError] = useState('');
+
+  // Form fields
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [price, setPrice] = useState('');
+  const [originalPrice, setOriginalPrice] = useState('');
+  const [category, setCategory] = useState('');
+  const [color, setColor] = useState('');
+  const [stock, setStock] = useState(-1);
+  const [featured, setFeatured] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [isActive, setIsActive] = useState(true);
+
+  // Cover image
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const [newCoverFile, setNewCoverFile] = useState<File | null>(null);
+  const [coverUploading, setCoverUploading] = useState(false);
+  const [currentImageUrl, setCurrentImageUrl] = useState('');
+
+  // Gallery images
+  const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
+  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
+  const [galleryUploading, setGalleryUploading] = useState(false);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+
+  // Load product data
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        // Try to get from Zustand store first
+        let product = products.find((p) => p.id === productId);
+
+        // If not found, try API
+        if (!product) {
+          const token = localStorage.getItem('tiendapp_token');
+          const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+          const productRes = await fetch(`/api/store-products/${productId}`, { headers: authHeaders });
+          if (productRes.ok) {
+            const productData = await productRes.json();
+            product = productData.data || productData;
+          }
+        }
+
+        if (product) {
+          setName(product.name || '');
+          setDescription(product.description || '');
+          setPrice(typeof product.price === 'object' ? String(product.price) : String(product.price || ''));
+          setOriginalPrice(product.originalPrice ? String(product.originalPrice) : '');
+          setCategory(product.categoryId || '');
+          setColor(product.color || '');
+          setFeatured(product.featured || false);
+          setRating(product.rating || 0);
+          setStock(product.stock !== undefined ? product.stock : -1);
+          setIsActive(product.isActive !== false);
+          setCoverPreview(product.imageUrl || null);
+          setCurrentImageUrl(product.imageUrl || '');
+          setExistingImages(Array.isArray(product.images) ? product.images : []);
+        }
+      } catch {
+        // ignore
+      } finally {
+        setFetching(false);
+      }
+    }
+    if (productId) fetchData();
+  }, [productId, products]);
+
+  const uploadImage = async (file: File): Promise<string | null> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('folder', 'products');
+    const token = localStorage.getItem('tiendapp_token');
+    const uploadRes = await fetch('/api/upload', {
+      method: 'POST',
+      headers: (token ? { Authorization: `Bearer ${token}` } : {}) as Record<string, string>,
+      body: formData,
+    });
+    if (uploadRes.ok) {
+      const uploadData = await uploadRes.json();
+      return uploadData.url || uploadData.data?.url;
+    }
+    return null;
+  };
+
+  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setNewCoverFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setCoverPreview(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    const newFiles = Array.from(files);
+    const totalImages = existingImages.length + galleryFiles.length + newFiles.length;
+    if (totalImages > 8) {
+      setError('Máximo 8 imágenes adicionales en total');
+      return;
+    }
+    setGalleryFiles((prev) => [...prev, ...newFiles]);
+    newFiles.forEach((file) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setGalleryPreviews((prev) => [...prev, reader.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeExistingImage = (index: number) => {
+    setExistingImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const removeGalleryImage = (index: number) => {
+    setGalleryFiles((prev) => prev.filter((_, i) => i !== index));
+    setGalleryPreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleDelete = async () => {
+    if (!confirm('¿Estás seguro de eliminar este producto?')) return;
+    setLoading(true);
+    try {
+      const delToken = localStorage.getItem('tiendapp_token');
+      const res = await fetch(`/api/store-products?id=${productId}`, {
+        method: 'DELETE',
+        headers: (delToken ? { Authorization: `Bearer ${delToken}` } : {}) as Record<string, string>,
+      });
+      if (res.ok) {
+        toast.success('Producto eliminado');
+        await syncFromAPI();
+        router.push('/dashboard/products');
+      } else {
+        setError('Error al eliminar el producto');
+      }
+    } catch {
+      setError('Error de conexión');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      // Upload new cover if changed
+      let imageUrl = currentImageUrl;
+      if (newCoverFile) {
+        setCoverUploading(true);
+        const uploaded = await uploadImage(newCoverFile);
+        setCoverUploading(false);
+        if (!uploaded) {
+          setError('Error al subir la imagen principal');
+          setLoading(false);
+          return;
+        }
+        imageUrl = uploaded;
+      }
+
+      // Upload new gallery images
+      let newImageUrls: string[] = [];
+      if (galleryFiles.length > 0) {
+        setGalleryUploading(true);
+        const uploadResults = await Promise.all(
+          galleryFiles.map((file) => uploadImage(file))
+        );
+        newImageUrls = uploadResults.filter((url): url is string => url !== null);
+        setGalleryUploading(false);
+      }
+
+      // Combine existing + new gallery images
+      const allImages = [...existingImages, ...newImageUrls];
+
+      // Update via /api/store-products PUT
+      const updateToken = localStorage.getItem('tiendapp_token');
+      const res = await fetch('/api/store-products', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(updateToken ? { Authorization: `Bearer ${updateToken}` } : {} as Record<string, string>),
+        },
+        body: JSON.stringify({
+          id: productId,
+          name,
+          description: description || '',
+          price: parseFloat(price),
+          originalPrice: originalPrice ? parseFloat(originalPrice) : null,
+          imageUrl,
+          images: allImages,
+          category: category || '',
+          color: color || null,
+          stock,
+          isActive,
+          featured,
+          rating,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error || 'Error al actualizar el producto');
+        return;
+      }
+
+      toast.success('Producto actualizado', { description: `"${name}" fue actualizado correctamente.` });
+      await syncFromAPI();
+      router.push('/dashboard/products');
+    } catch {
+      setError('Error de conexión');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (fetching) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="w-8 h-8 animate-spin text-violet-600" />
+      </div>
+    );
+  }
+
+  if (!name && !fetching) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
+        <Package className="w-12 h-12 text-gray-300" />
+        <h2 className="text-xl font-bold text-gray-900">Producto no encontrado</h2>
+        <Link href="/dashboard/products">
+          <Button className="bg-violet-600 hover:bg-violet-700 text-white">
+            Volver a productos
+          </Button>
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-2xl mx-auto space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Link href="/dashboard/products">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Volver
+            </Button>
+          </Link>
+          <h1 className="text-2xl font-bold text-gray-900">Editar producto</h1>
+        </div>
+        <Button variant="destructive" size="sm" onClick={handleDelete} disabled={loading}>
+          <Trash2 className="w-4 h-4 mr-1" />
+          Eliminar
+        </Button>
+      </div>
+
+      <Card className="border-0 shadow-sm">
+        <CardContent className="p-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {error && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                {error}
+              </div>
+            )}
+
+            {/* Cover Image */}
+            <div className="space-y-2">
+              <Label>Imagen principal</Label>
+              <div className="flex items-center gap-4">
+                {coverPreview ? (
+                  <div className="relative">
+                    <div className="w-28 h-28 bg-gray-100 rounded-xl overflow-hidden">
+                      <img src={coverPreview} alt="Preview" className="w-full h-full object-cover" />
+                    </div>
+                    <Button variant="destructive" size="sm" className="absolute -top-2 -right-2 w-5 h-5 rounded-full p-0" onClick={() => { setNewCoverFile(null); setCoverPreview(null); }}>×</Button>
+                  </div>
+                ) : (
+                  <label className="cursor-pointer">
+                    <div className="w-28 h-28 bg-gray-100 rounded-xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center hover:border-violet-400 hover:bg-violet-50 transition-colors">
+                      <Upload className="w-6 h-6 text-gray-400" />
+                      <span className="text-[10px] text-gray-400 mt-1">Portada</span>
+                    </div>
+                    <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleCoverChange} />
+                  </label>
+                )}
+              </div>
+            </div>
+
+            {/* Gallery Images */}
+            <div className="space-y-2">
+              <Label>Imágenes adicionales (máximo 8)</Label>
+              <div className="flex flex-wrap gap-2">
+                {existingImages.map((img, idx) => (
+                  <div key={`existing-${idx}`} className="relative">
+                    <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden">
+                      <img src={img} alt={`Galería ${idx + 1}`} className="w-full h-full object-cover" />
+                    </div>
+                    <Button variant="destructive" size="sm" className="absolute -top-1 -right-1 w-4 h-4 rounded-full p-0 text-[10px]" onClick={() => removeExistingImage(idx)}>×</Button>
+                  </div>
+                ))}
+                {galleryPreviews.map((preview, idx) => (
+                  <div key={`new-${idx}`} className="relative">
+                    <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden">
+                      <img src={preview} alt={`Nueva ${idx + 1}`} className="w-full h-full object-cover" />
+                    </div>
+                    <Button variant="destructive" size="sm" className="absolute -top-1 -right-1 w-4 h-4 rounded-full p-0 text-[10px]" onClick={() => removeGalleryImage(idx)}>×</Button>
+                  </div>
+                ))}
+                {existingImages.length + galleryFiles.length < 8 && (
+                  <label className="cursor-pointer">
+                    <div className="w-20 h-20 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center hover:border-violet-400 hover:bg-violet-50 transition-colors">
+                      <Plus className="w-5 h-5 text-gray-400" />
+                      <span className="text-[9px] text-gray-400 mt-0.5">Agregar</span>
+                    </div>
+                    <input ref={galleryInputRef} type="file" accept="image/jpeg,image/png,image/webp" multiple className="hidden" onChange={handleGalleryChange} />
+                  </label>
+                )}
+              </div>
+            </div>
+
+            {/* Name */}
+            <div className="space-y-2">
+              <Label htmlFor="name">Nombre del producto *</Label>
+              <Input id="name" placeholder="Nombre del producto" value={name} onChange={(e) => setName(e.target.value)} required />
+            </div>
+
+            {/* Description */}
+            <div className="space-y-2">
+              <Label htmlFor="description">Descripción</Label>
+              <Textarea id="description" placeholder="Describe tu producto..." value={description} onChange={(e) => setDescription(e.target.value)} rows={3} />
+            </div>
+
+            {/* Price & Original Price */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="price">Precio (S/) *</Label>
+                <Input id="price" type="number" step="0.01" min="0" placeholder="0.00" value={price} onChange={(e) => setPrice(e.target.value)} required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="originalPrice">Precio anterior (S/)</Label>
+                <Input id="originalPrice" type="number" step="0.01" min="0" placeholder="0.00 (opcional)" value={originalPrice} onChange={(e) => setOriginalPrice(e.target.value)} />
+                <p className="text-[11px] text-gray-400">Se mostrará como descuento</p>
+              </div>
+            </div>
+
+            {/* Category & Color */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="category">Categoría</Label>
+                <Select value={category} onValueChange={setCategory}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar categoría" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CATEGORIES.map((cat) => (
+                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="color">Color / Variante</Label>
+                <div className="flex gap-2">
+                  <Input id="color" placeholder="Ej: Rojo, Azul..." value={color} onChange={(e) => setColor(e.target.value)} className="flex-1" />
+                  {color && (
+                    <div className="w-10 h-10 rounded-lg border border-gray-300 flex-shrink-0" style={{ backgroundColor: color.toLowerCase() }} />
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Stock */}
+            <div className="space-y-2">
+              <Label htmlFor="stock">Stock / Inventario</Label>
+              <div className="flex items-center gap-3">
+                <Input id="stock" type="number" min="-1" placeholder="-1 = Sin límite" value={stock} onChange={(e) => setStock(parseInt(e.target.value) || -1)} className="w-32" />
+                <span className="text-xs text-gray-400">
+                  {stock === -1 ? 'Sin límite' : stock === 0 ? 'Agotado' : `${stock} unidades`}
+                </span>
+              </div>
+              <p className="text-[11px] text-gray-400">-1 = sin límite, 0 = agotado, número positivo = unidades disponibles</p>
+            </div>
+
+            {/* Rating */}
+            <div className="space-y-2">
+              <Label>Calificación</Label>
+              <div className="flex items-center gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button key={star} type="button" onClick={() => setRating(star === rating ? 0 : star)} className="focus:outline-none">
+                    <Star className={`w-6 h-6 transition-colors ${star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 hover:text-yellow-300'}`} />
+                  </button>
+                ))}
+                {rating > 0 && <span className="text-sm text-gray-500 ml-2">{rating}.0</span>}
+              </div>
+            </div>
+
+            {/* Toggles */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Producto destacado</Label>
+                  <p className="text-[11px] text-gray-400">Se mostrará con badge especial</p>
+                </div>
+                <Switch checked={featured} onCheckedChange={setFeatured} />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Producto activo</Label>
+                  <p className="text-[11px] text-gray-400">Los inactivos no se muestran en la tienda</p>
+                </div>
+                <Switch checked={isActive} onCheckedChange={setIsActive} />
+              </div>
+            </div>
+
+            {/* Submit */}
+            <Button
+              type="submit"
+              className="w-full bg-violet-600 hover:bg-violet-700 text-white"
+              disabled={loading || coverUploading || galleryUploading}
+            >
+              {loading || coverUploading || galleryUploading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  {coverUploading ? 'Subiendo imagen principal...' : galleryUploading ? 'Subiendo imágenes...' : 'Guardando...'}
+                </>
+              ) : (
+                'Guardar cambios'
+              )}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

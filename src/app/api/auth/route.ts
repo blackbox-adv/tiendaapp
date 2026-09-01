@@ -1,0 +1,222 @@
+import { db } from '@/lib/db'
+import { NextResponse } from 'next/server'
+import { verifyPassword, generateToken, verifyToken, hashPassword, safeComparePassword } from '@/lib/auth'
+import { validateBody, loginSchema } from '@/lib/validations'
+import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
+import { auditLog, getClientIp } from '@/lib/env'
+import { sendPasswordResetEmail } from '@/lib/email'
+import { v4 as uuidv4 } from 'uuid'
+
+// POST /api/auth - Login
+export async function POST(request: Request) {
+  try {
+    const body = await request.json()
+    const validation = validateBody(loginSchema, body)
+    if (!validation.success) {
+      return apiError(validation.error, 400, undefined, request)
+    }
+    const { email, password } = validation.data
+    const clientIp = getClientIp(request)
+
+    const user = await db.user.findUnique({ where: { email: email.toLowerCase() } })
+
+    // TIMING-SAFE LOGIN: Always run bcrypt comparison, even when user doesn't exist.
+    // This prevents user enumeration via response timing.
+    if (!user) {
+      await safeComparePassword(password, null) // Waste time with dummy comparison
+      auditLog({ action: 'LOGIN_FAILED', userEmail: email.toLowerCase(), ip: clientIp, details: { reason: 'invalid_credentials' }, success: false, statusCode: 401 })
+      return apiError('Credenciales incorrectas', 401, undefined, request)
+    }
+
+    if (!user.isActive) {
+      auditLog({ action: 'LOGIN_FAILED', userId: user.id, userEmail: user.email, ip: clientIp, details: { reason: 'account_disabled' }, success: false, statusCode: 403 })
+      return apiError('Cuenta desactivada. Contacta soporte.', 403, undefined, request)
+    }
+
+    let isMatch = false
+    try {
+      isMatch = await verifyPassword(password, user.password)
+    } catch {
+      return apiError('Error de autenticación', 500, undefined, request)
+    }
+
+    if (!isMatch) {
+      auditLog({ action: 'LOGIN_FAILED', userId: user.id, userEmail: user.email, ip: clientIp, details: { reason: 'invalid_credentials' }, success: false, statusCode: 401 })
+      return apiError('Credenciales incorrectas', 401, undefined, request)
+    }
+
+    // Update last login
+    await db.user.update({ where: { id: user.id }, data: { lastLogin: new Date() } })
+
+    const token = generateToken({
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+      tokenVersion: (user as Record<string, unknown>).tokenVersion as number || 0,
+    })
+
+    auditLog({ action: 'LOGIN_SUCCESS', userId: user.id, userEmail: user.email, ip: clientIp, details: { role: user.role }, success: true, statusCode: 200 })
+
+    return apiSuccess(
+      {
+        token,
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          phone: user.phone,
+          avatar: user.avatar,
+          isActive: user.isActive,
+        },
+      },
+      200,
+      request
+    )
+  } catch (err) {
+    console.error('[AUTH] Login error:', err instanceof Error ? err.message : String(err))
+    return apiError('Error en login', 500, undefined, request)
+  }
+}
+
+// GET /api/auth - Verify token
+export async function GET(request: Request) {
+  try {
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader?.startsWith('Bearer ')) {
+      return apiError('Token requerido', 401, undefined, request)
+    }
+
+    const token = authHeader.substring(7)
+    const payload = verifyToken(token)
+
+    if (!payload) {
+      return apiError('Token invalido', 401, undefined, request)
+    }
+
+    const user = await db.user.findUnique({
+      where: { id: payload.userId },
+      select: { id: true, email: true, name: true, role: true, phone: true, avatar: true, isActive: true, tokenVersion: true },
+    })
+
+    if (!user || !user.isActive) {
+      return apiError('Usuario no encontrado', 401, undefined, request)
+    }
+
+    // SECURITY: Invalidate tokens if tokenVersion changed (password reset, admin action)
+    // Treat NULL tokenVersion as 0 (for users created before this column was added)
+    const dbTokenVersion = user.tokenVersion ?? 0
+    if (dbTokenVersion !== payload.tokenVersion) {
+      return apiError('Sesión expirada. Inicia sesión nuevamente.', 401, undefined, request)
+    }
+
+    return apiSuccess({ user }, 200, request)
+  } catch (err) {
+    console.error('[AUTH] Token verify error:', err instanceof Error ? err.message : String(err))
+    return apiError('Error verificando token', 500, undefined, request)
+  }
+}
+
+// PUT /api/auth - Password reset request & reset password
+export async function PUT(request: Request) {
+  try {
+    const body = await request.json()
+    const { action } = body
+
+    if (action === 'reset_request') {
+      // Step 1: User requests password reset - send email with token
+      const { email } = body
+      if (!email || typeof email !== 'string') {
+        return apiError('Email es requerido', 400, undefined, request)
+      }
+
+      console.log('[AUTH] reset_request for:', email)
+
+      const clientIp = getClientIp(request)
+      const user = await db.user.findUnique({ where: { email: email.toLowerCase() } })
+
+      if (!user) {
+        // Don't reveal if user exists - return success anyway
+        return apiSuccess({ message: 'Si el email existe, recibiras instrucciones.' }, 200, request)
+      }
+
+      // Generate reset token (UUID)
+      const resetToken = uuidv4()
+      const resetTokenExpires = new Date(Date.now() + 60 * 60 * 1000) // 1 hour
+
+      console.log('[AUTH] saving reset token...')
+      await db.user.update({
+        where: { id: user.id },
+        data: { resetToken, resetTokenExpires },
+      })
+
+      // Send email
+      console.log('[AUTH] sending reset email...')
+      const emailResult = await sendPasswordResetEmail(user.name, user.email, resetToken)
+      console.log('[AUTH] email result:', !!emailResult)
+      if (!emailResult) {
+        auditLog({ action: 'PASSWORD_RESET', userId: user.id, userEmail: user.email, ip: clientIp, details: { reason: 'email_send_failed' }, success: false, statusCode: 200 })
+      }
+
+      auditLog({ action: 'PASSWORD_RESET', userId: user.id, userEmail: user.email, ip: clientIp, success: !!emailResult, statusCode: 200 })
+
+      return apiSuccess({ message: 'Si el email existe, recibiras instrucciones.' }, 200, request)
+    }
+
+    if (action === 'reset_password') {
+      // Step 2: User resets password with token
+      const { token, newPassword } = body
+
+      if (!token || !newPassword) {
+        return apiError('Token y nueva contrasena son requeridos', 400, undefined, request)
+      }
+
+      if (newPassword.length < 8) {
+        return apiError('La contrasena debe tener al menos 8 caracteres', 400, undefined, request)
+      }
+
+      const clientIp = getClientIp(request)
+
+      // Find user by reset token
+      const user = await db.user.findFirst({
+        where: {
+          resetToken: token,
+          resetTokenExpires: { gt: new Date() }, // Token not expired
+        },
+      })
+
+      if (!user) {
+        auditLog({ action: 'PASSWORD_RESET', userEmail: 'unknown', ip: clientIp, details: { reason: 'invalid_or_expired_token' }, success: false, statusCode: 400 })
+        return apiError('Token invalido o expirado. Solicita un nuevo enlace.', 400, undefined, request)
+      }
+
+      // Hash new password and clear reset token, increment tokenVersion to invalidate all existing sessions
+      const hashedPassword = await hashPassword(newPassword)
+      await db.user.update({
+        where: { id: user.id },
+        data: {
+          password: hashedPassword,
+          resetToken: null,
+          resetTokenExpires: null,
+          tokenVersion: { increment: 1 },
+        },
+      })
+
+      auditLog({ action: 'PASSWORD_RESET', userId: user.id, userEmail: user.email, ip: clientIp, success: true, statusCode: 200 })
+
+      return apiSuccess({ message: 'Contrasena actualizada exitosamente.' }, 200, request)
+    }
+
+    return apiError('Accion no valida', 400, undefined, request)
+  } catch (err) {
+    const errMsg = err instanceof Error ? err.message : String(err)
+    console.error('[AUTH] Password reset error:', errMsg)
+    console.error('[AUTH] Error stack:', err instanceof Error ? err.stack : 'no stack')
+    return apiError('Error al restablecer contrasena', 500, undefined, request)
+  }
+}
+
+// OPTIONS /api/auth - CORS preflight
+export async function OPTIONS(request: Request) {
+  return handleCorsPreflight(request)
+}

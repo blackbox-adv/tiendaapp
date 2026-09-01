@@ -1,0 +1,101 @@
+import jwt from 'jsonwebtoken'
+import bcrypt from 'bcryptjs'
+
+const JWT_SECRET = process.env.JWT_SECRET
+if (!JWT_SECRET) {
+  console.error('[AUTH] FATAL: JWT_SECRET environment variable is not set. Server cannot start securely.')
+}
+const JWT_EXPIRES_IN = '7d'
+
+export interface JwtPayload {
+  userId: string
+  email: string
+  role: string
+  tokenVersion: number
+}
+
+export async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, 12)
+}
+
+export async function verifyPassword(password: string, hash: string): Promise<boolean> {
+  return bcrypt.compare(password, hash)
+}
+
+export function generateToken(payload: JwtPayload): string {
+  if (!JWT_SECRET) throw new Error('JWT_SECRET not configured')
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
+}
+
+export function verifyToken(token: string): JwtPayload | null {
+  if (!JWT_SECRET) return null
+  try {
+    return jwt.verify(token, JWT_SECRET) as JwtPayload
+  } catch {
+    return null
+  }
+}
+
+// Helper to extract token from Authorization header
+export function getTokenFromHeader(request: Request): string | null {
+  const authHeader = request.headers.get('authorization')
+  if (!authHeader || !authHeader.startsWith('Bearer ')) return null
+  return authHeader.substring(7)
+}
+
+// Middleware helper - call at start of every protected API route
+// Returns { user, error, status }
+// CRITICAL FIX: Now validates tokenVersion against DB to invalidate tokens after password reset
+export async function authenticateRequest(request: Request): Promise<{ user: JwtPayload; error: null } | { user: null; error: string; status: number }> {
+  const token = getTokenFromHeader(request)
+  if (!token) {
+    return { user: null, error: 'Token de autenticación requerido', status: 401 }
+  }
+  
+  const payload = verifyToken(token)
+  if (!payload) {
+    return { user: null, error: 'Token inválido o expirado', status: 401 }
+  }
+
+  // Verify tokenVersion matches the one in DB (invalidates tokens after password reset)
+  try {
+    const { db } = await import('@/lib/db')
+    const user = await db.user.findUnique({
+      where: { id: payload.userId },
+      select: { tokenVersion: true, isActive: true },
+    })
+    
+    if (!user) {
+      return { user: null, error: 'Usuario no encontrado', status: 401 }
+    }
+    
+    if (!user.isActive) {
+      return { user: null, error: 'Cuenta desactivada', status: 403 }
+    }
+    
+    // Treat NULL tokenVersion as 0 (for users created before this column was added)
+    const dbTokenVersion = user.tokenVersion ?? 0
+    if (dbTokenVersion !== payload.tokenVersion) {
+      return { user: null, error: 'Sesión expirada. Inicia sesión nuevamente.', status: 401 }
+    }
+  } catch (err) {
+    // If DB check fails, allow the request but log the error
+    // This prevents a total outage if DB is temporarily down
+    console.error('[AUTH] tokenVersion DB check failed:', err)
+  }
+  
+  return { user: payload, error: null }
+}
+
+// Role-based authorization
+export function requireRole(user: JwtPayload, allowedRoles: string[]): boolean {
+  return allowedRoles.includes(user.role)
+}
+
+// Dummy hash for timing-safe login (prevents user enumeration)
+const DUMMY_HASH = '$2a$12$KIXGz7Z6X5Y3N2P8B9D0DeFgHiJkLmNoPqRsTuVwXyZaBcDeFgHiJ'
+
+export async function safeComparePassword(password: string, hash: string | null): Promise<boolean> {
+  const targetHash = hash || DUMMY_HASH
+  return bcrypt.compare(password, targetHash)
+}

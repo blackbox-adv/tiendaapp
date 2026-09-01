@@ -1,0 +1,1110 @@
+'use client'
+
+import { useState, useEffect, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useRouter, usePathname } from 'next/navigation'
+import { useAppStore } from '@/lib/store'
+import { StoreLogo } from './StoreLogo'
+import { DEFAULT_CATEGORIES, getStoreCategories } from '@/lib/store-categories'
+import {
+  ArrowLeft,
+  MessageCircle,
+  Tag,
+  Share2,
+  ShoppingBag,
+  Check,
+  ChevronRight,
+  Truck,
+  ShieldCheck,
+  RotateCcw,
+  Star,
+  QrCode,
+  ChevronDown,
+  Minus,
+  Plus,
+  X,
+  ZoomIn,
+} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { ProductBadges } from './ProductBadges'
+import { useCart } from '@/lib/cart-context'
+import { CartButton } from './CartButton'
+import type { Product, Store } from '@/lib/types'
+
+export function ProductDetailView({ slug, productId, onDemoBack }: { slug: string; productId: string; onDemoBack?: () => void }) {
+  const { stores, products, navigate, goBack } = useAppStore()
+  const router = useRouter()
+  const pathname = usePathname()
+  const [showYape, setShowYape] = useState(false)
+  const [showZoom, setShowZoom] = useState(false)
+  const [quantity, setQuantity] = useState(1)
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0)
+  const [addedToOrder, setAddedToOrder] = useState(false)
+  const { addToCart, totalItems } = useCart()
+
+  // Detect if we're on a public URL page (rendered by Next.js, not AppRouter)
+  const isPublicPage = pathname.startsWith('/store/') || pathname.startsWith('/demo/')
+
+  // Smart navigation: use URL navigation on public pages, Zustand navigation in app
+  const navigateToProduct = useCallback((productSlug: string, pId: string) => {
+    if (isPublicPage) {
+      router.push(`/store/${productSlug}/product/${pId}`)
+    } else {
+      navigate({ page: 'product-detail', slug: productSlug, productId: pId })
+    }
+  }, [isPublicPage, router, navigate])
+
+  const navigateToStore = useCallback((storeSlug: string) => {
+    if (isPublicPage) {
+      router.push(`/store/${storeSlug}`)
+    } else {
+      navigate({ page: 'store', slug: storeSlug })
+    }
+  }, [isPublicPage, router, navigate])
+
+  const navigateToLanding = useCallback(() => {
+    if (isPublicPage) {
+      router.push('/')
+    } else {
+      navigate({ page: 'landing' })
+    }
+  }, [isPublicPage, router, navigate])
+
+  const zustandStore = stores.find((s) => s.slug === slug && s.isActive)
+  const zustandProduct = products.find((p) => p.id === productId && p.isActive)
+
+  // API fallback: if product not found in Zustand, fetch from API
+  const [apiLoading, setApiLoading] = useState(!zustandStore || !zustandProduct)
+  const [apiStore, setApiStore] = useState<Store | null>(null)
+  const [apiProduct, setApiProduct] = useState<Product | null>(null)
+  const [apiProducts, setApiProducts] = useState<Product[]>([])
+
+  useEffect(() => {
+    if (zustandStore && zustandProduct) return
+    const fetchFromApi = async () => {
+      try {
+        const res = await fetch(`/api/stores?slug=${slug}`)
+        if (res.ok) {
+          const data = await res.json()
+          if (data && data.id) {
+            const mappedStore: Store = {
+              id: data.id,
+              name: data.name,
+              slug: data.slug,
+              description: data.description || '',
+              logo: data.logo || '\uD83D\uDED2',
+              categoryId: data.category || '',
+              planId: data.planType || 'free',
+              colors: {
+                primary: data.primaryColor || '#7C3AED',
+                secondary: data.secondaryColor || '#10B981',
+              },
+              whatsappNumber: data.whatsappNumber || '',
+              template: (data.template as 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist') || 'moderna',
+              bannerUrl: data.bannerUrl || '',
+              userId: data.ownerId || '',
+              isActive: data.isActive ?? true,
+              createdAt: data.createdAt || new Date().toISOString(),
+              hasShipping: data.hasShipping ?? false,
+              hasSecurePayment: data.hasSecurePayment ?? false,
+              hasReturns: data.hasReturns ?? false,
+              popupEnabled: data.popupEnabled ?? false,
+              popupType: (data.popupType as 'product' | 'custom') ?? 'product',
+              popupProductId: data.popupProductId || null,
+              popupCustomImage: data.popupCustomImage || null,
+              popupTitle: data.popupTitle || null,
+              popupButtonText: data.popupButtonText || 'Ver oferta',
+              yapeQrUrl: data.yapeQrUrl || null,
+              plinQrUrl: data.plinQrUrl || null,
+              yapeNumber: data.yapeNumber || null,
+              plinNumber: data.plinNumber || null,
+            }
+            setApiStore(mappedStore)
+
+            if (data.products && Array.isArray(data.products)) {
+              // Helper to safely convert Prisma Decimal / string / number to JS number
+              const toNum = (v: unknown): number => {
+                if (typeof v === 'number') return v
+                if (typeof v === 'string') return parseFloat(v) || 0
+                if (v && typeof v === 'object' && 'd' in (v as object) && 'e' in (v as object) && 's' in (v as object)) {
+                  return parseFloat(String(v)) || 0
+                }
+                return 0
+              }
+              const mapped: Product[] = data.products.map((p: Record<string, unknown>) => ({
+                id: p.id as string,
+                name: (p.name as string) || '',
+                description: (p.description as string) || '',
+                price: toNum(p.price),
+                originalPrice: p.originalPrice != null ? toNum(p.originalPrice) : null,
+                categoryId: (p.category as string) || '',
+                imageUrl: (p.imageUrl as string) || '',
+                images: Array.isArray(p.images) ? (p.images as string[]) : [],
+                color: (p.color as string) || null,
+                isActive: (p.isActive as boolean) ?? true,
+                featured: (p.featured as boolean) ?? false,
+                rating: toNum(p.rating),
+                storeId: (p.storeId as string) || '',
+                createdAt: (p.createdAt as string) || new Date().toISOString(),
+              }))
+              setApiProducts(mapped)
+              const found = mapped.find((p) => p.id === productId && p.isActive)
+              setApiProduct(found || null)
+            }
+          }
+        }
+      } catch {
+        // API fallback failed
+      }
+      setApiLoading(false)
+    }
+    fetchFromApi()
+  }, [slug, productId, zustandStore, zustandProduct])
+
+  const displayStore = zustandStore || apiStore
+  const displayProduct = zustandProduct || apiProduct
+
+  // SEO: Update document title and meta description
+  useEffect(() => {
+    if (!displayStore || !displayProduct) return
+    const title = `${displayProduct.name} | ${displayStore.name}`
+    const description = displayProduct.description
+      ? `${displayProduct.description.substring(0, 160)} - ${displayStore.name} en TiendApp.`
+      : `Compra ${displayProduct.name} por S/${Number(displayProduct.price).toFixed(2)} en ${displayStore.name}. Visita la tienda en TiendApp.`
+
+    document.title = title
+    // Update meta description
+    let metaDesc = document.querySelector('meta[name="description"]') as HTMLMetaElement | null
+    if (!metaDesc) {
+      metaDesc = document.createElement('meta')
+      metaDesc.setAttribute('name', 'description')
+      document.head.appendChild(metaDesc)
+    }
+    metaDesc.setAttribute('content', description)
+
+    // Update Open Graph
+    const setMeta = (prop: string, content: string) => {
+      let el = document.querySelector(`meta[property="${prop}"]`) as HTMLMetaElement | null
+      if (!el) {
+        el = document.createElement('meta')
+        el.setAttribute('property', prop)
+        document.head.appendChild(el)
+      }
+      el.content = content
+    }
+    setMeta('og:title', title)
+    setMeta('og:description', description)
+    setMeta('og:image', displayProduct.imageUrl)
+    setMeta('og:type', 'product')
+    setMeta('product:price:amount', displayProduct.price.toString())
+    setMeta('product:price:currency', 'PEN')
+
+    return () => {
+      document.title = 'TiendApp | Crea tu tienda online en Perú'
+      if (metaDesc) metaDesc.setAttribute('content', 'Crea tu tienda online en minutos con TiendApp. La plataforma #1 en Perú para emprendedores.')
+    }
+  }, [displayStore, displayProduct])
+
+  if (apiLoading) {
+    return (
+      <div className="min-h-screen bg-white">
+        <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
+          <div className="w-20 h-4 bg-gray-200 rounded animate-pulse" />
+          <div className="w-24 h-4 bg-gray-200 rounded animate-pulse" />
+          <div className="w-16 h-4 bg-gray-200 rounded animate-pulse" />
+        </div>
+        <div className="max-w-5xl mx-auto px-4 py-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+            <div className="aspect-square bg-gray-100 rounded-2xl animate-pulse" />
+            <div className="space-y-4">
+              <div className="w-16 h-3 bg-gray-200 rounded animate-pulse" />
+              <div className="w-3/4 h-7 bg-gray-200 rounded animate-pulse" />
+              <div className="w-1/2 h-4 bg-gray-200 rounded animate-pulse" />
+              <div className="w-full h-20 bg-gray-100 rounded-xl animate-pulse mt-4" />
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!displayStore || !displayProduct) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-white">
+        <ShoppingBag className="w-16 h-16 text-gray-200 mb-4" />
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Producto no encontrado</h1>
+        <p className="text-gray-500 mb-6">Este producto no existe o ya no está disponible.</p>
+        <Button
+          onClick={() => onDemoBack ? onDemoBack() : (displayStore ? navigateToStore(slug) : navigateToLanding())}
+          className="gap-2 rounded-xl"
+          style={{ backgroundColor: displayStore?.colors.primary || '#7C3AED' }}
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Volver a la tienda
+        </Button>
+      </div>
+    )
+  }
+
+  // Aliases for cleaner code below
+  const product = displayProduct
+  const store = displayStore
+
+  const handleAddToOrder = () => {
+    if (!store || product.stock === 0) return
+    addToCart(
+      {
+        productId: product.id,
+        name: product.name,
+        price: Number(product.price),
+        imageUrl: product.imageUrl || '',
+        storeId: store.id,
+      },
+      quantity
+    )
+    setAddedToOrder(true)
+    window.setTimeout(() => setAddedToOrder(false), 1800)
+  }
+
+  const categories = getStoreCategories(products)
+  const category = categories.find((c) => c.id === product.categoryId)
+  const discount = product.originalPrice
+    ? Math.round(((Number(product.originalPrice) - Number(product.price)) / Number(product.originalPrice)) * 100)
+    : 0
+  const savings = product.originalPrice ? Number(product.originalPrice) - Number(product.price) : 0
+
+  const isNewProduct = (() => {
+    const created = new Date(product.createdAt)
+    const now = new Date()
+    const diffDays = (now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24)
+    return diffDays <= 7
+  })()
+
+  // Related products: try Zustand first, fallback to API products
+  const allProducts = products.length > 0 ? products : apiProducts
+  const relatedProducts = allProducts.filter(
+    (p) => p.storeId === store.id && p.isActive && p.categoryId === product.categoryId && p.id !== product.id
+  ).slice(0, 4)
+
+  const totalPrice = Number(product.price) * quantity
+
+  const openWhatsApp = async () => {
+    try {
+      const res = await fetch('/api/whatsapp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          storeId: store.id,
+          productName: product.name,
+          productPrice: product.price,
+          quantity,
+        }),
+      })
+      const data = await res.json()
+      if (data.whatsappUrl) {
+        window.open(data.whatsappUrl, '_blank')
+        return
+      }
+    } catch {
+      // Fallback
+    }
+    const qtyText = quantity > 1 ? `${quantity} unidades` : 'el producto'
+    const totalText = quantity > 1 ? `\nTotal: S/${totalPrice.toFixed(2)}` : `\nPrecio: S/${Number(product.price).toFixed(2)}`
+    const msg = encodeURIComponent(
+      `Hola! Me interesa ${qtyText} de: ${product.name}${totalText}\nLo vi en tu tienda en TiendApp.`
+    )
+    window.open(`https://wa.me/${store.whatsappNumber.replace(/[^0-9]/g, '')}?text=${msg}`, '_blank')
+  }
+
+  const shareProduct = async () => {
+    const shareData = {
+      title: `${product.name} - ${store.name}`,
+      text: `Mira este producto: ${product.name} por S/${Number(product.price).toFixed(2)} en ${store.name}`,
+      url: typeof window !== 'undefined' ? window.location.href : '',
+    }
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData)
+      } else {
+        await navigator.clipboard.writeText(shareData.text + ' ' + shareData.url)
+      }
+    } catch {
+      // User cancelled or clipboard failed
+    }
+  }
+
+  const imgFallback =
+    'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"><rect fill="%23fafafa" width="600" height="600"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="16" fill="%23ccc">Imagen no disponible</text></svg>'
+
+  const renderStars = (rating: number, showLabel: boolean = false) => {
+    if (rating <= 0) return null
+    const formattedRating = rating % 1 === 0 ? Number(rating).toFixed(1) : rating.toString()
+    const getRatingLabel = (r: number) => {
+      if (r >= 4.5) return 'Excelente'
+      if (r >= 3.5) return 'Muy bueno'
+      if (r >= 2.5) return 'Bueno'
+      if (r >= 1.5) return 'Regular'
+      return 'Bajo'
+    }
+    return (
+      <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-0.5">
+          {[1, 2, 3, 4, 5].map((star) => {
+            let fillClass = 'text-gray-200'
+            if (rating >= star) {
+              fillClass = 'fill-yellow-400 text-yellow-400'
+            } else if (rating >= star - 0.5) {
+              fillClass = 'fill-yellow-400/50 text-yellow-400'
+            }
+            return (
+              <Star
+                key={star}
+                size={showLabel ? 20 : 16}
+                className={fillClass}
+              />
+            )
+          })}
+        </div>
+        {showLabel ? (
+          <div className="flex items-center gap-2">
+            <span className="bg-yellow-50 text-yellow-700 text-sm font-semibold px-2 py-0.5 rounded-md">
+              {formattedRating}
+            </span>
+            <span className="text-sm text-gray-500">{getRatingLabel(rating)}</span>
+          </div>
+        ) : (
+          <span className="text-xs text-gray-500 ml-0.5">{formattedRating}</span>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Top nav bar */}
+      <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
+        <button
+          onClick={() => onDemoBack ? onDemoBack() : (isPublicPage ? router.back() : goBack())}
+          className="flex items-center gap-2 text-gray-500 hover:text-gray-700 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span className="text-sm hidden sm:inline">Volver</span>
+        </button>
+        <button
+          onClick={() => navigateToStore(slug)}
+          className="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors"
+        >
+          <StoreLogo logo={store.logo} size={24} />
+          <span className="font-semibold text-sm">{store.name}</span>
+        </button>
+        <button onClick={shareProduct} className="flex items-center gap-1.5 text-gray-400 hover:text-gray-600 transition-colors">
+          <Share2 className="w-5 h-5" />
+          <span className="text-sm hidden sm:inline">Compartir</span>
+        </button>
+      </div>
+
+      {/* Breadcrumb */}
+      <div className="bg-gray-50 border-b border-gray-100">
+        <div className="max-w-5xl mx-auto px-4 py-2.5 flex items-center gap-1.5 text-xs text-gray-400">
+          <button
+            onClick={() => navigateToLanding()}
+            className="hover:text-gray-600 transition-colors"
+          >
+            Inicio
+          </button>
+          <ChevronRight className="w-3 h-3" />
+          <button
+            onClick={() => navigateToStore(slug)}
+            className="hover:text-gray-600 transition-colors"
+          >
+            {store.name}
+          </button>
+          <ChevronRight className="w-3 h-3" />
+          <span className="text-gray-700 font-medium truncate max-w-[200px]">{product.name}</span>
+        </div>
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="max-w-5xl mx-auto px-4 py-6 md:py-10"
+      >
+        {/* Main content: Image + Info */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+          {/* Product Image Gallery */}
+          <div className="relative">
+            {(() => {
+              // Build all images: primary imageUrl first, then images array
+              const allImages = [product.imageUrl, ...(product.images || [])].filter(Boolean)
+              const currentImage = allImages[selectedImageIndex] || product.imageUrl
+              return (
+                <>
+                  {/* Main Image */}
+                  <div
+                    className="aspect-square bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 sticky top-16 cursor-zoom-in group"
+                    onClick={() => setShowZoom(true)}
+                  >
+                    <AnimatePresence mode="wait">
+                      <motion.img
+                        key={currentImage}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        src={currentImage}
+                        alt={product.name}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                        onError={(e) => {
+                          ;(e.target as HTMLImageElement).src = imgFallback
+                        }}
+                      />
+                    </AnimatePresence>
+                    {/* Zoom hint overlay */}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg">
+                        <ZoomIn className="w-6 h-6 text-gray-700" />
+                      </div>
+                    </div>
+                    {/* Badges */}
+                    <ProductBadges product={product} primaryColor={store.colors.primary} store={store} />
+                  </div>
+
+                  {/* Thumbnail Strip */}
+                  {allImages.length > 1 && (
+                    <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
+                      {allImages.map((img, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setSelectedImageIndex(idx)}
+                          className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
+                            idx === selectedImageIndex
+                              ? 'border-gray-900 ring-1 ring-gray-900/20 scale-[1.05]'
+                              : 'border-gray-200 hover:border-gray-400 opacity-70 hover:opacity-100'
+                          }`}
+                        >
+                          <img
+                            src={img}
+                            alt={`${product.name} - ${idx + 1}`}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              ;(e.target as HTMLImageElement).src = imgFallback
+                            }}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )
+            })()}
+          </div>
+
+          {/* Product Info */}
+          <div className="flex flex-col">
+            {/* Category */}
+            {category && (
+              <div className="flex items-center gap-1.5 mb-3">
+                <Tag className="w-3.5 h-3.5" style={{ color: store.colors.primary }} />
+                <span
+                  className="text-xs font-semibold uppercase tracking-wider"
+                  style={{ color: store.colors.primary }}
+                >
+                  {category.name}
+                </span>
+              </div>
+            )}
+
+            {/* Product Name + Color Badge */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight leading-tight">
+                {product.name}
+              </h1>
+              {product.color && (
+                <span
+                  className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border border-gray-200 bg-gray-50 text-gray-700"
+                >
+                  <span
+                    className="w-3 h-3 rounded-full border border-gray-300 flex-shrink-0"
+                    style={{ backgroundColor: product.color.toLowerCase() }}
+                  />
+                  {product.color}
+                </span>
+              )}
+            </div>
+
+            {/* Rating & Featured Badge */}
+            <div className="flex items-center gap-3 mt-3 flex-wrap">
+              {renderStars(product.rating, true)}
+              {product.featured && (
+                <Badge className="bg-amber-100 text-amber-700 text-xs font-semibold border-0">
+                  Destacado
+                </Badge>
+              )}
+              {isNewProduct && (
+                <Badge className="bg-green-100 text-green-700 text-xs font-semibold border-0">
+                  Nuevo
+                </Badge>
+              )}
+            </div>
+
+            {/* Price */}
+            <div className="mt-6 p-5 rounded-2xl" style={{ backgroundColor: store.colors.primary + '08' }}>
+              <div className="flex items-center gap-3 flex-wrap">
+                <span
+                  className="text-3xl md:text-4xl font-bold tracking-tight"
+                  style={{ color: store.colors.primary }}
+                >
+                  {quantity > 1 ? `S/${totalPrice.toFixed(2)}` : `S/${Number(product.price).toFixed(2)}`}
+                </span>
+                {quantity > 1 && (
+                  <span className="text-sm text-gray-400 font-normal">
+                    S/{Number(product.price).toFixed(2)} c/u
+                  </span>
+                )}
+                {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
+                  <>
+                    <span className="text-lg text-gray-400 line-through">
+                      S/{Number(product.originalPrice).toFixed(2)}
+                    </span>
+                    <span className="bg-red-100 text-red-600 text-sm font-medium px-2.5 py-0.5 rounded-full">
+                      -{Math.round((1 - Number(product.price) / Number(product.originalPrice)) * 100)}%
+                    </span>
+                  </>
+                )}
+              </div>
+              {quantity > 1 && (
+                <p className="text-sm mt-2 font-medium" style={{ color: store.colors.primary }}>
+                  Total por {quantity} unidades: S/{totalPrice.toFixed(2)}
+                </p>
+              )}
+              {savings > 0 && (
+                <p className="text-sm mt-2 font-medium" style={{ color: store.colors.primary }}>
+                  Ahorras S/{(Number(savings) * quantity).toFixed(2)} con este precio especial
+                </p>
+              )}
+            </div>
+
+            {/* Description */}
+            <div className="mt-6">
+              <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">
+                Descripcion del producto
+              </h2>
+              <div className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
+                {product.description || 'Este producto no tiene una descripcion detallada todavia. Contacta al vendedor por WhatsApp para mas informacion.'}
+              </div>
+            </div>
+
+            {/* Features / Benefits - conditional based on store settings */}
+            {(() => {
+              const features: { icon: typeof Truck; label: string; active: boolean }[] = [
+                { icon: Truck, label: 'Envio disponible', active: store.hasShipping === true },
+                { icon: ShieldCheck, label: 'Pago seguro', active: store.hasSecurePayment === true },
+                { icon: RotateCcw, label: 'Devoluciones', active: store.hasReturns === true },
+              ]
+              const activeFeatures = features.filter((f) => f.active)
+              if (activeFeatures.length === 0) return null
+              const colsClass = activeFeatures.length === 1 ? 'grid-cols-1' : activeFeatures.length === 2 ? 'grid-cols-2' : 'grid-cols-3'
+              return (
+                <div className={`mt-6 grid ${colsClass} gap-3`}>
+                  {activeFeatures.map((f) => (
+                    <div key={f.label} className="flex flex-col items-center text-center p-3 rounded-xl bg-gray-50">
+                      <f.icon className="w-5 h-5 mb-1.5" style={{ color: store.colors.primary }} />
+                      <span className="text-[11px] text-gray-500 font-medium">{f.label}</span>
+                    </div>
+                  ))}
+                </div>
+              )
+            })()}
+
+            {/* Quantity Selector */}
+            <div className="mt-6">
+              <label className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3 block">
+                Cantidad
+              </label>
+              <div className="flex items-center gap-0">
+                <button
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  disabled={quantity <= 1}
+                  className="w-11 h-11 flex items-center justify-center rounded-l-xl border-2 transition-colors disabled:opacity-30"
+                  style={{
+                    borderColor: store.colors.primary + '30',
+                    color: store.colors.primary,
+                  }}
+                >
+                  <Minus className="w-4 h-4" />
+                </button>
+                <div
+                  className="w-14 h-11 flex items-center justify-center border-y-2 text-base font-bold"
+                  style={{
+                    borderColor: store.colors.primary + '30',
+                    color: store.colors.primary,
+                  }}
+                >
+                  {quantity}
+                </div>
+                <button
+                  onClick={() => setQuantity(Math.min(999, quantity + 1))}
+                  className="w-11 h-11 flex items-center justify-center rounded-r-xl border-2 transition-colors"
+                  style={{
+                    borderColor: store.colors.primary + '30',
+                    color: store.colors.primary,
+                  }}
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* WhatsApp CTA */}
+            <div className="mt-8 flex flex-col gap-3">
+              {product.stock === 0 ? (
+                <>
+                  <div className="w-full text-center py-6 rounded-2xl bg-gray-100 text-gray-500 font-bold text-base">
+                    Producto agotado
+                  </div>
+                  <p className="text-xs text-center text-gray-400">
+                    Consulta al vendedor por disponibilidad
+                  </p>
+                  <Button
+                    variant="outline"
+                    className="w-full gap-3 rounded-2xl py-4 text-sm font-medium"
+                    onClick={openWhatsApp}
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    Consultar por WhatsApp
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    className="w-full text-white gap-3 rounded-2xl py-6 text-base font-bold shadow-lg hover:opacity-90 transition-opacity"
+                    style={{ backgroundColor: '#25D366' }}
+                    onClick={openWhatsApp}
+                  >
+                    <MessageCircle className="w-5 h-5" />
+                    Comprar por WhatsApp
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full gap-3 rounded-2xl py-5 text-sm font-bold transition-colors"
+                    style={{
+                      borderColor: addedToOrder ? '#16a34a' : store.colors.primary + '60',
+                      color: addedToOrder ? '#16a34a' : store.colors.primary,
+                      backgroundColor: addedToOrder ? '#f0fdf4' : 'transparent',
+                    }}
+                    onClick={handleAddToOrder}
+                  >
+                    {addedToOrder ? <Check className="w-5 h-5" /> : <ShoppingBag className="w-5 h-5" />}
+                    {addedToOrder ? 'Agregado al pedido' : 'Agregar al pedido'}
+                  </Button>
+                  {totalItems > 0 && !addedToOrder && (
+                    <p className="text-xs text-center text-violet-600 font-medium">
+                      Llevas {totalItems} producto{totalItems > 1 ? 's' : ''} en tu pedido
+                    </p>
+                  )}
+                  <p className="text-xs text-center text-gray-400">
+                    ¿Varios productos? Agregalos al pedido y envíalos todos juntos por WhatsApp
+                  </p>
+                </>
+              )}
+              {/* Stock indicator */}
+              {product.stock != null && product.stock > 0 && product.stock <= 5 && (
+                <p className="text-xs text-center text-amber-600 font-medium">
+                  ¡Solo quedan {product.stock} unidades!
+                </p>
+              )}
+            </div>
+
+            {/* Yape/Plin Payment Option */}
+            {(() => {
+              // Only show Yape/Plin section if the store has at least one QR image or number configured
+              const hasYapeConfig = store.yapeQrUrl || store.yapeNumber
+              const hasPlinConfig = store.plinQrUrl || store.plinNumber
+              if (!hasYapeConfig && !hasPlinConfig) return null
+
+              return (
+                <div className="mt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowYape(!showYape)}
+                    className="w-full flex items-center justify-between p-4 rounded-2xl border-2 border-purple-200 hover:border-purple-300 bg-purple-50/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
+                        <QrCode className="w-5 h-5 text-purple-600" />
+                      </div>
+                      <div className="text-left">
+                        <p className="text-sm font-semibold text-gray-900">
+                          Pagar con {hasYapeConfig && hasPlinConfig ? 'Yape / Plin' : hasYapeConfig ? 'Yape' : 'Plin'}
+                        </p>
+                        <p className="text-xs text-gray-500">Escanea el QR y confirma tu pago</p>
+                      </div>
+                    </div>
+                    <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${showYape ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  <AnimatePresence>
+                    {showYape && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="p-6 mt-2 rounded-2xl border border-purple-100 bg-white space-y-5">
+                          {/* Yape Section */}
+                          {hasYapeConfig && (
+                            <div className="space-y-3">
+                              <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center">
+                                  <span className="text-white text-xs font-black">Y</span>
+                                </div>
+                                <h3 className="text-sm font-bold text-gray-900">Pagar con Yape</h3>
+                              </div>
+
+                              {store.yapeQrUrl ? (
+                                <div className="text-center">
+                                  <div className="inline-block p-3 bg-white rounded-2xl shadow-sm border border-gray-100">
+                                    <img
+                                      src={store.yapeQrUrl}
+                                      alt="QR Yape"
+                                      className="w-48 h-48 object-contain"
+                                      onError={(e) => {
+                                        const target = e.target as HTMLImageElement
+                                        target.style.display = 'none'
+                                        const parent = target.parentElement
+                                        if (parent) {
+                                          parent.innerHTML = '<div class="w-48 h-48 flex items-center justify-center bg-purple-50 rounded-xl"><span class="text-purple-400 text-sm">QR no disponible</span></div>'
+                                        }
+                                      }}
+                                    />
+                                  </div>
+                                  <p className="text-xs text-gray-400 mt-2">Abre Yape y escanea este QR</p>
+                                </div>
+                              ) : (
+                                <div className="text-center p-4 rounded-xl bg-purple-50">
+                                  <p className="text-sm text-gray-600">
+                                    Envía <b>S/{totalPrice.toFixed(2)}</b> al número:
+                                  </p>
+                                  <p className="text-lg font-bold text-purple-700 mt-1">{store.yapeNumber}</p>
+                                </div>
+                              )}
+
+                              {store.yapeNumber && !store.yapeQrUrl && (
+                                <p className="text-xs text-gray-400 text-center">
+                                  Abre Yape, selecciona &quot;Yapear&quot; e ingresa el número manualmente
+                                </p>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Plin Section */}
+                          {hasPlinConfig && (
+                            <div className="space-y-3">
+                              {hasYapeConfig && <div className="border-t border-gray-100" />}
+                              <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-lg bg-green-600 flex items-center justify-center">
+                                  <span className="text-white text-xs font-black">P</span>
+                                </div>
+                                <h3 className="text-sm font-bold text-gray-900">Pagar con Plin</h3>
+                              </div>
+
+                              {store.plinQrUrl ? (
+                                <div className="text-center">
+                                  <div className="inline-block p-3 bg-white rounded-2xl shadow-sm border border-gray-100">
+                                    <img
+                                      src={store.plinQrUrl}
+                                      alt="QR Plin"
+                                      className="w-48 h-48 object-contain"
+                                      onError={(e) => {
+                                        const target = e.target as HTMLImageElement
+                                        target.style.display = 'none'
+                                        const parent = target.parentElement
+                                        if (parent) {
+                                          parent.innerHTML = '<div class="w-48 h-48 flex items-center justify-center bg-green-50 rounded-xl"><span class="text-green-400 text-sm">QR no disponible</span></div>'
+                                        }
+                                      }}
+                                    />
+                                  </div>
+                                  <p className="text-xs text-gray-400 mt-2">Abre Plin y escanea este QR</p>
+                                </div>
+                              ) : (
+                                <div className="text-center p-4 rounded-xl bg-green-50">
+                                  <p className="text-sm text-gray-600">
+                                    Envía <b>S/{totalPrice.toFixed(2)}</b> al número:
+                                  </p>
+                                  <p className="text-lg font-bold text-green-700 mt-1">{store.plinNumber}</p>
+                                </div>
+                              )}
+
+                              {store.plinNumber && !store.plinQrUrl && (
+                                <p className="text-xs text-gray-400 text-center">
+                                  Abre Plin, selecciona &quot;Pagar&quot; e ingresa el número manualmente
+                                </p>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Amount to pay */}
+                          <div className="text-center p-4 rounded-xl bg-purple-50">
+                            <p className="text-xs text-gray-500 mb-1">Monto a transferir</p>
+                            <p className="text-2xl font-bold" style={{ color: store.colors.primary }}>
+                              S/{totalPrice.toFixed(2)}
+                            </p>
+                            <p className="text-xs text-gray-400 mt-1">
+                              {quantity > 1 ? `${quantity}x ${product.name}` : `por ${product.name}`}
+                            </p>
+                          </div>
+
+                          {/* Steps */}
+                          <div className="space-y-3">
+                            <div className="flex items-start gap-3">
+                              <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <span className="text-xs font-bold text-purple-600">1</span>
+                              </div>
+                              <p className="text-sm text-gray-600">Abre <b>Yape</b> o <b>Plin</b> en tu celular</p>
+                            </div>
+                            <div className="flex items-start gap-3">
+                              <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <span className="text-xs font-bold text-purple-600">2</span>
+                              </div>
+                              <p className="text-sm text-gray-600">Escanea el QR o ingresa el número y transfiere <b>S/{totalPrice.toFixed(2)}</b></p>
+                            </div>
+                            <div className="flex items-start gap-3">
+                              <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <span className="text-xs font-bold text-purple-600">3</span>
+                              </div>
+                              <p className="text-sm text-gray-600">Confirma tu pago enviando el comprobante por WhatsApp</p>
+                            </div>
+                          </div>
+
+                          {/* Confirm via WhatsApp */}
+                          <Button
+                            className="w-full text-white gap-3 rounded-2xl py-5 text-sm font-bold shadow-lg hover:opacity-90 transition-opacity"
+                            style={{ backgroundColor: '#25D366' }}
+                            onClick={() => {
+                              const qtyText = quantity > 1 ? ` (${quantity} unidades)` : ''
+                              const msg = encodeURIComponent(
+                                `Hola! Acabo de realizar el pago por Yape/Plin de S/${totalPrice.toFixed(2)} por: ${product.name}${qtyText}\nPor favor confirmar mi pedido.`
+                              )
+                              window.open(`https://wa.me/${store.whatsappNumber.replace(/[^0-9]/g, '')}?text=${msg}`, '_blank')
+                            }}
+                          >
+                            <MessageCircle className="w-5 h-5" />
+                            Enviar comprobante por WhatsApp
+                          </Button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )
+            })()}
+
+            {/* Store info */}
+            <div className="mt-8 p-4 rounded-xl border border-gray-100 bg-gray-50/50">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center">
+                  <StoreLogo logo={store.logo} size={32} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-900 truncate">{store.name}</p>
+                  <p className="text-xs text-gray-400">Responde pedidos por WhatsApp</p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs rounded-lg gap-1"
+                  onClick={() => navigateToStore(slug)}
+                >
+                  Ver tienda
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Related Products */}
+        {relatedProducts.length > 0 && (
+          <div className="mt-16">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">Productos relacionados</h2>
+              <button
+                onClick={() => navigateToStore(slug)}
+                className="text-sm font-medium flex items-center gap-1 transition-colors hover:underline"
+                style={{ color: store.colors.primary }}
+              >
+                Ver todo
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+              {relatedProducts.map((rp) => (
+                <motion.div
+                  key={rp.id}
+                  whileHover={{ y: -4 }}
+                  className="group cursor-pointer rounded-2xl overflow-hidden bg-white border border-gray-100 hover:border-gray-200 hover:shadow-lg transition-all duration-300"
+                  onClick={() => navigateToProduct(slug, rp.id)}
+                >
+                  <div className="relative aspect-square bg-gray-50 overflow-hidden">
+                    <img
+                      src={rp.imageUrl}
+                      alt={rp.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      onError={(e) => {
+                        ;(e.target as HTMLImageElement).src = imgFallback
+                      }}
+                    />
+                    <ProductBadges product={rp} primaryColor={store.colors.primary} store={store} />
+                  </div>
+                  <div className="p-3">
+                    <h3 className="text-sm font-medium text-gray-800 truncate">{rp.name}</h3>
+                    {rp.rating > 0 && (
+                      <div className="mt-1">
+                        {renderStars(rp.rating)}
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <span
+                        className="text-sm font-semibold"
+                        style={{ color: store.colors.primary }}
+                      >
+                        S/{Number(rp.price).toFixed(2)}
+                      </span>
+                      {rp.originalPrice && (
+                        <span className="text-xs text-gray-300 line-through">
+                          S/{Number(rp.originalPrice).toFixed(2)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Back to store link */}
+        <div className="mt-12 pb-8 text-center">
+          <button
+            onClick={() => navigateToStore(slug)}
+            className="inline-flex items-center gap-2 text-sm font-medium transition-colors hover:underline"
+            style={{ color: store.colors.primary }}
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Ver todos los productos de {store.name}
+          </button>
+        </div>
+      </motion.div>
+
+      {/* Image Zoom Modal */}
+      <AnimatePresence>
+        {showZoom && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center p-4"
+            onClick={() => setShowZoom(false)}
+          >
+            {/* Close button */}
+            <button
+              onClick={() => setShowZoom(false)}
+              className="absolute top-4 right-4 z-10 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-colors"
+            >
+              <X className="w-5 h-5 text-white" />
+            </button>
+
+            {/* Product name */}
+            <p className="absolute top-5 left-5 text-white/80 text-sm font-medium truncate max-w-[60%]">
+              {product.name}
+            </p>
+
+            {/* Zoomed image */}
+            {(() => {
+              const allImages = [product.imageUrl, ...(product.images || [])].filter(Boolean)
+              const currentImage = allImages[selectedImageIndex] || product.imageUrl
+              return (
+                <motion.img
+                  key={currentImage}
+                  initial={{ scale: 0.85, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.85, opacity: 0 }}
+                  transition={{ duration: 0.25, ease: 'easeOut' }}
+                  src={currentImage}
+                  alt={product.name}
+                  className="max-w-full max-h-[85vh] object-contain rounded-lg select-none"
+                  onClick={(e) => e.stopPropagation()}
+                  onError={(e) => {
+                    ;(e.target as HTMLImageElement).src = imgFallback
+                  }}
+                />
+              )
+            })()}
+
+            {/* Thumbnail navigation in zoom */}
+            {(() => {
+              const allImages = [product.imageUrl, ...(product.images || [])].filter(Boolean)
+              if (allImages.length <= 1) return null
+              return (
+                <div className="absolute bottom-14 left-1/2 -translate-x-1/2 flex gap-2 bg-black/50 backdrop-blur-sm rounded-full p-1.5">
+                  {allImages.map((img, idx) => (
+                    <button
+                      key={idx}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setSelectedImageIndex(idx)
+                      }}
+                      className={`w-10 h-10 rounded-full overflow-hidden border-2 transition-all duration-200 ${
+                        idx === selectedImageIndex
+                          ? 'border-white scale-110'
+                          : 'border-white/40 hover:border-white/70 opacity-60 hover:opacity-90'
+                      }`}
+                    >
+                      <img
+                        src={img}
+                        alt={`${product.name} - ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          ;(e.target as HTMLImageElement).src = imgFallback
+                        }}
+                      />
+                    </button>
+                  ))}
+                </div>
+              )
+            })()}
+
+            {/* Image counter */}
+            {(() => {
+              const allImages = [product.imageUrl, ...(product.images || [])].filter(Boolean)
+              if (allImages.length <= 1) return null
+              return (
+                <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/50 text-xs">
+                  {selectedImageIndex + 1} / {allImages.length}
+                </p>
+              )
+            })()}
+
+            {/* Hint */}
+            <p className="absolute bottom-5 left-1/2 -translate-x-1/2 text-white/50 text-xs">
+              Toca fuera de la imagen para cerrar
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      {/* Pedido múltiple: FAB visible cuando hay productos agregados de esta tienda */}
+      {store && (
+        <CartButton
+          storeId={store.id}
+          whatsappNumber={store.whatsappNumber}
+          storeName={store.name}
+        />
+      )}
+    </div>
+  )
+}
