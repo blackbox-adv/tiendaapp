@@ -78,11 +78,11 @@ function getToken(): string {
 }
 
 // Datos de cobro configurables desde Vercel (NEXT_PUBLIC_* se inyectan en build).
-// Si no están configuradas se muestran los placeholders por defecto.
-const PAYMENT_YAPE_NUMBER = process.env.NEXT_PUBLIC_PAYMENTS_YAPE_NUMBER || '+51 999 888 777'
-const PAYMENT_HOLDER_NAME = process.env.NEXT_PUBLIC_PAYMENTS_HOLDER_NAME || 'TiendApp SAC'
-const PAYMENT_BCP_ACCOUNT = process.env.NEXT_PUBLIC_PAYMENTS_BCP_ACCOUNT || '193-2847561-0-42'
-const PAYMENT_BCP_CCI = process.env.NEXT_PUBLIC_PAYMENTS_BCP_CCI || '002-193-128475610042'
+// Si no están configuradas se usan estos valores por defecto (Plin/Yape de TiendApp).
+const PAYMENT_YAPE_NUMBER = process.env.NEXT_PUBLIC_PAYMENTS_YAPE_NUMBER || '+51 958 297 236'
+const PAYMENT_HOLDER_NAME = process.env.NEXT_PUBLIC_PAYMENTS_HOLDER_NAME || ''
+const PAYMENT_BCP_ACCOUNT = process.env.NEXT_PUBLIC_PAYMENTS_BCP_ACCOUNT || ''
+const PAYMENT_BCP_CCI = process.env.NEXT_PUBLIC_PAYMENTS_BCP_CCI || ''
 
 const COMPARISON_ROWS = buildComparisonRows()
 
@@ -505,12 +505,12 @@ export function PlanManager() {
                 </p>
               </div>
 
-              {/* Yape / Plin info */}
+              {/* Plin / Yape info */}
               <div className="rounded-xl border border-gray-200 p-4 space-y-3">
                 <div className="flex items-center gap-2">
                   <QrCode className="w-5 h-5 text-violet-600" />
                   <h3 className="text-sm font-semibold text-gray-900">
-                    Pago por Yape / Plin
+                    Pago por Plin / Yape
                   </h3>
                 </div>
                 <div className="space-y-1 text-sm text-gray-600">
@@ -518,43 +518,51 @@ export function PlanManager() {
                     <span className="font-medium text-gray-800">Número:</span>{' '}
                     {PAYMENT_YAPE_NUMBER}
                   </p>
-                  <p>
-                    <span className="font-medium text-gray-800">Nombre:</span>{' '}
-                    {PAYMENT_HOLDER_NAME}
-                  </p>
+                  {PAYMENT_HOLDER_NAME && (
+                    <p>
+                      <span className="font-medium text-gray-800">Nombre:</span>{' '}
+                      {PAYMENT_HOLDER_NAME}
+                    </p>
+                  )}
                   <p className="text-xs text-gray-400">
-                    Escanea el QR desde la app de Yape o Plin y envía el monto
-                    exacto.
+                    Envía el monto exacto desde Plin o Yape a ese número (están
+                    interconectados) y registra el número de operación abajo.
                   </p>
                 </div>
               </div>
 
-              {/* Bank transfer info */}
-              <div className="rounded-xl border border-gray-200 p-4 space-y-3">
-                <div className="flex items-center gap-2">
-                  <Building2 className="w-5 h-5 text-violet-600" />
-                  <h3 className="text-sm font-semibold text-gray-900">
-                    Transferencia bancaria (BCP)
-                  </h3>
+              {/* Bank transfer info (solo si hay cuenta configurada) */}
+              {PAYMENT_BCP_ACCOUNT && (
+                <div className="rounded-xl border border-gray-200 p-4 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="w-5 h-5 text-violet-600" />
+                    <h3 className="text-sm font-semibold text-gray-900">
+                      Transferencia bancaria (BCP)
+                    </h3>
+                  </div>
+                  <div className="space-y-1 text-sm text-gray-600">
+                    <p>
+                      <span className="font-medium text-gray-800">Banco:</span> BCP
+                    </p>
+                    <p>
+                      <span className="font-medium text-gray-800">Cuenta:</span>{' '}
+                      {PAYMENT_BCP_ACCOUNT}
+                    </p>
+                    {PAYMENT_BCP_CCI && (
+                      <p>
+                        <span className="font-medium text-gray-800">CCI:</span>{' '}
+                        {PAYMENT_BCP_CCI}
+                      </p>
+                    )}
+                    {PAYMENT_HOLDER_NAME && (
+                      <p>
+                        <span className="font-medium text-gray-800">Nombre:</span>{' '}
+                        {PAYMENT_HOLDER_NAME}
+                      </p>
+                    )}
+                  </div>
                 </div>
-                <div className="space-y-1 text-sm text-gray-600">
-                  <p>
-                    <span className="font-medium text-gray-800">Banco:</span> BCP
-                  </p>
-                  <p>
-                    <span className="font-medium text-gray-800">Cuenta:</span>{' '}
-                    {PAYMENT_BCP_ACCOUNT}
-                  </p>
-                  <p>
-                    <span className="font-medium text-gray-800">CCI:</span>{' '}
-                    {PAYMENT_BCP_CCI}
-                  </p>
-                  <p>
-                    <span className="font-medium text-gray-800">Nombre:</span>{' '}
-                    {PAYMENT_HOLDER_NAME}
-                  </p>
-                </div>
-              </div>
+              )}
 
               {/* Voucher number input */}
               <div className="space-y-2">

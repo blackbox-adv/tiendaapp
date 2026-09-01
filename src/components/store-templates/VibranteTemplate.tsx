@@ -8,6 +8,7 @@ import { Star, MessageCircle, ShoppingBag, Search, X, SlidersHorizontal, ImageIc
 import { StoreFeatureBadges } from './StoreFeatureBadges'
 import { CombosSection } from './CombosSection'
 import { Badge } from '@/components/ui/badge'
+import { PaymentMethods } from './PaymentMethods'
 import { useAppStore } from '@/lib/store'
 import type { Store, Product } from '@/lib/types'
 
@@ -431,6 +432,8 @@ export function VibranteTemplate({ store, products, storeSlug, planId, onProduct
       </main>
 
       {/* Footer */}
+      <PaymentMethods store={store} />
+
       <footer className="mt-auto py-6 text-center">
         {planId === 'free' && (
           <a

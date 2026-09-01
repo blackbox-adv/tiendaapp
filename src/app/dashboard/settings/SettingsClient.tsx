@@ -14,6 +14,9 @@ import {
   Save,
   Store,
   Lock,
+  Wallet,
+  Upload,
+  X,
 } from 'lucide-react';
 
 interface StoreData {
@@ -23,6 +26,10 @@ interface StoreData {
   description: string | null;
   template: string;
   whatsappNumber: string | null;
+  yapeNumber: string | null;
+  plinNumber: string | null;
+  yapeQrUrl: string | null;
+  plinQrUrl: string | null;
   logo: string | null;
 }
 
@@ -37,6 +44,13 @@ export default function SettingsClient() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
+
+  // Métodos de pago de la tienda (para cobrar a sus clientes)
+  const [yapeNumber, setYapeNumber] = useState('');
+  const [plinNumber, setPlinNumber] = useState('');
+  const [yapeQrUrl, setYapeQrUrl] = useState<string | null>(null);
+  const [plinQrUrl, setPlinQrUrl] = useState<string | null>(null);
+  const [uploadingQr, setUploadingQr] = useState<'yape' | 'plin' | null>(null);
 
   // Password change
   const [currentPassword, setCurrentPassword] = useState('');
@@ -70,6 +84,10 @@ export default function SettingsClient() {
         setName(storeData.name || '');
         setDescription(storeData.description || '');
         setWhatsapp(storeData.whatsappNumber || '');
+        setYapeNumber((storeData as StoreData).yapeNumber || '');
+        setPlinNumber((storeData as StoreData).plinNumber || '');
+        setYapeQrUrl((storeData as StoreData).yapeQrUrl || null);
+        setPlinQrUrl((storeData as StoreData).plinQrUrl || null);
       }
     } catch {
       setError('Error de conexión');
@@ -96,6 +114,10 @@ export default function SettingsClient() {
           name,
           description: description || null,
           whatsappNumber: whatsapp || null,
+          yapeNumber: yapeNumber.trim() || null,
+          plinNumber: plinNumber.trim() || null,
+          yapeQrUrl,
+          plinQrUrl,
         }),
       });
 
@@ -110,6 +132,50 @@ export default function SettingsClient() {
       setError('Error de conexión');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleQrUpload = async (e: React.ChangeEvent<HTMLInputElement>, kind: 'yape' | 'plin') => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      setError('El QR debe ser una imagen JPG, PNG o WebP');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError('La imagen del QR no debe superar los 5MB');
+      return;
+    }
+
+    setUploadingQr(kind);
+    setError('');
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', 'payment-qr');
+
+      const token = localStorage.getItem('tiendapp_token');
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || 'Error al subir el QR');
+        return;
+      }
+      const data = await res.json();
+      if (kind === 'yape') setYapeQrUrl(data.url ?? data.data?.url ?? null);
+      else setPlinQrUrl(data.url ?? data.data?.url ?? null);
+    } catch {
+      setError('Error de conexión al subir el QR');
+    } finally {
+      setUploadingQr(null);
     }
   };
 
@@ -239,6 +305,86 @@ export default function SettingsClient() {
                 <p className="text-xs text-gray-500">
                   Con código de país, sin espacios ni el signo +. Aquí llegan los pedidos.
                 </p>
+              </div>
+
+              <div className="pt-2 border-t border-gray-100">
+                <div className="flex items-center gap-2 mt-4 mb-1">
+                  <Wallet className="w-4 h-4 text-violet-600" />
+                  <h4 className="text-sm font-semibold text-gray-900">Cobros con Yape / Plin</h4>
+                </div>
+                <p className="text-xs text-gray-500 mb-4">
+                  Estos datos aparecerán en tu tienda para que tus clientes te paguen. El dinero llega directo a ti.
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="yapeNumber">Tu número de Yape</Label>
+                    <Input
+                      id="yapeNumber"
+                      type="tel"
+                      placeholder="958297236"
+                      value={yapeNumber}
+                      onChange={(e) => setYapeNumber(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="plinNumber">Tu número de Plin</Label>
+                    <Input
+                      id="plinNumber"
+                      type="tel"
+                      placeholder="958297236"
+                      value={plinNumber}
+                      onChange={(e) => setPlinNumber(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                  {([
+                    { kind: 'yape' as const, label: 'QR de Yape', url: yapeQrUrl, setUrl: setYapeQrUrl },
+                    { kind: 'plin' as const, label: 'QR de Plin', url: plinQrUrl, setUrl: setPlinQrUrl },
+                  ]).map(({ kind, label, url, setUrl }) => (
+                    <div key={kind} className="space-y-2">
+                      <Label>{label} (opcional)</Label>
+                      <div className="flex items-center gap-3">
+                        <div className="w-20 h-20 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden flex-shrink-0">
+                          {url ? (
+                            <img src={url} alt={label} className="w-full h-full object-cover" />
+                          ) : uploadingQr === kind ? (
+                            <Loader2 className="w-5 h-5 animate-spin text-violet-600" />
+                          ) : (
+                            <Upload className="w-5 h-5 text-gray-300" />
+                          )}
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                          <label
+                            htmlFor={`qr-${kind}`}
+                            className="text-xs text-violet-600 hover:text-violet-700 cursor-pointer font-medium"
+                          >
+                            {url ? 'Cambiar imagen' : 'Subir captura del QR'}
+                          </label>
+                          <input
+                            id={`qr-${kind}`}
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            className="hidden"
+                            onChange={(e) => handleQrUpload(e, kind)}
+                          />
+                          {url && (
+                            <button
+                              type="button"
+                              onClick={() => setUrl(null)}
+                              className="text-xs text-gray-400 hover:text-red-500 inline-flex items-center gap-1"
+                            >
+                              <X className="w-3 h-3" />
+                              Quitar
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <Button

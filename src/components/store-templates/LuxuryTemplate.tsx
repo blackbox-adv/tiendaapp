@@ -8,6 +8,7 @@ import { Star, ShoppingBag, Search, X, Diamond, Crown, ImageIcon } from 'lucide-
 import { StoreFeatureBadges } from './StoreFeatureBadges'
 import { CombosSection } from './CombosSection'
 import { Badge } from '@/components/ui/badge'
+import { PaymentMethods } from './PaymentMethods'
 import { useAppStore } from '@/lib/store'
 import type { Store, Product } from '@/lib/types'
 
@@ -462,6 +463,9 @@ export function LuxuryTemplate({ store, products, storeSlug, planId, onProductCl
           </>
         )}
       </main>
+
+      {/* Formas de pago (Yape / Plin) */}
+      <PaymentMethods store={store} />
 
       {/* Footer */}
       <footer className="mt-auto" style={{ borderTop: `1px solid ${GOLD}12` }}>
