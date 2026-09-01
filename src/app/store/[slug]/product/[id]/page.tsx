@@ -14,21 +14,38 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug, id } = await params
 
+  let product: {
+    name: string
+    description: string | null
+    price: { toFixed: (digits?: number) => string } // Prisma Decimal
+    imageUrl: string
+    store: { name: string; slug: string } | null
+  } | null = null
   try {
-    const product = await db.storeProduct.findUnique({
+    product = await db.storeProduct.findUnique({
       where: { id },
-      include: {
+      select: {
+        name: true,
+        description: true,
+        price: true,
+        imageUrl: true,
         store: {
           select: { name: true, slug: true },
         },
       },
     })
+  } catch {
+    return { title: 'Producto | TiendApp' }
+  }
 
-    if (!product || !product.store) {
-      return { title: 'Producto no encontrado | TiendApp' }
-    }
+  // notFound() aquí (en generateMetadata) y NO en el page: generateMetadata se resuelve
+  // FUERA del boundary Suspense de loading.tsx, así la respuesta conserva el HTTP 404.
+  // Debe estar FUERA del try/catch de arriba porque notFound() lanza y el catch lo tragaría.
+  if (!product || !product.store) {
+    notFound()
+  }
 
-    const title = `${product.name} | ${product.store.name}`
+  const title = `${product.name} | ${product.store.name}`
     const description = product.description
       ? `${product.description.substring(0, 160)} - ${product.store.name} en TiendApp.`
       : `Compra ${product.name} por S/${product.price.toFixed(2)} en ${product.store.name}. Visita la tienda en TiendApp.`
@@ -53,10 +70,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         canonical: `/store/${slug}/product/${id}`,
       },
     }
-  } catch {
-    return { title: 'Producto | TiendApp' }
   }
-}
 
 export default async function ProductPage({ params }: Props) {
   const { slug, id } = await params

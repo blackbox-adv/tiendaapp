@@ -16,22 +16,37 @@ interface Props {
 // Generate static params for known stores (ISR-friendly)
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
+  let store: {
+    name: string
+    description: string | null
+    logo: string
+    primaryColor: string
+    isActive: boolean
+  } | null = null
   try {
-    const store = await db.store.findUnique({
+    store = await db.store.findUnique({
       where: { slug },
       select: {
         name: true,
         description: true,
         logo: true,
         primaryColor: true,
+        isActive: true,
       },
     })
+  } catch {
+    return { title: `${slug} | TiendApp` }
+  }
 
-    if (!store) {
-      return { title: { absolute: 'Tienda no encontrada | TiendApp' } }
-    }
+  // notFound() aquí (en generateMetadata) y NO en el page: generateMetadata se resuelve
+  // FUERA del boundary Suspense de loading.tsx, así la respuesta conserva el HTTP 404.
+  // Desde el page llega tarde — el shell ya se envió con 200 (soft-404, mal SEO).
+  // Debe estar FUERA del try/catch de arriba porque notFound() lanza y el catch lo tragaría.
+  if (!store || store.isActive === false) {
+    notFound()
+  }
 
-    const title = store.name
+  const title = store.name
     const description = store.description
       ? `${store.description} - Visita la tienda online de ${store.name} en TiendApp.`
       : `Visita la tienda online de ${store.name} en TiendApp. Productos y precios increibles.`
@@ -58,10 +73,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         canonical: `/store/${slug}`,
       },
     }
-  } catch {
-    return { title: `${slug} | TiendApp` }
   }
-}
 
 export default async function StorePage({ params }: Props) {
   const { slug } = await params
