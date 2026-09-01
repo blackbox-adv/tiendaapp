@@ -77,6 +77,13 @@ function getToken(): string {
   return ''
 }
 
+// Datos de cobro configurables desde Vercel (NEXT_PUBLIC_* se inyectan en build).
+// Si no están configuradas se muestran los placeholders por defecto.
+const PAYMENT_YAPE_NUMBER = process.env.NEXT_PUBLIC_PAYMENTS_YAPE_NUMBER || '+51 999 888 777'
+const PAYMENT_HOLDER_NAME = process.env.NEXT_PUBLIC_PAYMENTS_HOLDER_NAME || 'TiendApp SAC'
+const PAYMENT_BCP_ACCOUNT = process.env.NEXT_PUBLIC_PAYMENTS_BCP_ACCOUNT || '193-2847561-0-42'
+const PAYMENT_BCP_CCI = process.env.NEXT_PUBLIC_PAYMENTS_BCP_CCI || '002-193-128475610042'
+
 const COMPARISON_ROWS = buildComparisonRows()
 
 // ── Component ──────────────────────────────────────────
@@ -190,7 +197,7 @@ export function PlanManager() {
           body: JSON.stringify({
             planId: plan.id,
             storeId: currentStore.id,
-            paymentMethod: 'manual',
+            paymentMethod: 'yape',
           }),
         })
 
@@ -509,11 +516,11 @@ export function PlanManager() {
                 <div className="space-y-1 text-sm text-gray-600">
                   <p>
                     <span className="font-medium text-gray-800">Número:</span>{' '}
-                    +51 999 888 777
+                    {PAYMENT_YAPE_NUMBER}
                   </p>
                   <p>
                     <span className="font-medium text-gray-800">Nombre:</span>{' '}
-                    TiendApp SAC
+                    {PAYMENT_HOLDER_NAME}
                   </p>
                   <p className="text-xs text-gray-400">
                     Escanea el QR desde la app de Yape o Plin y envía el monto
@@ -536,15 +543,15 @@ export function PlanManager() {
                   </p>
                   <p>
                     <span className="font-medium text-gray-800">Cuenta:</span>{' '}
-                    193-2847561-0-42
+                    {PAYMENT_BCP_ACCOUNT}
                   </p>
                   <p>
                     <span className="font-medium text-gray-800">CCI:</span>{' '}
-                    002-193-128475610042
+                    {PAYMENT_BCP_CCI}
                   </p>
                   <p>
                     <span className="font-medium text-gray-800">Nombre:</span>{' '}
-                    TiendApp SAC
+                    {PAYMENT_HOLDER_NAME}
                   </p>
                 </div>
               </div>
