@@ -6,6 +6,7 @@ import { StoreLogo } from './StoreLogo'
 import { DEFAULT_CATEGORIES, getStoreCategories } from '@/lib/store-categories'
 import { Star, MessageCircle, ShoppingBag, Heart, Search, X, ImageIcon } from 'lucide-react'
 import { StoreFeatureBadges } from './StoreFeatureBadges'
+import { PaymentMethods } from './PaymentMethods'
 import { CombosSection } from './CombosSection'
 import { Badge } from '@/components/ui/badge'
 import { useAppStore } from '@/lib/store'
@@ -449,6 +450,8 @@ export function ClasicaTemplate({ store, products, storeSlug, planId, onProductC
           </div>
         )}
       </main>
+
+      <PaymentMethods store={store} />
 
       {/* Footer */}
       <footer

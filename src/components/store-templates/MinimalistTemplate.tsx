@@ -7,6 +7,7 @@ import { DEFAULT_CATEGORIES, getStoreCategories } from '@/lib/store-categories'
 import { Star, ShoppingBag, Search, X, ChevronRight, ImageIcon } from 'lucide-react'
 import { StoreFeatureBadges } from './StoreFeatureBadges'
 import { CombosSection } from './CombosSection'
+import { PaymentMethods } from './PaymentMethods'
 import { useAppStore } from '@/lib/store'
 import type { Store, Product } from '@/lib/types'
 
@@ -351,6 +352,8 @@ export function MinimalistTemplate({ store, products, storeSlug, planId, onProdu
       </main>
 
       {/* Footer — minimal */}
+      <PaymentMethods store={store} />
+
       <footer className="mt-auto border-t border-gray-50">
         <div className="max-w-6xl mx-auto px-8 md:px-12 py-10">
           <div className="flex items-center justify-between">

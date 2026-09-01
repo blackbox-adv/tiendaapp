@@ -8,6 +8,7 @@ import { Star, ShoppingBag, Search, X, ImageIcon } from 'lucide-react'
 import { StoreFeatureBadges } from './StoreFeatureBadges'
 import { CombosSection } from './CombosSection'
 import { Badge } from '@/components/ui/badge'
+import { PaymentMethods } from './PaymentMethods'
 import { useAppStore } from '@/lib/store'
 import type { Store, Product } from '@/lib/types'
 
@@ -349,6 +350,9 @@ export function ModernaTemplate({ store, products, storeSlug, planId, onProductC
           </>
         )}
       </main>
+      {/* Formas de pago (Yape / Plin) */}
+      <PaymentMethods store={store} />
+
       {/* Footer */}
       <footer className="mt-auto py-6 text-center">
         {planId === 'free' && (
