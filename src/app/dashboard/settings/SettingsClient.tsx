@@ -22,9 +22,7 @@ interface StoreData {
   name: string;
   description: string | null;
   template: string;
-  whatsapp: string | null;
-  email: string | null;
-  address: string | null;
+  whatsappNumber: string | null;
   logo: string | null;
 }
 
@@ -39,8 +37,6 @@ export default function SettingsClient() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
-  const [email, setEmail] = useState('');
-  const [address, setAddress] = useState('');
 
   // Password change
   const [currentPassword, setCurrentPassword] = useState('');
@@ -73,9 +69,7 @@ export default function SettingsClient() {
         setStore(storeData);
         setName(storeData.name || '');
         setDescription(storeData.description || '');
-        setWhatsapp(storeData.whatsapp || '');
-        setEmail(storeData.email || '');
-        setAddress(storeData.address || '');
+        setWhatsapp(storeData.whatsappNumber || '');
       }
     } catch {
       setError('Error de conexión');
@@ -101,9 +95,7 @@ export default function SettingsClient() {
         body: JSON.stringify({
           name,
           description: description || null,
-          whatsapp: whatsapp || null,
-          email: email || null,
-          address: address || null,
+          whatsappNumber: whatsapp || null,
         }),
       });
 
@@ -235,33 +227,18 @@ export default function SettingsClient() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="whatsapp">WhatsApp</Label>
-                  <Input
-                    id="whatsapp"
-                    value={whatsapp}
-                    onChange={(e) => setWhatsapp(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-              </div>
-
               <div className="space-y-2">
-                <Label htmlFor="address">Dirección</Label>
+                <Label htmlFor="whatsapp">WhatsApp de pedidos</Label>
                 <Input
-                  id="address"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
+                  id="whatsapp"
+                  type="tel"
+                  placeholder="51987654321"
+                  value={whatsapp}
+                  onChange={(e) => setWhatsapp(e.target.value)}
                 />
+                <p className="text-xs text-gray-500">
+                  Con código de país, sin espacios ni el signo +. Aquí llegan los pedidos.
+                </p>
               </div>
 
               <Button
