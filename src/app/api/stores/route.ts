@@ -247,7 +247,7 @@ export async function POST(request: NextRequest) {
       return apiError(validation.error, 400, undefined, request)
     }
 
-    const { name, description, category, logo, primaryColor, secondaryColor, whatsappNumber, template } =
+    const { name, description, category, logo, primaryColor, secondaryColor, whatsappNumber, template, slug: requestedSlug } =
       validation.data
 
     const store = await db.$transaction(async (tx) => {
@@ -281,8 +281,19 @@ export async function POST(request: NextRequest) {
       const sanitizedDescription = sanitizeHtml(description || '')
       const sanitizedCategory = sanitizeBasic(category || 'general')
 
-      // Generate unique slug from sanitized name
-      const baseSlug = sanitizedName
+      // Slug: respetar el elegido por el usuario (validado en el wizard) si es válido;
+      // derivarlo del nombre si no. Solo agregar sufijo si hay colisión real.
+      const wantedSlug = typeof requestedSlug === 'string'
+        ? requestedSlug
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)/g, '')
+            .slice(0, 60)
+        : ''
+
+      const baseSlug = wantedSlug || sanitizedName
         .toLowerCase()
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
@@ -290,7 +301,26 @@ export async function POST(request: NextRequest) {
         .replace(/(^-|-$)/g, '')
         .slice(0, 60)
 
-      const slug = `${baseSlug}-${Date.now().toString(36)}`
+      const slugTaken = async (s: string) => {
+        const rows = (await tx.$queryRawUnsafe(
+          `SELECT 1 FROM "Store" WHERE slug = $1 LIMIT 1`,
+          s
+        )) as unknown[]
+        return rows.length > 0
+      }
+
+      let slug = baseSlug
+      if (await slugTaken(slug)) {
+        let resolved = false
+        for (let i = 2; i <= 50; i++) {
+          if (!(await slugTaken(`${baseSlug}-${i}`))) {
+            slug = `${baseSlug}-${i}`
+            resolved = true
+            break
+          }
+        }
+        if (!resolved) slug = `${baseSlug}-${Date.now().toString(36)}`
+      }
 
       // Create without include to avoid PgBouncer timeout
       return tx.store.create({

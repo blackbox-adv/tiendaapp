@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/lib/store';
 import Link from 'next/link';
@@ -89,6 +89,8 @@ export default function OnboardingPage() {
   const [selectedTemplate, setSelectedTemplate] = useState('moderna');
   const [storeName, setStoreName] = useState('');
   const [storeSlug, setStoreSlug] = useState('');
+  // Check en vivo de disponibilidad de slug: 'idle' | 'checking' | 'available' | 'taken' | 'invalid'
+  const [slugStatus, setSlugStatus] = useState<'idle' | 'checking' | 'available' | 'taken' | 'invalid'>('idle');
   const [storeDescription, setStoreDescription] = useState('');
   const [storeWhatsapp, setStoreWhatsapp] = useState('');
   const [storeEmail, setStoreEmail] = useState(currentUser?.email || '');
@@ -105,6 +107,34 @@ export default function OnboardingPage() {
       .replace(/^-+|-+$/g, '');
     setStoreSlug(slug);
   };
+
+  // Verificación de disponibilidad de la URL con debounce (GET /api/stores?slug=X:
+  // 200 = ocupada, 404 = libre)
+  useEffect(() => {
+    if (!storeSlug.trim()) {
+      setSlugStatus('idle');
+      return;
+    }
+    if (!/^[a-z0-9-]{2,}$/.test(storeSlug)) {
+      setSlugStatus('invalid');
+      return;
+    }
+    setSlugStatus('checking');
+    let cancelled = false;
+    const t = setTimeout(() => {
+      fetch(`/api/stores?slug=${encodeURIComponent(storeSlug)}`)
+        .then((res) => {
+          if (!cancelled) setSlugStatus(res.ok ? 'taken' : 'available');
+        })
+        .catch(() => {
+          if (!cancelled) setSlugStatus('idle');
+        });
+    }, 500);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, [storeSlug]);
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -155,6 +185,7 @@ export default function OnboardingPage() {
         },
         body: JSON.stringify({
           name: storeName,
+          slug: storeSlug || undefined,
           description: storeDescription || '',
           template: selectedTemplate,
           whatsappNumber: storeWhatsapp || '',
@@ -183,7 +214,7 @@ export default function OnboardingPage() {
       case 1:
         return !!selectedTemplate;
       case 2:
-        return storeName.trim().length >= 2 && storeSlug.trim().length >= 2;
+        return storeName.trim().length >= 2 && storeSlug.trim().length >= 2 && slugStatus !== 'checking' && slugStatus !== 'taken' && slugStatus !== 'invalid';
       case 3:
         return true;
       case 4:
@@ -344,6 +375,24 @@ export default function OnboardingPage() {
                       className="rounded-l-none"
                     />
                   </div>
+                  {slugStatus === 'checking' && (
+                    <p className="text-xs text-gray-400">Verificando disponibilidad…</p>
+                  )}
+                  {slugStatus === 'available' && (
+                    <p className="text-xs text-emerald-600">
+                      ¡Disponible! Tu tienda estará en esta URL.
+                    </p>
+                  )}
+                  {slugStatus === 'taken' && (
+                    <p className="text-xs text-red-500">
+                      Esta URL ya está ocupada — elige otra para que tu enlace sea exactamente este.
+                    </p>
+                  )}
+                  {slugStatus === 'invalid' && (
+                    <p className="text-xs text-amber-600">
+                      Usa solo letras minúsculas, números y guiones (mínimo 2 caracteres).
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">

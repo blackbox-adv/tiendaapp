@@ -54,6 +54,11 @@ export const createStoreSchema = z.object({
     .min(2, 'Nombre de tienda requerido (min 2 caracteres)')
     .max(100, 'Nombre de tienda no puede exceder 100 caracteres')
     .trim(),
+  slug: z
+    .string()
+    .max(60, 'URL no puede exceder 60 caracteres')
+    .regex(/^[a-z0-9](-*[a-z0-9])*$/, 'URL invalida: usa letras minusculas, numeros y guiones')
+    .optional(),
   description: z.preprocess(
     (v) => (v === null || v === undefined ? '' : v),
     z
