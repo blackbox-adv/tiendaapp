@@ -4,9 +4,10 @@ import type { Metadata } from 'next'
 import { StorePublicClient } from './StorePublicClient'
 import { serializeDecimals } from '@/lib/utils'
 
-// ISR: revalidate every 5 minutes instead of force-dynamic
-// On-demand revalidation happens via revalidatePath() when store/products are updated
-export const revalidate = 300
+// force-dynamic: ISR (revalidate) + notFound() devuelve 200 en vez de 404 (soft-404, mal SEO).
+// Con dynamic, las tiendas inactivas/borradas dan 404 real, el catálogo siempre está fresco
+// y visitCount se incrementa en cada visita real (con ISR solo contaba en revalidaciones).
+export const dynamic = 'force-dynamic'
 
 interface Props {
   params: Promise<{ slug: string }>

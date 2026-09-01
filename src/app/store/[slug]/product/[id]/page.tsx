@@ -4,8 +4,8 @@ import type { Metadata } from 'next'
 import { ProductPublicClient } from './ProductPublicClient'
 import { serializeDecimals } from '@/lib/utils'
 
-// ISR: revalidate every 5 minutes
-export const revalidate = 300
+// force-dynamic: ISR (revalidate) + notFound() devuelve 200 en vez de 404 (soft-404, mal SEO).
+export const dynamic = 'force-dynamic'
 
 interface Props {
   params: Promise<{ slug: string; id: string }>
