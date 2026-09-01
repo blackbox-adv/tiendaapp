@@ -251,27 +251,26 @@ export default function TemplatePage() {
                     Ver vista previa
                   </Link>
                   {!isCurrent && (
-                    <Button
-                      size="sm"
-                      variant={isRestricted ? 'outline' : 'default'}
-                      className={`ml-auto ${
-                        !isRestricted ? 'bg-violet-600 hover:bg-violet-700 text-white' : ''
-                      }`}
-                      disabled={isRestricted}
-                      onClick={() => {
-                        setSelectedTemplate(tmpl.id);
-                        setConfirmOpen(true);
-                      }}
-                    >
-                      {isRestricted ? (
-                        <>
-                          <Lock className="w-3 h-3 mr-1" />
-                          Actualizar plan
-                        </>
-                      ) : (
-                        'Usar'
-                      )}
-                    </Button>
+                    isRestricted ? (
+                      <Link
+                        href="/dashboard/plan"
+                        className="ml-auto inline-flex items-center justify-center gap-1 h-8 px-3 rounded-md text-xs font-medium border border-violet-200 text-violet-600 hover:bg-violet-50 transition-colors"
+                      >
+                        <Lock className="w-3 h-3" />
+                        Actualizar plan
+                      </Link>
+                    ) : (
+                      <Button
+                        size="sm"
+                        className="ml-auto bg-violet-600 hover:bg-violet-700 text-white"
+                        onClick={() => {
+                          setSelectedTemplate(tmpl.id);
+                          setConfirmOpen(true);
+                        }}
+                      >
+                        Usar
+                      </Button>
+                    )
                   )}
                 </div>
               </CardContent>

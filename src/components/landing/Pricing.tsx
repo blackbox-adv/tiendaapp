@@ -137,7 +137,16 @@ export function Pricing() {
                   </ul>
 
                   <Button
-                    onClick={() => navigate({ page: 'register' })}
+                    onClick={() => {
+                      // Usuario logueado: free → dashboard, planes pagos → Mi Plan (upgrade).
+                      // Visitante: flujo de registro normal.
+                      const isLoggedIn = typeof window !== 'undefined' && !!localStorage.getItem('tiendapp_token')
+                      if (isLoggedIn) {
+                        window.location.href = plan.type === 'free' ? '/dashboard' : '/dashboard/plan'
+                        return
+                      }
+                      navigate({ page: 'register' })
+                    }}
                     className={`w-full py-3 rounded-xl font-semibold ${
                       plan.popular
                         ? 'bg-white text-violet-700 hover:bg-violet-50'

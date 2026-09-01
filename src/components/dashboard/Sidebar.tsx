@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import { useAppStore } from '@/lib/store'
 import {
   LayoutDashboard, Package, Settings, Palette, CreditCard,
-  LogOut, ExternalLink, Store, Menu, X, QrCode, Megaphone, FolderOpen
+  LogOut, ExternalLink, Store, Menu, X, QrCode, Megaphone, FolderOpen, ShoppingCart
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -16,8 +16,10 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/s
 const navItems = [
   { href: '/dashboard', label: 'Panel', icon: LayoutDashboard },
   { href: '/dashboard/products', label: 'Productos', icon: Package },
+  { href: '/dashboard/orders', label: 'Pedidos', icon: ShoppingCart },
   { href: '/dashboard/categories', label: 'Categorías', icon: FolderOpen },
   { href: '/dashboard/template', label: 'Plantillas', icon: Palette },
+  { href: '/dashboard/plan', label: 'Mi Plan', icon: CreditCard },
   { href: '/dashboard/settings', label: 'Configuración', icon: Settings },
 ]
 
@@ -128,6 +130,12 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
           <div className="px-3 py-2 rounded-lg bg-white/10">
             <p className="text-xs text-violet-300">Plan actual</p>
             <p className="text-sm font-semibold">{currentPlan.name} - S/{currentPlan.price.toFixed(2)}/mes</p>
+            <Link
+              href="/dashboard/plan"
+              className="text-xs text-violet-300 hover:text-white underline underline-offset-2 mt-1 inline-block"
+            >
+              Mejorar plan
+            </Link>
           </div>
         )}
         <Button
