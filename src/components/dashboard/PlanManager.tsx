@@ -80,7 +80,7 @@ function getToken(): string {
 // Datos de cobro configurables desde Vercel (NEXT_PUBLIC_* se inyectan en build).
 // Si no están configuradas se usan estos valores por defecto (Plin/Yape de TiendApp).
 const PAYMENT_YAPE_NUMBER = process.env.NEXT_PUBLIC_PAYMENTS_YAPE_NUMBER || '+51 958 297 236'
-const PAYMENT_HOLDER_NAME = process.env.NEXT_PUBLIC_PAYMENTS_HOLDER_NAME || ''
+const PAYMENT_HOLDER_NAME = process.env.NEXT_PUBLIC_PAYMENTS_HOLDER_NAME || 'CARLOS ALBERTO GUZMAN SOTO'
 const PAYMENT_BCP_ACCOUNT = process.env.NEXT_PUBLIC_PAYMENTS_BCP_ACCOUNT || ''
 const PAYMENT_BCP_CCI = process.env.NEXT_PUBLIC_PAYMENTS_BCP_CCI || ''
 
