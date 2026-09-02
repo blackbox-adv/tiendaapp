@@ -496,7 +496,7 @@ export default function OnboardingPage() {
                   <span className="text-sm text-gray-700">
                     <strong>Cargar productos de ejemplo</strong>
                     <span className="block text-xs text-gray-500 mt-0.5">
-                      Tu tienda abre con {getRubro(selectedRubro).products.length} productos del rubro "
+                      Tu tienda abre con productos de ejemplo del rubro "
                       {getRubro(selectedRubro).name}" con precios de referencia. Edítalos o bórralos cuando quieras.
                     </span>
                   </span>
