@@ -24,6 +24,8 @@ import {
   Upload,
   Lock,
 } from 'lucide-react';
+import { RUBROS, getRubro } from '@/lib/rubros';
+import { createDemoProducts } from '@/lib/demo-products';
 
 const templates = [
   {
@@ -97,6 +99,8 @@ export default function OnboardingPage() {
   const [storeAddress, setStoreAddress] = useState('');
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [selectedRubro, setSelectedRubro] = useState('');
+  const [withDemoProducts, setWithDemoProducts] = useState(true);
 
   const handleSlugFromName = (name: string) => {
     const slug = name
@@ -148,6 +152,13 @@ export default function OnboardingPage() {
     }
   };
 
+  const handleRubroChange = (rubroId: string) => {
+    setSelectedRubro(rubroId);
+    const preset = getRubro(rubroId);
+    // Sugerir descripción solo si el usuario no escribió una
+    setStoreDescription((prev) => (prev.trim() ? prev : preset.description));
+  };
+
   const handleCreateStore = async () => {
     setLoading(true);
     setError('');
@@ -190,6 +201,9 @@ export default function OnboardingPage() {
           template: selectedTemplate,
           whatsappNumber: storeWhatsapp || '',
           logo: logoUrl || '',
+          category: selectedRubro || undefined,
+          primaryColor: getRubro(selectedRubro).primary,
+          secondaryColor: getRubro(selectedRubro).secondary,
         }),
       });
 
@@ -198,6 +212,16 @@ export default function OnboardingPage() {
       if (!res.ok) {
         setError(data.error || 'Error al crear la tienda');
         return;
+      }
+
+      // Productos de ejemplo según el rubro (la tienda nunca se ve vacía)
+      const createdStoreId = data?.store?.id ?? data?.id;
+      if (withDemoProducts && createdStoreId) {
+        try {
+          await createDemoProducts(createdStoreId, selectedRubro || undefined);
+        } catch {
+          // No bloquear el onboarding si falla la carga de ejemplos
+        }
       }
 
       router.push('/dashboard');
@@ -214,7 +238,7 @@ export default function OnboardingPage() {
       case 1:
         return !!selectedTemplate;
       case 2:
-        return storeName.trim().length >= 2 && storeSlug.trim().length >= 2 && slugStatus !== 'checking' && slugStatus !== 'taken' && slugStatus !== 'invalid';
+        return storeName.trim().length >= 2 && storeSlug.trim().length >= 2 && slugStatus !== 'checking' && slugStatus !== 'taken' && slugStatus !== 'invalid' && !!selectedRubro;
       case 3:
         return true;
       case 4:
@@ -349,6 +373,30 @@ export default function OnboardingPage() {
             <Card className="border-0 shadow-sm max-w-lg mx-auto">
               <CardContent className="p-6 space-y-4">
                 <div className="space-y-2">
+                  <Label>¿Qué vendes? *</Label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {RUBROS.map((r) => (
+                      <button
+                        key={r.id}
+                        type="button"
+                        onClick={() => handleRubroChange(r.id)}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm transition-all ${
+                          selectedRubro === r.id
+                            ? 'border-violet-500 bg-violet-50 text-violet-700 ring-1 ring-violet-200'
+                            : 'border-gray-200 text-gray-600 hover:border-violet-300 hover:bg-gray-50'
+                        }`}
+                      >
+                        <span className="text-base">{r.emoji}</span>
+                        <span className="truncate">{r.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-400">
+                    Elegimos los colores de tu tienda según tu rubro (puedes cambiarlos después).
+                  </p>
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="storeName">Nombre de la tienda *</Label>
                   <Input
                     id="storeName"
@@ -437,6 +485,22 @@ export default function OnboardingPage() {
                     onChange={(e) => setStoreAddress(e.target.value)}
                   />
                 </div>
+
+                <label className="flex items-start gap-2.5 p-3 rounded-lg bg-violet-50 border border-violet-100 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={withDemoProducts}
+                    onChange={(e) => setWithDemoProducts(e.target.checked)}
+                    className="mt-0.5 accent-violet-600"
+                  />
+                  <span className="text-sm text-gray-700">
+                    <strong>Cargar productos de ejemplo</strong>
+                    <span className="block text-xs text-gray-500 mt-0.5">
+                      Tu tienda abre con {getRubro(selectedRubro).products.length} productos del rubro "
+                      {getRubro(selectedRubro).name}" con precios de referencia. Edítalos o bórralos cuando quieras.
+                    </span>
+                  </span>
+                </label>
               </CardContent>
             </Card>
           </div>
@@ -519,6 +583,14 @@ export default function OnboardingPage() {
                 <h3 className="font-semibold text-lg">Resumen</h3>
               </CardHeader>
               <CardContent className="space-y-3">
+                {selectedRubro && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Rubro</span>
+                    <span className="font-medium">
+                      {getRubro(selectedRubro).emoji} {getRubro(selectedRubro).name}
+                    </span>
+                  </div>
+                )}
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">Plantilla</span>
                   <span className="font-medium capitalize">{selectedTemplate}</span>

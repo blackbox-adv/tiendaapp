@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { downloadExport, PlanRequiredError } from '@/lib/export-client';
+import { createDemoProducts } from '@/lib/demo-products';
+import { getRubro } from '@/lib/rubros';
 import {
   Store,
   Package,
@@ -33,6 +35,7 @@ interface StoreData {
   description: string | null;
   template: string;
   logo: string | null;
+  category?: string;
   _count?: {
     products: number;
     categories: number;
@@ -54,6 +57,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [exporting, setExporting] = useState(false);
+  const [loadingDemo, setLoadingDemo] = useState(false);
   const [analytics, setAnalytics] = useState<{
     products: { total: number; active: number; outOfStock: number };
     orders: { total: number; totalRevenue: number; byStatus: Record<string, number> };
@@ -109,6 +113,25 @@ export default function DashboardPage() {
       }
     } finally {
       setExporting(false);
+    }
+  };
+
+  const handleLoadDemoProducts = async () => {
+    const storeData = (userData?.stores?.[0]?.store ?? userData?.stores?.[0]) as (StoreData & { category?: string }) | undefined;
+    if (!storeData?.id) return;
+    setLoadingDemo(true);
+    try {
+      const created = await createDemoProducts(storeData.id, storeData.category);
+      if (created > 0) {
+        toast.success(`${created} productos de ejemplo cargados`, { description: 'Edítalos o bórralos cuando quieras desde Productos.' });
+        await fetchUserData();
+      } else {
+        toast.error('No se pudieron cargar los productos de ejemplo');
+      }
+    } catch {
+      toast.error('Error al cargar los productos de ejemplo');
+    } finally {
+      setLoadingDemo(false);
     }
   };
 
@@ -215,6 +238,36 @@ export default function DashboardPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Empty store → cargar productos de ejemplo del rubro */}
+      {analytics && analytics.products.total === 0 && (
+        <Card className="border border-dashed border-violet-300 bg-violet-50/50">
+          <CardContent className="p-5 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="font-semibold text-sm text-gray-900">
+                Tu tienda está vacía — ¿empezamos con productos de ejemplo?
+              </p>
+              <p className="text-gray-500 text-xs mt-0.5">
+                Cargamos {getRubro(store.category).products.length} productos de "
+                {getRubro(store.category).name}" con precios de referencia para que veas tu tienda como quedaría.
+              </p>
+            </div>
+            <Button
+              size="sm"
+              className="bg-violet-600 hover:bg-violet-700 text-white"
+              onClick={handleLoadDemoProducts}
+              disabled={loadingDemo}
+            >
+              {loadingDemo ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Plus className="w-4 h-4 mr-2" />
+              )}
+              Cargar productos de ejemplo
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
