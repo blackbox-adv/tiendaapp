@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { downloadExport, PlanRequiredError } from '@/lib/export-client';
 import {
   ShoppingCart,
   RefreshCw,
@@ -16,6 +17,7 @@ import {
   Package,
   Phone,
   StickyNote,
+  Download,
 } from 'lucide-react';
 
 // ── Types ────────────────────────────────────────────────
@@ -90,6 +92,7 @@ export default function OrdersPage() {
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('todos');
   const [updating, setUpdating] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -160,6 +163,34 @@ export default function OrdersPage() {
     }
   };
 
+  const handleExport = async () => {
+    if (!store?.id) return;
+    setExporting(true);
+    try {
+      await downloadExport('orders', store.id, {
+        status: filter !== 'todos' ? filter : undefined,
+      });
+      toast.success('Reporte descargado', { description: 'Ábrelo con Excel o Google Sheets.' });
+    } catch (err) {
+      if (err instanceof PlanRequiredError) {
+        toast.error('Función Pro', {
+          description: err.message,
+          duration: 8000,
+          action: {
+            label: 'Ver planes',
+            onClick: () => {
+              window.location.href = '/dashboard/plan';
+            },
+          },
+        });
+      } else {
+        toast.error(err instanceof Error ? err.message : 'Error al descargar el reporte');
+      }
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const whatsappReply = (order: StoreOrder) => {
     const phone = sanitizePhone(order.customerPhone);
     const msg =
@@ -207,10 +238,25 @@ export default function OrdersPage() {
               : `${orders.length} pedido${orders.length > 1 ? 's' : ''} en total${pendingCount > 0 ? ` · ${pendingCount} pendiente${pendingCount > 1 ? 's' : ''}` : ''}`}
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={fetchData}>
-          <RefreshCw className="w-4 h-4 mr-2" />
-          Actualizar
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExport}
+            disabled={exporting || orders.length === 0}
+          >
+            {exporting ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Download className="w-4 h-4 mr-2" />
+            )}
+            Descargar Excel
+          </Button>
+          <Button variant="outline" size="sm" onClick={fetchData}>
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Actualizar
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}

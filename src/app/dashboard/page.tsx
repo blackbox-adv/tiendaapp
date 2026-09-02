@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
+import { downloadExport, PlanRequiredError } from '@/lib/export-client';
 import {
   Store,
   Package,
@@ -20,6 +22,8 @@ import {
   ShoppingCart,
   DollarSign,
   AlertTriangle,
+  FileSpreadsheet,
+  Download,
 } from 'lucide-react';
 
 interface StoreData {
@@ -49,6 +53,7 @@ export default function DashboardPage() {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [exporting, setExporting] = useState(false);
   const [analytics, setAnalytics] = useState<{
     products: { total: number; active: number; outOfStock: number };
     orders: { total: number; totalRevenue: number; byStatus: Record<string, number> };
@@ -79,6 +84,33 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchUserData();
   }, []);
+
+  const handleExportSales = async () => {
+    const storeData = (userData?.stores?.[0]?.store ?? userData?.stores?.[0]) as StoreData | undefined;
+    if (!storeData?.id) return;
+    setExporting(true);
+    try {
+      await downloadExport('sales', storeData.id);
+      toast.success('Reporte descargado', { description: 'Incluye resumen, ventas por día y productos más vendidos.' });
+    } catch (err) {
+      if (err instanceof PlanRequiredError) {
+        toast.error('Función Pro', {
+          description: err.message,
+          duration: 8000,
+          action: {
+            label: 'Ver planes',
+            onClick: () => {
+              window.location.href = '/dashboard/plan';
+            },
+          },
+        });
+      } else {
+        toast.error(err instanceof Error ? err.message : 'Error al descargar el reporte');
+      }
+    } finally {
+      setExporting(false);
+    }
+  };
 
   // Fetch analytics when store is available
   // La API /api/user devuelve objetos planos (stores[0] = store), no anidados
@@ -239,6 +271,36 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Sales report (Excel) */}
+      <Card className="border-0 shadow-sm">
+        <CardContent className="p-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
+              <FileSpreadsheet className="w-5 h-5 text-emerald-600" />
+            </div>
+            <div>
+              <p className="font-medium text-sm text-gray-900 flex items-center gap-2">
+                Reporte de ventas en Excel
+                {(currentUser?.planId ?? 'free') === 'free' && (
+                  <Badge className="bg-amber-100 text-amber-700 border-0 text-[10px] px-1.5 py-0">PRO</Badge>
+                )}
+              </p>
+              <p className="text-gray-400 text-xs">
+                Resumen, ventas por día y productos más vendidos
+              </p>
+            </div>
+          </div>
+          <Button variant="outline" size="sm" onClick={handleExportSales} disabled={exporting}>
+            {exporting ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Download className="w-4 h-4 mr-2" />
+            )}
+            Descargar Excel
+          </Button>
+        </CardContent>
+      </Card>
 
       {/* Alerts */}
       {analytics && (analytics.products.outOfStock > 0 || analytics.orders.byStatus?.pending > 0) && (
