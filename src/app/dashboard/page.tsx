@@ -248,8 +248,8 @@ export default function DashboardPage() {
                 Tu tienda está vacía — ¿empezamos con productos de ejemplo?
               </p>
               <p className="text-gray-500 text-xs mt-0.5">
-                Cargamos {getRubro(store.category).products.length} productos de "
-                {getRubro(store.category).name}" con precios de referencia para que veas tu tienda como quedaría.
+                Carga productos de ejemplo del rubro "{getRubro(store.category).name}" con precios
+                de referencia para que veas tu tienda como quedaría.
               </p>
             </div>
             <Button
