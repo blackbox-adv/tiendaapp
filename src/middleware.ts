@@ -251,6 +251,7 @@ export const config = {
     '/api/plans',
     '/api/upload',
     '/api/admin/payments',
+    '/api/export',
     // Page routes (for security headers)
     '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)',
   ],
