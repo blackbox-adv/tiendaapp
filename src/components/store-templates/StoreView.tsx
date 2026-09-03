@@ -14,6 +14,9 @@ import { VibranteTemplate } from './VibranteTemplate'
 import { ClasicaTemplate } from './ClasicaTemplate'
 import { LuxuryTemplate } from './LuxuryTemplate'
 import { MinimalistTemplate } from './MinimalistTemplate'
+import { BodegaTemplate } from './BodegaTemplate'
+import { SaborTemplate } from './SaborTemplate'
+import { ModaTemplate } from './ModaTemplate'
 import { PromoPopup } from './PromoPopup'
 import { CartButton } from './CartButton'
 import type { Product, Store as StoreType } from '@/lib/types'
@@ -74,7 +77,7 @@ export function StoreView({ slug }: { slug: string }) {
                 secondary: data.secondaryColor || '#10B981',
               },
               whatsappNumber: data.whatsappNumber || '',
-              template: (data.template as 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist') || 'moderna',
+              template: (data.template as 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist' | 'bodega' | 'sabor' | 'moda') || 'moderna',
               bannerUrl: data.bannerUrl || '',
               userId: data.ownerId || '',
               isActive: data.isActive ?? true,
@@ -258,6 +261,9 @@ export function StoreView({ slug }: { slug: string }) {
       {displayStore!.template === 'clasica' && <ClasicaTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} onProductClick={handleProductClick} />}
       {displayStore!.template === 'luxury' && <LuxuryTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} onProductClick={handleProductClick} />}
       {displayStore!.template === 'minimalist' && <MinimalistTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} onProductClick={handleProductClick} />}
+      {displayStore!.template === 'bodega' && <BodegaTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} onProductClick={handleProductClick} />}
+      {displayStore!.template === 'sabor' && <SaborTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} onProductClick={handleProductClick} />}
+      {displayStore!.template === 'moda' && <ModaTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} onProductClick={handleProductClick} />}
 
       {/* WhatsApp Float */}
       <WhatsAppButton whatsappNumber={displayStore!.whatsappNumber} />

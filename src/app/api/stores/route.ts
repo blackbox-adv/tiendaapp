@@ -2,6 +2,7 @@ import { db } from '@/lib/db'
 import { NextRequest } from 'next/server'
 import { authenticateRequest, requireRole } from '@/lib/auth'
 import { validateBody, createStoreSchema, updateStoreSchema } from '@/lib/validations'
+import { checkTemplatePermission } from '@/lib/plan-gating'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 import { sanitizeBasic, sanitizeHtml } from '@/lib/sanitize'
 import { serializeDecimals } from '@/lib/utils'
@@ -250,6 +251,12 @@ export async function POST(request: NextRequest) {
     const { name, description, category, logo, primaryColor, secondaryColor, whatsappNumber, template, slug: requestedSlug } =
       validation.data
 
+    // ── Gating: plantillas premium solo para plan Premium ──
+    const templateError = await checkTemplatePermission(auth.user.userId, template, auth.user.role)
+    if (templateError) {
+      return apiError(templateError.error, templateError.status, templateError.code, request)
+    }
+
     const store = await db.$transaction(async (tx) => {
       // Check store limit per plan (owner gets 1 store on free, up to 3 on premium)
       const existingStores = await tx.store.count({
@@ -373,6 +380,14 @@ export async function PUT(request: NextRequest) {
     }
 
     const { id, ...data } = validation.data
+
+    // ── Gating: plantillas premium solo para plan Premium ──
+    if (data.template !== undefined) {
+      const templateError = await checkTemplatePermission(auth.user.userId, data.template, auth.user.role)
+      if (templateError) {
+        return apiError(templateError.error, templateError.status, templateError.code, request)
+      }
+    }
 
     // Prevent changing ownership via this endpoint
     delete (data as Record<string, unknown>).ownerId

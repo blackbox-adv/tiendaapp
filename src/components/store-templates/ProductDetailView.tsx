@@ -101,7 +101,7 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
                 secondary: data.secondaryColor || '#10B981',
               },
               whatsappNumber: data.whatsappNumber || '',
-              template: (data.template as 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist') || 'moderna',
+              template: (data.template as 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist' | 'bodega' | 'sabor' | 'moda') || 'moderna',
               bannerUrl: data.bannerUrl || '',
               userId: data.ownerId || '',
               isActive: data.isActive ?? true,

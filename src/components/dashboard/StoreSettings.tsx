@@ -309,7 +309,7 @@ export function StoreSettings() {
         logo,
         bannerUrl,
         colors: { primary: primaryColor, secondary: currentStore?.colors.secondary || primaryColor },
-        template: template as 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist',
+        template: template as 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist' | 'bodega' | 'sabor' | 'moda',
         categoryId: category,
         hasShipping,
         hasSecurePayment,

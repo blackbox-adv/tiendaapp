@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { authenticateRequest } from '@/lib/auth';
 import { apiError, apiSuccess } from '@/lib/api-response';
 import { serializeDecimals } from '@/lib/utils';
+import { checkTemplatePermission } from '@/lib/plan-gating';
 
 export async function GET(
   request: NextRequest,
@@ -59,6 +60,17 @@ export async function PUT(
     // Check ownership: store.ownerId must match auth.user.userId (or super_admin)
     if (store.ownerId !== auth.user.userId && auth.user.role !== 'super_admin') {
       return NextResponse.json({ error: 'No tienes permisos para editar esta tienda' }, { status: 403 });
+    }
+
+    // ── Gating: plantillas premium solo para plan Premium ──
+    if (body.template !== undefined) {
+      const templateError = await checkTemplatePermission(auth.user.userId, body.template, auth.user.role);
+      if (templateError) {
+        return NextResponse.json(
+          { error: templateError.error, code: templateError.code },
+          { status: templateError.status }
+        );
+      }
     }
 
     const updateData: Record<string, unknown> = {};

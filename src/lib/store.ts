@@ -24,7 +24,7 @@ function transformApiStore(apiStore: Record<string, unknown>): Store {
       secondary: (apiStore.secondaryColor as string) || '#10B981',
     },
     whatsappNumber: (apiStore.whatsappNumber as string) || '',
-    template: (apiStore.template as 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist') || 'moderna',
+    template: (apiStore.template as 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist' | 'bodega' | 'sabor' | 'moda') || 'moderna',
     bannerUrl: (apiStore.bannerUrl as string) || '',
     userId: apiStore.ownerId as string,
     isActive: (apiStore.isActive as boolean) ?? true,
@@ -246,7 +246,7 @@ interface AppState {
     storeCategory: string
     storeColors: { primary: string; secondary: string }
     storeWhatsapp: string
-    template: 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist'
+    template: 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist' | 'bodega' | 'sabor' | 'moda'
   }
   platformSettings: {
     name: string

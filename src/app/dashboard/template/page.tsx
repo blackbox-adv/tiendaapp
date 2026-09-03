@@ -20,6 +20,9 @@ import {
   Store,
   Gem,
   Minus,
+  ShoppingBasket,
+  UtensilsCrossed,
+  Shirt,
   Eye,
   Check,
   Lock,
@@ -73,7 +76,46 @@ const templates = [
     plan: 'premium',
     demoSlug: 'minimalist',
   },
+  {
+    id: 'bodega',
+    name: 'Mercadito',
+    desc: 'Energía de barrio para bodegas y abarrotes',
+    color: 'from-red-600 to-amber-500',
+    icon: ShoppingBasket,
+    plan: 'premium',
+    demoSlug: 'bodega',
+  },
+  {
+    id: 'sabor',
+    name: 'Sabores',
+    desc: 'Carta digital para restaurantes y pollerías',
+    color: 'from-orange-600 to-yellow-500',
+    icon: UtensilsCrossed,
+    plan: 'premium',
+    demoSlug: 'sabor',
+  },
+  {
+    id: 'moda',
+    name: 'Pasarela',
+    desc: 'Editorial de moda para boutiques y accesorios',
+    color: 'from-zinc-900 to-pink-600',
+    icon: Shirt,
+    plan: 'premium',
+    demoSlug: 'moda',
+  },
 ];
+
+// Rubro de la tienda → plantilla recomendada
+const RECOMMENDED_BY_CATEGORY: Record<string, string> = {
+  bodega: 'bodega',
+  alimentos: 'bodega',
+  restaurante: 'sabor',
+  panaderia: 'sabor',
+  ropa: 'moda',
+  accesorios: 'moda',
+  belleza: 'moda',
+  flores: 'moda',
+};
 
 const planLabels: Record<string, { text: string; color: string }> = {
   free: { text: 'Gratis', color: 'bg-green-100 text-green-700' },
@@ -85,6 +127,7 @@ interface StoreData {
   id: string;
   slug: string;
   template: string;
+  category?: string;
 }
 
 export default function TemplatePage() {
@@ -194,6 +237,12 @@ export default function TemplatePage() {
     return false;
   };
 
+  const recommended = store?.category ? RECOMMENDED_BY_CATEGORY[store.category] : undefined;
+  // La plantilla recomendada para el rubro va primero
+  const orderedTemplates = [...templates].sort(
+    (a, b) => (b.id === recommended ? 1 : 0) - (a.id === recommended ? 1 : 0)
+  );
+
   return (
     <div className="space-y-6">
       <div>
@@ -204,7 +253,7 @@ export default function TemplatePage() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {templates.map((tmpl) => {
+        {orderedTemplates.map((tmpl) => {
           const Icon = tmpl.icon;
           const planInfo = planLabels[tmpl.plan];
           const isCurrent = store.template === tmpl.id;
@@ -225,6 +274,11 @@ export default function TemplatePage() {
                   <Badge className="absolute top-2 right-2 bg-white text-violet-700">
                     <Check className="w-3 h-3 mr-1" />
                     Actual
+                  </Badge>
+                )}
+                {!isCurrent && tmpl.id === recommended && (
+                  <Badge className="absolute top-2 right-2 bg-amber-400 text-amber-950 border-0">
+                    ⭐ Ideal para tu rubro
                   </Badge>
                 )}
                 {isRestricted && (
