@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import {
-  Smartphone, MessageCircle, Wallet, Clock, Rocket, Package,
+  Smartphone, MessageCircle, Wallet, Clock, Rocket, Package, Gift,
 } from 'lucide-react'
 
 // Features escritas como BENEFICIOS (qué gana el emprendedor),
@@ -29,7 +29,7 @@ const features = [
   },
   {
     icon: Smartphone,
-    title: 'Se ve perfecto en celular',
+    title: 'Tus clientes compran desde el celular',
     description:
       'Tus clientes compran desde su celular, y la tienda carga rápido con botones grandes y claros. El 90% de tus ventas vendrán del móvil, y todo está optimizado para esa experiencia.',
   },
@@ -38,6 +38,12 @@ const features = [
     title: 'Catálogo ilimitado con fotos',
     description:
       'Sube todos los productos que quieras con foto, precio, descripción y stock. Organízalos por categorías. Tus clientes ven todo ordenado, no andan preguntando "¿qué tienes?" por WhatsApp.',
+  },
+  {
+    icon: Gift,
+    title: 'Packs y promociones que se venden solos',
+    description:
+      'TiendApp arma packs con descuento automáticamente (ej. pollo + gaseosa + papas) y resalta tus ofertas. El cliente toca un botón y te pide el pack completo por WhatsApp.',
   },
   {
     icon: Rocket,

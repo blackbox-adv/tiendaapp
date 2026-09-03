@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { useAppStore } from '@/lib/store'
 import { Zap, Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { WhatsAppIcon } from './WhatsAppIcon'
 
 export function Navbar() {
   const navigate = useAppStore((s) => s.navigate)
@@ -47,17 +48,17 @@ export function Navbar() {
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-8">
+            <button onClick={() => handleNav('#templates')} className="text-sm font-medium text-gray-700 hover:text-violet-600 transition-colors">
+              Demos
+            </button>
             <button onClick={() => handleNav('#features')} className="text-sm font-medium text-gray-700 hover:text-violet-600 transition-colors">
               Funciones
             </button>
+            <button onClick={() => handleNav('#comparativa')} className="text-sm font-medium text-gray-700 hover:text-violet-600 transition-colors">
+              ¿Por qué TiendApp?
+            </button>
             <button onClick={() => handleNav('#pricing')} className="text-sm font-medium text-gray-700 hover:text-violet-600 transition-colors">
               Precios
-            </button>
-            <button onClick={() => handleNav('#templates')} className="text-sm font-medium text-gray-700 hover:text-violet-600 transition-colors">
-              Plantillas
-            </button>
-            <button onClick={() => handleNav('#testimonials')} className="text-sm font-medium text-gray-700 hover:text-violet-600 transition-colors">
-              Tiendas reales
             </button>
           </div>
 
@@ -75,8 +76,9 @@ export function Navbar() {
                 <Button variant="outline" onClick={() => navigate({ page: 'login' })} className="border-violet-200 text-violet-700 hover:bg-violet-50 hover:text-violet-800">
                   Iniciar sesión
                 </Button>
-                <Button onClick={() => navigate({ page: 'register' })} className="bg-violet-600 hover:bg-violet-700 text-white">
-                  Registrarse
+                <Button onClick={() => navigate({ page: 'register' })} className="bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-white font-semibold">
+                  <WhatsAppIcon className="w-4 h-4 mr-1.5" />
+                  Crear mi tienda
                 </Button>
               </>
             )}
@@ -98,17 +100,17 @@ export function Navbar() {
           className="md:hidden bg-white/95 backdrop-blur-lg border-t border-violet-100"
         >
           <div className="px-4 py-4 space-y-3">
+            <button onClick={() => handleNav('#templates')} className="block w-full text-left text-sm font-medium text-gray-600 hover:text-violet-600 py-2">
+              Demos
+            </button>
             <button onClick={() => handleNav('#features')} className="block w-full text-left text-sm font-medium text-gray-600 hover:text-violet-600 py-2">
               Funciones
             </button>
+            <button onClick={() => handleNav('#comparativa')} className="block w-full text-left text-sm font-medium text-gray-600 hover:text-violet-600 py-2">
+              ¿Por qué TiendApp?
+            </button>
             <button onClick={() => handleNav('#pricing')} className="block w-full text-left text-sm font-medium text-gray-600 hover:text-violet-600 py-2">
               Precios
-            </button>
-            <button onClick={() => handleNav('#templates')} className="block w-full text-left text-sm font-medium text-gray-600 hover:text-violet-600 py-2">
-              Plantillas
-            </button>
-            <button onClick={() => handleNav('#testimonials')} className="block w-full text-left text-sm font-medium text-gray-600 hover:text-violet-600 py-2">
-              Tiendas reales
             </button>
             <div className="pt-3 border-t border-gray-100 space-y-2">
               {currentUser ? (
@@ -120,8 +122,9 @@ export function Navbar() {
                   <Button variant="ghost" onClick={() => { navigate({ page: 'login' }); setMobileOpen(false) }} className="w-full text-violet-600">
                     Iniciar sesión
                   </Button>
-                  <Button onClick={() => { navigate({ page: 'register' }); setMobileOpen(false) }} className="w-full bg-violet-600 hover:bg-violet-700 text-white">
-                    Registrarse
+                  <Button onClick={() => { navigate({ page: 'register' }); setMobileOpen(false) }} className="w-full bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-white font-semibold">
+                    <WhatsAppIcon className="w-4 h-4 mr-1.5" />
+                    Crear mi tienda
                   </Button>
                 </>
               )}
