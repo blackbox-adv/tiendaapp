@@ -94,7 +94,7 @@ export const createStoreSchema = z.object({
       .or(z.literal(''))
   ),
   template: z
-    .enum(['moderna', 'vibrante', 'clasica', 'luxury', 'minimalist'])
+    .enum(['moderna', 'vibrante', 'clasica', 'luxury', 'minimalist', 'bodega', 'sabor', 'moda'])
     .optional()
     .default('moderna'),
 })

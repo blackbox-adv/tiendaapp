@@ -20,7 +20,7 @@ function transformStore(s: Record<string, unknown>): Store {
       secondary: (s.secondaryColor as string) || '#10B981',
     },
     whatsappNumber: (s.whatsappNumber as string) || '',
-    template: (s.template as 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist') || 'moderna',
+    template: (s.template as 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist' | 'bodega' | 'sabor' | 'moda') || 'moderna',
     bannerUrl: (s.bannerUrl as string) || '',
     userId: (s.ownerId as string) || '',
     isActive: (s.isActive as boolean) ?? true,

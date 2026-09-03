@@ -23,6 +23,9 @@ import {
   Eye,
   Upload,
   Lock,
+  ShoppingBasket,
+  UtensilsCrossed,
+  Shirt,
 } from 'lucide-react';
 import { RUBROS, getRubro } from '@/lib/rubros';
 import { createDemoProducts } from '@/lib/demo-products';
@@ -72,6 +75,33 @@ const templates = [
     icon: Minus,
     plan: 'premium',
     demoSlug: 'minimalist',
+  },
+  {
+    id: 'bodega',
+    name: 'Mercadito',
+    desc: 'Energía de barrio para bodegas y abarrotes',
+    color: 'from-red-600 to-amber-500',
+    icon: ShoppingBasket,
+    plan: 'premium',
+    demoSlug: 'bodega',
+  },
+  {
+    id: 'sabor',
+    name: 'Sabores',
+    desc: 'Carta digital para restaurantes y pollerías',
+    color: 'from-orange-600 to-yellow-500',
+    icon: UtensilsCrossed,
+    plan: 'premium',
+    demoSlug: 'sabor',
+  },
+  {
+    id: 'moda',
+    name: 'Pasarela',
+    desc: 'Editorial de moda para boutiques y accesorios',
+    color: 'from-zinc-900 to-pink-600',
+    icon: Shirt,
+    plan: 'premium',
+    demoSlug: 'moda',
   },
 ];
 

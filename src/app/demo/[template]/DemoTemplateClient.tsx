@@ -7,6 +7,9 @@ import { VibranteTemplate } from '@/components/store-templates/VibranteTemplate'
 import { ClasicaTemplate } from '@/components/store-templates/ClasicaTemplate'
 import { LuxuryTemplate } from '@/components/store-templates/LuxuryTemplate'
 import { MinimalistTemplate } from '@/components/store-templates/MinimalistTemplate'
+import { BodegaTemplate } from '@/components/store-templates/BodegaTemplate'
+import { SaborTemplate } from '@/components/store-templates/SaborTemplate'
+import { ModaTemplate } from '@/components/store-templates/ModaTemplate'
 import { ProductDetailView } from '@/components/store-templates/ProductDetailView'
 import { ArrowLeft, Crown, Sparkles, Gem } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -110,6 +113,63 @@ const demoStores: Record<string, Store> = {
     popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
     yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
   },
+  bodega: {
+    id: 'demo-bodega',
+    name: 'Bodega Doña Rosa',
+    slug: 'demo-bodega',
+    description: 'Tu bodega de barrio ahora online. Pide por WhatsApp y te lo llevamos.',
+    logo: '🏪',
+    categoryId: 'bodega',
+    planId: 'premium',
+    colors: { primary: '#DC2626', secondary: '#F59E0B' },
+    whatsappNumber: '+51999990006',
+    template: 'bodega',
+    bannerUrl: '',
+    userId: '',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    hasShipping: true, hasSecurePayment: true, hasReturns: false,
+    popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
+    yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
+  },
+  sabor: {
+    id: 'demo-sabor',
+    name: 'Sabor y Más',
+    slug: 'demo-sabor',
+    description: 'Comida casera y delivery rápido. Pide tu menú del día por WhatsApp.',
+    logo: '🍗',
+    categoryId: 'restaurante',
+    planId: 'premium',
+    colors: { primary: '#EA580C', secondary: '#FBBF24' },
+    whatsappNumber: '+51999990007',
+    template: 'sabor',
+    bannerUrl: '',
+    userId: '',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    hasShipping: true, hasSecurePayment: true, hasReturns: false,
+    popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
+    yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
+  },
+  moda: {
+    id: 'demo-moda',
+    name: 'Casa Moda',
+    slug: 'demo-moda',
+    description: 'Piezas seleccionadas para un estilo único. Nueva colección cada semana.',
+    logo: '👗',
+    categoryId: 'ropa',
+    planId: 'premium',
+    colors: { primary: '#111827', secondary: '#DB2777' },
+    whatsappNumber: '+51999990008',
+    template: 'moda',
+    bannerUrl: '',
+    userId: '',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    hasShipping: true, hasSecurePayment: true, hasReturns: true,
+    popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
+    yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
+  },
 }
 
 // Product images match the preview generation script (same Unsplash URLs)
@@ -150,6 +210,30 @@ const demoProducts: Record<string, Product[]> = {
     { id: 'dm7', name: 'Sun Glasses', description: 'Lentes de sol con montura delgada. Estilo atemporal.', price: 65.0, originalPrice: null, categoryId: 'accesorios', imageUrl: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=600', images: ['https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=600', 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=600&h=800&fit=crop'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-minimalist', createdAt: '2024-05-01T10:00:00.000Z' },
     { id: 'dm8', name: 'Silver Necklace', description: 'Collar de plata con dije esencial. Sutil y elegante.', price: 75.0, originalPrice: null, categoryId: 'accesorios', imageUrl: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600', images: ['https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600', 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&h=800&fit=crop'], color: 'Plata', stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-minimalist', createdAt: '2024-05-10T10:00:00.000Z' },
   ],
+  bodega: [
+    { id: 'db1', name: 'Arroz Extra Superior 5kg', description: 'Arroz extra de calidad superior, grano largo.', price: 24.9, originalPrice: 27.9, categoryId: 'abarrotes', imageUrl: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=600', images: ['https://images.unsplash.com/photo-1586201375761-83865001e31c?w=600'], color: null, stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-bodega', createdAt: '2024-01-10T10:00:00.000Z' },
+    { id: 'db2', name: 'Aceite Vegetal 1L', description: 'Aceite vegetal puro para cocinar.', price: 9.9, originalPrice: null, categoryId: 'abarrotes', imageUrl: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=600', images: ['https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=600'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-bodega', createdAt: '2024-02-10T10:00:00.000Z' },
+    { id: 'db3', name: 'Leche Evaporada 400g', description: 'Leche evaporada entera en lata.', price: 3.8, originalPrice: null, categoryId: 'abarrotes', imageUrl: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=600', images: ['https://images.unsplash.com/photo-1550583724-b2692b85b150?w=600'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-bodega', createdAt: '2024-03-01T10:00:00.000Z' },
+    { id: 'db4', name: 'Galletas de Soda', description: 'Paquete de galletas de soda crocantes.', price: 3.5, originalPrice: null, categoryId: 'snacks', imageUrl: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=600', images: ['https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=600'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-bodega', createdAt: '2024-03-15T10:00:00.000Z' },
+    { id: 'db5', name: 'Café Molido 500g', description: 'Café molido peruano tostado medio.', price: 19.9, originalPrice: 22.9, categoryId: 'abarrotes', imageUrl: 'https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=600', images: ['https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=600'], color: null, stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-bodega', createdAt: '2024-04-01T10:00:00.000Z' },
+    { id: 'db6', name: 'Atún en Agua 170g', description: 'Latas de atún en agua, fuente de proteína.', price: 6.9, originalPrice: null, categoryId: 'abarrotes', imageUrl: 'https://images.unsplash.com/photo-1562967914-608f82629710?w=600', images: ['https://images.unsplash.com/photo-1562967914-608f82629710?w=600'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-bodega', createdAt: '2024-04-15T10:00:00.000Z' },
+  ],
+  sabor: [
+    { id: 'ds1', name: 'Pollo a la Brasa Entero', description: 'Pollo a la brasa jugoso con papas y cremas.', price: 38.0, originalPrice: 42.0, categoryId: 'platos', imageUrl: 'https://images.unsplash.com/photo-1600891964092-4316c288032e?w=600', images: ['https://images.unsplash.com/photo-1600891964092-4316c288032e?w=600'], color: null, stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-sabor', createdAt: '2024-01-10T10:00:00.000Z' },
+    { id: 'ds2', name: 'Menú del Día', description: 'Entrada, fondo, postre y refresco. Cambia a diario.', price: 15.0, originalPrice: null, categoryId: 'menús', imageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600', images: ['https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600'], color: null, stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-sabor', createdAt: '2024-02-10T10:00:00.000Z' },
+    { id: 'ds3', name: 'Ceviche Fresco', description: 'Pescado del día marinado en limón con camote y choclo.', price: 22.0, originalPrice: null, categoryId: 'platos', imageUrl: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600', images: ['https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-sabor', createdAt: '2024-03-01T10:00:00.000Z' },
+    { id: 'ds4', name: 'Lomo Saltado', description: 'Lomo fino salteado con papas fritas y arroz.', price: 28.0, originalPrice: null, categoryId: 'platos', imageUrl: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600', images: ['https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-sabor', createdAt: '2024-03-15T10:00:00.000Z' },
+    { id: 'ds5', name: 'Chicha Morada (Jarra)', description: 'Bebida artesanal de maíz morado con limón y canela.', price: 10.0, originalPrice: null, categoryId: 'bebidas', imageUrl: 'https://images.unsplash.com/photo-1553530666-ba11a7da3888?w=600', images: ['https://images.unsplash.com/photo-1553530666-ba11a7da3888?w=600'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-sabor', createdAt: '2024-04-01T10:00:00.000Z' },
+    { id: 'ds6', name: 'Torta de Chocolate (Porción)', description: 'Torta húmeda de chocolate con cobertura.', price: 6.5, originalPrice: null, categoryId: 'postres', imageUrl: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600', images: ['https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600'], color: null, stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-sabor', createdAt: '2024-04-15T10:00:00.000Z' },
+  ],
+  moda: [
+    { id: 'dmf1', name: 'Vestido Midi Elegante', description: 'Vestido midi con corte fluido. Tela premium.', price: 119.0, originalPrice: null, categoryId: 'mujer', imageUrl: 'https://images.unsplash.com/photo-1595777167546-7e6e5e077222?w=600', images: ['https://images.unsplash.com/photo-1595777167546-7e6e5e077222?w=600'], color: null, stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-moda', createdAt: '2024-01-10T10:00:00.000Z' },
+    { id: 'dmf2', name: 'Blazer Sastre', description: 'Blazer de corte sastre en tela importada.', price: 149.0, originalPrice: 179.0, categoryId: 'mujer', imageUrl: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=600', images: ['https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=600'], color: 'Negro', stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-moda', createdAt: '2024-02-10T10:00:00.000Z' },
+    { id: 'dmf3', name: 'Jean Mom Fit', description: 'Jean de talle alto con lavado clásico.', price: 89.9, originalPrice: null, categoryId: 'casual', imageUrl: 'https://images.unsplash.com/photo-1542272604-787c3824274d?w=600', images: ['https://images.unsplash.com/photo-1542272604-787c3824274d?w=600'], color: 'Azul', stock: -1, isActive: true, featured: true, rating: 4.5, storeId: 'demo-moda', createdAt: '2024-03-01T10:00:00.000Z' },
+    { id: 'dmf4', name: 'Camisa de Lino', description: 'Camisa de lino fresca para verano.', price: 69.9, originalPrice: null, categoryId: 'hombre', imageUrl: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600', images: ['https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600'], color: 'Blanco', stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-moda', createdAt: '2024-03-15T10:00:00.000Z' },
+    { id: 'dmf5', name: 'Look Editorial Completo', description: 'Conjunto de temporada seleccionado por nuestros estilistas.', price: 199.0, originalPrice: null, categoryId: 'mujer', imageUrl: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600', images: ['https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-moda', createdAt: '2024-04-01T10:00:00.000Z' },
+    { id: 'dmf6', name: 'Bolso Tote Cuero', description: 'Bolso tote de cuero con acabado premium.', price: 99.9, originalPrice: 129.0, categoryId: 'accesorios', imageUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=600', images: ['https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=600'], color: 'Caramelo', stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-moda', createdAt: '2024-04-15T10:00:00.000Z' },
+  ],
 }
 
 // Map template ID to plan for rendering
@@ -159,6 +243,9 @@ const templatePlanId: Record<string, string> = {
   clasica: 'pro',
   luxury: 'premium',
   minimalist: 'premium',
+  bodega: 'premium',
+  sabor: 'premium',
+  moda: 'premium',
 }
 
 // Map template ID to plan label for the banner
@@ -168,7 +255,10 @@ function getPlanLabel(template: string): string {
     case 'vibrante':
     case 'clasica': return 'Plan Pro'
     case 'luxury':
-    case 'minimalist': return 'Plan Premium'
+    case 'minimalist':
+    case 'bodega':
+    case 'sabor':
+    case 'moda': return 'Plan Premium'
     default: return ''
   }
 }
@@ -278,6 +368,9 @@ export function DemoTemplateClient({ template }: { template: string }) {
       {template === 'moderna' && <ModernaTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
       {template === 'vibrante' && <VibranteTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
       {template === 'clasica' && <ClasicaTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
+      {template === 'bodega' && <BodegaTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
+      {template === 'sabor' && <SaborTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
+      {template === 'moda' && <ModaTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
     </div>
   )
 }
