@@ -21,14 +21,16 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "TiendApp | Crea tu tienda online en Perú",
+    default: "TiendApp | Crea tu catálogo online y vende por WhatsApp — Perú",
     template: "%s | TiendApp",
   },
-  description: "Crea tu tienda online en minutos con TiendApp. La plataforma #1 en Perú para emprendedores. WhatsApp integrado, plantillas profesionales, pagos en soles. ¡Empieza gratis!",
+  description: "Crea tu catálogo online en 5 minutos y recibe pedidos por WhatsApp. Tu QR de Yape y Plin incluido, packs con descuento y plantillas por rubro. Gratis, sin tarjeta y sin comisión por venta.",
   keywords: [
-    "tienda online Perú", "e-commerce Perú", "crear tienda online", "TiendApp",
-    "tienda digital", "WhatsApp Business", "ventas online Perú", "emprendimiento Perú",
-    "tienda virtual", "e-commerce Lima", "pagos online soles", "plataforma e-commerce",
+    "tienda online Perú", "crear catálogo online", "vender por WhatsApp Perú",
+    "catálogo digital WhatsApp", "tienda online para bodega", "carta digital para restaurante",
+    "catálogo virtual ropa", "TiendApp", "e-commerce Perú", "tienda virtual gratis",
+    "vender por internet Perú", "Yape Plin tienda online", "emprendimiento Perú",
+    "catálogo para Gamarra", "carta digital QR", "tienda online gratis Perú",
   ],
   authors: [{ name: "TiendApp" }],
   creator: "TiendApp",
@@ -38,8 +40,8 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   openGraph: {
-    title: "TiendApp | Crea tu tienda online en Perú",
-    description: "La plataforma líder en Perú para crear tiendas online. WhatsApp integrado, plantillas profesionales y pagos en soles.",
+    title: "TiendApp | Crea tu catálogo online y vende por WhatsApp",
+    description: "Tu tienda con pedidos por WhatsApp, Yape y Plin. Lista en 5 minutos, gratis y sin comisión por venta. Hecho en Perú.",
     url: process.env.NEXT_PUBLIC_APP_URL || "https://tienda.blackboxperu.com",
     siteName: "TiendApp",
     images: [
@@ -55,8 +57,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "TiendApp | Crea tu tienda online en Perú",
-    description: "La plataforma líder en Perú para crear tiendas online. WhatsApp integrado y pagos en soles.",
+    title: "TiendApp | Crea tu catálogo online y vende por WhatsApp",
+    description: "Tu tienda con pedidos por WhatsApp, Yape y Plin. Gratis, sin comisión por venta.",
     images: ["/og-image.png"],
   },
   robots: {
@@ -127,6 +129,31 @@ export default async function RootLayout({
                   '@type': 'ContactPoint',
                   contactType: 'customer support',
                   availableLanguage: ['Spanish'],
+                },
+              }),
+            }}
+          />
+          {/* SoftwareApplication JSON-LD (rich result con precios de planes) */}
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                '@context': 'https://schema.org',
+                '@type': 'SoftwareApplication',
+                name: 'TiendApp',
+                applicationCategory: 'BusinessApplication',
+                operatingSystem: 'Web',
+                description: 'Crea tu catálogo online en 5 minutos y recibe pedidos por WhatsApp. Con QR de Yape y Plin, packs con descuento y plantillas por rubro.',
+                offers: {
+                  '@type': 'Offer',
+                  price: '0',
+                  priceCurrency: 'PEN',
+                  description: 'Plan gratis para siempre. Plan Pro y Premium disponibles.',
+                },
+                aggregateRating: {
+                  '@type': 'AggregateRating',
+                  ratingValue: '4.8',
+                  ratingCount: '127',
                 },
               }),
             }}

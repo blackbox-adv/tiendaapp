@@ -3,9 +3,10 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Button } from '@/components/ui/button'
-import { Eye, Crown, ArrowRight, Check, Sparkles, Gem, Sun, Minimize2, Lock, Search, Filter, X } from 'lucide-react'
+import { Eye, Crown, ArrowRight, Search, Sparkles, Gem, Sun, Minimize2, ShoppingBasket, UtensilsCrossed, Shirt } from 'lucide-react'
 import { PLAN_PRICES } from '@/lib/plans'
+import { Button } from '@/components/ui/button'
+import { useAppStore } from '@/lib/store'
 
 type PlanType = 'free' | 'pro' | 'premium'
 
@@ -14,12 +15,10 @@ interface Template {
   name: string
   plan: PlanType
   planLabel: string
-  planPrice: string
   description: string
   bestFor: string[]
-  features: { text: string; included: boolean }[]
+  isNew?: boolean
   icon: React.ElementType
-  accentColor: string
 }
 
 const templates: Template[] = [
@@ -28,195 +27,125 @@ const templates: Template[] = [
     name: 'Moderna',
     plan: 'free',
     planLabel: 'Gratis',
-    planPrice: 'S/0.00',
-    description: 'Diseño limpio y profesional con navegación intuitiva, banner hero y productos en grid. La plantilla incluida en el plan gratuito para empezar a vender hoy mismo.',
-    bestFor: ['Moda', 'Tech', 'Lifestyle'],
-    features: [
-      { text: 'Hasta 5 productos', included: true },
-      { text: 'Botón de WhatsApp integrado', included: true },
-      { text: '100% responsive', included: true },
-      { text: 'Buscador de productos', included: false },
-      { text: 'Categorías y filtros', included: false },
-      { text: 'Sin badge TiendApp', included: false },
-    ],
+    description: 'Limpia y profesional. La del plan gratis para empezar hoy.',
+    bestFor: ['Cualquier rubro'],
     icon: Gem,
-    accentColor: 'violet',
+  },
+  {
+    id: 'bodega',
+    name: 'Mercadito',
+    plan: 'premium',
+    planLabel: 'Premium',
+    description: 'Estilo bodega peruana: ofertas resaltadas y pedido al toque.',
+    bestFor: ['Bodegas', 'Abarrotes', 'Mercados'],
+    isNew: true,
+    icon: ShoppingBasket,
+  },
+  {
+    id: 'sabor',
+    name: 'Sabores',
+    plan: 'premium',
+    planLabel: 'Premium',
+    description: 'Carta digital elegante con favoritos del chef y menú por secciones.',
+    bestFor: ['Restaurantes', 'Pollerías', 'Panaderías'],
+    isNew: true,
+    icon: UtensilsCrossed,
+  },
+  {
+    id: 'moda',
+    name: 'Pasarela',
+    plan: 'premium',
+    planLabel: 'Premium',
+    description: 'Editorial tipo revista: foto grande, minimal y precios sofisticados.',
+    bestFor: ['Ropa', 'Gamarra', 'Accesorios'],
+    isNew: true,
+    icon: Shirt,
   },
   {
     id: 'vibrante',
     name: 'Vibrante',
     plan: 'pro',
     planLabel: 'Pro',
-    planPrice: `S/${PLAN_PRICES.pro?.toFixed(2)}`,
-    description: 'Colores llamativos, categorías visuales, buscador integrado y promociones destacadas. Perfecto para tiendas juveniles, streetwear y productos con personalidad.',
-    bestFor: ['Streetwear', 'Youth', 'Pop Culture'],
-    features: [
-      { text: 'Hasta 20 productos', included: true },
-      { text: 'Buscador de productos', included: true },
-      { text: 'Categorías y filtros', included: true },
-      { text: 'Botón de WhatsApp integrado', included: true },
-      { text: 'Promociones y descuentos', included: true },
-      { text: 'Sin badge TiendApp', included: true },
-      { text: 'Filtros avanzados', included: false },
-    ],
+    description: 'Colores llamativos, buscador y promociones que se notan.',
+    bestFor: ['Streetwear', 'Tecnología'],
     icon: Sparkles,
-    accentColor: 'orange',
   },
   {
     id: 'clasica',
     name: 'Clásica',
     plan: 'pro',
     planLabel: 'Pro',
-    planPrice: `S/${PLAN_PRICES.pro?.toFixed(2)}`,
-    description: 'Tonos cálidos, diseño en lista con buscador y estilo artesanal. Transmite confianza y tradición, ideal para artesanías, food y productos locales peruanos.',
-    bestFor: ['Artesanías', 'Food', 'Local'],
-    features: [
-      { text: 'Hasta 20 productos', included: true },
-      { text: 'Buscador de productos', included: true },
-      { text: 'Categorías y filtros', included: true },
-      { text: 'Botón de WhatsApp integrado', included: true },
-      { text: 'Sin badge TiendApp', included: true },
-      { text: 'Filtros avanzados', included: false },
-    ],
+    description: 'Tonos cálidos que transmiten tradición y confianza.',
+    bestFor: ['Artesanías', 'Comida casera'],
     icon: Sun,
-    accentColor: 'amber',
   },
   {
     id: 'luxury',
     name: 'Luxury',
     plan: 'premium',
     planLabel: 'Premium',
-    planPrice: `S/${PLAN_PRICES.premium?.toFixed(2)}`,
-    description: 'Elegancia oscura con acabados dorados, buscador avanzado, filtros y consultas privadas. Para marcas que quieren proyectar lujo y sofisticación absoluta.',
-    bestFor: ['Joyería', 'Alta Moda', 'Exclusive'],
-    features: [
-      { text: 'Hasta 100 productos', included: true },
-      { text: 'Buscador y filtros avanzados', included: true },
-      { text: 'Categorías y subcategorías', included: true },
-      { text: 'Botón de WhatsApp integrado', included: true },
-      { text: 'Sin badge TiendApp', included: true },
-      { text: 'Hasta 3 tiendas', included: true },
-      { text: 'Soporte 24/7', included: true },
-    ],
+    description: 'Oscuro con acabados dorados. Para marcas premium.',
+    bestFor: ['Joyería', 'Alta gama'],
     icon: Crown,
-    accentColor: 'gold',
   },
   {
     id: 'minimalist',
     name: 'Minimalist',
     plan: 'premium',
     planLabel: 'Premium',
-    planPrice: `S/${PLAN_PRICES.premium?.toFixed(2)}`,
-    description: 'Ultra limpio, estilo Apple. Buscador avanzado, filtros, espacios amplios y tipografía precisa. Para marcas modernas que comunican con simplicidad.',
-    bestFor: ['Design', 'Cosmetics', 'Modern'],
-    features: [
-      { text: 'Hasta 100 productos', included: true },
-      { text: 'Buscador y filtros avanzados', included: true },
-      { text: 'Categorías y subcategorías', included: true },
-      { text: 'Botón de WhatsApp integrado', included: true },
-      { text: 'Sin badge TiendApp', included: true },
-      { text: 'Hasta 3 tiendas', included: true },
-      { text: 'Soporte 24/7', included: true },
-    ],
+    description: 'Estilo Apple: espacios amplios y tipografía precisa.',
+    bestFor: ['Cosmética', 'Diseño'],
     icon: Minimize2,
-    accentColor: 'gray',
   },
 ]
 
-function getAccentClasses(id: string) {
-  switch (id) {
-    case 'luxury':
-      return {
-        cardBorder: 'border-[#c8a456]/30 hover:border-[#c8a456]/50',
-        iconColor: 'text-[#c8a456]',
-        btnClass: 'border-[#c8a456] text-[#c8a456] hover:bg-[#c8a456]/5',
-        btnPrimary: 'bg-[#c8a456] hover:bg-[#c8a456]/90 text-[#0f0f1a]',
-        badgeClass: 'from-[#c8a456] to-[#f0d078] text-[#0f0f1a]',
-        bestForBg: 'bg-[#c8a456]/10 text-[#c8a456]',
-        tagBg: 'bg-[#c8a456]/5 border-[#c8a456]/10',
-        planBg: 'bg-[#c8a456]/10 text-[#c8a456] border-[#c8a456]/20',
-      }
-    case 'minimalist':
-      return {
-        cardBorder: 'border-gray-200 hover:border-gray-300',
-        iconColor: 'text-gray-700',
-        btnClass: 'border-gray-300 text-gray-600 hover:bg-gray-50',
-        btnPrimary: 'bg-gray-900 hover:bg-gray-800 text-white',
-        badgeClass: 'from-gray-500 to-gray-700 text-white',
-        bestForBg: 'bg-gray-100 text-gray-600',
-        tagBg: 'bg-gray-50 border-gray-100',
-        planBg: 'bg-gray-100 text-gray-700 border-gray-200',
-      }
-    case 'vibrante':
-      return {
-        cardBorder: 'border-orange-200 hover:border-orange-300',
-        iconColor: 'text-orange-500',
-        btnClass: 'border-orange-200 text-orange-600 hover:bg-orange-50',
-        btnPrimary: 'bg-orange-500 hover:bg-orange-600 text-white',
-        badgeClass: 'from-orange-400 to-pink-500 text-white',
-        bestForBg: 'bg-orange-50 text-orange-700',
-        tagBg: 'bg-orange-50/50 border-orange-100',
-        planBg: 'bg-orange-50 text-orange-700 border-orange-200',
-      }
-    case 'clasica':
-      return {
-        cardBorder: 'border-amber-200 hover:border-amber-300',
-        iconColor: 'text-amber-600',
-        btnClass: 'border-amber-200 text-amber-700 hover:bg-amber-50',
-        btnPrimary: 'bg-amber-700 hover:bg-amber-800 text-white',
-        badgeClass: 'from-amber-500 to-amber-700 text-white',
-        bestForBg: 'bg-amber-50 text-amber-700',
-        tagBg: 'bg-amber-50/50 border-amber-100',
-        planBg: 'bg-amber-50 text-amber-700 border-amber-200',
-      }
-    default: // moderna (free)
-      return {
-        cardBorder: 'border-violet-200 hover:border-violet-300',
-        iconColor: 'text-violet-600',
-        btnClass: 'border-violet-200 text-violet-600 hover:bg-violet-50',
-        btnPrimary: 'bg-violet-600 hover:bg-violet-700 text-white',
-        badgeClass: 'from-violet-500 to-violet-700 text-white',
-        bestForBg: 'bg-violet-50 text-violet-700',
-        tagBg: 'bg-violet-50/50 border-violet-100',
-        planBg: 'bg-violet-50 text-violet-700 border-violet-200',
-      }
-  }
-}
-
-function getPlanBadge(plan: PlanType, label: string) {
-  switch (plan) {
-    case 'free':
-      return { bg: 'bg-emerald-50 text-emerald-700 border-emerald-200', icon: null }
-    case 'pro':
-      return { bg: 'bg-blue-50 text-blue-700 border-blue-200', icon: Search }
-    case 'premium':
-      return { bg: 'bg-amber-50 text-amber-700 border-amber-200', icon: Crown }
-  }
+const planStyles: Record<PlanType, { badge: string; ring: string; hover: string }> = {
+  free: {
+    badge: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    ring: 'hover:border-emerald-300',
+    hover: 'group-hover:shadow-emerald-100',
+  },
+  pro: {
+    badge: 'bg-blue-50 text-blue-700 border-blue-200',
+    ring: 'hover:border-blue-300',
+    hover: 'group-hover:shadow-blue-100',
+  },
+  premium: {
+    badge: 'bg-amber-50 text-amber-700 border-amber-200',
+    ring: 'hover:border-amber-300',
+    hover: 'group-hover:shadow-amber-100',
+  },
 }
 
 export function Templates() {
-  const [hoveredId, setHoveredId] = useState<string | null>(null)
+  const navigate = useAppStore((s) => s.navigate)
+  const [showAll, setShowAll] = useState(false)
+  // En móvil mostramos 4 por defecto para no hacer una página interminable
+  const visible = showAll ? templates : templates.slice(0, 4)
 
   return (
-    <section id="templates" className="py-20 sm:py-28 bg-white">
+    <section id="templates" className="py-20 sm:py-28 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="text-center mb-16"
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+          className="text-center mb-12"
         >
-          <span className="text-sm font-semibold text-violet-600 uppercase tracking-wider">Plantillas</span>
+          <span className="text-sm font-semibold text-violet-600 uppercase tracking-wider">
+            Diseños que venden
+          </span>
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mt-3 mb-4">
-            Tu tienda se verá así de profesional
+            Elige un diseño hecho para tu rubro
           </h2>
-          <p className="text-lg text-gray-500 max-w-2xl mx-auto">
-            Cada plan incluye plantillas con diferentes funcionalidades. Mientras más avanzado el plan, más herramientas para vender.
+          <p className="text-lg text-gray-500 max-w-2xl mx-auto mb-6">
+            Toca cualquier diseño y mira una tienda real funcionando con WhatsApp y
+            Yape. Sin registrarte, sin instalar nada.
           </p>
           {/* Plan legend */}
-          <div className="flex flex-wrap items-center justify-center gap-4 mt-6">
+          <div className="flex flex-wrap items-center justify-center gap-3">
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-sm font-medium text-emerald-700">
               <div className="w-2 h-2 rounded-full bg-emerald-500" />
               Gratis
@@ -232,154 +161,101 @@ export function Templates() {
           </div>
         </motion.div>
 
-        {/* Template showcase */}
-        <div className="space-y-12">
-          {templates.map((tpl, i) => {
-            const accent = getAccentClasses(tpl.id)
-            const isEven = i % 2 === 0
-            const planBadge = getPlanBadge(tpl.plan, tpl.planLabel)
-
+        {/* Grid de plantillas */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {visible.map((tpl, i) => {
+            const style = planStyles[tpl.plan]
             return (
               <motion.div
                 key={tpl.id}
-                initial={{ opacity: 0, y: 40 }}
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.15 }}
-                transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
-                className={`flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} gap-8 items-center`}
-                onMouseEnter={() => setHoveredId(tpl.id)}
-                onMouseLeave={() => setHoveredId(null)}
+                viewport={{ once: true, amount: 0.1 }}
+                transition={{ duration: 0.5, delay: (i % 4) * 0.08, ease: 'easeOut' }}
+                className={`group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl ${style.ring} ${style.hover} transition-all duration-300 overflow-hidden flex flex-col`}
               >
-                {/* Image side */}
-                <div className="flex-1 w-full">
-                  <div className={`relative rounded-2xl overflow-hidden border-2 shadow-lg transition-all duration-500 ${accent.cardBorder} ${hoveredId === tpl.id ? 'shadow-2xl scale-[1.02]' : ''}`}>
-                    {/* Plan badge */}
-                    <div className={`absolute top-4 right-4 z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border shadow-lg ${planBadge.bg}`}>
-                      {planBadge.icon && <planBadge.icon className="w-3.5 h-3.5" />}
-                      {tpl.planLabel}
-                    </div>
-                    {/* Browser chrome */}
-                    <div className="px-4 py-2.5 flex items-center gap-2 border-b border-gray-100 bg-gray-50/80">
-                      <div className="flex gap-1.5">
-                        <div className="w-3 h-3 rounded-full bg-red-400/80" />
-                        <div className="w-3 h-3 rounded-full bg-yellow-400/80" />
-                        <div className="w-3 h-3 rounded-full bg-green-400/80" />
-                      </div>
-                      <div className="flex-1 flex justify-center">
-                        <div className="rounded-md px-4 py-1 text-xs border bg-white text-gray-400 border-gray-200 font-mono">
-                          mitienda.tiendapp.pe
-                        </div>
-                      </div>
-                    </div>
-                    {/* Store screenshot */}
-                    <div className="relative bg-white overflow-hidden">
-                      <Image
-                        src={`/templates/${tpl.id}-preview.png`}
-                        alt={`Plantilla ${tpl.name} - TiendApp`}
-                        width={800}
-                        height={900}
-                        className="w-full h-auto"
-                        priority={i < 2}
-                      />
-                      {/* Hover overlay */}
-                      <div className={`absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end justify-center pb-6 transition-opacity duration-300 ${hoveredId === tpl.id ? 'opacity-100' : 'opacity-0'}`}>
-                        <Button
-                          size="lg"
-                          onClick={() => window.location.href = `/demo/${tpl.id}`}
-                          className={`gap-2 shadow-xl ${accent.btnPrimary}`}
-                        >
-                          <Eye className="w-5 h-5" />
-                          Ver tienda en vivo
-                          <ArrowRight className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
+                {/* Preview (cropped) + link a demo */}
+                <a
+                  href={`/demo/${tpl.id}`}
+                  className="relative block aspect-[4/5] overflow-hidden bg-gray-100"
+                  aria-label={`Ver demo de la plantilla ${tpl.name}`}
+                >
+                  <Image
+                    src={`/templates/${tpl.id}-preview.png`}
+                    alt={`Tienda de ejemplo con la plantilla ${tpl.name} de TiendApp`}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    className="object-cover object-top group-hover:scale-[1.03] transition-transform duration-500"
+                  />
+                  {/* Plan badge */}
+                  <div className={`absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold border shadow-md ${style.badge}`}>
+                    {tpl.plan === 'premium' && <Crown className="w-3 h-3" />}
+                    {tpl.planLabel}
                   </div>
-                </div>
-
-                {/* Info side */}
-                <div className="flex-1 w-full lg:max-w-md">
-                  <div className="flex items-center gap-3 mb-3">
-                    <tpl.icon className={`w-6 h-6 ${accent.iconColor}`} />
-                    <h3 className="text-2xl font-bold text-gray-900">{tpl.name}</h3>
-                    <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${planBadge.bg}`}>
-                      {planBadge.icon && <planBadge.icon className="w-3 h-3" />}
-                      {tpl.planLabel}
+                  {tpl.isNew && (
+                    <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-400 text-amber-950 shadow-md">
+                      ⭐ Nuevo
                     </div>
+                  )}
+                  {/* Hover overlay con CTA */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent flex items-end justify-center pb-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-gray-900 text-sm font-bold shadow-xl">
+                      <Eye className="w-4 h-4" />
+                      Ver tienda en vivo
+                    </span>
                   </div>
+                </a>
 
-                  <p className="text-gray-600 mb-4 leading-relaxed">{tpl.description}</p>
-
-                  {/* Best for tags */}
-                  <div className="flex flex-wrap gap-2 mb-5">
+                {/* Info */}
+                <div className="p-4 flex flex-col flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <tpl.icon className="w-4 h-4 text-violet-600" />
+                    <h3 className="font-bold text-gray-900">{tpl.name}</h3>
+                  </div>
+                  <p className="text-sm text-gray-500 mb-3 flex-1">{tpl.description}</p>
+                  <div className="flex flex-wrap gap-1.5 mb-4">
                     {tpl.bestFor.map((tag) => (
-                      <span
-                        key={tag}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border ${accent.tagBg}`}
-                      >
-                        <Check className={`w-3.5 h-3.5 ${accent.iconColor}`} />
+                      <span key={tag} className="px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 text-xs font-medium border border-violet-100">
                         {tag}
                       </span>
                     ))}
                   </div>
-
-                  {/* Features list with included/excluded */}
-                  <div className="space-y-2.5 mb-6">
-                    {tpl.features.map((feature) => (
-                      <div key={feature.text} className="flex items-center gap-2.5">
-                        {feature.included ? (
-                          <div className={`w-5 h-5 rounded-full flex items-center justify-center ${accent.bestForBg}`}>
-                            <Check className="w-3 h-3" />
-                          </div>
-                        ) : (
-                          <div className="w-5 h-5 rounded-full flex items-center justify-center bg-gray-100 text-gray-400">
-                            <Lock className="w-3 h-3" />
-                          </div>
-                        )}
-                        <span className={`text-sm ${feature.included ? 'text-gray-600' : 'text-gray-400'}`}>
-                          {feature.text}
-                        </span>
-                        {!feature.included && (
-                          <span className="text-xs text-gray-400 ml-auto">Pro / Premium</span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center gap-3">
+                  {/* CTAs: SIEMPRE visibles (móvil no tiene hover) */}
+                  <div className="flex items-center gap-2 mt-auto">
+                    <Button
+                      size="sm"
+                      onClick={() => window.location.href = `/demo/${tpl.id}`}
+                      className="flex-1 bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-lg"
+                    >
+                      <Eye className="w-4 h-4 mr-1" />
+                      Ver demo
+                    </Button>
                     {tpl.plan === 'free' ? (
                       <Button
-                        size="lg"
-                        onClick={() => window.location.href = '/auth/register'}
-                        className={`gap-2 ${accent.btnPrimary}`}
+                        size="sm"
+                        onClick={() => navigate({ page: 'register' })}
+                        variant="outline"
+                        className="border-emerald-300 text-emerald-700 hover:bg-emerald-50 font-semibold rounded-lg"
                       >
-                        Crear tienda gratis
-                        <ArrowRight className="w-4 h-4" />
+                        Usar gratis
                       </Button>
-                    ) : (
-                      <Button
-                        size="lg"
-                        onClick={() => window.location.href = `/demo/${tpl.id}`}
-                        className={`gap-2 ${accent.btnPrimary}`}
-                      >
-                        <Eye className="w-5 h-5" />
-                        Ver demo
-                        <ArrowRight className="w-4 h-4" />
-                      </Button>
-                    )}
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      onClick={() => window.location.href = '/auth/register'}
-                      className={`gap-2 ${accent.btnClass}`}
-                    >
-                      {tpl.plan === 'free' ? 'Ver demo' : 'Usar esta plantilla'}
-                    </Button>
+                    ) : null}
                   </div>
                 </div>
               </motion.div>
             )
           })}
+        </div>
+
+        {/* Show more / less */}
+        <div className="text-center mt-10">
+          <button
+            onClick={() => setShowAll(!showAll)}
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full border-2 border-violet-200 text-violet-700 font-semibold hover:bg-violet-50 transition-colors"
+          >
+            {showAll ? 'Ver menos diseños' : `Ver los ${templates.length} diseños`}
+            <ArrowRight className={`w-4 h-4 transition-transform ${showAll ? '-rotate-90' : 'rotate-90'}`} />
+          </button>
         </div>
       </div>
     </section>
