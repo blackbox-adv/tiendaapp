@@ -25,6 +25,18 @@ const templateMeta: Record<string, { name: string; description: string }> = {
     name: 'Clasica',
     description: 'Demo de la plantilla Clasica - TiendApp',
   },
+  bodega: {
+    name: 'Mercadito',
+    description: 'Demo de la plantilla Mercadito para bodegas y abarrotes - TiendApp',
+  },
+  sabor: {
+    name: 'Sabores',
+    description: 'Demo de la plantilla Sabores para restaurantes - TiendApp',
+  },
+  moda: {
+    name: 'Pasarela',
+    description: 'Demo de la plantilla Pasarela para boutiques de moda - TiendApp',
+  },
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ template: string }> }): Promise<Metadata> {
