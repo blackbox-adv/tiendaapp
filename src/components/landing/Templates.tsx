@@ -124,7 +124,7 @@ export function Templates() {
   const visible = showAll ? templates : templates.slice(0, 4)
 
   return (
-    <section id="templates" className="py-20 sm:py-28 bg-gray-50">
+    <section id="templates" className="py-20 sm:py-28 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
@@ -134,13 +134,13 @@ export function Templates() {
           transition={{ duration: 0.6, ease: 'easeOut' }}
           className="text-center mb-12"
         >
-          <span className="text-sm font-semibold text-violet-600 uppercase tracking-wider">
+          <span className="text-sm font-semibold text-[#BC5A38] uppercase tracking-wider">
             Diseños que venden
           </span>
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mt-3 mb-4">
+          <h2 className="font-display text-3xl sm:text-4xl font-bold text-stone-900 mt-3 mb-4">
             Elige un diseño hecho para tu rubro
           </h2>
-          <p className="text-lg text-gray-500 max-w-2xl mx-auto mb-6">
+          <p className="text-lg text-stone-500 max-w-2xl mx-auto mb-6">
             Toca cualquier diseño y mira una tienda real funcionando con WhatsApp y
             Yape. Sin registrarte, sin instalar nada.
           </p>
@@ -172,7 +172,7 @@ export function Templates() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.1 }}
                 transition={{ duration: 0.5, delay: (i % 4) * 0.08, ease: 'easeOut' }}
-                className={`group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl ${style.ring} ${style.hover} transition-all duration-300 overflow-hidden flex flex-col`}
+                className={`group bg-white rounded-2xl border border-[#E5DCCB] shadow-sm hover:shadow-xl ${style.ring} ${style.hover} transition-all duration-300 overflow-hidden flex flex-col`}
               >
                 {/* Preview (cropped) + link a demo */}
                 <a
@@ -193,7 +193,7 @@ export function Templates() {
                     {tpl.planLabel}
                   </div>
                   {tpl.isNew && (
-                    <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-400 text-amber-950 shadow-md">
+                    <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold bg-[#BC5A38] text-white shadow-md">
                       ⭐ Nuevo
                     </div>
                   )}
@@ -209,13 +209,13 @@ export function Templates() {
                 {/* Info */}
                 <div className="p-4 flex flex-col flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <tpl.icon className="w-4 h-4 text-violet-600" />
-                    <h3 className="font-bold text-gray-900">{tpl.name}</h3>
+                    <tpl.icon className="w-4 h-4 text-[#BC5A38]" />
+                    <h3 className="font-display font-bold text-stone-900">{tpl.name}</h3>
                   </div>
-                  <p className="text-sm text-gray-500 mb-3 flex-1">{tpl.description}</p>
+                  <p className="text-sm text-stone-500 mb-3 flex-1">{tpl.description}</p>
                   <div className="flex flex-wrap gap-1.5 mb-4">
                     {tpl.bestFor.map((tag) => (
-                      <span key={tag} className="px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 text-xs font-medium border border-violet-100">
+                      <span key={tag} className="px-2 py-0.5 rounded-full bg-[#F6E7DE] text-[#BC5A38] text-xs font-medium border border-[#BC5A38]/15">
                         {tag}
                       </span>
                     ))}
@@ -225,7 +225,7 @@ export function Templates() {
                     <Button
                       size="sm"
                       onClick={() => window.location.href = `/demo/${tpl.id}`}
-                      className="flex-1 bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-lg"
+                      className="flex-1 bg-stone-900 hover:bg-[#BC5A38] text-white font-semibold rounded-full"
                     >
                       <Eye className="w-4 h-4 mr-1" />
                       Ver demo
@@ -251,7 +251,7 @@ export function Templates() {
         <div className="text-center mt-10">
           <button
             onClick={() => setShowAll(!showAll)}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full border-2 border-violet-200 text-violet-700 font-semibold hover:bg-violet-50 transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full border-2 border-[#BC5A38]/40 text-[#BC5A38] font-semibold hover:bg-[#F6E7DE] transition-colors"
           >
             {showAll ? 'Ver menos diseños' : `Ver los ${templates.length} diseños`}
             <ArrowRight className={`w-4 h-4 transition-transform ${showAll ? '-rotate-90' : 'rotate-90'}`} />

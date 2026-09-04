@@ -46,7 +46,7 @@ export function CookieConsent() {
             <p className="text-sm text-gray-600 leading-relaxed">
               Utilizamos cookies para mejorar tu experiencia y analizar el tráfico del sitio.
               Puedes aceptar todas las cookies o solo las esenciales.{' '}
-              <Link href="/privacy" className="text-purple-600 hover:underline">
+              <Link href="/privacy" className="text-[#BC5A38] hover:underline">
                 Política de Privacidad
               </Link>
             </p>
@@ -60,7 +60,7 @@ export function CookieConsent() {
             </button>
             <button
               onClick={acceptAll}
-              className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors"
+              className="px-4 py-2 text-sm font-medium text-white bg-[#BC5A38] rounded-lg hover:bg-[#A84C2D] transition-colors"
             >
               Aceptar todas
             </button>

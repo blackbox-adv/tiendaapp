@@ -77,13 +77,13 @@ export function Features() {
           transition={{ duration: 0.6, ease: 'easeOut' }}
           className="text-center mb-16"
         >
-          <span className="text-sm font-semibold text-violet-600 uppercase tracking-wider">
+          <span className="text-sm font-semibold text-[#BC5A38] uppercase tracking-wider">
             Beneficios
           </span>
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mt-3 mb-4">
+          <h2 className="font-display text-3xl sm:text-4xl font-bold text-stone-900 mt-3 mb-4">
             Todo lo que necesitas para vender online
           </h2>
-          <p className="text-lg text-gray-500 max-w-2xl mx-auto">
+          <p className="text-lg text-stone-500 max-w-2xl mx-auto">
             Hecho para emprendedores de Latinoamérica. Sin código, sin comisiones por venta y sin
             complicaciones. Tú te enfocas en vender, nosotros en la tecnología.
           </p>
@@ -100,13 +100,13 @@ export function Features() {
             <motion.div
               key={feature.title}
               variants={item}
-              className="group p-6 rounded-2xl border border-gray-100 bg-white hover:border-violet-200 hover:shadow-lg hover:shadow-violet-100/50 transition-all duration-300"
+              className="group p-6 rounded-2xl border border-[#E5DCCB] bg-[#FAF6EF] hover:border-[#BC5A38]/40 hover:shadow-lg hover:shadow-[#BC5A38]/10 transition-all duration-300"
             >
-              <div className="w-12 h-12 rounded-xl bg-violet-100 flex items-center justify-center mb-4 group-hover:bg-violet-600 transition-colors duration-300">
-                <feature.icon className="w-6 h-6 text-violet-600 group-hover:text-white transition-colors duration-300" />
+              <div className="w-12 h-12 rounded-xl bg-[#F6E7DE] flex items-center justify-center mb-4 group-hover:bg-[#BC5A38] transition-colors duration-300">
+                <feature.icon className="w-6 h-6 text-[#BC5A38] group-hover:text-white transition-colors duration-300" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
-              <p className="text-gray-500 text-sm leading-relaxed">{feature.description}</p>
+              <h3 className="font-display text-lg font-semibold text-stone-900 mb-2">{feature.title}</h3>
+              <p className="text-stone-500 text-sm leading-relaxed">{feature.description}</p>
             </motion.div>
           ))}
         </motion.div>
