@@ -9,6 +9,7 @@ import { StoreFeatureBadges } from './StoreFeatureBadges'
 import { CombosSection } from './CombosSection'
 import { Badge } from '@/components/ui/badge'
 import { PaymentMethods } from './PaymentMethods'
+import { ShippingOptions } from './ShippingOptions'
 import { useAppStore } from '@/lib/store'
 import type { Store, Product } from '@/lib/types'
 
@@ -351,6 +352,7 @@ export function ModernaTemplate({ store, products, storeSlug, planId, onProductC
         )}
       </main>
       {/* Formas de pago (Yape / Plin) */}
+      <ShippingOptions store={store} />
       <PaymentMethods store={store} />
 
       {/* Footer */}

@@ -510,7 +510,7 @@ export default function OnboardingPage() {
                   <Label htmlFor="storeAddress">Dirección</Label>
                   <Input
                     id="storeAddress"
-                    placeholder="Lima, Perú"
+                    placeholder="Ej: Lima, Bogotá, CDMX, Buenos Aires..."
                     value={storeAddress}
                     onChange={(e) => setStoreAddress(e.target.value)}
                   />

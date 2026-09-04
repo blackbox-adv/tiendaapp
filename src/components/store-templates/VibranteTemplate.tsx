@@ -9,6 +9,7 @@ import { StoreFeatureBadges } from './StoreFeatureBadges'
 import { CombosSection } from './CombosSection'
 import { Badge } from '@/components/ui/badge'
 import { PaymentMethods } from './PaymentMethods'
+import { ShippingOptions } from './ShippingOptions'
 import { useAppStore } from '@/lib/store'
 import type { Store, Product } from '@/lib/types'
 
@@ -432,6 +433,7 @@ export function VibranteTemplate({ store, products, storeSlug, planId, onProduct
       </main>
 
       {/* Footer */}
+      <ShippingOptions store={store} />
       <PaymentMethods store={store} />
 
       <footer className="mt-auto py-6 text-center">

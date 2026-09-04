@@ -9,6 +9,7 @@ import { StoreFeatureBadges } from './StoreFeatureBadges'
 import { CombosSection } from './CombosSection'
 import { Badge } from '@/components/ui/badge'
 import { PaymentMethods } from './PaymentMethods'
+import { ShippingOptions } from './ShippingOptions'
 import { useAppStore } from '@/lib/store'
 import type { Store, Product } from '@/lib/types'
 
@@ -465,6 +466,7 @@ export function LuxuryTemplate({ store, products, storeSlug, planId, onProductCl
       </main>
 
       {/* Formas de pago (Yape / Plin) */}
+      <ShippingOptions store={store} />
       <PaymentMethods store={store} />
 
       {/* Footer */}

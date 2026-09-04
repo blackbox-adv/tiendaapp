@@ -7,6 +7,7 @@ import { Search, X, ShoppingBag } from 'lucide-react'
 import { StoreFeatureBadges } from './StoreFeatureBadges'
 import { CombosSection } from './CombosSection'
 import { PaymentMethods } from './PaymentMethods'
+import { ShippingOptions } from './ShippingOptions'
 import { useAppStore } from '@/lib/store'
 import type { Store, Product } from '@/lib/types'
 
@@ -206,6 +207,7 @@ export function ModaTemplate({ store, products, storeSlug, planId, onProductClic
         )}
       </main>
 
+      <ShippingOptions store={store} />
       <PaymentMethods store={store} />
 
       <footer className="border-t border-stone-200 py-8 text-center">

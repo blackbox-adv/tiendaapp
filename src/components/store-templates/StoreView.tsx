@@ -269,7 +269,7 @@ export function StoreView({ slug }: { slug: string }) {
       <WhatsAppButton whatsappNumber={displayStore!.whatsappNumber} />
 
       {/* Cart Button */}
-      <CartButton storeId={displayStore!.id} whatsappNumber={displayStore!.whatsappNumber} storeName={displayStore!.name} />
+      <CartButton storeId={displayStore!.id} whatsappNumber={displayStore!.whatsappNumber} storeName={displayStore!.name} shippingOptions={displayStore!.shippingOptions} />
 
       {/* Promo Popup */}
       <PromoPopup store={displayStore!} products={displayProducts} onProductClick={handleProductClick} />

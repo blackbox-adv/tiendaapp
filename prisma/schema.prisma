@@ -86,6 +86,11 @@ model Store {
   yapeNumber       String?                           // Yape phone number (for manual entry display)
   plinNumber       String?                           // Plin phone number (for manual entry display)
 
+  // LatAm: otros métodos de pago del país (Mercado Pago, Nequi, Sinpe Móvil, transferencia, etc.)
+  otherPayments    Json     @default("[]")            // Array of {label, number}
+  // Opciones de envío que la tienda ofrece a sus clientes
+  shippingOptions  Json     @default("[]")            // Array of {label, price, time}
+
   isDemo         Boolean  @default(false)
   isActive       Boolean  @default(true)
   visitCount     Int      @default(0)

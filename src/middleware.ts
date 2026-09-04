@@ -232,6 +232,14 @@ export function middleware(request: NextRequest) {
     }
   }
 
+  // Rate limit: A/B event tracking (max 30 per minute per IP — view+clicks por sesión)
+  if (pathname === '/api/ab/event' && method === 'POST') {
+    const key = getRateLimitKey(request, 'ab-event')
+    if (isRateLimited(key, 30, 60 * 1000)) {
+      return NextResponse.json({ ok: false }, { status: 429 })
+    }
+  }
+
   return response
 }
 
@@ -252,6 +260,8 @@ export const config = {
     '/api/upload',
     '/api/admin/payments',
     '/api/export',
+    '/api/ab/event',
+    '/api/ab/stats',
     // Page routes (for security headers)
     '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)',
   ],

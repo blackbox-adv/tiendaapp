@@ -36,6 +36,11 @@ const demoStores: Record<string, Store> = {
     hasShipping: true, hasSecurePayment: true, hasReturns: true,
     popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
     yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
+    shippingOptions: [
+      { label: 'Delivery en la ciudad', price: 10, time: '24 horas' },
+      { label: 'Recojo en tienda', price: null, time: 'Cuando quieras' },
+    ],
+    otherPayments: [],
   },
   vibrante: {
     id: 'demo-vibrante',
@@ -55,6 +60,11 @@ const demoStores: Record<string, Store> = {
     hasShipping: true, hasSecurePayment: true, hasReturns: false,
     popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
     yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
+    shippingOptions: [
+      { label: 'Delivery en la ciudad', price: 10, time: '24 horas' },
+      { label: 'Recojo en tienda', price: null, time: 'Cuando quieras' },
+    ],
+    otherPayments: [],
   },
   clasica: {
     id: 'demo-clasica',
@@ -74,6 +84,11 @@ const demoStores: Record<string, Store> = {
     hasShipping: true, hasSecurePayment: true, hasReturns: true,
     popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
     yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
+    shippingOptions: [
+      { label: 'Delivery en la ciudad', price: 10, time: '24 horas' },
+      { label: 'Recojo en tienda', price: null, time: 'Cuando quieras' },
+    ],
+    otherPayments: [],
   },
   luxury: {
     id: 'demo-luxury',
@@ -93,6 +108,11 @@ const demoStores: Record<string, Store> = {
     hasShipping: true, hasSecurePayment: true, hasReturns: false,
     popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
     yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
+    shippingOptions: [
+      { label: 'Delivery en la ciudad', price: 10, time: '24 horas' },
+      { label: 'Recojo en tienda', price: null, time: 'Cuando quieras' },
+    ],
+    otherPayments: [],
   },
   minimalist: {
     id: 'demo-minimalist',
@@ -112,6 +132,11 @@ const demoStores: Record<string, Store> = {
     hasShipping: true, hasSecurePayment: true, hasReturns: true,
     popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
     yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
+    shippingOptions: [
+      { label: 'Delivery en la ciudad', price: 10, time: '24 horas' },
+      { label: 'Recojo en tienda', price: null, time: 'Cuando quieras' },
+    ],
+    otherPayments: [],
   },
   bodega: {
     id: 'demo-bodega',
@@ -131,6 +156,11 @@ const demoStores: Record<string, Store> = {
     hasShipping: true, hasSecurePayment: true, hasReturns: false,
     popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
     yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
+    shippingOptions: [
+      { label: 'Delivery en la ciudad', price: 10, time: '24 horas' },
+      { label: 'Recojo en tienda', price: null, time: 'Cuando quieras' },
+    ],
+    otherPayments: [],
   },
   sabor: {
     id: 'demo-sabor',
@@ -150,6 +180,11 @@ const demoStores: Record<string, Store> = {
     hasShipping: true, hasSecurePayment: true, hasReturns: false,
     popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
     yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
+    shippingOptions: [
+      { label: 'Delivery en la ciudad', price: 10, time: '24 horas' },
+      { label: 'Recojo en tienda', price: null, time: 'Cuando quieras' },
+    ],
+    otherPayments: [],
   },
   moda: {
     id: 'demo-moda',
@@ -169,6 +204,11 @@ const demoStores: Record<string, Store> = {
     hasShipping: true, hasSecurePayment: true, hasReturns: true,
     popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
     yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
+    shippingOptions: [
+      { label: 'Delivery en la ciudad', price: 10, time: '24 horas' },
+      { label: 'Recojo en tienda', price: null, time: 'Cuando quieras' },
+    ],
+    otherPayments: [],
   },
 }
 
