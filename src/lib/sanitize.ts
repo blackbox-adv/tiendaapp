@@ -67,6 +67,11 @@ export function sanitizeUrl(url: string): string {
   if (/^\/\//.test(cleaned)) {
     return 'https:' + cleaned
   }
+  // Rutas relativas del mismo origen (p.ej. /sample-products/arroz.jpg o /uploads/x.jpg).
+  // Seguras: no cambian de origen ni permiten esquemas peligrosos (javascript:, data:, etc.)
+  if (/^\/[^/]/.test(cleaned)) {
+    return cleaned
+  }
   return ''
 }
 
