@@ -95,6 +95,8 @@ export function StoreView({ slug }: { slug: string }) {
               plinQrUrl: data.plinQrUrl || null,
               yapeNumber: data.yapeNumber || null,
               plinNumber: data.plinNumber || null,
+              otherPayments: Array.isArray(data.otherPayments) ? data.otherPayments : [],
+              shippingOptions: Array.isArray(data.shippingOptions) ? data.shippingOptions : [],
             })
             if (data.products && Array.isArray(data.products)) {
               // Helper to safely convert Prisma Decimal / string / number to JS number
