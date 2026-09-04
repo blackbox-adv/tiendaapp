@@ -65,6 +65,8 @@ function buildComparisonRows() {
     { label: 'Dominio personalizado', fn: (p: ApiPlan) => p.type !== 'free' },
     { label: 'Estadísticas avanzadas', fn: (p: ApiPlan) => p.type !== 'free' },
     { label: 'Reportes en Excel', fn: (p: ApiPlan) => p.type !== 'free' },
+    { label: 'Descripciones con IA', fn: (p: ApiPlan) => p.type !== 'free' },
+    { label: 'Landing IA para lanzamientos', fn: (p: ApiPlan) => p.type === 'premium' },
     { label: 'Soporte prioritario', fn: (p: ApiPlan) => p.type !== 'free' },
     { label: 'Soporte 24/7', fn: (p: ApiPlan) => p.type === 'premium' },
     { label: 'Sin marca TiendApp', fn: (p: ApiPlan) => p.type === 'premium' },

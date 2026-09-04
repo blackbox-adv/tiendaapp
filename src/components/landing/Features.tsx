@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import {
-  Smartphone, MessageCircle, Wallet, Clock, Rocket, Package, Gift,
+  Smartphone, MessageCircle, Wallet, Clock, Rocket, Package, Gift, Sparkles, Wand2,
 } from 'lucide-react'
 
 // Features escritas como BENEFICIOS (qué gana el emprendedor),
@@ -44,6 +44,18 @@ const features = [
     title: 'Packs y promociones que se venden solos',
     description:
       'TiendApp arma packs con descuento automáticamente (ej. pollo + gaseosa + papas) y resalta tus ofertas. El cliente toca un botón y te pide el pack completo por WhatsApp.',
+  },
+  {
+    icon: Sparkles,
+    title: 'La IA te escribe las descripciones (muy pronto)',
+    description:
+      '¿No sabes qué escribir de tu producto? Sube la foto y la IA crea el nombre, la descripción y el copy de venta por ti. Deja de pelearte con las palabras y dedica ese tiempo a tu negocio.',
+  },
+  {
+    icon: Wand2,
+    title: 'Landing de lanzamiento con IA (muy pronto)',
+    description:
+      '¿Vas a lanzar un producto nuevo o hacer una promoción? La IA te crea una página de lanzamiento profesional con diseño y textos, lista para compartir por WhatsApp y medir qué tanto gusta.',
   },
   {
     icon: Rocket,
