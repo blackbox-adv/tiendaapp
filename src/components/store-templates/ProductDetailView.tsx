@@ -119,6 +119,8 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
               plinQrUrl: data.plinQrUrl || null,
               yapeNumber: data.yapeNumber || null,
               plinNumber: data.plinNumber || null,
+              otherPayments: Array.isArray(data.otherPayments) ? data.otherPayments : [],
+              shippingOptions: Array.isArray(data.shippingOptions) ? data.shippingOptions : [],
             }
             setApiStore(mappedStore)
 

@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { PageRoute, User, Store, Product } from './types'
+import type { PageRoute, User, Store, Product, ShippingOption, OtherPayment } from './types'
 import { PLANS, MOCK_USERS, MOCK_STORES, MOCK_PRODUCTS, CATEGORIES } from './mock-data'
 
 // ── Schema transformation helpers (API → Frontend) ──
@@ -44,6 +44,9 @@ function transformApiStore(apiStore: Record<string, unknown>): Store {
     plinQrUrl: (apiStore.plinQrUrl as string | null) ?? null,
     yapeNumber: (apiStore.yapeNumber as string | null) ?? null,
     plinNumber: (apiStore.plinNumber as string | null) ?? null,
+    // LatAm: otros métodos de pago + opciones de envío
+    otherPayments: Array.isArray(apiStore.otherPayments) ? (apiStore.otherPayments as OtherPayment[]) : [],
+    shippingOptions: Array.isArray(apiStore.shippingOptions) ? (apiStore.shippingOptions as ShippingOption[]) : [],
   }
 }
 

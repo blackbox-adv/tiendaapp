@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import { useAppStore } from '@/lib/store'
 import { StoreView } from '@/components/store-templates/StoreView'
-import type { Store, Product } from '@/lib/types'
+import type { Store, Product, ShippingOption, OtherPayment } from '@/lib/types'
 
 // Transform server Prisma store to frontend Store type
 function transformStore(s: Record<string, unknown>): Store {
@@ -38,6 +38,8 @@ function transformStore(s: Record<string, unknown>): Store {
     plinQrUrl: (s.plinQrUrl as string) || null,
     yapeNumber: (s.yapeNumber as string) || null,
     plinNumber: (s.plinNumber as string) || null,
+    otherPayments: Array.isArray(s.otherPayments) ? (s.otherPayments as OtherPayment[]) : [],
+    shippingOptions: Array.isArray(s.shippingOptions) ? (s.shippingOptions as ShippingOption[]) : [],
   }
 }
 
