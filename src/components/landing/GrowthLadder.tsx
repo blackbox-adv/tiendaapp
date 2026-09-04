@@ -39,7 +39,7 @@ const LEVELS: Level[] = [
     level: 'Próximamente',
     title: 'Landing con IA para lanzar productos',
     description:
-      '¿Lanzaste un modelo nuevo de zapatillas? Sube una foto y la IA crea la página de lanzamiento con copy y diseño profesional. Comparte el link con tus clientes y mide qué producto encanta.',
+      '¿Lanzaste un modelo nuevo de zapatillas? Sube una foto y la IA crea la página de lanzamiento con copy y diseño profesional. También te escribe las descripciones de tus productos. Comparte el link y mide qué producto encanta.',
     badge: 'Muy pronto · Premium',
     badgeClass: 'bg-[#E8A87C]/15 text-[#E8A87C] border-[#E8A87C]/30',
     iconClass: 'text-[#E8A87C] bg-[#E8A87C]/10 border-[#E8A87C]/30',
@@ -51,7 +51,7 @@ const LEVELS: Level[] = [
     title: 'La tienda completa',
     description:
       '8 diseños profesionales según tu rubro, buscador y filtros, packs con descuento, reportes de ventas descargables y hasta 3 tiendas. Todo lo que necesitas para vivir de tu negocio.',
-    badge: `Desde S/19.90/mes`,
+    badge: `Desde S/29.99/mes`,
     badgeClass: 'bg-[#BC5A38]/20 text-[#E29B77] border-[#BC5A38]/40',
     iconClass: 'text-[#E29B77] bg-[#BC5A38]/10 border-[#BC5A38]/30',
     cta: { label: 'Ver planes', action: 'scroll' as const },
