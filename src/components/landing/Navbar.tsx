@@ -10,6 +10,7 @@ import { WhatsAppIcon } from './WhatsAppIcon'
 export function Navbar() {
   const navigate = useAppStore((s) => s.navigate)
   const currentUser = useAppStore((s) => s.currentUser)
+  const isSyncing = useAppStore((s) => s.isSyncing)
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -62,7 +63,7 @@ export function Navbar() {
             </button>
           </div>
 
-          {/* Auth Buttons */}
+          {/* Auth Buttons (desktop) */}
           <div className="hidden md:flex items-center gap-3">
             {currentUser ? (
               <Button
@@ -71,6 +72,9 @@ export function Navbar() {
               >
                 Mi Panel
               </Button>
+            ) : isSyncing ? (
+              // Restaurando sesión — esqueleto neutro para no ofrecer "Crear mi tienda" a quien ya tiene cuenta
+              <div className="w-28 h-9 rounded-md bg-stone-200/80 animate-pulse" />
             ) : (
               <>
                 <Button variant="outline" onClick={() => navigate({ page: 'login' })} className="border-stone-300 text-stone-700 hover:bg-white hover:text-[#BC5A38] hover:border-[#BC5A38]/40">
@@ -84,10 +88,21 @@ export function Navbar() {
             )}
           </div>
 
-          {/* Mobile Toggle */}
-          <button className="md:hidden" onClick={() => setMobileOpen(!mobileOpen)}>
-            {mobileOpen ? <X className="w-6 h-6 text-stone-700" /> : <Menu className="w-6 h-6 text-stone-700" />}
-          </button>
+          {/* Mobile: "Mi Panel" siempre a la vista (1 tap al dashboard, sin abrir menú) */}
+          <div className="md:hidden flex items-center gap-2">
+            {currentUser && (
+              <Button
+                size="sm"
+                onClick={() => navigate(currentUser.role === 'admin' ? { page: 'admin' } : { page: 'dashboard' })}
+                className="h-9 px-3.5 bg-stone-900 hover:bg-[#BC5A38] text-white text-sm font-semibold"
+              >
+                Mi Panel
+              </Button>
+            )}
+            <button className="p-2 -mr-2" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Abrir menú">
+              {mobileOpen ? <X className="w-6 h-6 text-stone-700" /> : <Menu className="w-6 h-6 text-stone-700" />}
+            </button>
+          </div>
         </div>
       </div>
 

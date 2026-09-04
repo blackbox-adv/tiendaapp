@@ -10,6 +10,8 @@ import { logAbEvent } from '@/lib/ab-test'
 
 export function Hero() {
   const navigate = useAppStore((s) => s.navigate)
+  const currentUser = useAppStore((s) => s.currentUser)
+  const isLoggedIn = !!currentUser
 
   return (
     <section className="relative overflow-hidden bg-terra-cream">
@@ -48,19 +50,32 @@ export function Hero() {
               Lista en 5 minutos, sin comisión por venta.
             </p>
 
-            {/* CTAs */}
+            {/* CTAs — adaptados a la sesión: con cuenta, el camino natural es el panel */}
             <div className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-4 mb-8">
-              <Button
-                size="lg"
-                onClick={() => {
-                  logAbEvent('cta_click')
-                  navigate({ page: 'register' })
-                }}
-                className="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-white font-bold px-8 py-6 text-lg rounded-full shadow-xl shadow-emerald-900/20 hover:shadow-2xl hover:scale-[1.02] transition-all"
-              >
-                <WhatsAppIcon className="w-5 h-5 mr-2" />
-                Crear mi tienda gratis
-              </Button>
+              {isLoggedIn ? (
+                <Button
+                  size="lg"
+                  onClick={() => {
+                    logAbEvent('cta_click')
+                    navigate(currentUser!.role === 'admin' ? { page: 'admin' } : { page: 'dashboard' })
+                  }}
+                  className="w-full sm:w-auto bg-stone-900 hover:bg-[#BC5A38] text-white font-bold px-8 py-6 text-lg rounded-full shadow-xl shadow-stone-900/20 hover:shadow-2xl hover:scale-[1.02] transition-all"
+                >
+                  Ir a mi panel
+                </Button>
+              ) : (
+                <Button
+                  size="lg"
+                  onClick={() => {
+                    logAbEvent('cta_click')
+                    navigate({ page: 'register' })
+                  }}
+                  className="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-white font-bold px-8 py-6 text-lg rounded-full shadow-xl shadow-emerald-900/20 hover:shadow-2xl hover:scale-[1.02] transition-all"
+                >
+                  <WhatsAppIcon className="w-5 h-5 mr-2" />
+                  Crear mi tienda gratis
+                </Button>
+              )}
               <Button
                 size="lg"
                 onClick={() => {
