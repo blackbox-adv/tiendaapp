@@ -43,7 +43,7 @@ export function Testimonials() {
   const waHref = supportWhatsappUrl('Hola! Quiero saber si TiendApp funciona para mi negocio')
 
   return (
-    <section id="testimonials" className="py-20 sm:py-28 bg-gray-50">
+    <section id="testimonials" className="py-20 sm:py-28 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -52,11 +52,11 @@ export function Testimonials() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="text-center mb-16"
         >
-          <span className="text-sm font-semibold text-violet-600 uppercase tracking-wider">Tiendas reales</span>
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mt-3 mb-4">
+          <span className="text-sm font-semibold text-[#BC5A38] uppercase tracking-wider">Tiendas reales</span>
+          <h2 className="font-display text-3xl sm:text-4xl font-bold text-stone-900 mt-3 mb-4">
             Entra a estas tiendas y pruébalo tú mismo
           </h2>
-          <p className="text-lg text-gray-500 max-w-2xl mx-auto">
+          <p className="text-lg text-stone-500 max-w-2xl mx-auto">
             Nada de capturas de pantalla: estas tiendas están funcionando ahora mismo.
             Elige un producto, toca el botón verde y mira cómo llega el pedido por
             WhatsApp — así de fácil le compra la gente a tus clientes.
@@ -76,26 +76,26 @@ export function Testimonials() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
                 transition={{ duration: 0.5, delay: i * 0.15, ease: "easeOut" }}
-                className="group bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-xl hover:border-violet-200 hover:-translate-y-1 transition-all duration-300 flex flex-col"
+                className="group bg-[#FAF6EF] rounded-2xl p-6 border border-[#E5DCCB] hover:shadow-xl hover:border-[#BC5A38]/40 hover:-translate-y-1 transition-all duration-300 flex flex-col"
               >
                 <div className="flex items-center justify-between mb-5">
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${store.accent}`}>
                     <Icon className="w-6 h-6" />
                   </div>
-                  <span className="text-xs font-medium text-gray-400 bg-gray-50 border border-gray-100 px-2.5 py-1 rounded-full">
+                  <span className="text-xs font-medium text-stone-500 bg-white border border-[#E5DCCB] px-2.5 py-1 rounded-full">
                     {store.template}
                   </span>
                 </div>
 
-                <h3 className="font-semibold text-gray-900 text-lg">{store.name}</h3>
-                <p className="text-xs text-violet-600 font-medium mb-3">{store.industry}</p>
-                <p className="text-sm text-gray-600 leading-relaxed flex-1">{store.description}</p>
+                <h3 className="font-display font-semibold text-stone-900 text-lg">{store.name}</h3>
+                <p className="text-xs text-[#BC5A38] font-medium mb-3">{store.industry}</p>
+                <p className="text-sm text-stone-600 leading-relaxed flex-1">{store.description}</p>
 
-                <div className="mt-5 pt-4 border-t border-gray-100 flex items-center justify-between">
-                  <span className="text-sm font-semibold text-violet-700 group-hover:text-violet-800">
+                <div className="mt-5 pt-4 border-t border-[#E5DCCB] flex items-center justify-between">
+                  <span className="text-sm font-semibold text-[#BC5A38] group-hover:text-[#A84C2D]">
                     Ver tienda en vivo
                   </span>
-                  <span className="w-8 h-8 rounded-full bg-violet-50 text-violet-600 flex items-center justify-center group-hover:bg-violet-600 group-hover:text-white transition-all duration-300">
+                  <span className="w-8 h-8 rounded-full bg-[#F6E7DE] text-[#BC5A38] flex items-center justify-center group-hover:bg-[#BC5A38] group-hover:text-white transition-all duration-300">
                     <ArrowRight className="w-4 h-4" />
                   </span>
                 </div>
@@ -110,20 +110,20 @@ export function Testimonials() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="rounded-3xl bg-gradient-to-br from-violet-600 to-purple-700 px-6 py-10 sm:px-12 sm:py-12 text-center relative overflow-hidden"
+          className="rounded-3xl bg-terra-ink px-6 py-10 sm:px-12 sm:py-12 text-center relative overflow-hidden border border-[#BC5A38]/20"
         >
-          <div className="absolute -top-20 -right-20 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
-          <div className="absolute -bottom-24 -left-16 w-72 h-72 bg-purple-400/20 rounded-full blur-3xl" />
+          <div className="absolute -top-20 -right-20 w-64 h-64 bg-[#BC5A38]/20 rounded-full blur-3xl" />
+          <div className="absolute -bottom-24 -left-16 w-72 h-72 bg-[#E8A87C]/10 rounded-full blur-3xl" />
 
           <div className="relative">
-            <div className="inline-flex items-center gap-2 bg-white/15 text-white text-sm font-medium px-4 py-1.5 rounded-full mb-5">
-              <Store className="w-4 h-4" />
+            <div className="inline-flex items-center gap-2 bg-white/10 text-white text-sm font-medium px-4 py-1.5 rounded-full mb-5">
+              <Store className="w-4 h-4 text-[#E29B77]" />
               Hecho en Latinoamérica · Sin tarjeta · Sin comisión por venta
             </div>
-            <h3 className="text-2xl sm:text-3xl font-bold text-white mb-3">
+            <h3 className="font-display text-2xl sm:text-3xl font-bold text-white mb-3">
               ¿Dudas que funcione para tu negocio?
             </h3>
-            <p className="text-violet-100 max-w-2xl mx-auto mb-8">
+            <p className="text-stone-300 max-w-2xl mx-auto mb-8">
               Crea tu tienda gratis en minutos, sube tus productos y comparte tu catálogo
               por WhatsApp hoy mismo. Si necesitas ayuda para configurarla, escríbenos:
               te respondemos en minutos.
@@ -131,7 +131,7 @@ export function Testimonials() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <button
                 onClick={() => navigate({ page: 'register' })}
-                className="w-full sm:w-auto px-8 py-3.5 bg-white text-violet-700 font-semibold rounded-xl hover:bg-violet-50 shadow-lg hover:shadow-xl transition-all duration-300"
+                className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-emerald-500 to-green-500 text-white font-semibold rounded-full hover:from-emerald-400 hover:to-green-400 shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 Crear mi tienda gratis
               </button>
@@ -139,7 +139,7 @@ export function Testimonials() {
                 href={waHref ?? '/contact'}
                 target={waHref ? '_blank' : undefined}
                 rel={waHref ? 'noopener noreferrer' : undefined}
-                className="w-full sm:w-auto px-8 py-3.5 border-2 border-white/40 text-white font-semibold rounded-xl hover:bg-white/10 hover:border-white/60 transition-all duration-300 inline-flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-8 py-3.5 border-2 border-white/30 text-white font-semibold rounded-full hover:bg-white/10 hover:border-white/50 transition-all duration-300 inline-flex items-center justify-center gap-2"
               >
                 <MessageCircle className="w-5 h-5" />
                 {waHref ? 'Escríbenos por WhatsApp' : 'Contáctanos'}

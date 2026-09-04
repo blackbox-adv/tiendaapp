@@ -139,3 +139,42 @@ html {
     bottom: 14rem;
   }
 }
+
+/* ============================================================
+   SISTEMA VISUAL TERRACOTA (solo landing)
+   Paleta editorial: crema cálido + tinta negra + terracota.
+   Se aplica con clases utilitarias — NO toca las variables
+   violeta de :root que usa el resto de la app (dashboard, admin).
+   ============================================================ */
+
+/* Serif editorial para titulares de la landing */
+.font-display {
+  font-family: var(--font-display), Georgia, 'Times New Roman', serif;
+}
+
+/* Paleta terracota como utilidades Tailwind arbitrarias de referencia:
+   crema #F7F2EA · crema profundo #EFE7DA · tinta #1C1917
+   terracota #BC5A38 · terracota suave #F6E7DE · verde WhatsApp CTAs */
+.bg-terra-cream { background-color: #F7F2EA; }
+.bg-terra-deep { background-color: #EFE7DA; }
+.bg-terra-ink { background-color: #1C1917; }
+.bg-terra-soft { background-color: #F6E7DE; }
+.text-terra { color: #BC5A38; }
+.bg-terra { background-color: #BC5A38; }
+.border-terra { border-color: #BC5A38; }
+
+/* Itálica serif con acento terracota para palabras destacadas del H1 */
+.accent-serif {
+  font-family: var(--font-display), Georgia, serif;
+  font-style: italic;
+  color: #BC5A38;
+}
+
+/* Flotación suave para tarjetas del mockup */
+@keyframes float-soft {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.animate-float-soft {
+  animation: float-soft 5s ease-in-out infinite;
+}

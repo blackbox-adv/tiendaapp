@@ -32,7 +32,7 @@ const STEPS = [
 
 export function HowItWorks() {
   return (
-    <section id="how-it-works" className="py-20 sm:py-28 bg-gray-50">
+    <section id="how-it-works" className="py-20 sm:py-28 bg-terra-cream">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -41,20 +41,20 @@ export function HowItWorks() {
           transition={{ duration: 0.6, ease: 'easeOut' }}
           className="text-center mb-16"
         >
-          <span className="text-sm font-semibold text-violet-600 uppercase tracking-wider">
+          <span className="text-sm font-semibold text-[#BC5A38] uppercase tracking-wider">
             ¿Cómo funciona?
           </span>
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mt-3 mb-4">
+          <h2 className="font-display text-3xl sm:text-4xl font-bold text-stone-900 mt-3 mb-4">
             De cero a vendiendo en 3 pasos
           </h2>
-          <p className="text-lg text-gray-500 max-w-2xl mx-auto">
+          <p className="text-lg text-stone-500 max-w-2xl mx-auto">
             Sin programar, sin contratos y sin comisiones por venta. Así de fácil es empezar.
           </p>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
           {/* Connecting line for desktop */}
-          <div className="hidden md:block absolute top-16 left-[16%] right-[16%] h-0.5 bg-gradient-to-r from-violet-200 via-violet-300 to-violet-200" />
+          <div className="hidden md:block absolute top-16 left-[16%] right-[16%] h-0.5 bg-gradient-to-r from-[#BC5A38]/20 via-[#BC5A38]/50 to-[#BC5A38]/20" />
 
           {STEPS.map((step, i) => (
             <motion.div
@@ -63,21 +63,21 @@ export function HowItWorks() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.6, delay: i * 0.15, ease: 'easeOut' }}
-              className="relative bg-white rounded-2xl p-7 border border-gray-100 shadow-sm hover:shadow-md transition-shadow text-center"
+              className="relative bg-white rounded-2xl p-7 border border-[#E5DCCB] shadow-sm hover:shadow-lg hover:border-[#BC5A38]/30 transition-all text-center"
             >
               <div className="relative inline-flex items-center justify-center mb-5">
-                <div className="w-16 h-16 rounded-2xl bg-violet-100 flex items-center justify-center">
-                  <step.icon className="w-8 h-8 text-violet-600" />
+                <div className="w-16 h-16 rounded-2xl bg-[#F6E7DE] flex items-center justify-center">
+                  <step.icon className="w-8 h-8 text-[#BC5A38]" />
                 </div>
-                <span className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-violet-600 text-white text-xs font-bold flex items-center justify-center shadow-md">
+                <span className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-stone-900 text-white text-xs font-bold flex items-center justify-center shadow-md">
                   {step.step}
                 </span>
               </div>
 
-              <h3 className="text-lg font-bold text-gray-900 mb-2">{step.title}</h3>
-              <p className="text-sm text-gray-500 leading-relaxed mb-4">{step.description}</p>
+              <h3 className="font-display text-lg font-bold text-stone-900 mb-2">{step.title}</h3>
+              <p className="text-sm text-stone-500 leading-relaxed mb-4">{step.description}</p>
 
-              <span className="inline-block px-3 py-1 rounded-full bg-violet-50 text-violet-700 text-xs font-semibold">
+              <span className="inline-block px-3 py-1 rounded-full bg-[#F6E7DE] text-[#BC5A38] text-xs font-semibold">
                 {step.highlight}
               </span>
             </motion.div>

@@ -48,7 +48,7 @@ export function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(0)
 
   return (
-    <section id="faq" className="py-20 sm:py-28 bg-white">
+    <section id="faq" className="py-20 sm:py-28 bg-terra-cream">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -57,13 +57,13 @@ export function FAQ() {
           transition={{ duration: 0.6, ease: 'easeOut' }}
           className="text-center mb-12"
         >
-          <span className="text-sm font-semibold text-violet-600 uppercase tracking-wider">
+          <span className="text-sm font-semibold text-[#BC5A38] uppercase tracking-wider">
             Preguntas frecuentes
           </span>
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mt-3 mb-4">
+          <h2 className="font-display text-3xl sm:text-4xl font-bold text-stone-900 mt-3 mb-4">
             Resolvemos tus dudas
           </h2>
-          <p className="text-lg text-gray-500 max-w-2xl mx-auto">
+          <p className="text-lg text-stone-500 max-w-2xl mx-auto">
             Lo que más preguntan los emprendedores antes de crear su tienda.
           </p>
         </motion.div>
@@ -80,8 +80,8 @@ export function FAQ() {
                 transition={{ duration: 0.4, delay: i * 0.05, ease: 'easeOut' }}
                 className={`rounded-2xl border transition-colors ${
                   isOpen
-                    ? 'border-violet-200 bg-violet-50/40'
-                    : 'border-gray-200 bg-white hover:border-violet-200'
+                    ? 'border-[#BC5A38]/40 bg-white'
+                    : 'border-[#E5DCCB] bg-white/70 hover:border-[#BC5A38]/40'
                 }`}
               >
                 <button
@@ -89,11 +89,11 @@ export function FAQ() {
                   className="w-full flex items-center justify-between gap-4 p-5 text-left"
                   aria-expanded={isOpen}
                 >
-                  <span className="font-semibold text-gray-900 text-base sm:text-lg">
+                  <span className="font-semibold text-stone-900 text-base sm:text-lg">
                     {item.question}
                   </span>
                   <ChevronDown
-                    className={`w-5 h-5 text-violet-600 flex-shrink-0 transition-transform duration-300 ${
+                    className={`w-5 h-5 text-[#BC5A38] flex-shrink-0 transition-transform duration-300 ${
                       isOpen ? 'rotate-180' : ''
                     }`}
                   />
@@ -107,7 +107,7 @@ export function FAQ() {
                       transition={{ duration: 0.3, ease: 'easeInOut' }}
                       className="overflow-hidden"
                     >
-                      <p className="px-5 pb-5 text-gray-600 leading-relaxed text-sm sm:text-base">
+                      <p className="px-5 pb-5 text-stone-600 leading-relaxed text-sm sm:text-base">
                         {item.answer}
                       </p>
                     </motion.div>
@@ -123,14 +123,14 @@ export function FAQ() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="text-center text-sm text-gray-500 mt-8"
+          className="text-center text-sm text-stone-500 mt-8"
         >
           ¿Tienes otra duda?{' '}
           <a
             href={waHref ?? '/contact'}
             target={waHref ? '_blank' : undefined}
             rel={waHref ? 'noopener noreferrer' : undefined}
-            className="text-violet-600 font-medium hover:underline"
+            className="text-[#BC5A38] font-medium hover:underline"
           >
             {waHref ? 'Escríbenos por WhatsApp' : 'Contáctanos'}
           </a>{' '}

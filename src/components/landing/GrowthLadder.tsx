@@ -41,8 +41,8 @@ const LEVELS: Level[] = [
     description:
       '¿Lanzaste un modelo nuevo de zapatillas? Sube una foto y la IA crea la página de lanzamiento con copy y diseño profesional. Comparte el link con tus clientes y mide qué producto encanta.',
     badge: 'Muy pronto · Premium',
-    badgeClass: 'bg-amber-400/15 text-amber-300 border-amber-400/30',
-    iconClass: 'text-amber-300 bg-amber-400/10 border-amber-400/30',
+    badgeClass: 'bg-[#E8A87C]/15 text-[#E8A87C] border-[#E8A87C]/30',
+    iconClass: 'text-[#E8A87C] bg-[#E8A87C]/10 border-[#E8A87C]/30',
     soon: true,
   },
   {
@@ -52,8 +52,8 @@ const LEVELS: Level[] = [
     description:
       '8 diseños profesionales según tu rubro, buscador y filtros, packs con descuento, reportes de ventas descargables y hasta 3 tiendas. Todo lo que necesitas para vivir de tu negocio.',
     badge: `Desde S/19.90/mes`,
-    badgeClass: 'bg-violet-400/15 text-violet-200 border-violet-400/30',
-    iconClass: 'text-violet-200 bg-violet-400/10 border-violet-400/30',
+    badgeClass: 'bg-[#BC5A38]/20 text-[#E29B77] border-[#BC5A38]/40',
+    iconClass: 'text-[#E29B77] bg-[#BC5A38]/10 border-[#BC5A38]/30',
     cta: { label: 'Ver planes', action: 'scroll' as const },
   },
 ]
@@ -62,9 +62,9 @@ export function GrowthLadder() {
   const navigate = useAppStore((s) => s.navigate)
 
   return (
-    <section id="escala" className="relative py-20 sm:py-28 bg-gradient-to-b from-violet-950 via-violet-900 to-purple-950 overflow-hidden">
-      <div className="absolute top-0 right-0 w-96 h-96 bg-fuchsia-600 rounded-full filter blur-3xl opacity-10" />
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-600 rounded-full filter blur-3xl opacity-10" />
+    <section id="escala" className="relative py-20 sm:py-28 bg-terra-ink overflow-hidden">
+      <div className="absolute top-0 right-0 w-96 h-96 bg-[#BC5A38] rounded-full filter blur-3xl opacity-15" />
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#8A4A2F] rounded-full filter blur-3xl opacity-15" />
 
       <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
@@ -74,14 +74,14 @@ export function GrowthLadder() {
           transition={{ duration: 0.6, ease: 'easeOut' }}
           className="text-center mb-16"
         >
-          <span className="text-sm font-semibold text-violet-300 uppercase tracking-wider">
+          <span className="text-sm font-semibold text-[#E29B77] uppercase tracking-wider">
             Tu negocio crece, TiendApp crece contigo
           </span>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mt-3 mb-4">
-            Empieza gratis. <span className="text-emerald-300">Vende.</span> Escala cuando
+          <h2 className="font-display text-3xl sm:text-4xl font-bold text-white mt-3 mb-4">
+            Empieza gratis. <span className="accent-serif">Vende.</span> Escala cuando
             lo necesites.
           </h2>
-          <p className="text-lg text-violet-200/80 max-w-2xl mx-auto">
+          <p className="text-lg text-stone-300/80 max-w-2xl mx-auto">
             No necesitas pagar para empezar. Necesitas pagar cuando tu negocio ya está
             volando — y ahí estamos nosotros.
           </p>
@@ -97,12 +97,12 @@ export function GrowthLadder() {
               transition={{ duration: 0.7, delay: i * 0.15, ease: 'easeOut' }}
               className={`relative rounded-3xl p-7 border backdrop-blur-sm flex flex-col ${
                 i === 2
-                  ? 'bg-white/10 border-violet-400/40 shadow-2xl shadow-violet-900/50 md:-translate-y-3'
+                  ? 'bg-white/10 border-[#BC5A38]/50 shadow-2xl shadow-black/50 md:-translate-y-3'
                   : 'bg-white/5 border-white/10'
               }`}
             >
               {/* Step number */}
-              <span className="absolute -top-3 left-6 px-3 py-1 rounded-full text-xs font-bold bg-white text-violet-900 shadow-md">
+              <span className="absolute -top-3 left-6 px-3 py-1 rounded-full text-xs font-bold bg-[#BC5A38] text-white shadow-md">
                 PASO {i + 1}
               </span>
 
@@ -110,11 +110,11 @@ export function GrowthLadder() {
                 <lvl.icon className="w-7 h-7" />
               </div>
 
-              <p className="text-xs font-semibold uppercase tracking-widest text-violet-300/70 mb-1">
+              <p className="text-xs font-semibold uppercase tracking-widest text-stone-400 mb-1">
                 {lvl.level}
               </p>
-              <h3 className="text-xl font-bold text-white mb-3">{lvl.title}</h3>
-              <p className="text-sm text-violet-100/70 leading-relaxed mb-5 flex-1">
+              <h3 className="font-display text-xl font-bold text-white mb-3">{lvl.title}</h3>
+              <p className="text-sm text-stone-300/70 leading-relaxed mb-5 flex-1">
                 {lvl.description}
               </p>
 
@@ -129,10 +129,10 @@ export function GrowthLadder() {
                       ? navigate({ page: 'register' })
                       : document.querySelector('#pricing')?.scrollIntoView({ behavior: 'smooth' })
                   }
-                  className={`w-full font-bold rounded-xl ${
+                  className={`w-full font-bold rounded-full ${
                     i === 0
                       ? 'bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-white'
-                      : 'bg-white text-violet-800 hover:bg-violet-50'
+                      : 'bg-white text-stone-900 hover:bg-[#F6E7DE]'
                   }`}
                 >
                   {lvl.cta.label}
