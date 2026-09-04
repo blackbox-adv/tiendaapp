@@ -8,6 +8,7 @@ import { Star, ShoppingBag, Search, X, ChevronRight, ImageIcon } from 'lucide-re
 import { StoreFeatureBadges } from './StoreFeatureBadges'
 import { CombosSection } from './CombosSection'
 import { PaymentMethods } from './PaymentMethods'
+import { ShippingOptions } from './ShippingOptions'
 import { useAppStore } from '@/lib/store'
 import type { Store, Product } from '@/lib/types'
 
@@ -352,6 +353,7 @@ export function MinimalistTemplate({ store, products, storeSlug, planId, onProdu
       </main>
 
       {/* Footer — minimal */}
+      <ShippingOptions store={store} />
       <PaymentMethods store={store} />
 
       <footer className="mt-auto border-t border-gray-50">

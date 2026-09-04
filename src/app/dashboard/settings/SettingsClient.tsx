@@ -17,7 +17,13 @@ import {
   Wallet,
   Upload,
   X,
+  Truck,
+  CreditCard,
+  Plus,
+  Trash2,
 } from 'lucide-react';
+
+import type { ShippingOption, OtherPayment } from '@/lib/types';
 
 interface StoreData {
   id: string;
@@ -31,6 +37,8 @@ interface StoreData {
   yapeQrUrl: string | null;
   plinQrUrl: string | null;
   logo: string | null;
+  otherPayments?: OtherPayment[] | null;
+  shippingOptions?: ShippingOption[] | null;
 }
 
 export default function SettingsClient() {
@@ -51,6 +59,12 @@ export default function SettingsClient() {
   const [yapeQrUrl, setYapeQrUrl] = useState<string | null>(null);
   const [plinQrUrl, setPlinQrUrl] = useState<string | null>(null);
   const [uploadingQr, setUploadingQr] = useState<'yape' | 'plin' | null>(null);
+
+  // Otros métodos de pago del país (LatAm: Mercado Pago, Nequi, Sinpe Móvil, etc.)
+  const [otherPayments, setOtherPayments] = useState<OtherPayment[]>([]);
+
+  // Opciones de envío que la tienda ofrece
+  const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
 
   // Password change
   const [currentPassword, setCurrentPassword] = useState('');
@@ -88,6 +102,16 @@ export default function SettingsClient() {
         setPlinNumber((storeData as StoreData).plinNumber || '');
         setYapeQrUrl((storeData as StoreData).yapeQrUrl || null);
         setPlinQrUrl((storeData as StoreData).plinQrUrl || null);
+        setOtherPayments(
+          Array.isArray((storeData as StoreData).otherPayments)
+            ? (storeData as StoreData).otherPayments!.filter((p) => p && p.label)
+            : []
+        );
+        setShippingOptions(
+          Array.isArray((storeData as StoreData).shippingOptions)
+            ? (storeData as StoreData).shippingOptions!.filter((s) => s && s.label)
+            : []
+        );
       }
     } catch {
       setError('Error de conexión');
@@ -118,6 +142,8 @@ export default function SettingsClient() {
           plinNumber: plinNumber.trim() || null,
           yapeQrUrl,
           plinQrUrl,
+          otherPayments: otherPayments.filter((p) => p.label.trim()),
+          shippingOptions: shippingOptions.filter((s) => s.label.trim()),
         }),
       });
 
@@ -385,6 +411,131 @@ export default function SettingsClient() {
                     </div>
                   ))}
                 </div>
+              </div>
+
+              {/* Otros métodos de pago (LatAm) */}
+              <div className="pt-2 border-t border-gray-100">
+                <div className="flex items-center gap-2 mt-4 mb-1">
+                  <CreditCard className="w-4 h-4 text-violet-600" />
+                  <h4 className="text-sm font-semibold text-gray-900">Otros métodos de pago</h4>
+                </div>
+                <p className="text-xs text-gray-500 mb-4">
+                  ¿Cobras con Mercado Pago, Nequi, Sinpe Móvil, Daviplata o transferencia? Agrégalos y aparecerán junto a Yape/Plin en tu tienda.
+                </p>
+
+                {otherPayments.map((p, i) => (
+                  <div key={i} className="flex gap-2 mb-2">
+                    <Input
+                      placeholder="Nombre (ej: Mercado Pago)"
+                      value={p.label}
+                      maxLength={40}
+                      onChange={(e) => {
+                        const next = [...otherPayments];
+                        next[i] = { ...p, label: e.target.value };
+                        setOtherPayments(next);
+                      }}
+                    />
+                    <Input
+                      placeholder="Alias, número o link de pago"
+                      value={p.number}
+                      maxLength={80}
+                      onChange={(e) => {
+                        const next = [...otherPayments];
+                        next[i] = { ...p, number: e.target.value };
+                        setOtherPayments(next);
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setOtherPayments(otherPayments.filter((_, j) => j !== i))}
+                      className="p-2 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
+                      aria-label={`Quitar ${p.label || 'método de pago'}`}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+
+                {otherPayments.length < 6 && (
+                  <button
+                    type="button"
+                    onClick={() => setOtherPayments([...otherPayments, { label: '', number: '' }])}
+                    className="inline-flex items-center gap-1.5 text-sm text-violet-600 hover:text-violet-700 font-medium mt-1"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Agregar método de pago
+                  </button>
+                )}
+              </div>
+
+              {/* Opciones de envío */}
+              <div className="pt-2 border-t border-gray-100">
+                <div className="flex items-center gap-2 mt-4 mb-1">
+                  <Truck className="w-4 h-4 text-violet-600" />
+                  <h4 className="text-sm font-semibold text-gray-900">Opciones de envío</h4>
+                </div>
+                <p className="text-xs text-gray-500 mb-4">
+                  Indica cómo entregas tus productos: delivery, recojo en tienda, envío a otras ciudades... Tus clientes lo verán antes de pedir.
+                </p>
+
+                {shippingOptions.map((s, i) => (
+                  <div key={i} className="flex flex-col sm:flex-row gap-2 mb-2">
+                    <Input
+                      placeholder="Zona o método (ej: Delivery centro)"
+                      value={s.label}
+                      maxLength={60}
+                      onChange={(e) => {
+                        const next = [...shippingOptions];
+                        next[i] = { ...s, label: e.target.value };
+                        setShippingOptions(next);
+                      }}
+                    />
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder="Costo (vacío = gratis)"
+                      value={s.price ?? ''}
+                      onChange={(e) => {
+                        const next = [...shippingOptions];
+                        const v = e.target.value === '' ? null : parseFloat(e.target.value);
+                        next[i] = { ...s, price: v !== null && isFinite(v) && v > 0 ? v : null };
+                        setShippingOptions(next);
+                      }}
+                      className="sm:w-44"
+                    />
+                    <Input
+                      placeholder="Tiempo (ej: 24 horas)"
+                      value={s.time}
+                      maxLength={40}
+                      onChange={(e) => {
+                        const next = [...shippingOptions];
+                        next[i] = { ...s, time: e.target.value };
+                        setShippingOptions(next);
+                      }}
+                      className="sm:w-44"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShippingOptions(shippingOptions.filter((_, j) => j !== i))}
+                      className="p-2 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
+                      aria-label={`Quitar ${s.label || 'opción de envío'}`}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+
+                {shippingOptions.length < 6 && (
+                  <button
+                    type="button"
+                    onClick={() => setShippingOptions([...shippingOptions, { label: '', price: null, time: '' }])}
+                    className="inline-flex items-center gap-1.5 text-sm text-violet-600 hover:text-violet-700 font-medium mt-1"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Agregar opción de envío
+                  </button>
+                )}
               </div>
 
               <Button

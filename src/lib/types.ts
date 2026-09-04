@@ -38,6 +38,19 @@ export interface User {
   createdAt: string
 }
 
+// Opción de envío que la tienda ofrece (ej: "Delivery en Lima", S/10, 24h)
+export interface ShippingOption {
+  label: string
+  price: number | null   // null o 0 = gratis
+  time: string           // tiempo estimado ("24 horas", "2-3 días")
+}
+
+// Método de pago local de cualquier país (Mercado Pago, Nequi, Sinpe Móvil, etc.)
+export interface OtherPayment {
+  label: string
+  number: string
+}
+
 export interface Store {
   id: string
   name: string
@@ -63,6 +76,8 @@ export interface Store {
   plinQrUrl: string | null
   yapeNumber: string | null
   plinNumber: string | null
+  otherPayments?: OtherPayment[]
+  shippingOptions?: ShippingOption[]
   userId: string
   isActive: boolean
   createdAt: string

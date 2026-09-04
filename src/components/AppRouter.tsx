@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAppStore } from '@/lib/store'
@@ -9,6 +9,7 @@ import type { PageRoute } from '@/lib/types'
 // Landing
 import { Navbar } from '@/components/landing/Navbar'
 import { Hero } from '@/components/landing/Hero'
+import { HeroClassic } from '@/components/landing/HeroClassic'
 import { Problem } from '@/components/landing/Problem'
 import { HowItWorks } from '@/components/landing/HowItWorks'
 import { Features } from '@/components/landing/Features'
@@ -19,6 +20,7 @@ import { Pricing } from '@/components/landing/Pricing'
 import { Testimonials } from '@/components/landing/Testimonials'
 import { FAQ } from '@/components/landing/FAQ'
 import { Footer } from '@/components/landing/Footer'
+import { getAbVariant, logAbEvent, type AbVariant } from '@/lib/ab-test'
 
 // Auth
 import { LoginPage } from '@/components/auth/LoginPage'
@@ -43,6 +45,37 @@ const pageVariants = {
   animate: { opacity: 1, y: 0 },
   exit: { opacity: 0, y: -12 },
   transition: { duration: 0.3, ease: "easeInOut" as const },
+}
+
+// Landing con test A/B: el hero que ve cada visitante se decide 50/50
+// (persistente) y los resultados se miden en /api/ab/stats.
+function LandingView() {
+  const [variant, setVariant] = useState<AbVariant | null>(null)
+
+  useEffect(() => {
+    const v = getAbVariant()
+    setVariant(v)
+    logAbEvent('view', v)
+  }, [])
+
+  if (variant === null) return null
+
+  return (
+    <motion.div key="landing" variants={pageVariants} initial="initial" animate="animate" exit="exit" className="min-h-screen">
+      <Navbar />
+      {variant === 'B' ? <HeroClassic /> : <Hero />}
+      <Problem />
+      <HowItWorks />
+      <Features />
+      <Templates />
+      <Comparison />
+      <GrowthLadder />
+      <Pricing />
+      <Testimonials />
+      <FAQ />
+      <Footer />
+    </motion.div>
+  )
 }
 
 // Routes that are handled by Next.js App Router pages
@@ -173,22 +206,7 @@ export default function AppRouter() {
   const renderPage = () => {
     switch (route.page) {
       case 'landing':
-        return (
-          <motion.div key="landing" variants={pageVariants} initial="initial" animate="animate" exit="exit" className="min-h-screen">
-            <Navbar />
-            <Hero />
-            <Problem />
-            <HowItWorks />
-            <Features />
-            <Templates />
-            <Comparison />
-            <GrowthLadder />
-            <Pricing />
-            <Testimonials />
-            <FAQ />
-            <Footer />
-          </motion.div>
-        )
+        return <LandingView />
 
       case 'login':
         return (

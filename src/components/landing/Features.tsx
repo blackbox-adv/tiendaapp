@@ -47,7 +47,7 @@ const features = [
   },
   {
     icon: Rocket,
-    title: 'Vende en todo el Perú',
+    title: 'Vende en todo tu país',
     description:
       'Comparte tu link por WhatsApp, Instagram, Facebook o TikTok. Llegas a clientes fuera de tu ciudad sin pagar envíos ni intermediarios. Tú despachas, tú cobras, tú decides.',
   },
@@ -84,7 +84,7 @@ export function Features() {
             Todo lo que necesitas para vender online
           </h2>
           <p className="text-lg text-gray-500 max-w-2xl mx-auto">
-            Hecho para emprendedores peruanos. Sin código, sin comisiones por venta y sin
+            Hecho para emprendedores de Latinoamérica. Sin código, sin comisiones por venta y sin
             complicaciones. Tú te enfocas en vender, nosotros en la tecnología.
           </p>
         </motion.div>

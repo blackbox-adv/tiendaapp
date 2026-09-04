@@ -39,7 +39,7 @@ const FAQ_ITEMS: FAQItem[] = [
   {
     question: '¿Necesito tarjeta de crédito para registrarme?',
     answer:
-      'No. El plan gratis no pide tarjeta. Te registras con tu correo, creas tu tienda y empiezas a vender. Solo si decides pasar a Pro o Premium necesitarás un método de pago, y puedes pagar con Yape, Plin o transferencia bancaria desde Perú.',
+      'No. El plan gratis no pide tarjeta. Te registras con tu correo, creas tu tienda y empiezas a vender. Solo si decides pasar a Pro o Premium necesitarás un método de pago, y puedes pagar con Yape, Plin, Mercado Pago o transferencia bancaria.',
   },
 ]
 
@@ -64,7 +64,7 @@ export function FAQ() {
             Resolvemos tus dudas
           </h2>
           <p className="text-lg text-gray-500 max-w-2xl mx-auto">
-            Lo que más preguntan los emprendedores peruanos antes de crear su tienda.
+            Lo que más preguntan los emprendedores antes de crear su tienda.
           </p>
         </motion.div>
 

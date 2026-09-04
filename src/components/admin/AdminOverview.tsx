@@ -17,10 +17,15 @@ interface Stats {
   expiringSubscriptions: number; pastDueCount: number
 }
 
+interface AbStats {
+  variants: { variant: string; views: number; ctaClicks: number; registers: number; ctaRate: number; registerRate: number }[]
+}
+
 export function AdminOverview() {
   const { navigate } = useAppStore()
   const [stats, setStats] = useState<Stats | null>(null)
   const [billing, setBilling] = useState<{ pendingPayments: number; pastDueSubscriptions: any[]; expiringSoon: number } | null>(null)
+  const [ab, setAb] = useState<AbStats | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -29,13 +34,15 @@ export function AdminOverview() {
         const token = typeof window !== 'undefined' ? localStorage.getItem('tiendapp_token') : null
         const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {}
 
-        const [statsRes, billingRes] = await Promise.all([
+        const [statsRes, billingRes, abRes] = await Promise.all([
           fetch('/api/admin/stats', { headers }),
           fetch('/api/billing/check', { headers }),
+          fetch('/api/ab/stats', { headers }),
         ])
 
         if (statsRes.ok) setStats(await statsRes.json())
         if (billingRes.ok) setBilling(await billingRes.json())
+        if (abRes.ok) setAb(await abRes.json())
       } catch (err) {
         console.error('Error loading admin stats:', err)
       } finally {
@@ -75,6 +82,51 @@ export function AdminOverview() {
                 onClick={() => navigate({ page: 'admin-payments' })}>
                 Ver pagos
               </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Test A/B landing — decisión de diseño con datos reales */}
+      {ab?.variants && (ab.variants[0]?.views + ab.variants[1]?.views) > 0 && (
+        <Card>
+          <CardContent className="p-5">
+            <div className="flex items-center gap-2 mb-1">
+              <TrendingUp className="w-4 h-4 text-violet-600" />
+              <p className="text-sm font-semibold text-gray-900">Test A/B — ¿qué diseño de landing convierte más?</p>
+            </div>
+            <p className="text-xs text-gray-400 mb-4">
+              Gana la variante con mejor % de registro. Decide con al menos ~100 vistas por variante.
+            </p>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left text-xs text-gray-400 uppercase tracking-wide">
+                    <th className="pb-2 pr-4">Variante</th>
+                    <th className="pb-2 pr-4">Vistas</th>
+                    <th className="pb-2 pr-4">Clicks CTA</th>
+                    <th className="pb-2 pr-4">% CTA</th>
+                    <th className="pb-2 pr-4">Registros</th>
+                    <th className="pb-2">% Registro</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ab.variants.map((v) => (
+                    <tr key={v.variant} className="border-t border-gray-100">
+                      <td className="py-2 pr-4 font-semibold text-gray-900">
+                        {v.variant === 'A' ? 'A — Hero nuevo' : 'B — Hero clásico'}
+                      </td>
+                      <td className="py-2 pr-4 text-gray-600">{v.views}</td>
+                      <td className="py-2 pr-4 text-gray-600">{v.ctaClicks}</td>
+                      <td className="py-2 pr-4 text-gray-600">{v.ctaRate}%</td>
+                      <td className="py-2 pr-4 text-gray-600">{v.registers}</td>
+                      <td className={`py-2 font-bold ${v.registerRate >= (ab.variants.find((o) => o.variant !== v.variant)?.registerRate ?? 0) ? 'text-green-600' : 'text-gray-600'}`}>
+                        {v.registerRate}%
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </CardContent>
         </Card>

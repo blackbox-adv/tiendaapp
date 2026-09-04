@@ -7,6 +7,7 @@ import { Search, X, ShoppingBasket, Phone } from 'lucide-react'
 import { StoreFeatureBadges } from './StoreFeatureBadges'
 import { CombosSection } from './CombosSection'
 import { PaymentMethods } from './PaymentMethods'
+import { ShippingOptions } from './ShippingOptions'
 import { useAppStore } from '@/lib/store'
 import type { Store, Product } from '@/lib/types'
 
@@ -209,6 +210,7 @@ export function BodegaTemplate({ store, products, storeSlug, planId, onProductCl
         )}
       </main>
 
+      <ShippingOptions store={store} />
       <PaymentMethods store={store} />
 
       <footer className="py-6 text-center">

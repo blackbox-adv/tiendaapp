@@ -8,9 +8,9 @@ import { useAppStore } from '@/lib/store'
 const ROWS = [
   { label: 'Catálogo con fotos, precios y stock', wa: false, ta: true },
   { label: 'Pedido armado automáticamente en el mensaje', wa: false, ta: true },
-  { label: 'Tu QR de Yape y Plin visible en la tienda', wa: false, ta: true },
+  { label: 'Tus métodos de pago visibles (Yape, Plin, Mercado Pago y más)', wa: false, ta: true },
   { label: 'Packs con descuento y ofertas resaltadas', wa: false, ta: true },
-  { label: 'Clientes de todo el Perú te encuentran con un link', wa: false, ta: true },
+  { label: 'Clientes de todo tu país te encuentran con un link', wa: false, ta: true },
   { label: 'Sabes cuántos productos tienes y tus ofertas al día', wa: false, ta: true },
   { label: 'Sigues cobrando y atendiendo por WhatsApp', wa: true, ta: true },
 ]

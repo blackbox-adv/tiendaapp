@@ -48,6 +48,22 @@ export async function POST(request: Request) {
       },
     });
 
+    // Test A/B: atribuir el registro a la variante del visitante (cookie)
+    try {
+      const abMatch = request.headers.get('cookie')?.match(/(?:^|;\s*)tiendapp_ab=([AB])/);
+      if (abMatch) {
+        await db.auditLog.create({
+          data: {
+            action: 'AB_EVENT',
+            details: { event: 'register', variant: abMatch[1] },
+            success: true,
+          },
+        });
+      }
+    } catch {
+      // el tracking nunca rompe el registro
+    }
+
     // Send welcome email (non-blocking)
     sendWelcomeEmail(name, email).catch((err) => {
       console.error('[REGISTER] Welcome email failed (non-blocking):', err);

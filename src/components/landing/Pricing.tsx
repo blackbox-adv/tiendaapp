@@ -116,7 +116,7 @@ export function Pricing() {
                     {plan.description}
                   </p>
 
-                  <div className="mb-6">
+                  <div className="mb-2">
                     <span className={`text-4xl font-extrabold ${plan.popular ? 'text-white' : 'text-gray-900'}`}>
                       {plan.price === 0 ? 'Gratis' : `S/${plan.price.toFixed(2)}`}
                     </span>
@@ -124,6 +124,11 @@ export function Pricing() {
                       <span className={`text-sm ${plan.popular ? 'text-violet-200' : 'text-gray-400'}`}>/mes</span>
                     )}
                   </div>
+                  {plan.price > 0 && (
+                    <p className={`text-xs mb-4 ${plan.popular ? 'text-violet-200' : 'text-gray-400'}`}>
+                      ≈ US$ {Math.round(plan.price / 3.7)} · pagas en la moneda de tu país
+                    </p>
+                  )}
 
                   <ul className="space-y-3 mb-8 flex-1">
                     {plan.features.map((feature: string) => (
@@ -160,7 +165,7 @@ export function Pricing() {
                   <p className={`text-xs text-center mt-3 ${plan.popular ? 'text-violet-100' : 'text-gray-400'}`}>
                     {plan.price === 0
                       ? 'Sin tarjeta · Sin compromiso'
-                      : 'Paga con Yape, Plin o transferencia'}
+                      : 'Yape, Plin, Mercado Pago o transferencia'}
                   </p>
                 </motion.div>
               )

@@ -21,16 +21,17 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "TiendApp | Crea tu catálogo online y vende por WhatsApp — Perú",
+    default: "TiendApp | Crea tu catálogo online y vende por WhatsApp — Latinoamérica",
     template: "%s | TiendApp",
   },
-  description: "Crea tu catálogo online en 5 minutos y recibe pedidos por WhatsApp. Tu QR de Yape y Plin incluido, packs con descuento y plantillas por rubro. Gratis, sin tarjeta y sin comisión por venta.",
+  description: "Crea tu catálogo online en 5 minutos y recibe pedidos por WhatsApp. Tus métodos de pago locales (Yape, Plin, Mercado Pago y más), tus opciones de envío y plantillas por rubro. Gratis, sin tarjeta y sin comisión por venta.",
   keywords: [
-    "tienda online Perú", "crear catálogo online", "vender por WhatsApp Perú",
+    "tienda online gratis", "crear catálogo online", "vender por WhatsApp",
     "catálogo digital WhatsApp", "tienda online para bodega", "carta digital para restaurante",
-    "catálogo virtual ropa", "TiendApp", "e-commerce Perú", "tienda virtual gratis",
-    "vender por internet Perú", "Yape Plin tienda online", "emprendimiento Perú",
-    "catálogo para Gamarra", "carta digital QR", "tienda online gratis Perú",
+    "catálogo virtual ropa", "TiendApp", "tienda virtual gratis",
+    "vender por internet", "emprendimiento", "catálogo para Gamarra", "carta digital QR",
+    "tienda online Perú", "tienda online México", "vender por WhatsApp Colombia",
+    "catálogo digital Argentina", "tienda online Chile", "e-commerce Latinoamérica",
   ],
   authors: [{ name: "TiendApp" }],
   creator: "TiendApp",
@@ -41,7 +42,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "TiendApp | Crea tu catálogo online y vende por WhatsApp",
-    description: "Tu tienda con pedidos por WhatsApp, Yape y Plin. Lista en 5 minutos, gratis y sin comisión por venta. Hecho en Perú.",
+    description: "Tu tienda con pedidos por WhatsApp, los métodos de pago de tu país y tus opciones de envío. Lista en 5 minutos, gratis y sin comisión por venta.",
     url: process.env.NEXT_PUBLIC_APP_URL || "https://tienda.blackboxperu.com",
     siteName: "TiendApp",
     images: [
@@ -49,16 +50,16 @@ export const metadata: Metadata = {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "TiendApp - Crea tu tienda online en Perú",
+        alt: "TiendApp - Crea tu tienda online en Latinoamérica",
       },
     ],
-    locale: "es_PE",
+    locale: "es_LA",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "TiendApp | Crea tu catálogo online y vende por WhatsApp",
-    description: "Tu tienda con pedidos por WhatsApp, Yape y Plin. Gratis, sin comisión por venta.",
+    description: "Tu tienda con pedidos por WhatsApp y los métodos de pago de tu país. Gratis, sin comisión por venta.",
     images: ["/og-image.png"],
   },
   robots: {
@@ -90,11 +91,9 @@ export default async function RootLayout({
   const contact = await getPlatformContact()
 
   return (
-    <html lang="es-PE" suppressHydrationWarning>
+    <html lang="es" suppressHydrationWarning>
       <head>
-        <meta name="geo.region" content="PE" />
-        <meta name="geo.placename" content="Perú" />
-        <meta name="language" content="es-PE" />
+        <meta name="language" content="Spanish" />
         <link rel="preconnect" href="https://web.whatsapp.com" />
       </head>
       <body
@@ -112,7 +111,7 @@ export default async function RootLayout({
                 name: 'TiendApp',
                 url: process.env.NEXT_PUBLIC_APP_URL || 'https://tienda.blackboxperu.com',
                 logo: `${process.env.NEXT_PUBLIC_APP_URL || 'https://tienda.blackboxperu.com'}/logo.svg`,
-                description: 'La plataforma líder en Perú para crear tiendas online sin conocimientos técnicos. WhatsApp integrado, plantillas profesionales y pagos en soles.',
+                description: 'La plataforma para crear tiendas online sin conocimientos técnicos en toda Latinoamérica. WhatsApp integrado, plantillas profesionales, tus métodos de pago locales y tus opciones de envío.',
                 email: contact.contactEmail,
                 telephone: contact.contactPhone,
                 address: {
@@ -143,7 +142,7 @@ export default async function RootLayout({
                 name: 'TiendApp',
                 applicationCategory: 'BusinessApplication',
                 operatingSystem: 'Web',
-                description: 'Crea tu catálogo online en 5 minutos y recibe pedidos por WhatsApp. Con QR de Yape y Plin, packs con descuento y plantillas por rubro.',
+                description: 'Crea tu catálogo online en 5 minutos y recibe pedidos por WhatsApp. Con los métodos de pago de tu país, tus opciones de envío y plantillas por rubro.',
                 offers: {
                   '@type': 'Offer',
                   price: '0',
@@ -168,7 +167,7 @@ export default async function RootLayout({
                 mainEntity: [
                   {
                     '@type': 'Question',
-                    name: 'Cómo crear una tienda online en Perú con TiendApp?',
+                    name: 'Cómo crear una tienda online gratis con TiendApp?',
                     acceptedAnswer: {
                       '@type': 'Answer',
                       text: 'Regístrate gratis en TiendApp, completa el asistente de configuración, elige tu plantilla favorita y agrega tus productos. En menos de 5 minutos tu tienda estará lista para recibir pedidos vía WhatsApp.',
@@ -203,7 +202,7 @@ export default async function RootLayout({
                     name: 'Qué métodos de pago acepta TiendApp?',
                     acceptedAnswer: {
                       '@type': 'Answer',
-                      text: 'Para pagar la suscripción de TiendApp puedes usar Yape, transferencia bancaria, tarjeta de crédito o débito a través de Culqi o Niubiz. Los pagos de tus clientes se coordinan directamente contigo vía WhatsApp.',
+                      text: 'Para pagar la suscripción de TiendApp puedes usar Yape, Plin, Mercado Pago, transferencia bancaria, tarjeta de crédito o débito. Además, en tu tienda puedes mostrar los métodos de pago que uses en tu país (Yape, Plin, Mercado Pago, Nequi, Sinpe Móvil y más) y tus opciones de envío.',
                     },
                   },
                 ],

@@ -39,6 +39,8 @@ export async function GET(request: NextRequest) {
     { table: 'Store', column: 'plinQrUrl', sql: `ALTER TABLE "Store" ADD COLUMN IF NOT EXISTS "plinQrUrl" TEXT` },
     { table: 'Store', column: 'yapeNumber', sql: `ALTER TABLE "Store" ADD COLUMN IF NOT EXISTS "yapeNumber" TEXT` },
     { table: 'Store', column: 'plinNumber', sql: `ALTER TABLE "Store" ADD COLUMN IF NOT EXISTS "plinNumber" TEXT` },
+    { table: 'Store', column: 'otherPayments', sql: `ALTER TABLE "Store" ADD COLUMN IF NOT EXISTS "otherPayments" JSONB NOT NULL DEFAULT '[]'` },
+    { table: 'Store', column: 'shippingOptions', sql: `ALTER TABLE "Store" ADD COLUMN IF NOT EXISTS "shippingOptions" JSONB NOT NULL DEFAULT '[]'` },
 
     // StoreProduct table
     { table: 'StoreProduct', column: 'color', sql: `ALTER TABLE "StoreProduct" ADD COLUMN IF NOT EXISTS "color" TEXT` },

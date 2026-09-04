@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react'
 import { ShoppingCart, Plus, Minus, Trash2, MessageCircle, Loader2, X } from 'lucide-react'
 import { useCart, type CartItem } from '@/lib/cart-context'
+import type { ShippingOption } from '@/lib/types'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,14 +14,19 @@ interface CartButtonProps {
   storeId: string
   whatsappNumber?: string
   storeName?: string
+  shippingOptions?: ShippingOption[]
 }
 
-export function CartButton({ storeId, whatsappNumber, storeName }: CartButtonProps) {
+export function CartButton({ storeId, whatsappNumber, storeName, shippingOptions }: CartButtonProps) {
   const { cartItems, updateQuantity, removeFromCart, clearCart, totalAmount, totalItems } = useCart()
   const [open, setOpen] = useState(false)
   const [checkoutStep, setCheckoutStep] = useState<'cart' | 'checkout'>('cart')
   const [submitting, setSubmitting] = useState(false)
   const [submitResult, setSubmitResult] = useState<{ success: boolean; message: string; orderNumber?: string } | null>(null)
+
+  const validShippingOptions = Array.isArray(shippingOptions)
+    ? shippingOptions.filter((o) => o && o.label)
+    : []
 
   // Filter cart items for this store only
   const storeCartItems = cartItems.filter((item) => item.storeId === storeId)
@@ -32,6 +38,14 @@ export function CartButton({ storeId, whatsappNumber, storeName }: CartButtonPro
   const [customerPhone, setCustomerPhone] = useState('')
   const [customerEmail, setCustomerEmail] = useState('')
   const [notes, setNotes] = useState('')
+  // Opción de envío elegida por el cliente ('' = coordinar por WhatsApp)
+  const [shippingChoice, setShippingChoice] = useState('')
+
+  const selectedShipping = validShippingOptions.find((o) => o.label === shippingChoice)
+  const shippingText = selectedShipping
+    ? `${selectedShipping.label} (${selectedShipping.price ? `S/ ${selectedShipping.price.toFixed(2)}` : 'Gratis'})${selectedShipping.time ? ` — ${selectedShipping.time}` : ''}`
+    : ''
+  const shippingCost = selectedShipping?.price ?? 0
 
   const handleWhatsApp = useCallback(() => {
     if (!whatsappNumber || storeCartItems.length === 0) return
@@ -45,7 +59,9 @@ export function CartButton({ storeId, whatsappNumber, storeName }: CartButtonPro
       '',
       itemsText,
       '',
-      `Total: S/ ${storeTotal.toFixed(2)}`,
+      `Total productos: S/ ${storeTotal.toFixed(2)}`,
+      shippingText ? `Envío: ${shippingText}` : '',
+      shippingText && shippingCost ? `Total con envío: S/ ${(storeTotal + shippingCost).toFixed(2)}` : '',
       customerName ? `\nNombre: ${customerName}` : '',
       customerPhone ? `Teléfono: ${customerPhone}` : '',
       notes ? `\nNotas: ${notes}` : '',
@@ -57,7 +73,7 @@ export function CartButton({ storeId, whatsappNumber, storeName }: CartButtonPro
 
     const whatsappUrl = `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer')
-  }, [whatsappNumber, storeCartItems, storeName, storeTotal, customerName, customerPhone, notes])
+  }, [whatsappNumber, storeCartItems, storeName, storeTotal, customerName, customerPhone, notes, shippingText, shippingCost])
 
   const handleConfirmOrder = useCallback(async () => {
     if (!customerName.trim() || !customerPhone.trim()) return
@@ -82,7 +98,7 @@ export function CartButton({ storeId, whatsappNumber, storeName }: CartButtonPro
             quantity: item.quantity,
             imageUrl: item.imageUrl,
           })),
-          notes: notes.trim() || undefined,
+          notes: [notes.trim() || null, shippingText ? `Envío: ${shippingText}` : null].filter(Boolean).join(' | ') || undefined,
         }),
       })
 
@@ -101,6 +117,7 @@ export function CartButton({ storeId, whatsappNumber, storeName }: CartButtonPro
         setCustomerPhone('')
         setCustomerEmail('')
         setNotes('')
+        setShippingChoice('')
       } else {
         setSubmitResult({
           success: false,
@@ -115,7 +132,7 @@ export function CartButton({ storeId, whatsappNumber, storeName }: CartButtonPro
     } finally {
       setSubmitting(false)
     }
-  }, [storeId, customerName, customerPhone, customerEmail, notes, storeCartItems, removeFromCart])
+  }, [storeId, customerName, customerPhone, customerEmail, notes, shippingText, storeCartItems, removeFromCart])
 
   // Don't render if no items for this store
   if (storeItemCount === 0 && !open) return null
@@ -251,6 +268,18 @@ export function CartButton({ storeId, whatsappNumber, storeName }: CartButtonPro
                     <span>Total</span>
                     <span>S/ {storeTotal.toFixed(2)}</span>
                   </div>
+                  {selectedShipping && (
+                    <div className="flex justify-between text-sm mt-1">
+                      <span className="text-gray-500">+ Envío: {selectedShipping.label}</span>
+                      <span className="font-medium text-gray-700">{shippingCost ? `S/ ${shippingCost.toFixed(2)}` : 'Gratis'}</span>
+                    </div>
+                  )}
+                  {selectedShipping && (
+                    <div className="flex justify-between font-semibold mt-1 pt-1 border-t border-gray-200">
+                      <span>Total con envío</span>
+                      <span>S/ {(storeTotal + shippingCost).toFixed(2)}</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Customer info */}
@@ -302,6 +331,60 @@ export function CartButton({ storeId, whatsappNumber, storeName }: CartButtonPro
                       placeholder="Ej: Sin cebolla, entregar después de las 5pm..."
                     />
                   </div>
+
+                  {/* Opciones de envío */}
+                  {validShippingOptions.length > 0 && (
+                    <div className="space-y-2">
+                      <label className="block text-sm font-medium text-gray-700">
+                        Opción de envío
+                      </label>
+                      <div className="space-y-2">
+                        {validShippingOptions.map((o) => (
+                          <label
+                            key={o.label}
+                            className={`flex items-center justify-between gap-2 p-3 rounded-lg border cursor-pointer transition-colors ${
+                              shippingChoice === o.label
+                                ? 'border-violet-500 bg-violet-50'
+                                : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                          >
+                            <span className="flex items-center gap-2.5 min-w-0">
+                              <input
+                                type="radio"
+                                name="cart-shipping-option"
+                                checked={shippingChoice === o.label}
+                                onChange={() => setShippingChoice(o.label)}
+                                className="accent-violet-600 flex-shrink-0"
+                              />
+                              <span className="min-w-0">
+                                <span className="text-sm font-medium text-gray-900 block truncate">{o.label}</span>
+                                {o.time && <span className="text-xs text-gray-500 block">{o.time}</span>}
+                              </span>
+                            </span>
+                            <span className="text-sm font-semibold text-gray-900 flex-shrink-0">
+                              {o.price ? `S/ ${o.price.toFixed(2)}` : 'Gratis'}
+                            </span>
+                          </label>
+                        ))}
+                        <label
+                          className={`flex items-center gap-2.5 p-3 rounded-lg border cursor-pointer transition-colors ${
+                            shippingChoice === ''
+                              ? 'border-violet-500 bg-violet-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="cart-shipping-option"
+                            checked={shippingChoice === ''}
+                            onChange={() => setShippingChoice('')}
+                            className="accent-violet-600"
+                          />
+                          <span className="text-sm text-gray-700">Lo coordino por WhatsApp</span>
+                        </label>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 

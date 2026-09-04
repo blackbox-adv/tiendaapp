@@ -74,7 +74,28 @@ export async function PUT(
     }
 
     const updateData: Record<string, unknown> = {};
+    // otherPayments/shippingOptions ya quedaron saneados arriba (excluidos del loop para no sobrescribir)
     const allowedFields = ['name', 'description', 'template', 'primaryColor', 'secondaryColor', 'category', 'logo', 'bannerUrl', 'whatsappNumber', 'hasShipping', 'hasSecurePayment', 'hasReturns', 'popupEnabled', 'popupType', 'popupProductId', 'popupCustomImage', 'popupTitle', 'popupButtonText', 'yapeQrUrl', 'plinQrUrl', 'yapeNumber', 'plinNumber'];
+
+    // Validación de arrays JSON (otherPayments / shippingOptions)
+    if (body.otherPayments !== undefined) {
+      if (!Array.isArray(body.otherPayments) || body.otherPayments.length > 10 ||
+          !body.otherPayments.every((p: unknown) => typeof p === 'object' && p !== null && typeof (p as { label?: unknown }).label === 'string')) {
+        return NextResponse.json({ error: 'Formato inválido en métodos de pago' }, { status: 400 });
+      }
+      updateData.otherPayments = body.otherPayments.map((p: { label: string; number?: string }) => ({ label: String(p.label).slice(0, 40), number: String(p.number ?? '').slice(0, 80) }));
+    }
+    if (body.shippingOptions !== undefined) {
+      if (!Array.isArray(body.shippingOptions) || body.shippingOptions.length > 10 ||
+          !body.shippingOptions.every((s: unknown) => typeof s === 'object' && s !== null && typeof (s as { label?: unknown }).label === 'string')) {
+        return NextResponse.json({ error: 'Formato inválido en opciones de envío' }, { status: 400 });
+      }
+      updateData.shippingOptions = body.shippingOptions.map((s: { label: string; price?: number | null; time?: string }) => ({
+        label: String(s.label).slice(0, 60),
+        price: (typeof s.price === 'number' && isFinite(s.price) && s.price > 0) ? Math.round(s.price * 100) / 100 : null,
+        time: String(s.time ?? '').slice(0, 40),
+      }));
+    }
 
     for (const field of allowedFields) {
       if (body[field] !== undefined) {

@@ -6,6 +6,7 @@ import { useAppStore } from '@/lib/store'
 import { Zap, ShoppingBag, Star, Bell, Wallet } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { WhatsAppIcon } from './WhatsAppIcon'
+import { logAbEvent } from '@/lib/ab-test'
 
 export function Hero() {
   const navigate = useAppStore((s) => s.navigate)
@@ -28,7 +29,7 @@ export function Hero() {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/15 text-white/90 text-sm font-medium mb-6">
               <Zap className="w-4 h-4 text-amber-300" />
-              Hecho en Perú para emprendedores 🇵🇪
+              Para emprendedores de toda Latinoamérica 🌎
             </div>
 
             {/* Heading — dolor + resultado directo */}
@@ -40,8 +41,8 @@ export function Hero() {
             {/* Subtitle */}
             <p className="text-lg text-violet-100/90 max-w-xl mx-auto lg:mx-0 mb-8 leading-relaxed">
               Deja de perder pedidos entre chats y fotos sueltas. Tu tienda con{' '}
-              <strong className="text-white">botón de WhatsApp</strong>, tu QR de{' '}
-              <strong className="text-white">Yape y Plin</strong> y packs con descuento.
+              <strong className="text-white">botón de WhatsApp</strong>, los{' '}
+              <strong className="text-white">métodos de pago de tu país</strong> y packs con descuento.
               Lista en 5 minutos, sin comisión por venta.
             </p>
 
@@ -49,7 +50,10 @@ export function Hero() {
             <div className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-4 mb-8">
               <Button
                 size="lg"
-                onClick={() => navigate({ page: 'register' })}
+                onClick={() => {
+                  logAbEvent('cta_click')
+                  navigate({ page: 'register' })
+                }}
                 className="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-white font-bold px-8 py-6 text-lg rounded-2xl shadow-xl shadow-emerald-900/40 hover:shadow-2xl hover:scale-[1.02] transition-all"
               >
                 <WhatsAppIcon className="w-5 h-5 mr-2" />
@@ -57,7 +61,10 @@ export function Hero() {
               </Button>
               <Button
                 size="lg"
-                onClick={() => window.location.href = '/demo/bodega'}
+                onClick={() => {
+                  logAbEvent('cta_click')
+                  window.location.href = '/demo/bodega'
+                }}
                 className="w-full sm:w-auto border-2 border-white/30 bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 font-semibold px-8 py-6 text-lg rounded-2xl transition-all"
               >
                 Ver tienda de ejemplo
@@ -74,7 +81,7 @@ export function Hero() {
               {[
                 { icon: Zap, value: '5 min', label: 'En crear tu tienda' },
                 { icon: ShoppingBag, value: '0%', label: 'Comisión por venta' },
-                { icon: Star, value: 'S/0', label: 'Para empezar' },
+                { icon: Star, value: 'Gratis', label: 'Para empezar' },
               ].map((stat, i) => (
                 <motion.div
                   key={stat.label}
@@ -148,7 +155,7 @@ export function Hero() {
               </div>
               <div>
                 <p className="text-xs font-bold text-gray-900 leading-tight">Pago recibido</p>
-                <p className="text-[11px] font-semibold text-violet-700 leading-tight">S/ 45.90 por Yape</p>
+                <p className="text-[11px] font-semibold text-violet-700 leading-tight">$45.90 vía Yape</p>
               </div>
             </motion.div>
 
@@ -160,7 +167,7 @@ export function Hero() {
               className="absolute left-4 bottom-[8%] bg-amber-400 text-amber-950 rounded-full shadow-xl px-4 py-2 flex items-center gap-1.5"
             >
               <Bell className="w-3.5 h-3.5" />
-              <span className="text-xs font-bold">Tu venta de hoy: S/ 128.50</span>
+              <span className="text-xs font-bold">Tu venta de hoy: $128.50</span>
             </motion.div>
           </motion.div>
         </div>
@@ -176,7 +183,7 @@ export function Hero() {
             Funciona con lo que tú y tus clientes ya usan
           </p>
           <div className="flex flex-wrap justify-center gap-3">
-            {['WhatsApp', 'Yape', 'Plin', 'Efectivo', 'Transferencia'].map((tool) => (
+            {['WhatsApp', 'Yape', 'Plin', 'Mercado Pago', 'Efectivo', 'Transferencia'].map((tool) => (
               <span
                 key={tool}
                 className="px-4 py-2 rounded-full bg-white/10 border border-white/15 text-white/90 text-sm font-semibold backdrop-blur-sm"

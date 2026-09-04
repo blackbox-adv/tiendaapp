@@ -118,7 +118,7 @@ export function Testimonials() {
           <div className="relative">
             <div className="inline-flex items-center gap-2 bg-white/15 text-white text-sm font-medium px-4 py-1.5 rounded-full mb-5">
               <Store className="w-4 h-4" />
-              100% peruano · Sin tarjeta · Sin comisión por venta
+              Hecho en Latinoamérica · Sin tarjeta · Sin comisión por venta
             </div>
             <h3 className="text-2xl sm:text-3xl font-bold text-white mb-3">
               ¿Dudas que funcione para tu negocio?

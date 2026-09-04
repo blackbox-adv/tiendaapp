@@ -1,17 +1,28 @@
 'use client'
 
 import { useState } from 'react'
-import { Wallet, Copy, Check, Phone } from 'lucide-react'
+import { Wallet, Copy, Check, Phone, CreditCard } from 'lucide-react'
 import type { Store } from '@/lib/types'
 
-// Muestra las formas de pago de la tienda (Yape / Plin) con QR y número.
-// Se renderiza solo si la tienda configuró al menos un método.
+// Muestra las formas de pago de la tienda (Yape / Plin + métodos locales de cualquier país)
+// con QR y número. Se renderiza solo si la tienda configuró al menos un método.
 export function PaymentMethods({ store }: { store: Store }) {
   const [copied, setCopied] = useState<string | null>(null)
+
+  const otherPayments = Array.isArray(store.otherPayments)
+    ? store.otherPayments.filter((p) => p && p.label)
+    : []
 
   const methods = [
     { key: 'yape', label: 'Yape', number: store.yapeNumber, qr: store.yapeQrUrl, color: '#6D28D9' },
     { key: 'plin', label: 'Plin', number: store.plinNumber, qr: store.plinQrUrl, color: '#0EA5E9' },
+    ...otherPayments.map((p, i) => ({
+      key: `other-${i}`,
+      label: p.label,
+      number: p.number || '',
+      qr: '' as string,
+      color: '#059669',
+    })),
   ].filter((m) => m.number || m.qr)
 
   if (methods.length === 0) return null
@@ -48,6 +59,10 @@ export function PaymentMethods({ store }: { store: Store }) {
                 alt={`QR de ${m.label}`}
                 className="w-24 h-24 rounded-lg object-cover border border-gray-200 bg-white"
               />
+            ) : m.key.startsWith('other-') ? (
+              <div className="w-24 h-24 rounded-lg border border-dashed border-gray-200 bg-white flex items-center justify-center">
+                <CreditCard className="w-6 h-6 text-gray-300" />
+              </div>
             ) : (
               <div className="w-24 h-24 rounded-lg border border-dashed border-gray-200 bg-white flex items-center justify-center">
                 <Phone className="w-6 h-6 text-gray-300" />
@@ -79,7 +94,7 @@ export function PaymentMethods({ store }: { store: Store }) {
                 </div>
               ) : (
                 <p className="mt-2 text-xs text-gray-400">
-                  Escanea el QR con tu app
+                  {m.key.startsWith('other-') ? 'Usa estos datos para pagar' : 'Escanea el QR con tu app'}
                 </p>
               )}
               <p className="text-[11px] text-gray-400 mt-1">

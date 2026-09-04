@@ -1103,6 +1103,7 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
           storeId={store.id}
           whatsappNumber={store.whatsappNumber}
           storeName={store.name}
+          shippingOptions={store.shippingOptions}
         />
       )}
     </div>
