@@ -119,6 +119,21 @@ export default async function StorePage({ params }: Props) {
     notFound()
   }
 
+  // Franja de anuncio: columnas nuevas leídas con SQL crudo para no
+  // depender del esquema de Prisma (si aún no existen → null, sin romper).
+  let announcementText: string | null = null
+  let announcementLink: string | null = null
+  try {
+    const rows = await db.$queryRawUnsafe(
+      `SELECT "announcementText", "announcementLink" FROM "Store" WHERE id = $1 LIMIT 1`,
+      store.id as string
+    ) as Array<{ announcementText?: string | null; announcementLink?: string | null }>
+    announcementText = rows?.[0]?.announcementText ?? null
+    announcementLink = rows?.[0]?.announcementLink ?? null
+  } catch {
+    // migración pendiente: sin aviso
+  }
+
   return (
     <>
       <script
@@ -135,7 +150,12 @@ export default async function StorePage({ params }: Props) {
           ),
         }}
       />
-      <StorePublicClient store={serializeDecimals(store)} products={serializeDecimals(products)} />
+      <StorePublicClient
+        store={serializeDecimals(store)}
+        products={serializeDecimals(products)}
+        announcementText={announcementText}
+        announcementLink={announcementLink}
+      />
     </>
   )
 }

@@ -257,6 +257,24 @@ export function StoreView({ slug }: { slug: string }) {
         <div className="w-16" />
       </div>
 
+      {/* Franja de anuncio (configurable en Configuración) */}
+      {displayStore?.announcementText && (
+        <div className="bg-amber-400 text-amber-950 text-xs sm:text-sm font-semibold text-center px-4 py-2">
+          {displayStore.announcementLink ? (
+            <a
+              href={displayStore.announcementLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline-offset-2 hover:underline"
+            >
+              {displayStore.announcementText} →
+            </a>
+          ) : (
+            displayStore.announcementText
+          )}
+        </div>
+      )}
+
       {/* Render template */}
       {displayStore!.template === 'moderna' && <ModernaTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} onProductClick={handleProductClick} />}
       {displayStore!.template === 'vibrante' && <VibranteTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} onProductClick={handleProductClick} />}
