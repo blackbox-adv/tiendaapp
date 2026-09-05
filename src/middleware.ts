@@ -133,6 +133,18 @@ export function middleware(request: NextRequest) {
     }
   }
 
+  // Rate limit: Landing IA (max 6 por minuto por IP — protege la cuota
+  // gratuita de Gemini y evita abuso del generador)
+  if (pathname === '/api/ai/landing' && method === 'POST') {
+    const key = getRateLimitKey(request, 'ai-landing')
+    if (isRateLimited(key, 6, 60 * 1000)) {
+      return NextResponse.json(
+        { error: 'Demasiadas generaciones seguidas. Espera un minuto.', code: 'RATE_LIMITED' },
+        { status: 429, headers: corsHeaders(request) }
+      )
+    }
+  }
+
   // Rate limit: WhatsApp endpoint (max 20 requests per minute per IP)
   if (pathname === '/api/whatsapp' && method === 'POST') {
     const key = getRateLimitKey(request, 'whatsapp')
@@ -260,6 +272,8 @@ export const config = {
     '/api/upload',
     '/api/admin/payments',
     '/api/export',
+    '/api/ai/landing',
+    '/api/landings',
     '/api/ab/event',
     '/api/ab/stats',
     // Page routes (for security headers)

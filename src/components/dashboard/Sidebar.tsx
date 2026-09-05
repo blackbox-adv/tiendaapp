@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import { useAppStore } from '@/lib/store'
 import {
   LayoutDashboard, Package, Settings, Palette, CreditCard,
-  LogOut, ExternalLink, Store, Menu, X, QrCode, Megaphone, FolderOpen, ShoppingCart
+  LogOut, ExternalLink, Store, Menu, X, QrCode, Megaphone, FolderOpen, ShoppingCart, Sparkles
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -19,6 +19,7 @@ const navItems = [
   { href: '/dashboard/orders', label: 'Pedidos', icon: ShoppingCart },
   { href: '/dashboard/categories', label: 'Categorías', icon: FolderOpen },
   { href: '/dashboard/template', label: 'Plantillas', icon: Palette },
+  { href: '/dashboard/landing', label: 'Landing IA', icon: Sparkles },
   { href: '/dashboard/plan', label: 'Mi Plan', icon: CreditCard },
   { href: '/dashboard/settings', label: 'Configuración', icon: Settings },
 ]
