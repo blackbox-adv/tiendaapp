@@ -21,6 +21,7 @@ import {
   CreditCard,
   Plus,
   Trash2,
+  Megaphone,
 } from 'lucide-react';
 
 import type { ShippingOption, OtherPayment } from '@/lib/types';
@@ -65,6 +66,12 @@ export default function SettingsClient() {
 
   // Opciones de envío que la tienda ofrece
   const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
+  // Franja de anuncio (banner de la tienda)
+  const [announcementText, setAnnouncementText] = useState('');
+  const [announcementLink, setAnnouncementLink] = useState('');
+  const [savingAnnouncement, setSavingAnnouncement] = useState(false);
+  const [announcementError, setAnnouncementError] = useState('');
+  const [announcementSuccess, setAnnouncementSuccess] = useState('');
 
   // Password change
   const [currentPassword, setCurrentPassword] = useState('');
@@ -122,7 +129,44 @@ export default function SettingsClient() {
 
   useEffect(() => {
     fetchStore();
+    fetchAnnouncement();
   }, []);
+
+  const fetchAnnouncement = async () => {
+    try {
+      const res = await fetch('/api/store-announcement', { headers: getAuthHeaders() });
+      if (res.ok) {
+        const data = await res.json();
+        setAnnouncementText(data.text || '');
+        setAnnouncementLink(data.link || '');
+      }
+    } catch {
+      // silencioso: la franja es opcional
+    }
+  };
+
+  const handleSaveAnnouncement = async () => {
+    setSavingAnnouncement(true);
+    setAnnouncementError('');
+    setAnnouncementSuccess('');
+    try {
+      const res = await fetch('/api/store-announcement', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ slug: store?.slug, text: announcementText, link: announcementLink }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setAnnouncementError(data.error || 'Error al guardar el aviso');
+        return;
+      }
+      setAnnouncementSuccess(announcementText.trim() ? 'Aviso guardado. Ya aparece en tu tienda.' : 'Aviso oculto de tu tienda.');
+    } catch {
+      setAnnouncementError('Error de conexión');
+    } finally {
+      setSavingAnnouncement(false);
+    }
+  };
 
   const handleSaveStore = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -559,6 +603,75 @@ export default function SettingsClient() {
           </CardContent>
         </Card>
       )}
+
+      {/* Franja de anuncio (banner) */}
+      <Card className="border-0 shadow-sm">
+        <CardHeader>
+          <h3 className="font-semibold flex items-center gap-2">
+            <Megaphone className="w-5 h-5 text-violet-600" />
+            Anuncio en tu tienda
+          </h3>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-gray-500">
+            Una franja llamativa en la parte de arriba de tu tienda para promociones, rebajas o avisos.
+            Déjalo vacío para ocultarla.
+          </p>
+          {announcementText.trim() && (
+            <div>
+              <p className="text-xs text-gray-400 mb-1">Vista previa:</p>
+              <div className="bg-amber-400 text-amber-950 text-xs sm:text-sm font-semibold text-center px-4 py-2 rounded-lg">
+                {announcementText}{announcementLink ? ' →' : ''}
+              </div>
+            </div>
+          )}
+          {announcementError && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{announcementError}</div>
+          )}
+          {announcementSuccess && (
+            <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">{announcementSuccess}</div>
+          )}
+          <div className="space-y-2">
+            <Label htmlFor="announcementText">Texto del anuncio</Label>
+            <Input
+              id="announcementText"
+              type="text"
+              maxLength={90}
+              placeholder="Ej: ¡ENVÍO GRATIS en pedidos desde S/50! Solo hoy"
+              value={announcementText}
+              onChange={(e) => setAnnouncementText(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="announcementLink">Enlace al tocar el anuncio (opcional)</Label>
+            <Input
+              id="announcementLink"
+              type="text"
+              placeholder="Ej: wa.me/51987654321 o una página de tu catálogo"
+              value={announcementLink}
+              onChange={(e) => setAnnouncementLink(e.target.value)}
+            />
+          </div>
+          <Button
+            type="button"
+            onClick={handleSaveAnnouncement}
+            className="bg-violet-600 hover:bg-violet-700 text-white"
+            disabled={savingAnnouncement}
+          >
+            {savingAnnouncement ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Guardando...
+              </>
+            ) : (
+              <>
+                <Megaphone className="w-4 h-4 mr-2" />
+                Guardar anuncio
+              </>
+            )}
+          </Button>
+        </CardContent>
+      </Card>
 
       {/* Change Password */}
       <Card className="border-0 shadow-sm">

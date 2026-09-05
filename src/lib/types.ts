@@ -78,6 +78,8 @@ export interface Store {
   plinNumber: string | null
   otherPayments?: OtherPayment[]
   shippingOptions?: ShippingOption[]
+  announcementText?: string | null
+  announcementLink?: string | null
   userId: string
   isActive: boolean
   createdAt: string

@@ -252,6 +252,14 @@ export function middleware(request: NextRequest) {
     }
   }
 
+  // Rate limit: Store announcement updates (max 10 per minute per IP)
+  if (pathname === '/api/store-announcement' && method === 'POST') {
+    const key = getRateLimitKey(request, 'announcement')
+    if (isRateLimited(key, 10, 60 * 1000)) {
+      return NextResponse.json({ error: 'Demasiadas actualizaciones. Intenta de nuevo en 1 minuto.', code: 'RATE_LIMITED' }, { status: 429, headers: corsHeaders(request) })
+    }
+  }
+
   return response
 }
 
@@ -276,6 +284,7 @@ export const config = {
     '/api/landings',
     '/api/ab/event',
     '/api/ab/stats',
+    '/api/store-announcement',
     // Page routes (for security headers)
     '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)',
   ],

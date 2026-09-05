@@ -72,7 +72,7 @@ export const CANONICAL_PLANS: CanonicalPlan[] = [
       'Estadísticas avanzadas',
       'Reportes descargables (Excel)',
       'Copys y descripciones con IA (muy pronto)',
-      'Landing IA para tus lanzamientos (muy pronto)',
+      'Landing IA para tus lanzamientos',
       'Soporte 24/7',
       'Sin marca TiendApp',
     ],

@@ -72,11 +72,15 @@ function transformProduct(p: Record<string, unknown>): Product {
 interface StorePublicClientProps {
   store: Record<string, unknown>
   products: Record<string, unknown>[]
+  announcementText?: string | null
+  announcementLink?: string | null
 }
 
-export function StorePublicClient({ store, products }: StorePublicClientProps) {
+export function StorePublicClient({ store, products, announcementText, announcementLink }: StorePublicClientProps) {
   useEffect(() => {
     const ts = transformStore(store)
+    ts.announcementText = announcementText ?? null
+    ts.announcementLink = announcementLink ?? null
     const tp = products
       .map(transformProduct)
       .sort((a, b) => {
@@ -94,7 +98,7 @@ export function StorePublicClient({ store, products }: StorePublicClientProps) {
       products: [...tp, ...otherStoreProducts],
       currentStore: ts,
     })
-  }, [store, products])
+  }, [store, products, announcementText, announcementLink])
 
   return <StoreView slug={store.slug as string} />
 }
