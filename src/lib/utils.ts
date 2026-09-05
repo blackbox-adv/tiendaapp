@@ -62,3 +62,16 @@ export function serializeDecimals<T>(obj: T): T {
   }
   return obj
 }
+
+/**
+ * Slug URL-friendly desde un texto (soporta acentos españoles).
+ * "Lanzamiento: Mesa de Madera Ñ" → "lanzamiento-mesa-de-madera-n"
+ */
+export function slugify(text: string): string {
+  return (text || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // quita acentos
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')     // no alfanumérico → guion
+    .replace(/^-+|-+$/g, '')         // guiones de borde
+}

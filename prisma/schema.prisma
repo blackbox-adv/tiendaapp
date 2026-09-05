@@ -105,6 +105,7 @@ model Store {
   orders        StoreOrder[]
   subscriptions Subscription[]
   payments     Payment[]
+  landingPages  LandingPage[]
 
   @@index([ownerId])                              // Owner's stores lookup
   @@index([isActive])                             // Active stores filter
@@ -295,4 +296,37 @@ model Notification {
   @@index([userId, createdAt(sort: Desc)])        // User's notifications sorted by date
   @@index([createdAt(sort: Desc)])                // Global sorted list
   @@index([type])                                 // Filter by type
+}
+
+// ============================================================
+// LANDING IA — Landings de lanzamiento generadas con IA (Premium)
+// El vendedor describe su producto + sube fotos, la IA (Gemini)
+// escribe los copys y el sistema publica una página compartible
+// en /l/[slug] con CTA directo a WhatsApp.
+// ============================================================
+model LandingPage {
+  id             String   @id @default(cuid())
+  storeId        String
+  store          Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  title          String   @default("")                     // Nombre del producto/lanzamiento
+  slug           String   @unique                          // URL pública /l/[slug]
+  inputText      String   @default("")                     // Lo que contó el vendedor (para regenerar)
+  offerText      String?                                   // Ej: "20% dcto solo esta semana"
+  headline       String   @default("")                     // Título gancho (IA)
+  subheadline    String   @default("")                     // Subtítulo (IA)
+  description    String   @default("")                     // Descripción de venta (IA)
+  benefits       Json     @default("[]")                   // string[]: beneficios cortos (IA)
+  price          Decimal? @db.Decimal(10,2)
+  offerPrice     Decimal? @db.Decimal(10,2)
+  ctaText        String   @default("Pedir por WhatsApp")
+  photos         Json     @default("[]")                   // string[]: URLs de fotos subidas
+  seoTitle       String   @default("")
+  seoDescription String   @default("")
+  published      Boolean  @default(false)
+  views          Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([published, createdAt(sort: Desc)])
 }
