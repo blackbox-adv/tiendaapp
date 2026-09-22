@@ -56,7 +56,10 @@ function transformApiUser(apiUser: Record<string, unknown>): User {
 
   const subs = (apiUser.subscriptions as Array<Record<string, unknown>>) || []
   const latestSub = subs.length > 0 ? subs[subs.length - 1] : null
-  const planId = (latestSub?.planId as string) || 'free'
+  // El plan viene anidado: { plan: { type: 'premium', id: ... } }.
+  // Preferimos el tipo (free/pro/premium) igual que transformApiStore.
+  const latestPlan = latestSub?.plan as Record<string, unknown> | undefined
+  const planId = (latestPlan?.type as string) || 'free'
 
   const apiRole = apiUser.role as string
 
