@@ -110,7 +110,40 @@ export async function GET(request: Request) {
       return apiError('Sesión expirada. Inicia sesión nuevamente.', 401, undefined, request)
     }
 
-    return apiSuccess({ user }, 200, request)
+    // Suscripción activa con plan (el dashboard la usa para mostrar el plan
+    // real del vendedor; misma lógica que GET /api/user)
+    let subscription: Record<string, unknown> | null = null
+    try {
+      const subRows = await db.$queryRawUnsafe(`
+        SELECT sub.id, sub.status, sub."nextBillingDate",
+          p.id as "planId", p.name as "planName", p.type as "planType",
+          p.price::text as "planPrice", p."maxProducts", p.features
+        FROM "Subscription" sub
+        JOIN "Plan" p ON p.id = sub."planId"
+        WHERE sub."userId" = $1 AND sub.status = 'active'
+        ORDER BY sub."createdAt" DESC LIMIT 1
+      `, user.id) as Array<Record<string, unknown>>
+      if (subRows.length > 0) {
+        const s = subRows[0]
+        subscription = {
+          id: s.id,
+          status: s.status,
+          nextBillingDate: s.nextBillingDate,
+          plan: {
+            id: s.planId,
+            name: s.planName,
+            type: s.planType,
+            price: parseFloat(String(s.planPrice || '0')),
+            maxProducts: s.maxProducts,
+            features: s.features,
+          },
+        }
+      }
+    } catch {
+      // sin suscripción → el frontend cae a 'free'
+    }
+
+    return apiSuccess({ user: { ...user, subscriptions: subscription ? [subscription] : [] } }, 200, request)
   } catch (err) {
     console.error('[AUTH] Token verify error:', err instanceof Error ? err.message : String(err))
     return apiError('Error verificando token', 500, undefined, request)
