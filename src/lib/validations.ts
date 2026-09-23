@@ -18,9 +18,23 @@ export function normalizePeruWhatsapp(raw: string): string {
 }
 
 // Reusable Zod schema for Peru WhatsApp numbers (nullable-friendly)
+// NOTA: el .refine() rechaza el formato invalido DENTRO de Zod (ZodError -> 400 con
+// mensaje amigable). Sin el refine, normalizePeruWhatsapp lanzaria una excepcion que
+// escapa de safeParse y el endpoint responderia 500 generico (bug real del onboarding:
+// "Error creando tienda" al guardar un WhatsApp como "999999").
 export const peruWhatsappString = z
   .string()
   .min(1, PERU_WHATSAPP_ERROR)
+  .refine(
+    (raw) => {
+      const digits = raw.replace(/[^0-9]/g, '')
+      return (
+        (digits.startsWith('519') && digits.length === 11) ||
+        (digits.startsWith('9') && digits.length === 9)
+      )
+    },
+    PERU_WHATSAPP_ERROR
+  )
   .transform(normalizePeruWhatsapp)
 
 // ── Auth schemas ──
@@ -290,13 +304,22 @@ export function validateBody<T>(
   schema: z.ZodSchema<T>,
   body: unknown
 ): { success: true; data: T } | { success: false; error: string } {
-  const result = schema.safeParse(body)
-  if (!result.success) {
-    const firstError = result.error.issues[0]
+  try {
+    const result = schema.safeParse(body)
+    if (!result.success) {
+      const firstError = result.error.issues[0]
+      return {
+        success: false,
+        error: firstError?.message || 'Datos invalidos',
+      }
+    }
+    return { success: true, data: result.data }
+  } catch (e) {
+    // Un .transform() lanzo una excepcion (ex: formato invalido). Responder 400 con
+    // el mensaje real en vez de dejar que el endpoint caiga en un 500 generico.
     return {
       success: false,
-      error: firstError?.message || 'Datos invalidos',
+      error: e instanceof Error ? e.message : 'Datos invalidos',
     }
   }
-  return { success: true, data: result.data }
 }
