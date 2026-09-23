@@ -1,3 +1,4 @@
+import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 'use client'
 
 import { useState, useMemo } from 'react'
@@ -76,7 +77,7 @@ export function ModaTemplate({ store, products, storeSlug, planId, onProductClic
           <div className="relative h-64 md:h-full min-h-[320px] bg-stone-100">
             {featured ? (
               <img
-                src={featured.imageUrl}
+                src={featured.imageUrl || PRODUCT_IMG_FALLBACK}
                 alt={featured.name}
                 className="absolute inset-0 w-full h-full object-cover"
                 onError={(e) => {
@@ -163,7 +164,7 @@ export function ModaTemplate({ store, products, storeSlug, planId, onProductClic
               >
                 <div className="relative aspect-[3/4] bg-stone-100 overflow-hidden">
                   <img
-                    src={product.imageUrl}
+                    src={product.imageUrl || PRODUCT_IMG_FALLBACK}
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
                     onError={(e) => {

@@ -1,3 +1,4 @@
+import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 'use client'
 
 import { useState, useMemo } from 'react'
@@ -152,7 +153,7 @@ export function BodegaTemplate({ store, products, storeSlug, planId, onProductCl
               >
                 <div className="aspect-square bg-amber-50 relative overflow-hidden">
                   <img
-                    src={product.imageUrl}
+                    src={product.imageUrl || PRODUCT_IMG_FALLBACK}
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     onError={(e) => {

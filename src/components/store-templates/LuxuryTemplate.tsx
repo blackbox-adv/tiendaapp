@@ -1,3 +1,4 @@
+import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 'use client'
 
 import { useState, useMemo } from 'react'
@@ -378,7 +379,7 @@ export function LuxuryTemplate({ store, products, storeSlug, planId, onProductCl
                       {/* Hero-style product image */}
                       <div className="aspect-[3/4] overflow-hidden relative">
                         <img
-                          src={product.imageUrl}
+                          src={product.imageUrl || PRODUCT_IMG_FALLBACK}
                           alt={product.name}
                           className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                           onError={(e) => {

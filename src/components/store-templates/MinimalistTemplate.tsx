@@ -1,3 +1,4 @@
+import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 'use client'
 
 import { useState, useMemo } from 'react'
@@ -297,7 +298,7 @@ export function MinimalistTemplate({ store, products, storeSlug, planId, onProdu
                     {/* Image — square, no border */}
                     <div className="aspect-square overflow-hidden relative bg-gray-50">
                       <img
-                        src={product.imageUrl}
+                        src={product.imageUrl || PRODUCT_IMG_FALLBACK}
                         alt={product.name}
                         className="w-full h-full object-cover transition-transform duration-600 ease-out group-hover:scale-[1.03]"
                         onError={(e) => {

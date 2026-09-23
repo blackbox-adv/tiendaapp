@@ -1,3 +1,4 @@
+import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 'use client'
 
 import { useState, useMemo } from 'react'
@@ -157,7 +158,7 @@ export function SaborTemplate({ store, products, storeSlug, planId, onProductCli
                 >
                   <div className="aspect-square rounded-2xl overflow-hidden bg-orange-50 border border-stone-200 shadow-sm group-hover:shadow-md transition-all">
                     <img
-                      src={p.imageUrl}
+                      src={p.imageUrl || PRODUCT_IMG_FALLBACK}
                       alt={p.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       onError={(e) => {
@@ -199,7 +200,7 @@ export function SaborTemplate({ store, products, storeSlug, planId, onProductCli
                   >
                     <div className="w-14 h-14 rounded-xl overflow-hidden bg-orange-50 shrink-0 border border-stone-100">
                       <img
-                        src={p.imageUrl}
+                        src={p.imageUrl || PRODUCT_IMG_FALLBACK}
                         alt={p.name}
                         className="w-full h-full object-cover"
                         onError={(e) => {

@@ -1,3 +1,4 @@
+import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 'use client'
 
 import { useState } from 'react'
@@ -123,7 +124,7 @@ export function CombosSection({ products, store, storeSlug, primaryColor }: Comb
                   }}
                 >
                   <img
-                    src={p.imageUrl}
+                    src={p.imageUrl || PRODUCT_IMG_FALLBACK}
                     alt={p.name}
                     className="w-full h-full object-cover"
                     onError={(e) => {

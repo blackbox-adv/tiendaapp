@@ -1,3 +1,4 @@
+import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 'use client'
 
 import { useState, useCallback } from 'react'
@@ -451,7 +452,7 @@ function CartItemRow({
       {/* Product image */}
       {item.imageUrl ? (
         <img
-          src={item.imageUrl}
+          src={item.imageUrl || PRODUCT_IMG_FALLBACK}
           alt={item.name}
           className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
         />
