@@ -1,5 +1,5 @@
-import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 'use client'
+import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
