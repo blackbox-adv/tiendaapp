@@ -279,9 +279,9 @@ export default function OnboardingPage() {
       case 1:
         return !!selectedTemplate;
       case 2:
-        return storeName.trim().length >= 2 && storeSlug.trim().length >= 2 && slugStatus !== 'checking' && slugStatus !== 'taken' && slugStatus !== 'invalid' && !!selectedRubro;
+        return storeName.trim().length >= 2 && storeSlug.trim().length >= 2 && slugStatus !== 'checking' && slugStatus !== 'taken' && slugStatus !== 'invalid' && !!selectedRubro && isWhatsappValid(storeWhatsapp);
       case 3:
-        return isWhatsappValid(storeWhatsapp);
+        return true;
       case 4:
         return true;
       default:
