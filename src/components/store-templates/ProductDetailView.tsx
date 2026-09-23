@@ -1,3 +1,4 @@
+import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
@@ -455,7 +456,7 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        src={currentImage}
+                        src={currentImage || PRODUCT_IMG_FALLBACK}
                         alt={product.name}
                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                         onError={(e) => {
@@ -953,7 +954,7 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
                 >
                   <div className="relative aspect-square bg-gray-50 overflow-hidden">
                     <img
-                      src={rp.imageUrl}
+                      src={rp.imageUrl || PRODUCT_IMG_FALLBACK}
                       alt={rp.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       onError={(e) => {
@@ -1037,7 +1038,7 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
                   animate={{ scale: 1, opacity: 1 }}
                   exit={{ scale: 0.85, opacity: 0 }}
                   transition={{ duration: 0.25, ease: 'easeOut' }}
-                  src={currentImage}
+                  src={currentImage || PRODUCT_IMG_FALLBACK}
                   alt={product.name}
                   className="max-w-full max-h-[85vh] object-contain rounded-lg select-none"
                   onClick={(e) => e.stopPropagation()}

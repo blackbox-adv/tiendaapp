@@ -1,3 +1,4 @@
+import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 'use client'
 
 import { useState, useMemo } from 'react'
@@ -344,7 +345,7 @@ export function ClasicaTemplate({ store, products, storeSlug, planId, onProductC
                     style={{ backgroundColor: '#FFF8ED' }}
                   >
                     <img
-                      src={product.imageUrl}
+                      src={product.imageUrl || PRODUCT_IMG_FALLBACK}
                       alt={product.name}
                       className="w-full h-48 sm:h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       onError={(e) => {

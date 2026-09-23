@@ -1,3 +1,4 @@
+import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 'use client'
 
 import { useState, useMemo } from 'react'
@@ -341,7 +342,7 @@ export function VibranteTemplate({ store, products, storeSlug, planId, onProduct
                   {/* Tall image (Instagram-like) */}
                   <div className="aspect-[4/5] bg-gray-100 overflow-hidden relative">
                     <img
-                      src={product.imageUrl}
+                      src={product.imageUrl || PRODUCT_IMG_FALLBACK}
                       alt={product.name}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
                       onError={(e) => {

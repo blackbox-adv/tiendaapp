@@ -1,3 +1,4 @@
+import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 'use client'
 
 import { useState, useMemo } from 'react'
@@ -272,7 +273,7 @@ export function ModernaTemplate({ store, products, storeSlug, planId, onProductC
                   >
                     <div className="aspect-square bg-gray-50 rounded-lg overflow-hidden border border-gray-100 relative">
                       <img
-                        src={product.imageUrl}
+                        src={product.imageUrl || PRODUCT_IMG_FALLBACK}
                         alt={product.name}
                         className="w-full h-full object-cover"
                         onError={(e) => {
