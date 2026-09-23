@@ -353,6 +353,15 @@ export async function POST(request: NextRequest) {
 
     return apiSuccess(serializeDecimals(store), 201, request)
   } catch (error: unknown) {
+    // Límite de tiendas por plan: mensaje claro en vez del 500 genérico
+    if (error instanceof Error && error.message === 'STORE_LIMIT') {
+      return apiError(
+        'Ya alcanzaste el máximo de tiendas de tu plan (1 tienda en Gratis). Actualiza a Premium para crear hasta 3 tiendas.',
+        403,
+        { code: 'STORE_LIMIT' },
+        request
+      )
+    }
     const errCode = error && typeof error === 'object' && 'code' in error ? (error as { code: string }).code : undefined
     const errMeta = error && typeof error === 'object' && 'meta' in error ? (error as { meta: unknown }).meta : undefined
     const errMessage = error instanceof Error ? error.message : String(error)

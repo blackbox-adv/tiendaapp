@@ -111,6 +111,17 @@ const planLabels: Record<string, { text: string; color: string }> = {
   premium: { text: 'Premium', color: 'bg-amber-100 text-amber-700' },
 };
 
+// Valida el formato de WhatsApp Perú igual que el servidor (opcional: vacío es válido).
+// Evita llegar al paso final y chocar con "Error creando tienda" por un número mal escrito.
+const isWhatsappValid = (v: string) => {
+  if (!v.trim()) return true;
+  const digits = v.replace(/[^0-9]/g, '');
+  return (
+    (digits.startsWith('519') && digits.length === 11) ||
+    (digits.startsWith('9') && digits.length === 9)
+  );
+};
+
 export default function OnboardingPage() {
   const router = useRouter();
   const { currentUser } = useAppStore();
@@ -270,7 +281,7 @@ export default function OnboardingPage() {
       case 2:
         return storeName.trim().length >= 2 && storeSlug.trim().length >= 2 && slugStatus !== 'checking' && slugStatus !== 'taken' && slugStatus !== 'invalid' && !!selectedRubro;
       case 3:
-        return true;
+        return isWhatsappValid(storeWhatsapp);
       case 4:
         return true;
       default:
@@ -489,10 +500,24 @@ export default function OnboardingPage() {
                     <Label htmlFor="storeWhatsapp">WhatsApp</Label>
                     <Input
                       id="storeWhatsapp"
-                      placeholder="+51 999 888 777"
+                      placeholder="987 654 321"
                       value={storeWhatsapp}
                       onChange={(e) => setStoreWhatsapp(e.target.value)}
+                      className={
+                        storeWhatsapp && !isWhatsappValid(storeWhatsapp)
+                          ? 'border-red-300 focus-visible:ring-red-200'
+                          : undefined
+                      }
                     />
+                    {storeWhatsapp && !isWhatsappValid(storeWhatsapp) ? (
+                      <p className="text-xs text-red-600">
+                        Número inválido. Usa 9 dígitos que empiecen con 9 (ej: 987 654 321) o déjalo vacío.
+                      </p>
+                    ) : (
+                      <p className="text-xs text-gray-400">
+                        Opcional. Aquí recibirás los pedidos por WhatsApp.
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="storeEmail">Email</Label>
