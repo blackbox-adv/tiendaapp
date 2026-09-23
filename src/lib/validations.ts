@@ -102,10 +102,11 @@ export const createStoreSchema = z.object({
     .optional()
     .default('#10B981'),
   whatsappNumber: z.preprocess(
-    (v) => (v === null ? undefined : v),
-    peruWhatsappString
-      .optional()
-      .or(z.literal(''))
+    // Vacio/whitespace -> undefined (opcional) ANTES de validar, para no necesitar
+    // .or(z.literal('')): en Zod v4 una union fallida produce issue raiz con mensaje
+    // generico "Invalid input" y se pierde el mensaje amigable del refine.
+    (v) => (v === null || v === undefined || (typeof v === 'string' && v.trim() === '') ? undefined : v),
+    peruWhatsappString.optional()
   ),
   template: z
     .enum(['moderna', 'vibrante', 'clasica', 'luxury', 'minimalist', 'bodega', 'sabor', 'moda'])
