@@ -12,6 +12,7 @@ import { SaborTemplate } from '@/components/store-templates/SaborTemplate'
 import { ModaTemplate } from '@/components/store-templates/ModaTemplate'
 import { VitrinaTemplate } from '@/components/store-templates/VitrinaTemplate'
 import { NeonTemplate } from '@/components/store-templates/NeonTemplate'
+import { BoutiqueTemplate } from '@/components/store-templates/BoutiqueTemplate'
 import { ProductDetailView } from '@/components/store-templates/ProductDetailView'
 import { ArrowLeft, Crown, Sparkles, Gem } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -236,6 +237,30 @@ const demoStores: Record<string, Store> = {
     ],
     otherPayments: [],
   },
+  boutique: {
+    id: 'demo-boutique',
+    name: 'Casa Alameda',
+    slug: 'demo-boutique',
+    description: 'Moda femenina con estilo editorial. Nuevas piezas cada semana.',
+    logo: '👗',
+    categoryId: 'ropa',
+    planId: 'premium',
+    colors: { primary: '#A9744F', secondary: '#1C1917' },
+    whatsappNumber: '+51999990011',
+    template: 'boutique',
+    bannerUrl: '/demo-assets/boutique-hero.jpg',
+    userId: '',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    hasShipping: true, hasSecurePayment: true, hasReturns: true,
+    popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
+    yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
+    shippingOptions: [
+      { label: 'Delivery en la ciudad', price: 10, time: '24 horas' },
+      { label: 'Recojo en tienda', price: null, time: 'Cuando quieras' },
+    ],
+    otherPayments: [],
+  },
   neon: {
     id: 'demo-neon',
     name: 'TecnoNova',
@@ -341,6 +366,20 @@ const demoProducts: Record<string, Product[]> = {
     { id: 'dnn5', name: 'Parlante Bluetooth Portátil', description: 'Sonido 360° con graves profundos. Resistente al agua.', price: 99.0, originalPrice: null, categoryId: 'electronica', imageUrl: '/sample-products/parlante-bluetooth-portatil.jpg', images: ['/sample-products/parlante-bluetooth-portatil.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-neon', createdAt: '2024-03-15T10:00:00.000Z' },
     { id: 'dnn6', name: 'Vidrio Templado 9H', description: 'Protección total para tu pantalla con instalación fácil.', price: 15.0, originalPrice: null, categoryId: 'accesorios', imageUrl: '/sample-products/vidrio-templado.jpg', images: ['/sample-products/vidrio-templado.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-neon', createdAt: '2024-04-01T10:00:00.000Z' },
   ],
+  boutique: [
+    { id: 'dbq1', name: 'Vestido Gala Noir', description: 'Vestido largo de gala con caída fluida y detalle en la espalda.', price: 189.0, originalPrice: null, categoryId: 'vestidos', imageUrl: '/sample-products/vestido-gala.jpg', images: ['/sample-products/vestido-gala.jpg'], color: 'Negro', stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-boutique', createdAt: '2024-01-10T10:00:00.000Z' },
+    { id: 'dbq2', name: 'Vestido Verano Blush', description: 'Vestido ligero de verano en tonos rosados. Tela fresca.', price: 99.0, originalPrice: 129.0, categoryId: 'vestidos', imageUrl: '/sample-products/vestido-verano-rosado.jpg', images: ['/sample-products/vestido-verano-rosado.jpg'], color: 'Rosado', stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-boutique', createdAt: '2024-01-20T10:00:00.000Z' },
+    { id: 'dbq3', name: 'Casaca Denim Oversize', description: 'Casaca de mezclilla corte oversize con lavado clásico.', price: 119.0, originalPrice: 159.0, categoryId: 'casacas', imageUrl: '/sample-products/casaca-jean.jpg', images: ['/sample-products/casaca-jean.jpg'], color: 'Denim', stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-boutique', createdAt: '2024-02-01T10:00:00.000Z' },
+    { id: 'dbq4', name: 'Chompa Tejida Premium', description: 'Chompa tejida a máquina con hilo suave de alta calidad.', price: 89.0, originalPrice: null, categoryId: 'casacas', imageUrl: '/sample-products/chompa-tejida.jpg', images: ['/sample-products/chompa-tejida.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-boutique', createdAt: '2024-02-10T10:00:00.000Z' },
+    { id: 'dbq5', name: 'Top Crochet Artesanal', description: 'Top de crochet hecho a mano. Pieza única de temporada.', price: 59.0, originalPrice: null, categoryId: 'casual', imageUrl: '/sample-products/top-crochet.jpg', images: ['/sample-products/top-crochet.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-boutique', createdAt: '2024-02-20T10:00:00.000Z' },
+    { id: 'dbq6', name: 'Pantalón Wide Leg', description: 'Pantalón wide leg con tiro alto y caída elegante.', price: 79.0, originalPrice: null, categoryId: 'casual', imageUrl: '/sample-products/pantalon-wide-leg.jpg', images: ['/sample-products/pantalon-wide-leg.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-boutique', createdAt: '2024-03-01T10:00:00.000Z' },
+    { id: 'dbq7', name: 'Polo Algodón Pima', description: 'Polo básico de algodón Pima peruano. Corte recto.', price: 45.0, originalPrice: 59.0, categoryId: 'casual', imageUrl: '/sample-products/polo-basico-algodon.jpg', images: ['/sample-products/polo-basico-algodon.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-boutique', createdAt: '2024-03-10T10:00:00.000Z' },
+    { id: 'dbq8', name: 'Jean Slim Fit', description: 'Jean slim fit de mezclilla elástica cómoda.', price: 95.0, originalPrice: null, categoryId: 'casual', imageUrl: '/sample-products/jean-unisex.jpg', images: ['/sample-products/jean-unisex.jpg'], color: 'Azul', stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-boutique', createdAt: '2024-03-20T10:00:00.000Z' },
+    { id: 'dbq9', name: 'Bolso Estructurado', description: 'Bolso de mano estructurado con correa desmontable.', price: 139.0, originalPrice: null, categoryId: 'accesorios', imageUrl: '/sample-products/bolso-mano.jpg', images: ['/sample-products/bolso-mano.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-boutique', createdAt: '2024-04-01T10:00:00.000Z' },
+    { id: 'dbq10', name: 'Lentes Sol Classic', description: 'Lentes de sol con protección UV400 y armazón acetato.', price: 65.0, originalPrice: null, categoryId: 'accesorios', imageUrl: '/sample-products/lentes-sol-uv400.jpg', images: ['/sample-products/lentes-sol-uv400.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-boutique', createdAt: '2024-04-10T10:00:00.000Z' },
+    { id: 'dbq11', name: 'Sneakers Urbanas', description: 'Zapatillas urbanas ligeras con suela amortiguada.', price: 149.0, originalPrice: 189.0, categoryId: 'calzado', imageUrl: '/sample-products/zapatillas-running.jpg', images: ['/sample-products/zapatillas-running.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-boutique', createdAt: '2024-04-20T10:00:00.000Z' },
+    { id: 'dbq12', name: 'Conjunto Lounge', description: 'Conjunto de algodón para estar en casa con estilo.', price: 69.0, originalPrice: null, categoryId: 'casual', imageUrl: '/sample-products/pijama-algodon.jpg', images: ['/sample-products/pijama-algodon.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-boutique', createdAt: '2024-05-01T10:00:00.000Z' },
+  ],
 }
 
 // Map template ID to plan for rendering
@@ -355,6 +394,7 @@ const templatePlanId: Record<string, string> = {
   moda: 'premium',
   vitrina: 'premium',
   neon: 'premium',
+  boutique: 'premium',
 }
 
 // Map template ID to plan label for the banner
@@ -369,7 +409,8 @@ function getPlanLabel(template: string): string {
     case 'sabor':
     case 'moda':
     case 'vitrina':
-    case 'neon': return 'Plan Premium'
+    case 'neon':
+    case 'boutique': return 'Plan Premium'
     default: return ''
   }
 }
@@ -484,6 +525,7 @@ export function DemoTemplateClient({ template }: { template: string }) {
       {template === 'moda' && <ModaTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
       {template === 'vitrina' && <VitrinaTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
       {template === 'neon' && <NeonTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
+      {template === 'boutique' && <BoutiqueTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
     </div>
   )
 }

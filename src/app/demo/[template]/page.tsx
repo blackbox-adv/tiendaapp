@@ -45,6 +45,10 @@ const templateMeta: Record<string, { name: string; description: string }> = {
     name: 'Neón',
     description: 'Demo de la plantilla Neón tech para celulares y electrónica - TiendApp',
   },
+  boutique: {
+    name: 'Boutique',
+    description: 'Demo de la plantilla Boutique estilo marca de moda: hero editorial, categorías con foto y grilla lookbook - TiendApp',
+  },
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ template: string }> }): Promise<Metadata> {

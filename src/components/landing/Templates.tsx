@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Eye, Crown, ArrowRight, Search, Sparkles, Gem, Sun, Minimize2, ShoppingBasket, UtensilsCrossed, Shirt, BookOpen, Cpu } from 'lucide-react'
+import { Eye, Crown, ArrowRight, Search, Sparkles, Gem, Sun, Minimize2, ShoppingBasket, UtensilsCrossed, Shirt, BookOpen, Cpu, ShoppingBag } from 'lucide-react'
 import { PLAN_PRICES } from '@/lib/plans'
 import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/lib/store'
@@ -70,6 +70,16 @@ const templates: Template[] = [
     bestFor: ['Joyería', 'Flores', 'Belleza'],
     isNew: true,
     icon: BookOpen,
+  },
+  {
+    id: 'boutique',
+    name: 'Boutique',
+    plan: 'premium',
+    planLabel: 'Premium',
+    description: 'Estilo boutique top: hero editorial a pantalla, categorías con foto y grilla lookbook.',
+    bestFor: ['Ropa', 'Moda', 'Boutiques'],
+    isNew: true,
+    icon: ShoppingBag,
   },
   {
     id: 'neon',
