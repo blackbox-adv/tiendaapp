@@ -28,6 +28,7 @@ import {
   Shirt,
   BookOpen,
   Cpu,
+  ShoppingBag,
 } from 'lucide-react';
 import { RUBROS, getRubro } from '@/lib/rubros';
 import { createDemoProducts } from '@/lib/demo-products';
@@ -122,6 +123,15 @@ const templates = [
     icon: Cpu,
     plan: 'premium',
     demoSlug: 'neon',
+  },
+  {
+    id: 'boutique',
+    name: 'Boutique',
+    desc: 'Estilo boutique top: hero editorial, categorías con foto y lookbook',
+    color: 'from-[#8C5F3C] to-[#D9B08C]',
+    icon: ShoppingBag,
+    plan: 'premium',
+    demoSlug: 'boutique',
   },
 ];
 

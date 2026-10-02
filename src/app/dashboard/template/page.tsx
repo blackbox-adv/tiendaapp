@@ -25,6 +25,7 @@ import {
   Shirt,
   BookOpen,
   Cpu,
+  ShoppingBag,
   Eye,
   Check,
   Lock,
@@ -123,6 +124,15 @@ const templates = [
     plan: 'premium',
     demoSlug: 'neon',
   },
+  {
+    id: 'boutique',
+    name: 'Boutique',
+    desc: 'Estilo boutique top: hero editorial, categorías con foto y lookbook',
+    color: 'from-[#8C5F3C] to-[#D9B08C]',
+    icon: ShoppingBag,
+    plan: 'premium',
+    demoSlug: 'boutique',
+  },
 ];
 
 // Rubro de la tienda → plantilla recomendada
@@ -131,7 +141,7 @@ const RECOMMENDED_BY_CATEGORY: Record<string, string> = {
   alimentos: 'bodega',
   restaurante: 'sabor',
   panaderia: 'sabor',
-  ropa: 'moda',
+  ropa: 'boutique',
   accesorios: 'vitrina',
   belleza: 'vitrina',
   flores: 'vitrina',
