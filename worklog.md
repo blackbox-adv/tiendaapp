@@ -486,3 +486,25 @@ Stage Summary:
 - 11 plantillas en producción. Boutique = respuesta directa al pedido del dueño: una tienda de ropa ahora puede verse como boutique top
 - Demo: https://tienda.blackboxperu.com/demo/boutique
 - Capturas: download/ver-boutique-hero.png, ver-boutique-mosaico.png, ver-boutique-producto.png, boutique-full.png
+
+---
+Task ID: 23
+Agent: Main Agent
+Task: Familia de plantillas "catálogo" (Editorial, Atelier, Terracota) + galería Venngage en landing
+
+Work Log:
+- Feedback del dueño: Boutique fue 1 solo diseño; quería VARIOS diseños nivel catálogo (referencia Venngage) y que la landing los muestre como galería moderna para vender más
+- Creadas 3 plantillas premium (~430 líneas c/u, esqueleto funcional intacto): EditorialTemplate (catálogo revista: portada tipográfica Playfair, índice numerado, fichas con folio 001, banda de oferta negra), AtelierTemplate (moda femenina: marfil rosado, Cormorant Garamond itálica, arcos, tarjeta flotante de 2do producto), TerracotaTemplate (artesanal: Fraunces+Karla, terracota/arena, sello 100% artesanal, banda de valores del oficio)
+- Fuentes Google vía <style> @import dentro de cada plantilla (sin tocar globals)
+- Registro en 8 puntos: types.ts (union), plan-gating PREMIUM_TEMPLATES, StoreView (import+cast+render), demo page meta, DemoTemplateClient (tiendas NOVA Studio/Atelier Rosé/Tierra & Arte + 12 productos c/u), OnboardingClient (+Newspaper/Flower2/Hand), dashboard/template, landing Templates
+- Landing Templates.tsx rediseñada estilo Venngage: 14 diseños TODOS visibles, filtros por rubro (Moda/Belleza/Comida/Hogar/Tech/General), Boutique destacada 2 col con cinta "El favorito para tiendas de ropa", headline "Catálogos que se ven de revista", CTA final
+- AppRouter: sección Templates subida al puesto 3 (Hero→Problem→Templates→HowItWorks→Features→...)
+- 14 previews re-disparados en retrato 900x1200 desde demos de producción, banner de cookies eliminado vía eval antes de cada shot
+- Gate: tsc 0 errores en src/ (ruido solo de copias anidadas tiendaapp/ y tienda-app/)
+- Commits: 6afc46b (plantillas), 45fee01 (landing galería + 3 previews), 884561a (11 previews uniformes); deploy Vercel verificado
+- Verificado en producción: 14 demos HTTP 200, 14 previews HTTP 200, galería capturada (download/ver-galeria-landing-1/2/3.png), ficha de producto abre desde demo editorial (ver-editorial-ficha.png)
+
+Stage Summary:
+- 14 plantillas en producción; 4 de ellas "nivel catálogo revista" (Boutique, Editorial, Atelier, Terracota) respondiendo directo al pedido del dueño
+- Landing ahora muestra los catálogos arriba y como galería grande con filtros, imitando la referencia Venngage
+- Demos: /demo/boutique, /demo/editorial, /demo/atelier, /demo/terracota
