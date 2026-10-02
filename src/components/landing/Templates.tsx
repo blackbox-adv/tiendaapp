@@ -3,12 +3,13 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Eye, Crown, ArrowRight, Search, Sparkles, Gem, Sun, Minimize2, ShoppingBasket, UtensilsCrossed, Shirt, BookOpen, Cpu, ShoppingBag } from 'lucide-react'
+import { Eye, Crown, ArrowRight, Search, Sparkles, Gem, Sun, Minimize2, ShoppingBasket, UtensilsCrossed, Shirt, BookOpen, Cpu, ShoppingBag, Newspaper, Flower2, Hand, LayoutGrid } from 'lucide-react'
 import { PLAN_PRICES } from '@/lib/plans'
 import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/lib/store'
 
 type PlanType = 'free' | 'pro' | 'premium'
+type Rubro = 'todos' | 'moda' | 'belleza' | 'comida' | 'hogar' | 'tech' | 'general'
 
 interface Template {
   id: string
@@ -17,39 +18,58 @@ interface Template {
   planLabel: string
   description: string
   bestFor: string[]
+  tags: Rubro[]
   isNew?: boolean
+  featured?: boolean
   icon: React.ElementType
 }
 
+// Galería estilo catálogo: los 4 diseños "nivel revista" primero.
 const templates: Template[] = [
   {
-    id: 'moderna',
-    name: 'Moderna',
-    plan: 'free',
-    planLabel: 'Gratis',
-    description: 'Limpia y profesional. La del plan gratis para empezar hoy.',
-    bestFor: ['Cualquier rubro'],
-    icon: Gem,
-  },
-  {
-    id: 'bodega',
-    name: 'Mercadito',
+    id: 'boutique',
+    name: 'Boutique',
     plan: 'premium',
     planLabel: 'Premium',
-    description: 'Estilo bodega peruana: ofertas resaltadas y pedido al toque.',
-    bestFor: ['Bodegas', 'Abarrotes', 'Mercados'],
+    description: 'El look de las marcas top de ropa: hero editorial a pantalla completa, categorías con foto, oferta destacada y grilla lookbook.',
+    bestFor: ['Ropa', 'Moda', 'Boutiques'],
+    tags: ['moda'],
     isNew: true,
-    icon: ShoppingBasket,
+    featured: true,
+    icon: ShoppingBag,
   },
   {
-    id: 'sabor',
-    name: 'Sabores',
+    id: 'editorial',
+    name: 'Editorial',
     plan: 'premium',
     planLabel: 'Premium',
-    description: 'Carta digital elegante con favoritos del chef y menú por secciones.',
-    bestFor: ['Restaurantes', 'Pollerías', 'Panaderías'],
+    description: 'Catálogo estilo revista de moda: portada tipográfica, índice numerado y fichas de producto como en una publicación impresa.',
+    bestFor: ['Ropa', 'Urbano', 'Accesorios'],
+    tags: ['moda'],
     isNew: true,
-    icon: UtensilsCrossed,
+    icon: Newspaper,
+  },
+  {
+    id: 'atelier',
+    name: 'Atelier',
+    plan: 'premium',
+    planLabel: 'Premium',
+    description: 'Delicado y femenino: arcos, serif itálica y rosa empolvado. Piezas que se sienten de una marca de diseño.',
+    bestFor: ['Vestidos', 'Belleza', 'Joyería'],
+    tags: ['moda', 'belleza'],
+    isNew: true,
+    icon: Flower2,
+  },
+  {
+    id: 'terracota',
+    name: 'Terracota',
+    plan: 'premium',
+    planLabel: 'Premium',
+    description: 'Cálido y artesanal: terracota, arena y serif con carácter. Perfecto para lo hecho a mano en el Perú.',
+    bestFor: ['Tejidos', 'Artesanía', 'Hogar'],
+    tags: ['moda', 'hogar'],
+    isNew: true,
+    icon: Hand,
   },
   {
     id: 'moda',
@@ -58,6 +78,7 @@ const templates: Template[] = [
     planLabel: 'Premium',
     description: 'Editorial tipo revista: foto grande, minimal y precios sofisticados.',
     bestFor: ['Ropa', 'Gamarra', 'Accesorios'],
+    tags: ['moda'],
     isNew: true,
     icon: Shirt,
   },
@@ -68,18 +89,31 @@ const templates: Template[] = [
     planLabel: 'Premium',
     description: 'Lookbook editorial claro con serif elegante y producto estrella.',
     bestFor: ['Joyería', 'Flores', 'Belleza'],
+    tags: ['belleza', 'moda'],
     isNew: true,
     icon: BookOpen,
   },
   {
-    id: 'boutique',
-    name: 'Boutique',
+    id: 'sabor',
+    name: 'Sabores',
     plan: 'premium',
     planLabel: 'Premium',
-    description: 'Estilo boutique top: hero editorial a pantalla, categorías con foto y grilla lookbook.',
-    bestFor: ['Ropa', 'Moda', 'Boutiques'],
+    description: 'Carta digital elegante con favoritos del chef y menú por secciones.',
+    bestFor: ['Restaurantes', 'Pollerías', 'Panaderías'],
+    tags: ['comida'],
     isNew: true,
-    icon: ShoppingBag,
+    icon: UtensilsCrossed,
+  },
+  {
+    id: 'bodega',
+    name: 'Mercadito',
+    plan: 'premium',
+    planLabel: 'Premium',
+    description: 'Estilo bodega peruana: ofertas resaltadas y pedido al toque.',
+    bestFor: ['Bodegas', 'Abarrotes', 'Mercados'],
+    tags: ['comida', 'hogar'],
+    isNew: true,
+    icon: ShoppingBasket,
   },
   {
     id: 'neon',
@@ -88,8 +122,19 @@ const templates: Template[] = [
     planLabel: 'Premium',
     description: 'Tech oscura con acentos eléctricos. Ideal para celulares y gadgets.',
     bestFor: ['Celulares', 'Electrónica', 'Gaming'],
+    tags: ['tech'],
     isNew: true,
     icon: Cpu,
+  },
+  {
+    id: 'moderna',
+    name: 'Moderna',
+    plan: 'free',
+    planLabel: 'Gratis',
+    description: 'Limpia y profesional. La del plan gratis para empezar hoy.',
+    bestFor: ['Cualquier rubro'],
+    tags: ['general'],
+    icon: Gem,
   },
   {
     id: 'vibrante',
@@ -98,6 +143,7 @@ const templates: Template[] = [
     planLabel: 'Pro',
     description: 'Colores llamativos, buscador y promociones que se notan.',
     bestFor: ['Streetwear', 'Tecnología'],
+    tags: ['general', 'tech'],
     icon: Sparkles,
   },
   {
@@ -107,6 +153,7 @@ const templates: Template[] = [
     planLabel: 'Pro',
     description: 'Tonos cálidos que transmiten tradición y confianza.',
     bestFor: ['Artesanías', 'Comida casera'],
+    tags: ['hogar', 'general'],
     icon: Sun,
   },
   {
@@ -116,6 +163,7 @@ const templates: Template[] = [
     planLabel: 'Premium',
     description: 'Oscuro con acabados dorados. Para marcas premium.',
     bestFor: ['Joyería', 'Alta gama'],
+    tags: ['belleza'],
     icon: Crown,
   },
   {
@@ -125,8 +173,19 @@ const templates: Template[] = [
     planLabel: 'Premium',
     description: 'Estilo Apple: espacios amplios y tipografía precisa.',
     bestFor: ['Cosmética', 'Diseño'],
+    tags: ['belleza', 'hogar'],
     icon: Minimize2,
   },
+]
+
+const rubroFilters: { id: Rubro; label: string }[] = [
+  { id: 'todos', label: 'Todos' },
+  { id: 'moda', label: 'Moda y ropa' },
+  { id: 'belleza', label: 'Belleza y joyería' },
+  { id: 'comida', label: 'Comida' },
+  { id: 'hogar', label: 'Hogar y artesanal' },
+  { id: 'tech', label: 'Tecnología' },
+  { id: 'general', label: 'Cualquier rubro' },
 ]
 
 const planStyles: Record<PlanType, { badge: string; ring: string; hover: string }> = {
@@ -149,12 +208,11 @@ const planStyles: Record<PlanType, { badge: string; ring: string; hover: string 
 
 export function Templates() {
   const navigate = useAppStore((s) => s.navigate)
-  const [showAll, setShowAll] = useState(false)
-  // En móvil mostramos 4 por defecto para no hacer una página interminable
-  const visible = showAll ? templates : templates.slice(0, 4)
+  const [rubro, setRubro] = useState<Rubro>('todos')
+  const visible = rubro === 'todos' ? templates : templates.filter((t) => t.tags.includes(rubro))
 
   return (
-    <section id="templates" className="py-20 sm:py-28 bg-white">
+    <section id="templates" className="py-20 sm:py-28 bg-[#FAF7F2]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
@@ -162,18 +220,37 @@ export function Templates() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.6, ease: 'easeOut' }}
-          className="text-center mb-12"
+          className="text-center mb-10"
         >
           <span className="text-sm font-semibold text-[#BC5A38] uppercase tracking-wider">
-            Diseños que venden
+            Galería de diseños
           </span>
-          <h2 className="font-display text-3xl sm:text-4xl font-bold text-stone-900 mt-3 mb-4">
-            Elige un diseño hecho para tu rubro
+          <h2 className="font-display text-3xl sm:text-5xl font-bold text-stone-900 mt-3 mb-4">
+            Catálogos que se ven <span className="italic text-[#BC5A38]">de revista</span>
           </h2>
-          <p className="text-lg text-stone-500 max-w-2xl mx-auto mb-6">
-            Toca cualquier diseño y mira una tienda real funcionando con WhatsApp y
-            Yape. Sin registrarte, sin instalar nada.
+          <p className="text-lg text-stone-500 max-w-2xl mx-auto mb-7">
+            {templates.length} diseños listos para tu rubro, al nivel de los grandes catálogos.
+            Toca cualquiera y recorre una tienda real con WhatsApp y Yape.
           </p>
+
+          {/* Filtros por rubro */}
+          <div className="flex flex-wrap items-center justify-center gap-2 mb-5">
+            <LayoutGrid className="w-4 h-4 text-stone-400 mr-1 hidden sm:block" />
+            {rubroFilters.map((f) => (
+              <button
+                key={f.id}
+                onClick={() => setRubro(f.id)}
+                className={`px-4 py-2 rounded-full text-sm font-semibold border transition-all duration-200 ${
+                  rubro === f.id
+                    ? 'bg-stone-900 text-white border-stone-900 shadow-md'
+                    : 'bg-white text-stone-600 border-[#E5DCCB] hover:border-[#BC5A38] hover:text-[#BC5A38]'
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+
           {/* Plan legend */}
           <div className="flex flex-wrap items-center justify-center gap-3">
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-sm font-medium text-emerald-700">
@@ -191,7 +268,7 @@ export function Templates() {
           </div>
         </motion.div>
 
-        {/* Grid de plantillas */}
+        {/* Galería de plantillas (todas visibles, estilo mosaico) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {visible.map((tpl, i) => {
             const style = planStyles[tpl.plan]
@@ -201,20 +278,22 @@ export function Templates() {
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.1 }}
-                transition={{ duration: 0.5, delay: (i % 4) * 0.08, ease: 'easeOut' }}
-                className={`group bg-white rounded-2xl border border-[#E5DCCB] shadow-sm hover:shadow-xl ${style.ring} ${style.hover} transition-all duration-300 overflow-hidden flex flex-col`}
+                transition={{ duration: 0.5, delay: (i % 4) * 0.07, ease: 'easeOut' }}
+                className={`group bg-white rounded-2xl border border-[#E5DCCB] shadow-sm hover:shadow-xl ${style.ring} ${style.hover} transition-all duration-300 overflow-hidden flex flex-col ${
+                  tpl.featured ? 'sm:col-span-2' : ''
+                }`}
               >
-                {/* Preview (cropped) + link a demo */}
+                {/* Preview (recortado como portada de catálogo) + link a demo */}
                 <a
                   href={`/demo/${tpl.id}`}
-                  className="relative block aspect-[4/5] overflow-hidden bg-gray-100"
+                  className={`relative block overflow-hidden bg-gray-100 ${tpl.featured ? 'aspect-[4/3] sm:aspect-[16/10]' : 'aspect-[3/4]'}`}
                   aria-label={`Ver demo de la plantilla ${tpl.name}`}
                 >
                   <Image
                     src={`/templates/${tpl.id}-preview.png`}
                     alt={`Tienda de ejemplo con la plantilla ${tpl.name} de TiendApp`}
                     fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     className="object-cover object-top group-hover:scale-[1.03] transition-transform duration-500"
                   />
                   {/* Plan badge */}
@@ -225,6 +304,11 @@ export function Templates() {
                   {tpl.isNew && (
                     <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold bg-[#BC5A38] text-white shadow-md">
                       ⭐ Nuevo
+                    </div>
+                  )}
+                  {tpl.featured && (
+                    <div className="absolute bottom-3 left-3 px-3 py-1.5 rounded-full text-xs font-bold bg-stone-900/85 backdrop-blur-sm text-white shadow-md">
+                      El favorito para tiendas de ropa
                     </div>
                   )}
                   {/* Hover overlay con CTA */}
@@ -239,7 +323,7 @@ export function Templates() {
                 {/* Info */}
                 <div className="p-4 flex flex-col flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <tpl.icon className="w-4 h-4 text-[#BC5A38]" />
+                    <tpl.icon className="w-4 h-4 text-[#BC5A38] shrink-0" />
                     <h3 className="font-display font-bold text-stone-900">{tpl.name}</h3>
                   </div>
                   <p className="text-sm text-stone-500 mb-3 flex-1">{tpl.description}</p>
@@ -277,14 +361,17 @@ export function Templates() {
           })}
         </div>
 
-        {/* Show more / less */}
-        <div className="text-center mt-10">
+        {/* CTA final */}
+        <div className="text-center mt-12">
+          <p className="text-stone-500 mb-4 text-sm">
+            Todos los diseños incluyen carrito, pedidos por WhatsApp, Yape/Plin y envíos.
+          </p>
           <button
-            onClick={() => setShowAll(!showAll)}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full border-2 border-[#BC5A38]/40 text-[#BC5A38] font-semibold hover:bg-[#F6E7DE] transition-colors"
+            onClick={() => navigate({ page: 'register' })}
+            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#BC5A38] text-white font-bold hover:bg-[#a84b2d] transition-colors shadow-lg"
           >
-            {showAll ? 'Ver menos diseños' : `Ver los ${templates.length} diseños`}
-            <ArrowRight className={`w-4 h-4 transition-transform ${showAll ? '-rotate-90' : 'rotate-90'}`} />
+            Crear mi tienda gratis
+            <ArrowRight className="w-4 h-4" />
           </button>
         </div>
       </div>
