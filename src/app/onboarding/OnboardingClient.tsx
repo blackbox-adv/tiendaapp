@@ -26,6 +26,8 @@ import {
   ShoppingBasket,
   UtensilsCrossed,
   Shirt,
+  BookOpen,
+  Cpu,
 } from 'lucide-react';
 import { RUBROS, getRubro } from '@/lib/rubros';
 import { createDemoProducts } from '@/lib/demo-products';
@@ -102,6 +104,24 @@ const templates = [
     icon: Shirt,
     plan: 'premium',
     demoSlug: 'moda',
+  },
+  {
+    id: 'vitrina',
+    name: 'Vitrina',
+    desc: 'Lookbook editorial para joyería, flores y belleza',
+    color: 'from-[#96613D] to-[#C89B6D]',
+    icon: BookOpen,
+    plan: 'premium',
+    demoSlug: 'vitrina',
+  },
+  {
+    id: 'neon',
+    name: 'Neón',
+    desc: 'Tech oscura para celulares, electrónica y gaming',
+    color: 'from-cyan-500 to-violet-600',
+    icon: Cpu,
+    plan: 'premium',
+    demoSlug: 'neon',
   },
 ];
 

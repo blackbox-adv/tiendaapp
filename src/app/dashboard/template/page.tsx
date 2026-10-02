@@ -23,6 +23,8 @@ import {
   ShoppingBasket,
   UtensilsCrossed,
   Shirt,
+  BookOpen,
+  Cpu,
   Eye,
   Check,
   Lock,
@@ -103,6 +105,24 @@ const templates = [
     plan: 'premium',
     demoSlug: 'moda',
   },
+  {
+    id: 'vitrina',
+    name: 'Vitrina',
+    desc: 'Lookbook editorial para joyería, flores y belleza',
+    color: 'from-[#96613D] to-[#C89B6D]',
+    icon: BookOpen,
+    plan: 'premium',
+    demoSlug: 'vitrina',
+  },
+  {
+    id: 'neon',
+    name: 'Neón',
+    desc: 'Tech oscura para celulares, electrónica y gaming',
+    color: 'from-cyan-500 to-violet-600',
+    icon: Cpu,
+    plan: 'premium',
+    demoSlug: 'neon',
+  },
 ];
 
 // Rubro de la tienda → plantilla recomendada
@@ -112,9 +132,11 @@ const RECOMMENDED_BY_CATEGORY: Record<string, string> = {
   restaurante: 'sabor',
   panaderia: 'sabor',
   ropa: 'moda',
-  accesorios: 'moda',
-  belleza: 'moda',
-  flores: 'moda',
+  accesorios: 'vitrina',
+  belleza: 'vitrina',
+  flores: 'vitrina',
+  celulares: 'neon',
+  electronica: 'neon',
 };
 
 const planLabels: Record<string, { text: string; color: string }> = {

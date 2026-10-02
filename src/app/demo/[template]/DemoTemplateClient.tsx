@@ -10,6 +10,8 @@ import { MinimalistTemplate } from '@/components/store-templates/MinimalistTempl
 import { BodegaTemplate } from '@/components/store-templates/BodegaTemplate'
 import { SaborTemplate } from '@/components/store-templates/SaborTemplate'
 import { ModaTemplate } from '@/components/store-templates/ModaTemplate'
+import { VitrinaTemplate } from '@/components/store-templates/VitrinaTemplate'
+import { NeonTemplate } from '@/components/store-templates/NeonTemplate'
 import { ProductDetailView } from '@/components/store-templates/ProductDetailView'
 import { ArrowLeft, Crown, Sparkles, Gem } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -210,6 +212,54 @@ const demoStores: Record<string, Store> = {
     ],
     otherPayments: [],
   },
+  vitrina: {
+    id: 'demo-vitrina',
+    name: 'Atelier Rosa',
+    slug: 'demo-vitrina',
+    description: 'Piezas seleccionadas con calidez y estilo. Belleza para cada día.',
+    logo: '💎',
+    categoryId: 'accesorios',
+    planId: 'premium',
+    colors: { primary: '#96613D', secondary: '#C89B6D' },
+    whatsappNumber: '+51999990009',
+    template: 'vitrina',
+    bannerUrl: '',
+    userId: '',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    hasShipping: true, hasSecurePayment: true, hasReturns: true,
+    popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
+    yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
+    shippingOptions: [
+      { label: 'Delivery en la ciudad', price: 10, time: '24 horas' },
+      { label: 'Recojo en tienda', price: null, time: 'Cuando quieras' },
+    ],
+    otherPayments: [],
+  },
+  neon: {
+    id: 'demo-neon',
+    name: 'TecnoNova',
+    slug: 'demo-neon',
+    description: 'Tecnología de punta con delivery en 24 horas. Garantía incluida.',
+    logo: '📱',
+    categoryId: 'electronica',
+    planId: 'premium',
+    colors: { primary: '#06B6D4', secondary: '#8B5CF6' },
+    whatsappNumber: '+51999990010',
+    template: 'neon',
+    bannerUrl: '',
+    userId: '',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    hasShipping: true, hasSecurePayment: true, hasReturns: true,
+    popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
+    yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
+    shippingOptions: [
+      { label: 'Delivery en la ciudad', price: 10, time: '24 horas' },
+      { label: 'Recojo en tienda', price: null, time: 'Cuando quieras' },
+    ],
+    otherPayments: [],
+  },
 }
 
 // Product images match the preview generation script (same Unsplash URLs)
@@ -274,6 +324,23 @@ const demoProducts: Record<string, Product[]> = {
     { id: 'dmf5', name: 'Look Editorial Completo', description: 'Conjunto de temporada seleccionado por nuestros estilistas.', price: 199.0, originalPrice: null, categoryId: 'mujer', imageUrl: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600', images: ['https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-moda', createdAt: '2024-04-01T10:00:00.000Z' },
     { id: 'dmf6', name: 'Bolso Tote Cuero', description: 'Bolso tote de cuero con acabado premium.', price: 99.9, originalPrice: 129.0, categoryId: 'accesorios', imageUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=600', images: ['https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=600'], color: 'Caramelo', stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-moda', createdAt: '2024-04-15T10:00:00.000Z' },
   ],
+  vitrina: [
+    { id: 'dvt1', name: 'Perfume Rosa Blanca', description: 'Fragancia floral con notas de peonía y vainilla. 100 ml.', price: 129.0, originalPrice: null, categoryId: 'belleza', imageUrl: '/sample-products/perfume-blanco-frasco.jpg', images: ['/sample-products/perfume-blanco-frasco.jpg'], color: null, stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-vitrina', createdAt: '2024-01-10T10:00:00.000Z' },
+    { id: 'dvt2', name: 'Joyería de Plata 925', description: 'Set de plata 925 peruana con diseño artesanal.', price: 145.0, originalPrice: 175.0, categoryId: 'accesorios', imageUrl: '/sample-products/joyeria-plata-925.jpg', images: ['/sample-products/joyeria-plata-925.jpg'], color: 'Plata', stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-vitrina', createdAt: '2024-01-20T10:00:00.000Z' },
+    { id: 'dvt3', name: 'Aretes Plateados', description: 'Aretes delicados con acabado pulido a mano.', price: 49.0, originalPrice: null, categoryId: 'accesorios', imageUrl: '/sample-products/aretes-plateados.jpg', images: ['/sample-products/aretes-plateados.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-vitrina', createdAt: '2024-02-01T10:00:00.000Z' },
+    { id: 'dvt4', name: 'Bolso de Mano', description: 'Bolso estructurado con correa desmontable.', price: 159.0, originalPrice: null, categoryId: 'accesorios', imageUrl: '/sample-products/bolso-mano.jpg', images: ['/sample-products/bolso-mano.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-vitrina', createdAt: '2024-02-10T10:00:00.000Z' },
+    { id: 'dvt5', name: 'Ramo de Girasoles', description: 'Frescas de la mañana, envueltas para regalo.', price: 45.0, originalPrice: null, categoryId: 'flores', imageUrl: '/sample-products/ramo-girasoles.jpg', images: ['/sample-products/ramo-girasoles.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-vitrina', createdAt: '2024-03-01T10:00:00.000Z' },
+    { id: 'dvt6', name: 'Perfume Femenino Intense', description: 'Notas ámbar y madera para las noches especiales.', price: 149.0, originalPrice: 189.0, categoryId: 'belleza', imageUrl: '/sample-products/perfume-femenino-100ml.jpg', images: ['/sample-products/perfume-femenino-100ml.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-vitrina', createdAt: '2024-03-10T10:00:00.000Z' },
+    { id: 'dvt7', name: 'Pulsera Tejida a Mano', description: 'Pulsera artesanal con hilos de colores naturales.', price: 25.0, originalPrice: null, categoryId: 'accesorios', imageUrl: '/sample-products/pulsera-tejida-mano.jpg', images: ['/sample-products/pulsera-tejida-mano.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-vitrina', createdAt: '2024-04-01T10:00:00.000Z' },
+  ],
+  neon: [
+    { id: 'dnn1', name: 'Audífonos Bluetooth Pro', description: 'Cancelación activa de ruido y 30 horas de batería.', price: 189.0, originalPrice: 229.0, categoryId: 'electronica', imageUrl: '/sample-products/audifonos-bluetooth-wireless.jpg', images: ['/sample-products/audifonos-bluetooth-wireless.jpg'], color: null, stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-neon', createdAt: '2024-01-10T10:00:00.000Z' },
+    { id: 'dnn2', name: 'Smartwatch Fit 2', description: 'Pulsómetro, GPS y pantalla AMOLED resistente al agua.', price: 159.0, originalPrice: null, categoryId: 'electronica', imageUrl: '/sample-products/smartwatch-basico.jpg', images: ['/sample-products/smartwatch-basico.jpg'], color: null, stock: -1, isActive: true, featured: true, rating: 4.5, storeId: 'demo-neon', createdAt: '2024-02-01T10:00:00.000Z' },
+    { id: 'dnn3', name: 'Power Bank 10 000 mAh', description: 'Carga rápida de 22.5 W con doble salida USB.', price: 69.0, originalPrice: null, categoryId: 'electronica', imageUrl: '/sample-products/power-bank-10000.jpg', images: ['/sample-products/power-bank-10000.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-neon', createdAt: '2024-02-15T10:00:00.000Z' },
+    { id: 'dnn4', name: 'Cargador Rápido 20 W', description: 'Carga completa en menos de 2 horas. Certificado.', price: 35.0, originalPrice: 45.0, categoryId: 'accesorios', imageUrl: '/sample-products/cargador-rapido-20w.jpg', images: ['/sample-products/cargador-rapido-20w.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-neon', createdAt: '2024-03-01T10:00:00.000Z' },
+    { id: 'dnn5', name: 'Parlante Bluetooth Portátil', description: 'Sonido 360° con graves profundos. Resistente al agua.', price: 99.0, originalPrice: null, categoryId: 'electronica', imageUrl: '/sample-products/parlante-bluetooth-portatil.jpg', images: ['/sample-products/parlante-bluetooth-portatil.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-neon', createdAt: '2024-03-15T10:00:00.000Z' },
+    { id: 'dnn6', name: 'Vidrio Templado 9H', description: 'Protección total para tu pantalla con instalación fácil.', price: 15.0, originalPrice: null, categoryId: 'accesorios', imageUrl: '/sample-products/vidrio-templado.jpg', images: ['/sample-products/vidrio-templado.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-neon', createdAt: '2024-04-01T10:00:00.000Z' },
+  ],
 }
 
 // Map template ID to plan for rendering
@@ -286,6 +353,8 @@ const templatePlanId: Record<string, string> = {
   bodega: 'premium',
   sabor: 'premium',
   moda: 'premium',
+  vitrina: 'premium',
+  neon: 'premium',
 }
 
 // Map template ID to plan label for the banner
@@ -298,7 +367,9 @@ function getPlanLabel(template: string): string {
     case 'minimalist':
     case 'bodega':
     case 'sabor':
-    case 'moda': return 'Plan Premium'
+    case 'moda':
+    case 'vitrina':
+    case 'neon': return 'Plan Premium'
     default: return ''
   }
 }
@@ -411,6 +482,8 @@ export function DemoTemplateClient({ template }: { template: string }) {
       {template === 'bodega' && <BodegaTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
       {template === 'sabor' && <SaborTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
       {template === 'moda' && <ModaTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
+      {template === 'vitrina' && <VitrinaTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
+      {template === 'neon' && <NeonTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
     </div>
   )
 }
