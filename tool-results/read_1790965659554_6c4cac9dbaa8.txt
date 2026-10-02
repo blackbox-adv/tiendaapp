@@ -1,0 +1,531 @@
+     1→'use client'
+     2→import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
+     3→
+     4→import { useState, useMemo } from 'react'
+     5→import { motion, AnimatePresence } from 'framer-motion'
+     6→import { StoreLogo } from './StoreLogo'
+     7→import { getStoreCategories } from '@/lib/store-categories'
+     8→import { ShoppingBag, Search, X, ArrowRight, Truck, ShieldCheck, RotateCcw, MessageCircle } from 'lucide-react'
+     9→import { StoreFeatureBadges } from './StoreFeatureBadges'
+    10→import { CombosSection } from './CombosSection'
+    11→import { PaymentMethods } from './PaymentMethods'
+    12→import { ShippingOptions } from './ShippingOptions'
+    13→import { useAppStore } from '@/lib/store'
+    14→import type { Store, Product } from '@/lib/types'
+    15→
+    16→// ============================================================
+    17→// BOUTIQUE — Plantilla premium estilo "boutique top".
+    18→// Réplica del look de las grandes marcas de moda: hero editorial
+    19→// a pantalla completa, barra de beneficios, categorías con foto
+    20→// (chips circulares + mosaicos), banner de colección con descuento
+    21→// y grilla lookbook. Ideal para tiendas de ropa que quieren verse
+    22→// como marca profesional.
+    23→// ============================================================
+    24→
+    25→export function BoutiqueTemplate({ store, products, storeSlug, planId, onProductClick }: { store: Store; products: Product[]; storeSlug: string; planId?: string; onProductClick?: (productId: string) => void }) {
+    26→  const [selectedCategory, setSelectedCategory] = useState<string>('all')
+    27→  const [searchQuery, setSearchQuery] = useState('')
+    28→  const navigate = useAppStore((s) => s.navigate)
+    29→
+    30→  const categories = useMemo(() => getStoreCategories(products), [products])
+    31→
+    32→  const filteredProducts = useMemo(() => {
+    33→    let result = selectedCategory === 'all'
+    34→      ? products
+    35→      : products.filter((p) => p.categoryId === selectedCategory)
+    36→    if (searchQuery.trim()) {
+    37→      const q = searchQuery.toLowerCase()
+    38→      result = result.filter(
+    39→        (p) => p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q)
+    40→      )
+    41→    }
+    42→    return result
+    43→  }, [products, selectedCategory, searchQuery])
+    44→
+    45→  // Primera foto disponible por categoría (chips circulares + mosaicos)
+    46→  const categoryImages = useMemo(() => {
+    47→    const map: Record<string, string> = {}
+    48→    for (const p of products) {
+    49→      if (p.imageUrl && !map[p.categoryId]) map[p.categoryId] = p.imageUrl
+    50→    }
+    51→    return map
+    52→  }, [products])
+    53→
+    54→  // Hero: producto destacado (para el hero dividido cuando no hay banner)
+    55→  const heroProduct = useMemo(
+    56→    () => products.find((p) => p.featured) || products[0] || null,
+    57→    [products]
+    58→  )
+    59→
+    60→  // Banner de colección: producto con mayor % de descuento
+    61→  const dealProduct = useMemo(() => {
+    62→    return products
+    63→      .filter((p) => p.originalPrice && Number(p.originalPrice) > Number(p.price))
+    64→      .sort((a, b) => {
+    65→        const da = 1 - Number(a.price) / Number(a.originalPrice!)
+    66→        const db = 1 - Number(b.price) / Number(b.originalPrice!)
+    67→        return db - da
+    68→      })[0] || null
+    69→  }, [products])
+    70→  const dealPct = dealProduct
+    71→    ? Math.round((1 - Number(dealProduct.price) / Number(dealProduct.originalPrice!)) * 100)
+    72→    : 0
+    73→
+    74→  const openProduct = (id: string) =>
+    75→    onProductClick ? onProductClick(id) : navigate({ page: 'product-detail', slug: storeSlug, productId: id })
+    76→
+    77→  const whatsappUrl = `https://wa.me/${store.whatsappNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hola ${store.name}! Vi tu catálogo online y quiero más información.`)}`
+    78→
+    79→  const showCategoryTiles = categories.length >= 3
+    80→
+    81→  return (
+    82→    <div className="min-h-screen bg-[#FDFBF7] text-stone-900 flex flex-col">
+    83→      {/* ── Barra superior de anuncio ── */}
+    84→      <div className="bg-stone-900 text-[#FDFBF7]">
+    85→        <div className="max-w-6xl mx-auto px-6 py-2 flex items-center justify-center gap-2 text-[10px] md:text-[11px] tracking-[0.18em] uppercase">
+    86→          <Truck className="w-3 h-3 shrink-0" />
+    87→          <span className="truncate">
+    88→            {store.hasShipping ? 'Envíos a todo el país' : 'Atención personalizada'} · Compra fácil por WhatsApp
+    89→          </span>
+    90→        </div>
+    91→      </div>
+    92→
+    93→      {/* ── Navegación ── */}
+    94→      <nav className="sticky top-[53px] z-30 bg-[#FDFBF7]/90 backdrop-blur-md border-b border-stone-200/80">
+    95→        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+    96→          <div className="flex items-center gap-2.5 min-w-0">
+    97→            {store.logo && <StoreLogo logo={store.logo} size={26} />}
+    98→            <span className="font-serif text-lg tracking-tight truncate">{store.name}</span>
+    99→          </div>
+   100→          <div className="hidden md:flex items-center gap-7 text-[11px] font-medium uppercase tracking-[0.2em] text-stone-500">
+   101→            <a href="#coleccion" className="hover:text-stone-900 transition-colors">Colección</a>
+   102→            {categories.length > 0 && (
+   103→              <a href="#categorias" className="hover:text-stone-900 transition-colors">Categorías</a>
+   104→            )}
+   105→          </div>
+   106→          <a
+   107→            href={whatsappUrl}
+   108→            target="_blank"
+   109→            rel="noopener noreferrer"
+   110→            className="inline-flex items-center gap-1.5 bg-stone-900 text-white text-[11px] font-semibold uppercase tracking-[0.15em] px-4 py-2 hover:bg-stone-700 transition-colors"
+   111→          >
+   112→            <MessageCircle className="w-3.5 h-3.5" />
+   113→            <span className="hidden sm:inline">Pedir</span>
+   114→          </a>
+   115→        </div>
+   116→      </nav>
+   117→
+   118→      {/* ── Hero editorial ── */}
+   119→      {store.bannerUrl ? (
+   120→        <section className="relative h-[68vh] min-h-[420px] max-h-[640px] overflow-hidden">
+   121→          <img src={store.bannerUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
+   122→          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
+   123→          <div className="relative max-w-6xl mx-auto px-6 h-full flex items-center">
+   124→            <div className="max-w-lg text-white">
+   125→              <p className="text-[10px] font-semibold uppercase tracking-[0.35em] mb-4 text-white/80">
+   126→                Nueva colección
+   127→              </p>
+   128→              <h1 className="font-serif text-4xl md:text-6xl leading-[1.05] tracking-tight">{store.name}</h1>
+   129→              {store.description && (
+   130→                <p className="mt-5 text-sm md:text-base text-white/85 font-light leading-relaxed max-w-sm">
+   131→                  {store.description}
+   132→                </p>
+   133→              )}
+   134→              <div className="mt-8 flex flex-wrap items-center gap-3">
+   135→                <a
+   136→                  href="#coleccion"
+   137→                  className="inline-flex items-center gap-2 bg-white text-stone-900 px-7 py-3 text-[11px] font-bold uppercase tracking-[0.2em] hover:bg-stone-100 transition-colors shadow-lg"
+   138→                >
+   139→                  Ver colección <ArrowRight className="w-3.5 h-3.5" />
+   140→                </a>
+   141→                <a
+   142→                  href={whatsappUrl}
+   143→                  target="_blank"
+   144→                  rel="noopener noreferrer"
+   145→                  className="inline-flex items-center gap-2 border border-white/50 text-white px-7 py-3 text-[11px] font-bold uppercase tracking-[0.2em] hover:bg-white/10 transition-colors backdrop-blur-sm"
+   146→                >
+   147→                  Pedir por WhatsApp
+   148→                </a>
+   149→              </div>
+   150→            </div>
+   151→          </div>
+   152→        </section>
+   153→      ) : (
+   154→        <section className="max-w-6xl mx-auto px-6 pt-10 md:pt-14 pb-10">
+   155→          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+   156→            <div>
+   157→              <p className="text-[10px] font-semibold uppercase tracking-[0.35em] mb-4" style={{ color: store.colors.primary }}>
+   158→                Nueva colección
+   159→              </p>
+   160→              <h1 className="font-serif text-4xl md:text-6xl leading-[1.05] tracking-tight">{store.name}</h1>
+   161→              {store.description && (
+   162→                <p className="mt-5 text-stone-500 font-light leading-relaxed max-w-sm">{store.description}</p>
+   163→              )}
+   164→              <div className="mt-8 flex flex-wrap items-center gap-3">
+   165→                <a
+   166→                  href="#coleccion"
+   167→                  className="inline-flex items-center gap-2 bg-stone-900 text-white px-7 py-3 text-[11px] font-bold uppercase tracking-[0.2em] hover:bg-stone-700 transition-colors"
+   168→                >
+   169→                  Ver colección <ArrowRight className="w-3.5 h-3.5" />
+   170→                </a>
+   171→                <a
+   172→                  href={whatsappUrl}
+   173→                  target="_blank"
+   174→                  rel="noopener noreferrer"
+   175→                  className="inline-flex items-center gap-2 border border-stone-300 text-stone-700 px-7 py-3 text-[11px] font-bold uppercase tracking-[0.2em] hover:bg-stone-100 transition-colors"
+   176→                >
+   177→                  Pedir por WhatsApp
+   178→                </a>
+   179→              </div>
+   180→            </div>
+   181→            {heroProduct && (
+   182→              <button
+   183→                onClick={() => openProduct(heroProduct.id)}
+   184→                className="group relative aspect-[4/5] max-h-[460px] w-full overflow-hidden bg-stone-100 cursor-pointer text-left"
+   185→              >
+   186→                <img
+   187→                  src={heroProduct.imageUrl || PRODUCT_IMG_FALLBACK}
+   188→                  alt={heroProduct.name}
+   189→                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
+   190→                  onError={(e) => {
+   191→                    (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK
+   192→                  }}
+   193→                />
+   194→                <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm px-4 py-2.5 shadow-md">
+   195→                  <p className="text-[9px] uppercase tracking-[0.25em] text-stone-400">Destacado</p>
+   196→                  <p className="font-serif text-sm">{heroProduct.name}</p>
+   197→                </div>
+   198→              </button>
+   199→            )}
+   200→          </div>
+   201→        </section>
+   202→      )}
+   203→
+   204→      {/* ── Barra de beneficios ── */}
+   205→      <section className="border-y border-stone-200/80 bg-white/60">
+   206→        <div className="max-w-6xl mx-auto px-6 grid grid-cols-3 divide-x divide-stone-200/80">
+   207→          {[
+   208→            { icon: Truck, title: 'Envío', sub: store.hasShipping ? 'A todo el país' : 'A coordinar' },
+   209→            { icon: ShieldCheck, title: 'Pago seguro', sub: 'Yape · Plin · Efectivo' },
+   210→            { icon: RotateCcw, title: 'Cambios', sub: store.hasReturns ? 'Fáciles y rápidos' : 'A coordinar' },
+   211→          ].map((b) => (
+   212→            <div key={b.title} className="flex items-center justify-center gap-2.5 py-4 md:py-5 px-2">
+   213→              <b.icon className="w-4 h-4 text-stone-400 shrink-0 hidden sm:block" />
+   214→              <div className="text-center sm:text-left">
+   215→                <p className="text-[10px] md:text-[11px] font-bold uppercase tracking-[0.15em]">{b.title}</p>
+   216→                <p className="text-[9px] md:text-[10px] text-stone-400 tracking-wide">{b.sub}</p>
+   217→              </div>
+   218→            </div>
+   219→          ))}
+   220→        </div>
+   221→      </section>
+   222→
+   223→      <main className="flex-1 w-full">
+   224→        {/* ── Categorías: chips circulares con foto ── */}
+   225→        {categories.length > 0 && (
+   226→          <section id="categorias" className="max-w-6xl mx-auto px-6 pt-12 scroll-mt-32">
+   227→            <div className="flex items-end justify-between mb-7">
+   228→              <div>
+   229→                <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-stone-400 mb-2">Shop by category</p>
+   230→                <h2 className="font-serif text-2xl md:text-3xl tracking-tight">Encuentra tu estilo</h2>
+   231→              </div>
+   232→            </div>
+   233→            <div className="flex gap-5 md:gap-8 overflow-x-auto scrollbar-hide pb-2">
+   234→              <button
+   235→                onClick={() => setSelectedCategory('all')}
+   236→                className="group flex flex-col items-center gap-2.5 shrink-0"
+   237→              >
+   238→                <span
+   239→                  className={`w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden ring-1 transition-all duration-300 flex items-center justify-center ${
+   240→                    selectedCategory === 'all'
+   241→                      ? 'ring-2 ring-offset-2 ring-stone-900 ring-offset-[#FDFBF7]'
+   242→                      : 'ring-stone-200 group-hover:ring-stone-400'
+   243→                  }`}
+   244→                  style={selectedCategory === 'all' ? { ['--tw-ring-color' as string]: store.colors.primary } : undefined}
+   245→                >
+   246→                  <span className="w-full h-full flex items-center justify-center bg-stone-100 text-[10px] font-bold uppercase tracking-widest text-stone-500">
+   247→                    Todo
+   248→                  </span>
+   249→                </span>
+   250→                <span className={`text-[10px] md:text-[11px] uppercase tracking-[0.15em] ${selectedCategory === 'all' ? 'font-bold' : 'text-stone-500'}`}>
+   251→                  Todo
+   252→                </span>
+   253→              </button>
+   254→              {categories.map((cat) => {
+   255→                const active = selectedCategory === cat.id
+   256→                return (
+   257→                  <button
+   258→                    key={cat.id}
+   259→                    onClick={() => setSelectedCategory(cat.id)}
+   260→                    className="group flex flex-col items-center gap-2.5 shrink-0"
+   261→                  >
+   262→                    <span
+   263→                      className={`w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden ring-1 transition-all duration-300 ${
+   264→                        active
+   265→                          ? 'ring-2 ring-offset-2 ring-offset-[#FDFBF7]'
+   266→                          : 'ring-stone-200 group-hover:ring-stone-400'
+   267→                      }`}
+   268→                      style={active ? { ['--tw-ring-color' as string]: store.colors.primary } : undefined}
+   269→                    >
+   270→                      <img
+   271→                        src={categoryImages[cat.id] || PRODUCT_IMG_FALLBACK}
+   272→                        alt={cat.name}
+   273→                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+   274→                        onError={(e) => {
+   275→                          (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK
+   276→                        }}
+   277→                      />
+   278→                    </span>
+   279→                    <span className={`text-[10px] md:text-[11px] uppercase tracking-[0.15em] whitespace-nowrap ${active ? 'font-bold' : 'text-stone-500 group-hover:text-stone-900'}`}>
+   280→                      {cat.name}
+   281→                    </span>
+   282→                  </button>
+   283→                )
+   284→              })}
+   285→            </div>
+   286→
+   287→            {/* Mosaico de categorías con foto grande (solo si hay 3+) */}
+   288→            {showCategoryTiles && (
+   289→              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mt-8">
+   290→                {categories.slice(0, 4).map((cat) => (
+   291→                  <button
+   292→                    key={cat.id}
+   293→                    onClick={() => setSelectedCategory(cat.id)}
+   294→                    className="group relative aspect-[4/5] md:aspect-[3/4] overflow-hidden bg-stone-100 cursor-pointer"
+   295→                  >
+   296→                    <img
+   297→                      src={categoryImages[cat.id] || PRODUCT_IMG_FALLBACK}
+   298→                      alt={cat.name}
+   299→                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-700"
+   300→                      onError={(e) => {
+   301→                        (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK
+   302→                      }}
+   303→                    />
+   304→                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+   305→                    <div className="absolute bottom-0 inset-x-0 p-4 text-left">
+   306→                      <p className="text-white font-serif text-base md:text-lg leading-tight">{cat.name}</p>
+   307→                      <span className="inline-flex items-center gap-1.5 text-white/80 text-[10px] uppercase tracking-[0.2em] mt-1 group-hover:gap-3 group-hover:text-white transition-all duration-300">
+   308→                        Explorar <ArrowRight className="w-3 h-3" />
+   309→                      </span>
+   310→                    </div>
+   311→                  </button>
+   312→                ))}
+   313→              </div>
+   314→            )}
+   315→          </section>
+   316→        )}
+   317→
+   318→        {/* ── Banner de colección con descuento ── */}
+   319→        {dealProduct && selectedCategory === 'all' && !searchQuery.trim() && (
+   320→          <section className="max-w-6xl mx-auto px-6 pt-14">
+   321→            <motion.button
+   322→              initial={{ opacity: 0, y: 16 }}
+   323→              whileInView={{ opacity: 1, y: 0 }}
+   324→              viewport={{ once: true }}
+   325→              transition={{ duration: 0.5 }}
+   326→              onClick={() => openProduct(dealProduct.id)}
+   327→              className="group relative w-full overflow-hidden bg-stone-900 cursor-pointer text-left grid md:grid-cols-2"
+   328→            >
+   329→              <div className="aspect-[16/10] md:aspect-auto md:min-h-[300px] relative overflow-hidden">
+   330→                <img
+   331→                  src={dealProduct.imageUrl || PRODUCT_IMG_FALLBACK}
+   332→                  alt={dealProduct.name}
+   333→                  className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:scale-[1.03] transition-transform duration-700"
+   334→                  onError={(e) => {
+   335→                    (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK
+   336→                  }}
+   337→                />
+   338→              </div>
+   339→              <div className="flex flex-col justify-center items-start p-8 md:p-12">
+   340→                <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/60 mb-3">Oferta especial</p>
+   341→                <p className="font-serif text-3xl md:text-4xl text-white leading-tight">Hasta -{dealPct}%</p>
+   342→                <p className="mt-3 text-white/80 text-sm font-light max-w-xs line-clamp-2">{dealProduct.name}</p>
+   343→                <span className="mt-7 inline-flex items-center gap-2 bg-white text-stone-900 px-6 py-2.5 text-[10px] font-bold uppercase tracking-[0.2em] group-hover:bg-stone-100 transition-colors">
+   344→                  Ver oferta <ArrowRight className="w-3 h-3" />
+   345→                </span>
+   346→              </div>
+   347→            </motion.button>
+   348→          </section>
+   349→        )}
+   350→
+   351→        {/* ── Packs / combos (funcionalidad intacta) ── */}
+   352→        {selectedCategory === 'all' && !searchQuery.trim() && (
+   353→          <div className="max-w-6xl mx-auto px-6 pt-14">
+   354→            <CombosSection products={products} store={store} storeSlug={storeSlug} primaryColor={store.colors.primary} />
+   355→          </div>
+   356→        )}
+   357→
+   358→        {/* ── Catálogo ── */}
+   359→        <section id="coleccion" className="max-w-6xl mx-auto px-6 pt-14 pb-16 scroll-mt-32">
+   360→          <div className="flex items-end justify-between mb-7 gap-4">
+   361→            <div>
+   362→              <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-stone-400 mb-2">Best sellers</p>
+   363→              <h2 className="font-serif text-2xl md:text-3xl tracking-tight">
+   364→                {searchQuery.trim() ? 'Resultados' : (selectedCategory === 'all' ? 'Los más pedidos' : categories.find((c) => c.id === selectedCategory)?.name || 'Colección')}
+   365→              </h2>
+   366→            </div>
+   367→            {planId !== 'free' && (
+   368→              <div className="relative w-44 md:w-64 shrink-0">
+   369→                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400" />
+   370→                <input
+   371→                  type="text"
+   372→                  placeholder="Buscar..."
+   373→                  value={searchQuery}
+   374→                  onChange={(e) => setSearchQuery(e.target.value)}
+   375→                  className="w-full pl-8 pr-7 py-2.5 text-xs bg-transparent border border-stone-200 focus:outline-none focus:border-stone-900 placeholder:text-stone-400 transition-colors"
+   376→                />
+   377→                {searchQuery && (
+   378→                  <button
+   379→                    onClick={() => setSearchQuery('')}
+   380→                    className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-stone-200 hover:bg-stone-300 flex items-center justify-center transition-colors"
+   381→                  >
+   382→                    <X className="w-2.5 h-2.5 text-stone-600" />
+   383→                  </button>
+   384→                )}
+   385→              </div>
+   386→            )}
+   387→          </div>
+   388→
+   389→          {filteredProducts.length === 0 ? (
+   390→            <div className="text-center py-24">
+   391→              <div className="w-14 h-14 rounded-full bg-white mx-auto mb-5 flex items-center justify-center ring-1 ring-stone-200">
+   392→                <ShoppingBag className="w-6 h-6 text-stone-300" />
+   393→              </div>
+   394→              <p className="font-serif text-lg text-stone-400">
+   395→                {searchQuery ? `Sin resultados para "${searchQuery}"` : 'No hay productos en esta categoría'}
+   396→              </p>
+   397→              {searchQuery && (
+   398→                <button
+   399→                  onClick={() => setSearchQuery('')}
+   400→                  className="mt-3 text-xs uppercase tracking-[0.15em] text-stone-500 hover:text-stone-900 border-b border-stone-400 pb-0.5 transition-colors"
+   401→                >
+   402→                  Limpiar búsqueda
+   403→                </button>
+   404→              )}
+   405→            </div>
+   406→          ) : (
+   407→            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-10 md:gap-x-6">
+   408→              <AnimatePresence mode="popLayout">
+   409→                {filteredProducts.map((product, i) => (
+   410→                  <motion.article
+   411→                    key={product.id}
+   412→                    layout
+   413→                    initial={{ opacity: 0, y: 14 }}
+   414→                    animate={{ opacity: 1, y: 0 }}
+   415→                    exit={{ opacity: 0 }}
+   416→                    transition={{ duration: 0.4, delay: Math.min(i * 0.04, 0.3) }}
+   417→                    className="group cursor-pointer"
+   418→                    onClick={() => openProduct(product.id)}
+   419→                  >
+   420→                    <div className="aspect-[3/4] relative overflow-hidden bg-stone-100">
+   421→                      <img
+   422→                        src={product.imageUrl || PRODUCT_IMG_FALLBACK}
+   423→                        alt={product.name}
+   424→                        className="w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-700"
+   425→                        onError={(e) => {
+   426→                          (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK
+   427→                        }}
+   428→                      />
+   429→                      {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
+   430→                        <div
+   431→                          className="absolute top-3 left-3 px-2 py-0.5 text-[10px] font-bold tracking-widest text-white"
+   432→                          style={{ backgroundColor: store.colors.primary }}
+   433→                        >
+   434→                          -{Math.round((1 - Number(product.price) / Number(product.originalPrice)) * 100)}%
+   435→                        </div>
+   436→                      )}
+   437→                      {product.featured && !product.originalPrice && (
+   438→                        <div className="absolute top-3 left-3 px-2 py-0.5 bg-stone-900 text-white text-[10px] font-semibold tracking-widest uppercase">
+   439→                          Destacado
+   440→                        </div>
+   441→                      )}
+   442→                      <div className="absolute inset-0 bg-stone-900/0 group-hover:bg-stone-900/15 transition-colors duration-300" />
+   443→                      <div className="absolute inset-x-3 bottom-3 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+   444→                        <span className="block text-center py-2.5 bg-white/95 backdrop-blur-sm text-stone-900 text-[10px] font-bold uppercase tracking-[0.2em] shadow-md">
+   445→                          Ver detalle
+   446→                        </span>
+   447→                      </div>
+   448→                    </div>
+   449→                    <div className="mt-3.5">
+   450→                      <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-stone-400 mb-1">
+   451→                        {categories.find((c) => c.id === product.categoryId)?.name || 'Producto'}
+   452→                      </p>
+   453→                      <h3 className="font-serif text-[15px] leading-snug">{product.name}</h3>
+   454→                      <div className="flex items-center gap-2 mt-1.5">
+   455→                        <span className="text-sm font-semibold" style={{ color: store.colors.primary }}>
+   456→                          S/{Number(product.price).toFixed(2)}
+   457→                        </span>
+   458→                        {product.originalPrice && (
+   459→                          <span className="text-xs text-stone-400 line-through">S/{Number(product.originalPrice).toFixed(2)}</span>
+   460→                        )}
+   461→                      </div>
+   462→                    </div>
+   463→                  </motion.article>
+   464→                ))}
+   465→              </AnimatePresence>
+   466→            </div>
+   467→          )}
+   468→
+   469→          {/* Insignias de features en el cierre del catálogo */}
+   470→          <div className="mt-14 flex justify-center">
+   471→            <StoreFeatureBadges
+   472→              hasShipping={store.hasShipping}
+   473→              hasSecurePayment={store.hasSecurePayment}
+   474→              hasReturns={store.hasReturns}
+   475→              variant="light"
+   476→              primaryColor={store.colors.primary}
+   477→            />
+   478→          </div>
+   479→        </section>
+   480→      </main>
+   481→
+   482→      {/* ── CTA final estilo newsletter → WhatsApp ── */}
+   483→      <section className="bg-stone-900">
+   484→        <div className="max-w-6xl mx-auto px-6 py-14 text-center">
+   485→          <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/50 mb-3">Atención personalizada</p>
+   486→          <h2 className="font-serif text-2xl md:text-3xl text-white tracking-tight">¿Listo para tu próximo favorito?</h2>
+   487→          <p className="mt-3 text-white/60 text-sm font-light max-w-md mx-auto">
+   488→            Escríbenos por WhatsApp y te ayudamos a elegir. Respondemos rápido.
+   489→          </p>
+   490→          <a
+   491→            href={whatsappUrl}
+   492→            target="_blank"
+   493→            rel="noopener noreferrer"
+   494→            className="mt-7 inline-flex items-center gap-2 bg-[#25D366] text-white px-8 py-3.5 text-[11px] font-bold uppercase tracking-[0.2em] hover:brightness-95 transition-all shadow-lg"
+   495→          >
+   496→            <MessageCircle className="w-4 h-4" /> Escribir por WhatsApp
+   497→          </a>
+   498→        </div>
+   499→      </section>
+   500→
+   501→      {/* Formas de pago (Yape / Plin) y envíos */}
+   502→      <ShippingOptions store={store} />
+   503→      <PaymentMethods store={store} />
+   504→
+   505→      {/* ── Footer oscuro elegante ── */}
+   506→      <footer className="bg-stone-950 text-white/70">
+   507→        <div className="max-w-6xl mx-auto px-6 py-10 flex flex-col items-center gap-3 text-center">
+   508→          {store.logo && <StoreLogo logo={store.logo} size={30} />}
+   509→          <p className="font-serif text-lg text-white">{store.name}</p>
+   510→          {store.description && (
+   511→            <p className="text-xs text-white/40 font-light max-w-sm leading-relaxed">{store.description}</p>
+   512→          )}
+   513→          <div className="h-px w-10 bg-white/20 my-2" />
+   514→          <div className="flex items-center gap-6 text-[10px] uppercase tracking-[0.2em] text-white/40">
+   515→            <a href="#coleccion" className="hover:text-white transition-colors">Colección</a>
+   516→            {categories.length > 0 && (
+   517→              <a href="#categorias" className="hover:text-white transition-colors">Categorías</a>
+   518→            )}
+   519→            <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">WhatsApp</a>
+   520→          </div>
+   521→          {planId === 'free' && (
+   522→            <a href="/" className="mt-2 text-[10px] text-white/25 hover:text-white/50 transition-colors">
+   523→              Creado con TiendApp
+   524→            </a>
+   525→          )}
+   526→        </div>
+   527→      </footer>
+   528→    </div>
+   529→  )
+   530→}
+   531→
