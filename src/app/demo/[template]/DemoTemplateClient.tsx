@@ -13,6 +13,9 @@ import { ModaTemplate } from '@/components/store-templates/ModaTemplate'
 import { VitrinaTemplate } from '@/components/store-templates/VitrinaTemplate'
 import { NeonTemplate } from '@/components/store-templates/NeonTemplate'
 import { BoutiqueTemplate } from '@/components/store-templates/BoutiqueTemplate'
+import { EditorialTemplate } from '@/components/store-templates/EditorialTemplate'
+import { AtelierTemplate } from '@/components/store-templates/AtelierTemplate'
+import { TerracotaTemplate } from '@/components/store-templates/TerracotaTemplate'
 import { ProductDetailView } from '@/components/store-templates/ProductDetailView'
 import { ArrowLeft, Crown, Sparkles, Gem } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -285,6 +288,78 @@ const demoStores: Record<string, Store> = {
     ],
     otherPayments: [],
   },
+  editorial: {
+    id: 'demo-editorial',
+    name: 'NOVA Studio',
+    slug: 'demo-editorial',
+    description: 'Moda urbana editada como revista: piezas esenciales de temporada.',
+    logo: '📰',
+    categoryId: 'ropa',
+    planId: 'premium',
+    colors: { primary: '#C8102E', secondary: '#141414' },
+    whatsappNumber: '+51999990012',
+    template: 'editorial',
+    bannerUrl: '',
+    userId: '',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    hasShipping: true, hasSecurePayment: true, hasReturns: true,
+    popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
+    yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
+    shippingOptions: [
+      { label: 'Delivery en la ciudad', price: 10, time: '24 horas' },
+      { label: 'Recojo en tienda', price: null, time: 'Cuando quieras' },
+    ],
+    otherPayments: [],
+  },
+  atelier: {
+    id: 'demo-atelier',
+    name: 'Atelier Rosé',
+    slug: 'demo-atelier',
+    description: 'Piezas femeninas seleccionadas a mano para cada ocasión especial.',
+    logo: '🤍',
+    categoryId: 'ropa',
+    planId: 'premium',
+    colors: { primary: '#B76E79', secondary: '#40343A' },
+    whatsappNumber: '+51999990013',
+    template: 'atelier',
+    bannerUrl: '',
+    userId: '',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    hasShipping: true, hasSecurePayment: true, hasReturns: true,
+    popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
+    yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
+    shippingOptions: [
+      { label: 'Delivery en la ciudad', price: 10, time: '24 horas' },
+      { label: 'Recojo en tienda', price: null, time: 'Cuando quieras' },
+    ],
+    otherPayments: [],
+  },
+  terracota: {
+    id: 'demo-terracota',
+    name: 'Tierra & Arte',
+    slug: 'demo-terracota',
+    description: 'Tejidos y accesorios hechos a mano por artistas peruanos.',
+    logo: '🏺',
+    categoryId: 'ropa',
+    planId: 'premium',
+    colors: { primary: '#B4552D', secondary: '#5F6F52' },
+    whatsappNumber: '+51999990014',
+    template: 'terracota',
+    bannerUrl: '',
+    userId: '',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    hasShipping: true, hasSecurePayment: true, hasReturns: true,
+    popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
+    yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
+    shippingOptions: [
+      { label: 'Delivery en la ciudad', price: 10, time: '24 horas' },
+      { label: 'Recojo en tienda', price: null, time: 'Cuando quieras' },
+    ],
+    otherPayments: [],
+  },
 }
 
 // Product images match the preview generation script (same Unsplash URLs)
@@ -380,6 +455,48 @@ const demoProducts: Record<string, Product[]> = {
     { id: 'dbq11', name: 'Sneakers Urbanas', description: 'Zapatillas urbanas ligeras con suela amortiguada.', price: 149.0, originalPrice: 189.0, categoryId: 'calzado', imageUrl: '/sample-products/zapatillas-running.jpg', images: ['/sample-products/zapatillas-running.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-boutique', createdAt: '2024-04-20T10:00:00.000Z' },
     { id: 'dbq12', name: 'Conjunto Lounge', description: 'Conjunto de algodón para estar en casa con estilo.', price: 69.0, originalPrice: null, categoryId: 'casual', imageUrl: '/sample-products/pijama-algodon.jpg', images: ['/sample-products/pijama-algodon.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-boutique', createdAt: '2024-05-01T10:00:00.000Z' },
   ],
+  editorial: [
+    { id: 'dte1', name: 'Casaca Denim Oversize', description: 'Casaca de mezclilla corte oversize con lavado clásico.', price: 119.0, originalPrice: 159.0, categoryId: 'casacas', imageUrl: '/sample-products/casaca-jean.jpg', images: ['/sample-products/casaca-jean.jpg'], color: 'Denim', stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-editorial', createdAt: '2024-01-10T10:00:00.000Z' },
+    { id: 'dte2', name: 'Jean Recto Clásico', description: 'Jean recto de mezclilla resistente. Corte atemporal.', price: 95.0, originalPrice: null, categoryId: 'jeans', imageUrl: '/sample-products/jean-unisex.jpg', images: ['/sample-products/jean-unisex.jpg'], color: 'Azul', stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-editorial', createdAt: '2024-01-20T10:00:00.000Z' },
+    { id: 'dte3', name: 'Polo Algodón Pima', description: 'Polo básico de algodón Pima peruano. Corte recto.', price: 45.0, originalPrice: 59.0, categoryId: 'polos', imageUrl: '/sample-products/polo-basico-algodon.jpg', images: ['/sample-products/polo-basico-algodon.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-editorial', createdAt: '2024-02-01T10:00:00.000Z' },
+    { id: 'dte4', name: 'Polo Dry Fit Urban', description: 'Polo técnico dry fit para el día a día.', price: 39.0, originalPrice: null, categoryId: 'polos', imageUrl: '/sample-products/polo-dry-fit.jpg', images: ['/sample-products/polo-dry-fit.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-editorial', createdAt: '2024-02-10T10:00:00.000Z' },
+    { id: 'dte5', name: 'Pantalón Wide Leg', description: 'Pantalón wide leg con tiro alto y caída elegante.', price: 79.0, originalPrice: null, categoryId: 'pantalones', imageUrl: '/sample-products/pantalon-wide-leg.jpg', images: ['/sample-products/pantalon-wide-leg.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-editorial', createdAt: '2024-02-20T10:00:00.000Z' },
+    { id: 'dte6', name: 'Gorra Urban Baseball', description: 'Gorra de baseball con bordado minimal.', price: 35.0, originalPrice: null, categoryId: 'accesorios', imageUrl: '/sample-products/gorra-urban-baseball.jpg', images: ['/sample-products/gorra-urban-baseball.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-editorial', createdAt: '2024-03-01T10:00:00.000Z' },
+    { id: 'dte7', name: 'Lentes Sol Classic', description: 'Lentes de sol con protección UV400 y armazón acetato.', price: 65.0, originalPrice: 85.0, categoryId: 'accesorios', imageUrl: '/sample-products/lentes-sol-uv400.jpg', images: ['/sample-products/lentes-sol-uv400.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-editorial', createdAt: '2024-03-10T10:00:00.000Z' },
+    { id: 'dte8', name: 'Bolso Estructurado', description: 'Bolso de mano estructurado con correa desmontable.', price: 139.0, originalPrice: null, categoryId: 'accesorios', imageUrl: '/sample-products/bolso-mano.jpg', images: ['/sample-products/bolso-mano.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-editorial', createdAt: '2024-03-20T10:00:00.000Z' },
+    { id: 'dte9', name: 'Sneakers Urbanas', description: 'Zapatillas urbanas ligeras con suela amortiguada.', price: 149.0, originalPrice: 189.0, categoryId: 'calzado', imageUrl: '/sample-products/zapatillas-running.jpg', images: ['/sample-products/zapatillas-running.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-editorial', createdAt: '2024-04-01T10:00:00.000Z' },
+    { id: 'dte10', name: 'Bufanda Tejida', description: 'Bufanda tejida suave para la temporada fría.', price: 49.0, originalPrice: null, categoryId: 'accesorios', imageUrl: '/sample-products/bufanda-neon.jpg', images: ['/sample-products/bufanda-neon.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-editorial', createdAt: '2024-04-10T10:00:00.000Z' },
+    { id: 'dte11', name: 'Conjunto Lounge', description: 'Conjunto de algodón para estar en casa con estilo.', price: 69.0, originalPrice: null, categoryId: 'casual', imageUrl: '/sample-products/pijama-algodon.jpg', images: ['/sample-products/pijama-algodon.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-editorial', createdAt: '2024-04-20T10:00:00.000Z' },
+    { id: 'dte12', name: 'Top Crochet', description: 'Top de crochet artesanal con acabado delicado.', price: 59.0, originalPrice: 75.0, categoryId: 'casual', imageUrl: '/sample-products/top-crochet.jpg', images: ['/sample-products/top-crochet.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-editorial', createdAt: '2024-05-01T10:00:00.000Z' },
+  ],
+  atelier: [
+    { id: 'dat1', name: 'Vestido Gala Noir', description: 'Vestido largo de gala con caída fluida y detalle en la espalda.', price: 189.0, originalPrice: null, categoryId: 'vestidos', imageUrl: '/sample-products/vestido-gala.jpg', images: ['/sample-products/vestido-gala.jpg'], color: 'Negro', stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-atelier', createdAt: '2024-01-10T10:00:00.000Z' },
+    { id: 'dat2', name: 'Vestido Verano Blush', description: 'Vestido ligero de verano en tonos rosados. Tela fresca.', price: 99.0, originalPrice: 129.0, categoryId: 'vestidos', imageUrl: '/sample-products/vestido-verano-rosado.jpg', images: ['/sample-products/vestido-verano-rosado.jpg'], color: 'Rosado', stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-atelier', createdAt: '2024-01-20T10:00:00.000Z' },
+    { id: 'dat3', name: 'Top Crochet Artesanal', description: 'Top de crochet hecho a mano. Pieza única de temporada.', price: 59.0, originalPrice: null, categoryId: 'tejidos', imageUrl: '/sample-products/top-crochet.jpg', images: ['/sample-products/top-crochet.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-atelier', createdAt: '2024-02-01T10:00:00.000Z' },
+    { id: 'dat4', name: 'Chompa Tejida Premium', description: 'Chompa tejida con hilo suave de alta calidad.', price: 89.0, originalPrice: null, categoryId: 'tejidos', imageUrl: '/sample-products/chompa-tejida.jpg', images: ['/sample-products/chompa-tejida.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-atelier', createdAt: '2024-02-10T10:00:00.000Z' },
+    { id: 'dat5', name: 'Pantalón Wide Leg', description: 'Pantalón wide leg con tiro alto y caída elegante.', price: 79.0, originalPrice: null, categoryId: 'casual', imageUrl: '/sample-products/pantalon-wide-leg.jpg', images: ['/sample-products/pantalon-wide-leg.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-atelier', createdAt: '2024-02-20T10:00:00.000Z' },
+    { id: 'dat6', name: 'Conjunto Lounge', description: 'Conjunto de algodón suave para descansar con estilo.', price: 69.0, originalPrice: 89.0, categoryId: 'casual', imageUrl: '/sample-products/pijama-algodon.jpg', images: ['/sample-products/pijama-algodon.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-atelier', createdAt: '2024-03-01T10:00:00.000Z' },
+    { id: 'dat7', name: 'Joyería Plata 925', description: 'Set de joyería en plata 925 con acabado pulido.', price: 129.0, originalPrice: null, categoryId: 'joyeria', imageUrl: '/sample-products/joyeria-plata-925.jpg', images: ['/sample-products/joyeria-plata-925.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-atelier', createdAt: '2024-03-10T10:00:00.000Z' },
+    { id: 'dat8', name: 'Aretes Plateados', description: 'Aretes delicados en plata con brillo sutil.', price: 45.0, originalPrice: null, categoryId: 'joyeria', imageUrl: '/sample-products/aretes-plateados.jpg', images: ['/sample-products/aretes-plateados.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-atelier', createdAt: '2024-03-20T10:00:00.000Z' },
+    { id: 'dat9', name: 'Anillo Diamond', description: 'Anillo con piedra central y banda fina.', price: 99.0, originalPrice: 139.0, categoryId: 'joyeria', imageUrl: '/sample-products/anillo-diamond.jpg', images: ['/sample-products/anillo-diamond.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-atelier', createdAt: '2024-04-01T10:00:00.000Z' },
+    { id: 'dat10', name: 'Bolso Estructurado', description: 'Bolso de mano estructurado con correa desmontable.', price: 139.0, originalPrice: null, categoryId: 'accesorios', imageUrl: '/sample-products/bolso-mano.jpg', images: ['/sample-products/bolso-mano.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-atelier', createdAt: '2024-04-10T10:00:00.000Z' },
+    { id: 'dat11', name: 'Perfume Rosé 100ml', description: 'Eau de parfum floral con notas de rosa y almizcle.', price: 119.0, originalPrice: null, categoryId: 'belleza', imageUrl: '/sample-products/perfume-femenino-100ml.jpg', images: ['/sample-products/perfume-femenino-100ml.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-atelier', createdAt: '2024-04-20T10:00:00.000Z' },
+    { id: 'dat12', name: 'Labial Mate', description: 'Labial mate de larga duración, tonos nude.', price: 35.0, originalPrice: 45.0, categoryId: 'belleza', imageUrl: '/sample-products/labial-mate.jpg', images: ['/sample-products/labial-mate.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-atelier', createdAt: '2024-05-01T10:00:00.000Z' },
+  ],
+  terracota: [
+    { id: 'dtt1', name: 'Chompa Tejida Alpaca', description: 'Chompa de alpaca tejida a mano por artistas andinos.', price: 120.0, originalPrice: null, categoryId: 'tejidos', imageUrl: '/sample-products/chompa-tejida.jpg', images: ['/sample-products/chompa-tejida.jpg'], color: null, stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-terracota', createdAt: '2024-01-10T10:00:00.000Z' },
+    { id: 'dtt2', name: 'Manta de Alpaca', description: 'Manta de alpaca suave con tejido tradicional.', price: 150.0, originalPrice: 190.0, categoryId: 'tejidos', imageUrl: '/sample-products/manta-alpaca.jpg', images: ['/sample-products/manta-alpaca.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-terracota', createdAt: '2024-01-20T10:00:00.000Z' },
+    { id: 'dtt3', name: 'Top Crochet', description: 'Top de crochet hecho a mano en algodón natural.', price: 60.0, originalPrice: null, categoryId: 'tejidos', imageUrl: '/sample-products/top-crochet.jpg', images: ['/sample-products/top-crochet.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-terracota', createdAt: '2024-02-01T10:00:00.000Z' },
+    { id: 'dtt4', name: 'Pulsera Tejida a Mano', description: 'Pulsera artesanal tejida en hilos de colores.', price: 25.0, originalPrice: null, categoryId: 'joyeria', imageUrl: '/sample-products/pulsera-tejida-mano.jpg', images: ['/sample-products/pulsera-tejida-mano.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-terracota', createdAt: '2024-02-10T10:00:00.000Z' },
+    { id: 'dtt5', name: 'Collar Artesanal', description: 'Collar hecho a mano con piedras y semillas naturales.', price: 55.0, originalPrice: null, categoryId: 'joyeria', imageUrl: '/sample-products/collar-artesanal.jpg', images: ['/sample-products/collar-artesanal.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-terracota', createdAt: '2024-02-20T10:00:00.000Z' },
+    { id: 'dtt6', name: 'Aretes Artesanales', description: 'Aretes ligeros con detalles tejidos a mano.', price: 40.0, originalPrice: 55.0, categoryId: 'joyeria', imageUrl: '/sample-products/aretes-plateados.jpg', images: ['/sample-products/aretes-plateados.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-terracota', createdAt: '2024-03-01T10:00:00.000Z' },
+    { id: 'dtt7', name: 'Bolso Artesanal', description: 'Bolso de mano con acabados artesanales únicos.', price: 130.0, originalPrice: null, categoryId: 'accesorios', imageUrl: '/sample-products/bolso-mano.jpg', images: ['/sample-products/bolso-mano.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-terracota', createdAt: '2024-03-10T10:00:00.000Z' },
+    { id: 'dtt8', name: 'Cerámica Decorativa', description: 'Pieza de cerámica pintada a mano por artistas locales.', price: 45.0, originalPrice: null, categoryId: 'hogar', imageUrl: '/sample-products/ceramica-navidena.jpg', images: ['/sample-products/ceramica-navidena.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-terracota', createdAt: '2024-03-20T10:00:00.000Z' },
+    { id: 'dtt9', name: 'Cojín Tejido', description: 'Cojín decorativo tejido con diseños tradicionales.', price: 50.0, originalPrice: 65.0, categoryId: 'hogar', imageUrl: '/sample-products/cojin-decorativo.jpg', images: ['/sample-products/cojin-decorativo.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-terracota', createdAt: '2024-04-01T10:00:00.000Z' },
+    { id: 'dtt10', name: 'Cortina Tejida 2m', description: 'Cortina de algodón tejida en telar tradicional.', price: 85.0, originalPrice: null, categoryId: 'hogar', imageUrl: '/sample-products/cortina-2m.jpg', images: ['/sample-products/cortina-2m.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-terracota', createdAt: '2024-04-10T10:00:00.000Z' },
+    { id: 'dtt11', name: 'Edredón Matrimonial', description: 'Edredón abrigador con acabado artesanal.', price: 220.0, originalPrice: 280.0, categoryId: 'hogar', imageUrl: '/sample-products/edredon-matrimonial.jpg', images: ['/sample-products/edredon-matrimonial.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-terracota', createdAt: '2024-04-20T10:00:00.000Z' },
+    { id: 'dtt12', name: 'Set Plata 925', description: 'Set de joyería en plata 925 elaborado a mano.', price: 140.0, originalPrice: null, categoryId: 'joyeria', imageUrl: '/sample-products/joyeria-plata-925.jpg', images: ['/sample-products/joyeria-plata-925.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-terracota', createdAt: '2024-05-01T10:00:00.000Z' },
+  ],
 }
 
 // Map template ID to plan for rendering
@@ -395,6 +512,9 @@ const templatePlanId: Record<string, string> = {
   vitrina: 'premium',
   neon: 'premium',
   boutique: 'premium',
+  editorial: 'premium',
+  atelier: 'premium',
+  terracota: 'premium',
 }
 
 // Map template ID to plan label for the banner
@@ -410,7 +530,10 @@ function getPlanLabel(template: string): string {
     case 'moda':
     case 'vitrina':
     case 'neon':
-    case 'boutique': return 'Plan Premium'
+    case 'boutique':
+    case 'editorial':
+    case 'atelier':
+    case 'terracota': return 'Plan Premium'
     default: return ''
   }
 }
@@ -526,6 +649,9 @@ export function DemoTemplateClient({ template }: { template: string }) {
       {template === 'vitrina' && <VitrinaTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
       {template === 'neon' && <NeonTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
       {template === 'boutique' && <BoutiqueTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
+      {template === 'editorial' && <EditorialTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
+      {template === 'atelier' && <AtelierTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
+      {template === 'terracota' && <TerracotaTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
     </div>
   )
 }
