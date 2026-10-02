@@ -508,3 +508,24 @@ Stage Summary:
 - 14 plantillas en producción; 4 de ellas "nivel catálogo revista" (Boutique, Editorial, Atelier, Terracota) respondiendo directo al pedido del dueño
 - Landing ahora muestra los catálogos arriba y como galería grande con filtros, imitando la referencia Venngage
 - Demos: /demo/boutique, /demo/editorial, /demo/atelier, /demo/terracota
+
+---
+Task ID: 24
+Agent: Main Agent
+Task: Opinión experta — cuántas plantillas más + ejemplos de página principal (3 conceptos de landing)
+
+Work Log:
+- Verificado estado: 14 plantillas en producción (Tasks 22-23), commits 6afc46b/45fee01/884561a ya en origin/main, landing 200 y demos 200
+- Copiados los 14 previews reales a download/ejemplos-landing/assets/
+- Creados 3 mockups HTML completos de página principal con los previews reales:
+  * opcion-a-editorial.html — estilo Squarespace: crema, serif Fraunces, cascada de browser frames, galería con filtros JS funcionales
+  * opcion-b-pop.html — estilo Venngage/Canva: gradientes violeta-coral, 3 teléfonos en abanico con chips flotantes (pedido WhatsApp/Yape), anillos de color por rubro, testimonios y precios
+  * opcion-c-dark.html — estilo Framer: fondo oscuro con glow, doble marquesina animada de plantillas, tarjeta destacada Boutique
+- Capturas full-page: captura-opcion-a-editorial.png, captura-opcion-b-pop.png, captura-opcion-c-dark.png (verificadas visualmente, fuentes e imágenes OK)
+- image-search falló 2 veces (429 + 400 upstream) → Plan B: capturas reales con agent-browser de Venngage (página exacta del dueño), Canva y Squarespace en referencias/ref-*.png
+- Scripts persistidos: scripts/shot-mockups.sh, scripts/shot-referencias.sh
+
+Stage Summary:
+- Entregado al dueño: opinión (techo práctico 18 plantillas: +4 = Dulce/Aura/Teca/Pixel) + 3 conceptos de landing para elegir antes de implementar en Next.js
+- Recomendación experta: Opción B como base (más conversora para emprendedores) con elementos de C si quiere look premium
+- Sin cambios en el repo de TiendaApp en esta tarea (solo ejemplos); implementación pendiente de elección del dueño

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Opción C — Dark Premium · TiendaApp</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root{
+  --bg:#08080D; --panel:#101018; --line:#232336; --txt:#F4F4F8; --muted:#9C9CB4;
+  --vio:#8B5CF6; --cyan:#22D3EE; --gold:#F0B86E;
+  --grad:linear-gradient(93deg,#A78BFA,#22D3EE);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.wrap{max-width:1180px;margin:0 auto;padding:0 32px}
+h1,h2,h3,.sg{font-family:'Space Grotesk',sans-serif}
+.grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.btn{display:inline-flex;align-items:center;gap:9px;border-radius:999px;font-weight:600;text-decoration:none;transition:.2s}
+.btn-glow{background:linear-gradient(93deg,#8B5CF6,#6D28D9);color:#fff;padding:15px 32px;font-size:15.5px;box-shadow:0 0 0 1px rgba(167,139,250,.4),0 14px 40px -8px rgba(139,92,246,.55)}
+.btn-glow:hover{transform:translateY(-2px);box-shadow:0 0 0 1px rgba(167,139,250,.6),0 18px 50px -8px rgba(139,92,246,.7)}
+.btn-ghost{border:1px solid var(--line);color:var(--txt);padding:14px 28px;font-size:15.5px;background:rgba(255,255,255,.03)}
+.btn-ghost:hover{border-color:#3D3D5C;background:rgba(255,255,255,.06)}
+.badge{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 11px;border-radius:999px}
+.badge.free{background:rgba(34,211,238,.14);color:#67E8F9;border:1px solid rgba(34,211,238,.25)}
+.badge.prem{background:rgba(167,139,250,.15);color:#C4B5FD;border:1px solid rgba(167,139,250,.3)}
+.badge.new{background:var(--grad);color:#0B0B12}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:60;backdrop-filter:blur(16px);background:rgba(8,8,13,.72);border-bottom:1px solid rgba(35,35,54,.7)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;height:70px}
+.logo{font-family:'Space Grotesk';font-weight:700;font-size:21px;display:flex;align-items:center;gap:10px}
+.logo i{width:24px;height:24px;border-radius:7px;background:var(--grad);box-shadow:0 0 18px rgba(139,92,246,.8)}
+.nav-links{display:flex;gap:30px;font-size:14px;font-weight:500;color:var(--muted)}
+.nav-links a{text-decoration:none;color:inherit;transition:.15s}
+.nav-links a:hover{color:#fff}
+
+/* HERO */
+.hero{position:relative;padding:90px 0 40px;text-align:center}
+.glow{position:absolute;border-radius:50%;filter:blur(110px);pointer-events:none}
+.g1{width:640px;height:640px;background:rgba(139,92,246,.16);top:-260px;left:50%;transform:translateX(-50%)}
+.g2{width:420px;height:420px;background:rgba(34,211,238,.10);top:120px;right:-160px}
+.g3{width:420px;height:420px;background:rgba(240,184,110,.07);bottom:-140px;left:-160px}
+.gridbg{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(720px 420px at 50% 8%,#000 30%,transparent 75%);pointer-events:none}
+.hero-in{position:relative}
+.eyebrow{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--line);background:rgba(255,255,255,.04);border-radius:999px;padding:8px 18px;font-size:13px;color:var(--muted);margin-bottom:30px}
+.eyebrow .dotlive{width:7px;height:7px;border-radius:50%;background:#4ADE80;box-shadow:0 0 10px #4ADE80}
+h1{font-size:64px;line-height:1.04;font-weight:700;letter-spacing:-.03em}
+.hero p.sub{max-width:560px;margin:24px auto 0;font-size:17.5px;line-height:1.65;color:var(--muted)}
+.hero-ctas{display:flex;gap:14px;justify-content:center;margin-top:36px}
+.hero-note{margin-top:16px;font-size:13px;color:#6D6D85}
+.stats{display:flex;justify-content:center;gap:64px;margin-top:52px;flex-wrap:wrap}
+.stat b{font-family:'Space Grotesk';font-size:30px;font-weight:700;display:block;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat span{font-size:13px;color:var(--muted)}
+
+/* MARQUEE */
+.marquee-zone{margin:64px 0 10px;position:relative}
+.marquee{overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+.m-track{display:flex;gap:18px;width:max-content;animation:scroll 46s linear infinite}
+.m-track.rev{animation:scrollr 52s linear infinite;margin-top:18px}
+@keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes scrollr{from{transform:translateX(-50%)}to{transform:translateX(0)}}
+.m-card{width:172px;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:var(--panel);flex-shrink:0;transition:.25s}
+.m-card:hover{border-color:#4C3D8F;box-shadow:0 0 34px -6px rgba(139,92,246,.5)}
+.m-card img{width:100%;aspect-ratio:3/4;object-fit:cover;object-position:top;opacity:.94}
+.m-cap{padding:9px 12px;font-size:12px;color:var(--muted);font-weight:600;display:flex;justify-content:space-between;align-items:center}
+.m-cap b{color:#E7E7F2;font-weight:600}
+
+/* FEATURED */
+.featured{padding:90px 0 20px}
+.f-card{display:grid;grid-template-columns:1fr 1.05fr;gap:0;border:1px solid var(--line);border-radius:28px;overflow:hidden;background:linear-gradient(120deg,#12121C,#0D0D15);box-shadow:0 40px 90px -30px rgba(0,0,0,.8)}
+.f-copy{padding:56px 48px;display:flex;flex-direction:column;justify-content:center;gap:18px}
+.f-kicker{font-size:12px;font-weight:700;letter-spacing:.2em;color:#C4B5FD;text-transform:uppercase}
+.f-copy h2{font-size:38px;line-height:1.12;font-weight:700;letter-spacing:-.02em}
+.f-copy p{color:var(--muted);font-size:15.5px;line-height:1.7}
+.f-list{list-style:none;display:flex;flex-direction:column;gap:11px;margin-top:6px}
+.f-list li{display:flex;gap:11px;font-size:14.5px;color:#C9C9DB}
+.f-list li::before{content:'◆';color:var(--vio);font-size:12px;margin-top:2px}
+.f-img{position:relative;min-height:520px}
+.f-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top}
+.f-img::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,#0D0D15 0%,transparent 22%)}
+
+/* GRID */
+.gallery{padding:80px 0 30px}
+.g-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:36px}
+.g-head h2{font-size:40px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.g-head p{color:var(--muted);font-size:15px;max-width:360px;line-height:1.65}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.card{border-radius:18px;overflow:hidden;border:1px solid var(--line);background:var(--panel);transition:.25s;position:relative}
+.card:hover{transform:translateY(-6px);border-color:#4C3D8F;box-shadow:0 24px 50px -16px rgba(139,92,246,.35)}
+.thumb{position:relative;overflow:hidden}
+.thumb img{width:100%;aspect-ratio:3/4;object-fit:cover;object-position:top;transition:.4s}
+.card:hover .thumb img{transform:scale(1.04)}
+.badges{position:absolute;top:10px;left:10px;z-index:2}
+.c-body{padding:14px 16px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.c-body h3{font-size:15.5px;font-weight:600}
+.c-body .tag{font-size:12px;color:var(--muted);margin-top:2px}
+
+/* CAPS */
+.caps{padding:70px 0 10px}
+.caps-in{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.cap{border:1px solid var(--line);background:rgba(255,255,255,.03);border-radius:999px;padding:11px 22px;font-size:13.5px;font-weight:600;color:#C9C9DB;display:flex;gap:9px;align-items:center}
+
+/* CTA */
+.cta{padding:100px 0 90px;text-align:center;position:relative}
+.cta h2{font-size:50px;font-weight:700;letter-spacing:-.03em;line-height:1.08}
+.cta p{color:var(--muted);font-size:16.5px;margin:18px auto 36px;max-width:460px;line-height:1.65}
+footer{border-top:1px solid rgba(35,35,54,.7);padding:36px 0 48px;color:#6D6D85;font-size:13px;display:flex;justify-content:space-between;align-items:center}
+footer .logo{font-size:17px;color:var(--txt)}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap nav-in">
+  <div class="logo"><i></i>TiendaApp</div>
+  <div class="nav-links"><a href="#plantillas">Diseños</a><a href="#">Precios</a><a href="#">Cómo funciona</a><a href="#">Demos</a></div>
+  <a class="btn btn-glow" style="padding:11px 24px;font-size:14px" href="#">Crear mi tienda</a>
+</div></nav>
+
+<header class="hero">
+  <div class="gridbg"></div><div class="glow g1"></div><div class="glow g2"></div><div class="glow g3"></div>
+  <div class="wrap hero-in">
+    <div class="eyebrow"><span class="dotlive"></span> 14 diseños de catálogo · Pedidos por WhatsApp</div>
+    <h1>Diseños que impresionan.<br><span class="grad-text">Tiendas que venden.</span></h1>
+    <p class="sub">Catálogos de nivel profesional para tu emprendimiento. Tu cliente navega, elige y te manda el pedido por WhatsApp. Tú solo despachas.</p>
+    <div class="hero-ctas">
+      <a class="btn btn-glow" href="#">Crear mi tienda gratis</a>
+      <a class="btn btn-ghost" href="#plantillas">Explorar diseños</a>
+    </div>
+    <div class="hero-note">Gratis para empezar · Sin tarjeta · En 10 minutos</div>
+    <div class="stats">
+      <div class="stat"><b>+500</b><span>tiendas activas</span></div>
+      <div class="stat"><b>14</b><span>diseños premium</span></div>
+      <div class="stat"><b>12 mil+</b><span>pedidos enviados</span></div>
+      <div class="stat"><b>4.9★</b><span>satisfacción</span></div>
+    </div>
+  </div>
+
+  <div class="marquee-zone">
+    <div class="marquee"><div class="m-track">
+      <div class="m-card"><img src="assets/boutique-preview.png" alt="Boutique"><div class="m-cap"><b>Boutique</b><span>Premium</span></div></div>
+      <div class="m-card"><img src="assets/editorial-preview.png" alt="Editorial"><div class="m-cap"><b>Editorial</b><span>Premium</span></div></div>
+      <div class="m-card"><img src="assets/atelier-preview.png" alt="Atelier"><div class="m-cap"><b>Atelier</b><span>Premium</span></div></div>
+      <div class="m-card"><img src="assets/terracota-preview.png" alt="Terracota"><div class="m-cap"><b>Terracota</b><span>Premium</span></div></div>
+      <div class="m-card"><img src="assets/vitrina-preview.png" alt="Vitrina"><div class="m-cap"><b>Vitrina</b><span>Premium</span></div></div>
+      <div class="m-card"><img src="assets/neon-preview.png" alt="Neón"><div class="m-cap"><b>Neón</b><span>Premium</span></div></div>
+      <div class="m-card"><img src="assets/luxury-preview.png" alt="Luxury"><div class="m-cap"><b>Luxury</b><span>Premium</span></div></div>
+      <div class="m-card"><img src="assets/boutique-preview.png" alt="Boutique"><div class="m-cap"><b>Boutique</b><span>Premium</span></div></div>
+      <div class="m-card"><img src="assets/editorial-preview.png" alt="Editorial"><div class="m-cap"><b>Editorial</b><span>Premium</span></div></div>
+      <div class="m-card"><img src="assets/atelier-preview.png" alt="Atelier"><div class="m-cap"><b>Atelier</b><span>Premium</span></div></div>
+      <div class="m-card"><img src="assets/terracota-preview.png" alt="Terracota"><div class="m-cap"><b>Terracota</b><span>Premium</span></div></div>
+      <div class="m-card"><img src="assets/vitrina-preview.png" alt="Vitrina"><div class="m-cap"><b>Vitrina</b><span>Premium</span></div></div>
+      <div class="m-card"><img src="assets/neon-preview.png" alt="Neón"><div class="m-cap"><b>Neón</b><span>Premium</span></div></div>
+      <div class="m-card"><img src="assets/luxury-preview.png" alt="Luxury"><div class="m-cap"><b>Luxury</b><span>Premium</span></div></div>
+    </div></div>
+    <div class="marquee"><div class="m-track rev">
+      <div class="m-card"><img src="assets/sabor-preview.png" alt="Sabor"><div class="m-cap"><b>Sabor</b><span>Premium</span></div></div>
+      <div class="m-card"><img src="assets/moderna-preview.png" alt="Moderna"><div class="m-cap"><b>Moderna</b><span>Gratis</span></div></div>
+      <div class="m-card"><img src="assets/minimalist-preview.png" alt="Minimalist"><div class="m-cap"><b>Minimalist</b><span>Premium</span></div></div>
+      <div class="m-card"><img src="assets/bodega-preview.png" alt="Bodega"><div class="m-cap"><b>Bodega</b><span>Premium</span></div></div>
+      <div class="m-card"><img src="assets/moda-preview.png" alt="Moda"><div class="m-cap"><b>Moda</b><span>Premium</span></div></div>
+      <div class="m-card"><img src="assets/vibrante-preview.png" alt="Vibrante"><div class="m-cap"><b>Vibrante</b><span>Gratis</span></div></div>
+      <div class="m-card"><img src="assets/clasica-preview.png" alt="Clásica"><div class="m-cap"><b>Clásica</b><span>Gratis</span></div></div>
+      <div class="m-card"><img src="assets/sabor-preview.png" alt="Sabor"><div class="m-cap"><b>Sabor</b><span>Premium</span></div></div>
+      <div class="m-card"><img src="assets/moderna-preview.png" alt="Moderna"><div class="m-cap"><b>Moderna</b><span>Gratis</span></div></div>
+      <div class="m-card"><img src="assets/minimalist-preview.png" alt="Minimalist"><div class="m-cap"><b>Minimalist</b><span>Premium</span></div></div>
+      <div class="m-card"><img src="assets/bodega-preview.png" alt="Bodega"><div class="m-cap"><b>Bodega</b><span>Premium</span></div></div>
+      <div class="m-card"><img src="assets/moda-preview.png" alt="Moda"><div class="m-cap"><b>Moda</b><span>Premium</span></div></div>
+      <div class="m-card"><img src="assets/vibrante-preview.png" alt="Vibrante"><div class="m-cap"><b>Vibrante</b><span>Gratis</span></div></div>
+      <div class="m-card"><img src="assets/clasica-preview.png" alt="Clásica"><div class="m-cap"><b>Clásica</b><span>Gratis</span></div></div>
+    </div></div>
+  </div>
+</header>
+
+<section class="featured wrap">
+  <div class="f-card">
+    <div class="f-copy">
+      <div class="f-kicker">Diseño destacado</div>
+      <h2>Boutique — el favorito para tiendas de ropa.</h2>
+      <p>Un hero a pantalla completa con tu fotografía, categorías con imagen circular y una grilla lookbook de best sellers. Así se ve una marca top.</p>
+      <ul class="f-list">
+        <li>Hero editorial con tu foto de campaña</li>
+        <li>Categorías con foto y efecto hover</li>
+        <li>Banner de ofertas automático</li>
+        <li>Lookbook de best sellers integrado</li>
+      </ul>
+      <div style="margin-top:10px"><a class="btn btn-glow" href="#">Ver demo de Boutique →</a></div>
+    </div>
+    <div class="f-img"><img src="assets/boutique-preview.png" alt="Boutique"></div>
+  </div>
+</section>
+
+<section class="gallery wrap" id="plantillas">
+  <div class="g-head">
+    <h2>Una colección para<br>cada tipo de marca.</h2>
+    <p>Ropa, comida, tech, hogar o lo que vendas. Elige el diseño, cámbiale colores, logo y fotos. Todo lo demás ya está hecho.</p>
+  </div>
+  <div class="grid">
+    <div class="card"><div class="thumb"><div class="badges"><span class="badge prem">Premium</span></div><img src="assets/editorial-preview.png" alt="Editorial"></div><div class="c-body"><div><h3>Editorial</h3><div class="tag">Catálogo revista</div></div></div></div>
+    <div class="card"><div class="thumb"><div class="badges"><span class="badge prem">Premium</span></div><img src="assets/atelier-preview.png" alt="Atelier"></div><div class="c-body"><div><h3>Atelier</h3><div class="tag">Moda femenina</div></div></div></div>
+    <div class="card"><div class="thumb"><div class="badges"><span class="badge prem">Premium</span></div><img src="assets/terracota-preview.png" alt="Terracota"></div><div class="c-body"><div><h3>Terracota</h3><div class="tag">Artesanal</div></div></div></div>
+    <div class="card"><div class="thumb"><div class="badges"><span class="badge prem">Premium</span></div><img src="assets/vitrina-preview.png" alt="Vitrina"></div><div class="c-body"><div><h3>Vitrina</h3><div class="tag">Lookbook</div></div></div></div>
+    <div class="card"><div class="thumb"><div class="badges"><span class="badge prem">Premium</span></div><img src="assets/neon-preview.png" alt="Neón"></div><div class="c-body"><div><h3>Neón</h3><div class="tag">Tech · Gaming</div></div></div></div>
+    <div class="card"><div class="thumb"><div class="badges"><span class="badge prem">Premium</span></div><img src="assets/luxury-preview.png" alt="Luxury"></div><div class="c-body"><div><h3>Luxury</h3><div class="tag">Joyería</div></div></div></div>
+    <div class="card"><div class="thumb"><div class="badges"><span class="badge prem">Premium</span></div><img src="assets/sabor-preview.png" alt="Sabor"></div><div class="c-body"><div><h3>Sabor</h3><div class="tag">Comida</div></div></div></div>
+    <div class="card"><div class="thumb"><div class="badges"><span class="badge prem">Premium</span></div><img src="assets/bodega-preview.png" alt="Bodega"></div><div class="c-body"><div><h3>Bodega</h3><div class="tag">Abarrotes</div></div></div></div>
+    <div class="card"><div class="thumb"><div class="badges"><span class="badge prem">Premium</span></div><img src="assets/moda-preview.png" alt="Moda"></div><div class="c-body"><div><h3>Moda</h3><div class="tag">Ropa</div></div></div></div>
+    <div class="card"><div class="thumb"><div class="badges"><span class="badge prem">Premium</span></div><img src="assets/minimalist-preview.png" alt="Minimalist"></div><div class="c-body"><div><h3>Minimalist</h3><div class="tag">Elegante</div></div></div></div>
+    <div class="card"><div class="thumb"><div class="badges"><span class="badge free">Gratis</span></div><img src="assets/moderna-preview.png" alt="Moderna"></div><div class="c-body"><div><h3>Moderna</h3><div class="tag">General</div></div></div></div>
+    <div class="card"><div class="thumb"><div class="badges"><span class="badge free">Gratis</span></div><img src="assets/vibrante-preview.png" alt="Vibrante"></div><div class="c-body"><div><h3>Vibrante</h3><div class="tag">Juvenil</div></div></div></div>
+  </div>
+</section>
+
+<section class="caps wrap">
+  <div class="caps-in">
+    <div class="cap">💬 Pedidos por WhatsApp</div><div class="cap">💜 Yape</div><div class="cap">💙 Plin</div><div class="cap">🚚 Zonas de envío</div><div class="cap">🤖 Descripciones con IA</div><div class="cap">🎁 Combos y promos</div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="glow g1" style="top:20px"></div>
+  <h2>Lanza tu tienda <span class="grad-text">esta misma noche.</span></h2>
+  <p>Regístrate gratis, elige tu diseño y comparte tu catálogo por WhatsApp antes de dormir.</p>
+  <a class="btn btn-glow" href="#">Crear mi tienda gratis →</a>
+</section>
+
+<footer class="wrap"><div class="logo"><i style="width:20px;height:20px"></i>TiendaApp</div><div>Hecho en Perú 🇵🇪 · Pedidos por WhatsApp</div></footer>
+
+</body>
+</html>

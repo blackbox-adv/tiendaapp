@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Opción B — Pop Comercial · TiendaApp</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+:root{
+  --ink:#160F2E; --muted:#6B6580; --bg:#FFFFFF; --soft:#F6F4FF;
+  --v1:#6D5BF6; --v2:#A24BF0; --pink:#F65B8C; --sun:#FFB13D; --mint:#2FB98B;
+  --grad:linear-gradient(93deg,#6D5BF6 0%,#A24BF0 45%,#F65B8C 100%);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:'Plus Jakarta Sans',sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.wrap{max-width:1180px;margin:0 auto;padding:0 32px}
+h1,h2,h3{font-family:'Sora',sans-serif}
+.grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:999px;font-weight:700;text-decoration:none;transition:.2s}
+.btn-grad{background:var(--grad);color:#fff;padding:16px 32px;font-size:16px;box-shadow:0 12px 28px -8px rgba(109,91,246,.55)}
+.btn-grad:hover{transform:translateY(-2px);box-shadow:0 16px 34px -8px rgba(109,91,246,.65)}
+.btn-soft{background:#F1EEFF;color:#5343C9;padding:15px 28px;font-size:16px}
+.btn-soft:hover{background:#E7E2FF}
+.badge{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:5px 12px;border-radius:999px}
+.badge.free{background:#DCF5EA;color:#177A50}
+.badge.prem{background:#F1EEFF;color:#5B45E0}
+.badge.new{background:var(--grad);color:#fff}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:60;background:rgba(255,255,255,.82);backdrop-filter:blur(14px);border-bottom:1px solid #EFEAFB}
+.nav-in{display:flex;align-items:center;justify-content:space-between;height:72px}
+.logo{font-family:'Sora';font-weight:800;font-size:22px;display:flex;align-items:center;gap:9px}
+.logo i{width:26px;height:26px;border-radius:8px;background:var(--grad);display:block}
+.nav-links{display:flex;gap:30px;font-size:14.5px;font-weight:600;color:#4E4768}
+.nav-links a{text-decoration:none;color:inherit}
+
+/* HERO */
+.hero{position:relative;padding:64px 0 90px}
+.blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.5;pointer-events:none}
+.b1{width:520px;height:520px;background:#E4DEFF;top:-160px;right:-120px}
+.b2{width:420px;height:420px;background:#FFE3EE;top:220px;left:-180px;opacity:.55}
+.b3{width:340px;height:340px;background:#FFF0D9;bottom:-120px;left:34%}
+.hero-grid{position:relative;display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center}
+.chip-top{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #ECE6FB;box-shadow:0 6px 18px rgba(23,15,46,.06);border-radius:999px;padding:8px 16px;font-size:13px;font-weight:700;color:#5B45E0;margin-bottom:24px}
+.chip-top .dotlive{width:8px;height:8px;border-radius:50%;background:var(--mint)}
+h1{font-size:58px;line-height:1.06;font-weight:800;letter-spacing:-.03em}
+h1 mark{background:linear-gradient(transparent 58%,#FFD9E7 58%);color:inherit}
+.hero p.sub{font-size:18px;line-height:1.65;color:var(--muted);margin:22px 0 30px;max-width:520px}
+.hero-ctas{display:flex;gap:14px;align-items:center}
+.trust{margin-top:20px;font-size:13.5px;color:#9A93AD;font-weight:500}
+.avatars{display:flex;margin-top:26px;align-items:center;gap:12px}
+.av{width:36px;height:36px;border-radius:50%;border:2.5px solid #fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;margin-left:-8px}
+.av:first-child{margin-left:0}
+.avatars span{font-size:13px;color:var(--muted);font-weight:600}
+
+/* phones */
+.phones{position:relative;height:560px}
+.phone{position:absolute;width:250px;border-radius:34px;background:#160F2E;padding:10px;box-shadow:0 40px 70px -20px rgba(22,15,46,.45)}
+.phone img{width:100%;aspect-ratio:9/18;object-fit:cover;object-position:top;border-radius:26px}
+.p1{left:6%;top:40px;transform:rotate(-9deg);z-index:2}
+.p2{left:32%;top:0;z-index:3}
+.p3{left:58%;top:56px;transform:rotate(9deg);z-index:2}
+.float{position:absolute;background:#fff;border-radius:16px;box-shadow:0 18px 40px -10px rgba(22,15,46,.25);padding:13px 16px;font-size:13px;font-weight:700;z-index:5}
+.float small{display:block;font-weight:600;color:var(--muted);font-size:11px;margin-top:2px}
+.fl1{left:-14px;top:210px}
+.fl2{right:-6px;top:120px}
+.fl3{right:8%;bottom:40px}
+.f-ico{display:flex;align-items:center;gap:8px}
+
+/* RUBROS */
+.rubros{position:relative;padding:8px 0 30px}
+.rubros-in{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.rub{background:#fff;border:1.5px solid #ECE6FB;border-radius:999px;padding:11px 22px;font-size:14.5px;font-weight:700;box-shadow:0 8px 20px rgba(23,15,46,.05)}
+
+/* GALLERY */
+.gallery{padding:56px 0 80px;position:relative}
+.g-head{text-align:center;max-width:680px;margin:0 auto 44px}
+h2{font-size:42px;font-weight:800;letter-spacing:-.03em;line-height:1.1}
+.g-head p{color:var(--muted);font-size:17px;margin-top:14px;line-height:1.6}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+.card{border-radius:24px;background:#fff;border:1px solid #EFEAFB;overflow:hidden;transition:.25s;box-shadow:0 10px 30px -12px rgba(22,15,46,.10)}
+.card:hover{transform:translateY(-8px) scale(1.015);box-shadow:0 30px 60px -16px rgba(22,15,46,.28)}
+.ring{height:7px}
+.r1{background:linear-gradient(90deg,#6D5BF6,#A24BF0)}
+.r2{background:linear-gradient(90deg,#F65B8C,#FFB13D)}
+.r3{background:linear-gradient(90deg,#2FB98B,#7BD56B)}
+.r4{background:linear-gradient(90deg,#38B6FF,#6D5BF6)}
+.r5{background:linear-gradient(90deg,#FF7A45,#FFB13D)}
+.r6{background:linear-gradient(90deg,#E86AA6,#A24BF0)}
+.thumb{position:relative;overflow:hidden}
+.thumb img{width:100%;aspect-ratio:3/4;object-fit:cover;object-position:top;transition:.4s}
+.card:hover .thumb img{transform:scale(1.05)}
+.badges{position:absolute;top:10px;left:10px;display:flex;gap:6px;z-index:2}
+.c-body{padding:15px 17px 17px}
+.c-body h3{font-size:16.5px;font-weight:700}
+.c-body .tag{font-size:12.5px;color:var(--muted);font-weight:600;margin-top:3px}
+.card.wide{grid-column:span 2;display:grid;grid-template-columns:1fr 1fr}
+.card.wide .thumb img{aspect-ratio:auto;height:100%}
+.wide-body{padding:26px 24px;display:flex;flex-direction:column;justify-content:center;gap:10px}
+.wide-body h3{font-size:24px;font-weight:800}
+.wide-body p{font-size:14px;color:var(--muted);line-height:1.6}
+.ribbon{position:absolute;top:16px;right:-38px;transform:rotate(38deg);background:var(--grad);color:#fff;font-size:11px;font-weight:800;padding:6px 44px;letter-spacing:.05em}
+
+/* TESTIMONIALS */
+.tst{padding:70px 0;background:var(--soft);border-radius:40px 40px 0 0}
+.t-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:44px}
+.t-card{background:#fff;border-radius:22px;padding:28px 26px;box-shadow:0 12px 32px -14px rgba(22,15,46,.14)}
+.stars{color:#FFB13D;font-size:15px;letter-spacing:2px;margin-bottom:14px}
+.t-card p{font-size:14.5px;line-height:1.7;color:#3E3757}
+.t-who{display:flex;align-items:center;gap:12px;margin-top:18px}
+.t-who .av{width:40px;height:40px;margin:0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:13px}
+.t-who b{font-size:14px;display:block}
+.t-who span{font-size:12.5px;color:var(--muted)}
+
+/* PRICING TEASER */
+.price{padding:76px 0 30px;display:grid;grid-template-columns:1fr 1fr;gap:26px;max-width:860px;margin:0 auto}
+.p-card{border-radius:26px;padding:34px;border:2px solid #EFEAFB}
+.p-card.hot{border-color:#6D5BF6;box-shadow:0 24px 50px -18px rgba(109,91,246,.35);position:relative}
+.p-card .plan{font-weight:800;font-family:'Sora';font-size:18px}
+.p-card .amount{font-family:'Sora';font-size:44px;font-weight:800;margin:10px 0 4px}
+.p-card .amount small{font-size:15px;color:var(--muted);font-weight:600}
+.p-card ul{list-style:none;margin:18px 0 24px}
+.p-card li{font-size:14px;padding:6px 0;color:#3E3757;display:flex;gap:9px}
+.p-card li::before{content:'✓';color:var(--mint);font-weight:800}
+.p-cta{display:block;text-align:center;border-radius:999px;padding:14px;font-weight:800;text-decoration:none}
+.p-cta.g{background:var(--grad);color:#fff}
+.p-cta.s{background:#F1EEFF;color:#5343C9}
+.hot-tag{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--grad);color:#fff;font-size:11px;font-weight:800;padding:6px 16px;border-radius:999px;letter-spacing:.05em}
+
+/* CTA + FOOTER */
+.cta{padding:80px 0 90px;text-align:center}
+.cta h2{font-size:46px}
+.cta p{color:var(--muted);font-size:17px;margin:16px auto 34px;max-width:480px;line-height:1.6}
+footer{border-top:1px solid #EFEAFB;padding:36px 0 48px;color:#9A93AD;font-size:13.5px;display:flex;justify-content:space-between;align-items:center}
+footer .logo{font-size:18px;color:var(--ink)}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap nav-in">
+  <div class="logo"><i></i>TiendaApp</div>
+  <div class="nav-links"><a href="#plantillas">Diseños</a><a href="#">Precios</a><a href="#">Cómo funciona</a><a href="#">Demos</a></div>
+  <a class="btn btn-grad" style="padding:12px 24px;font-size:14px" href="#">Crear mi tienda</a>
+</div></nav>
+
+<header class="hero">
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+  <div class="wrap hero-grid">
+    <div>
+      <div class="chip-top"><span class="dotlive"></span> 14 diseños profesionales disponibles</div>
+      <h1>Crea una tienda que se ve <mark>carísima</mark>. Sin ser diseñador.</h1>
+      <p class="sub">Elige una plantilla de catálogo, sube tus productos y recibe los pedidos directo en tu WhatsApp. Con Yape, Plin y envíos incluidos.</p>
+      <div class="hero-ctas">
+        <a class="btn btn-grad" href="#">Crear mi tienda gratis</a>
+        <a class="btn btn-soft" href="#plantillas">Ver diseños</a>
+      </div>
+      <div class="avatars">
+        <div class="av" style="background:#6D5BF6">RM</div><div class="av" style="background:#F65B8C">JL</div><div class="av" style="background:#FFB13D">CP</div><div class="av" style="background:#2FB98B">+</div>
+        <span><b style="color:var(--ink)">+500 emprendedores</b> ya venden con TiendaApp</span>
+      </div>
+    </div>
+    <div class="phones">
+      <div class="phone p1"><img src="assets/neon-preview.png" alt="Neón"></div>
+      <div class="phone p2"><img src="assets/boutique-preview.png" alt="Boutique"></div>
+      <div class="phone p3"><img src="assets/atelier-preview.png" alt="Atelier"></div>
+      <div class="float fl1"><div class="f-ico">🟢 <span>Pedido nuevo<small>Carrito por WhatsApp</small></span></div></div>
+      <div class="float fl2"><div class="f-ico">💜 <span>Yape recibido<small>S/ 79.00 — voucher OK</small></span></div></div>
+      <div class="float fl3"><div class="f-ico">⭐ <span>4.9/5<small>valoración de usuarios</small></span></div></div>
+    </div>
+  </div>
+</header>
+
+<section class="rubros"><div class="wrap rubros-in">
+  <div class="rub">👗 Ropa y moda</div><div class="rub">🍔 Comida</div><div class="rub">💅 Belleza</div><div class="rub">📱 Tech</div><div class="rub">🏠 Hogar y deco</div><div class="rub">🧶 Artesanal</div><div class="rub">🛒 Bodega</div>
+</div></section>
+
+<section class="gallery wrap" id="plantillas">
+  <div class="g-head">
+    <h2>Elige tu diseño favorito <span class="grad-text">y vende hoy mismo</span></h2>
+    <p>Diseños de catálogo listos para tu rubro. Todos con carrito, pedidos por WhatsApp y pagos Yape/Plin incluidos.</p>
+  </div>
+  <div class="grid">
+    <div class="card wide" style="position:relative">
+      <div class="ribbon">EL FAVORITO</div>
+      <div class="thumb"><img src="assets/boutique-preview.png" alt="Boutique"></div>
+      <div class="wide-body">
+        <div><span class="badge prem">Premium</span></div>
+        <h3>Boutique</h3>
+        <p>El diseño que hace que una tienda de ropa se vea como marca top: hero editorial, categorías con foto y grilla lookbook.</p>
+        <a class="btn btn-soft" style="padding:11px 22px;font-size:13.5px;align-self:flex-start" href="#">Ver demo →</a>
+      </div>
+      <div class="ring r1" style="grid-column:1/-1;height:7px"></div>
+    </div>
+    <div class="card"><div class="ring r2"></div><div class="thumb"><div class="badges"><span class="badge prem">Premium</span></div><img src="assets/editorial-preview.png" alt="Editorial"></div><div class="c-body"><h3>Editorial</h3><div class="tag">Catálogo revista · Ropa</div></div></div>
+    <div class="card"><div class="ring r6"></div><div class="thumb"><div class="badges"><span class="badge prem">Premium</span></div><img src="assets/atelier-preview.png" alt="Atelier"></div><div class="c-body"><h3>Atelier</h3><div class="tag">Moda femenina</div></div></div>
+    <div class="card"><div class="ring r5"></div><div class="thumb"><div class="badges"><span class="badge prem">Premium</span></div><img src="assets/terracota-preview.png" alt="Terracota"></div><div class="c-body"><h3>Terracota</h3><div class="tag">Artesanal · Deco</div></div></div>
+    <div class="card"><div class="ring r1"></div><div class="thumb"><div class="badges"><span class="badge prem">Premium</span></div><img src="assets/neon-preview.png" alt="Neón"></div><div class="c-body"><h3>Neón</h3><div class="tag">Tech · Gaming</div></div></div>
+    <div class="card"><div class="ring r3"></div><div class="thumb"><div class="badges"><span class="badge prem">Premium</span></div><img src="assets/sabor-preview.png" alt="Sabor"></div><div class="c-body"><h3>Sabor</h3><div class="tag">Restaurant · Comida</div></div></div>
+    <div class="card"><div class="ring r4"></div><div class="thumb"><div class="badges"><span class="badge prem">Premium</span></div><img src="assets/vitrina-preview.png" alt="Vitrina"></div><div class="c-body"><h3>Vitrina</h3><div class="tag">Lookbook · Ropa</div></div></div>
+    <div class="card"><div class="ring r5"></div><div class="thumb"><div class="badges"><span class="badge prem">Premium</span></div><img src="assets/luxury-preview.png" alt="Luxury"></div><div class="c-body"><h3>Luxury</h3><div class="tag">Joyería · Lujo</div></div></div>
+    <div class="card"><div class="ring r6"></div><div class="thumb"><div class="badges"><span class="badge free">Gratis</span></div><img src="assets/moderna-preview.png" alt="Moderna"></div><div class="c-body"><h3>Moderna</h3><div class="tag">Cualquier rubro</div></div></div>
+    <div class="card"><div class="ring r3"></div><div class="thumb"><div class="badges"><span class="badge prem">Premium</span></div><img src="assets/bodega-preview.png" alt="Bodega"></div><div class="c-body"><h3>Bodega</h3><div class="tag">Bodega · Abarrotes</div></div></div>
+    <div class="card"><div class="ring r1"></div><div class="thumb"><div class="badges"><span class="badge prem">Premium</span></div><img src="assets/minimalist-preview.png" alt="Minimalist"></div><div class="c-body"><h3>Minimalist</h3><div class="tag">Limpio · Elegante</div></div></div>
+    <div class="card"><div class="ring r2"></div><div class="thumb"><div class="badges"><span class="badge prem">Premium</span></div><img src="assets/moda-preview.png" alt="Moda"></div><div class="c-body"><h3>Moda</h3><div class="tag">Ropa · Accesorios</div></div></div>
+    <div class="card"><div class="ring r5"></div><div class="thumb"><div class="badges"><span class="badge free">Gratis</span></div><img src="assets/vibrante-preview.png" alt="Vibrante"></div><div class="c-body"><h3>Vibrante</h3><div class="tag">Colorido · Juvenil</div></div></div>
+    <div class="card"><div class="ring r4"></div><div class="thumb"><div class="badges"><span class="badge free">Gratis</span></div><img src="assets/clasica-preview.png" alt="Clásica"></div><div class="c-body"><h3>Clásica</h3><div class="tag">Tradicional</div></div></div>
+  </div>
+</section>
+
+<section class="tst"><div class="wrap">
+  <div class="g-head" style="margin-bottom:0">
+    <h2>Emprendedores que ya <span class="grad-text">se ven de marca grande</span></h2>
+  </div>
+  <div class="t-grid">
+    <div class="t-card"><div class="stars">★★★★★</div><p>“Mis clientas me dijeron ‘¿esta página es tuya?’. Con Boutique parezco tienda de mall y solo pago S/79 al mes.”</p><div class="t-who"><div class="av" style="background:#F65B8C">RM</div><div><b>Rosario M.</b><span>Tienda de ropa, Lima</span></div></div></div>
+    <div class="t-card"><div class="stars">★★★★★</div><p>“Los pedidos me llegan armados por WhatsApp con dirección y todo. Antes escribía todo a mano, ahora solo confirmo.”</p><div class="t-who"><div class="av" style="background:#2FB98B">JC</div><div><b>Jorge C.</b><span>Bodega, Arequipa</span></div></div></div>
+    <div class="t-card"><div class="stars">★★★★★</div><p>“Subí mis 40 postres en una tarde con la ayuda de la IA para las descripciones. Mi catálogo ahora se ve delicioso.”</p><div class="t-who"><div class="av" style="background:#FFB13D">LP</div><div><b>Lucía P.</b><span>Repostería, Trujillo</span></div></div></div>
+  </div>
+</div></section>
+
+<section class="wrap price">
+  <div class="p-card">
+    <div class="plan">Gratis</div>
+    <div class="amount">S/0<small>/mes</small></div>
+    <ul><li>1 tienda con plantilla gratis</li><li>Pedidos por WhatsApp</li><li>Hasta 20 productos</li><li>Yape y Plin</li></ul>
+    <a class="p-cta s" href="#">Empezar gratis</a>
+  </div>
+  <div class="p-card hot">
+    <div class="hot-tag">MÁS ELEGIDO</div>
+    <div class="plan">Premium</div>
+    <div class="amount">S/79.99<small>/mes</small></div>
+    <ul><li>3 tiendas + las 11 plantillas premium</li><li>Productos ilimitados</li><li>Dominio propio</li><li>Descripciones con IA</li><li>Combos y promociones</li></ul>
+    <a class="p-cta g" href="#">Quiero Premium</a>
+  </div>
+</section>
+
+<section class="cta">
+  <h2>Tu marca merece verse <span class="grad-text">así de bien</span></h2>
+  <p>Crea tu tienda gratis en 10 minutos. Elige tu diseño, sube tus productos y comparte tu catálogo hoy.</p>
+  <a class="btn btn-grad" href="#">Crear mi tienda gratis →</a>
+</section>
+
+<footer class="wrap"><div class="logo"><i style="width:22px;height:22px"></i>TiendaApp</div><div>Pedidos por WhatsApp · Yape y Plin · Hecho en Perú 🇵🇪</div></footer>
+
+</body>
+</html>
