@@ -61,7 +61,7 @@ export interface Store {
   planId: string
   colors: { primary: string; secondary: string }
   whatsappNumber: string
-  template: 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist' | 'bodega' | 'sabor' | 'moda' | 'vitrina' | 'neon' | 'boutique'
+  template: 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist' | 'bodega' | 'sabor' | 'moda' | 'vitrina' | 'neon' | 'boutique' | 'editorial' | 'atelier' | 'terracota'
   bannerUrl: string
   hasShipping: boolean
   hasSecurePayment: boolean

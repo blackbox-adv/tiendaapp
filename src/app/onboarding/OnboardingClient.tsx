@@ -29,6 +29,9 @@ import {
   BookOpen,
   Cpu,
   ShoppingBag,
+  Newspaper,
+  Flower2,
+  Hand,
 } from 'lucide-react';
 import { RUBROS, getRubro } from '@/lib/rubros';
 import { createDemoProducts } from '@/lib/demo-products';
@@ -132,6 +135,33 @@ const templates = [
     icon: ShoppingBag,
     plan: 'premium',
     demoSlug: 'boutique',
+  },
+  {
+    id: 'editorial',
+    name: 'Editorial',
+    desc: 'Catálogo estilo revista: portada tipográfica e índice numerado',
+    color: 'from-[#141414] to-[#C8102E]',
+    icon: Newspaper,
+    plan: 'premium',
+    demoSlug: 'editorial',
+  },
+  {
+    id: 'atelier',
+    name: 'Atelier',
+    desc: 'Moda femenina delicada: arcos, serif itálica y rosa empolvado',
+    color: 'from-[#B76E79] to-[#E8CDC5]',
+    icon: Flower2,
+    plan: 'premium',
+    demoSlug: 'atelier',
+  },
+  {
+    id: 'terracota',
+    name: 'Terracota',
+    desc: 'Artesanal y cálido: hecho a mano, valores y ofertas del mes',
+    color: 'from-[#B4552D] to-[#E8B48C]',
+    icon: Hand,
+    plan: 'premium',
+    demoSlug: 'terracota',
   },
 ];
 

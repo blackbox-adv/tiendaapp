@@ -49,6 +49,18 @@ const templateMeta: Record<string, { name: string; description: string }> = {
     name: 'Boutique',
     description: 'Demo de la plantilla Boutique estilo marca de moda: hero editorial, categorías con foto y grilla lookbook - TiendApp',
   },
+  editorial: {
+    name: 'Editorial',
+    description: 'Demo de la plantilla Editorial estilo catálogo de revista: portada tipográfica, índice numerado y fichas de producto - TiendApp',
+  },
+  atelier: {
+    name: 'Atelier',
+    description: 'Demo de la plantilla Atelier de moda femenina delicada: arcos, serif itálica y rosa empolvado - TiendApp',
+  },
+  terracota: {
+    name: 'Terracota',
+    description: 'Demo de la plantilla Terracota artesanal y cálida: hecho a mano, valores del oficio y ofertas del mes - TiendApp',
+  },
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ template: string }> }): Promise<Metadata> {
