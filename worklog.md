@@ -464,3 +464,25 @@ Important notes for next session:
 - User has NOT confirmed if Supabase Security Advisor fix worked (need screenshot)
 - 26 warnings from Security Advisor still unreviewed
 - Placeholders in landing (RUC, WhatsApp, testimonials) need real data
+
+---
+Task ID: 22
+Agent: Main Agent
+Task: Plantilla Boutique premium — look "boutique top" según referencias del dueño
+
+Work Log:
+- Dueño compartió 5 referencias (MEN'S, ZUREA, TECHNO, LUNORA, NovaTrend): tiendas de marca con hero editorial, categorías con foto y best sellers — ningún diseño previo se veía así
+- Entorno reseteado nuevamente; recuperado con remote set-url + reset --hard origin/main
+- Generada imagen editorial de moda con IA para la demo (public/demo-assets/boutique-hero.jpg, texto residual recortado con PIL)
+- Creada BoutiqueTemplate.tsx (~470 líneas): barra de anuncio, nav con anchors, hero full-bleed (o split con destacado si no hay banner), barra de beneficios, chips circulares de categorías con foto, mosaico 4-up de categorías (si >=3), banner de oferta automático (mayor descuento), grilla lookbook best sellers, CTA WhatsApp, footer oscuro
+- Esqueleto funcional intacto: carrito, WhatsApp flotante, popup, combos, Yape/Plin, envíos, gating de búsqueda por plan
+- Registro en 8 puntos: types.ts (union), plan-gating (premium), StoreView (render+cast), demo page meta, DemoTemplateClient (store Casa Alameda + 12 productos moda + plan label + render), OnboardingClient, dashboard/template (ropa->boutique como recomendada), landing Templates
+- Fix: restaurado producto dnn6 de neón eliminado por error en edición
+- Gate: tsc --noEmit = 0 errores en src/; commits d2b3e34 y push a main; deploy Vercel verificado
+- Verificado en producción: /demo/boutique 200, hero/categorías/oferta/grilla capturados, detalle de producto abre correctamente
+- Preview oficial public/templates/boutique-preview.png generado desde la demo real (commit posterior)
+
+Stage Summary:
+- 11 plantillas en producción. Boutique = respuesta directa al pedido del dueño: una tienda de ropa ahora puede verse como boutique top
+- Demo: https://tienda.blackboxperu.com/demo/boutique
+- Capturas: download/ver-boutique-hero.png, ver-boutique-mosaico.png, ver-boutique-producto.png, boutique-full.png
