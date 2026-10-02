@@ -4,11 +4,10 @@ import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { StoreLogo } from './StoreLogo'
-import { DEFAULT_CATEGORIES, getStoreCategories } from '@/lib/store-categories'
-import { Star, ShoppingBag, Search, X, ImageIcon } from 'lucide-react'
+import { getStoreCategories } from '@/lib/store-categories'
+import { Star, ShoppingBag, Search, X, ImageIcon, Sparkles } from 'lucide-react'
 import { StoreFeatureBadges } from './StoreFeatureBadges'
 import { CombosSection } from './CombosSection'
-import { Badge } from '@/components/ui/badge'
 import { PaymentMethods } from './PaymentMethods'
 import { ShippingOptions } from './ShippingOptions'
 import { useAppStore } from '@/lib/store'
@@ -62,24 +61,25 @@ export function ModernaTemplate({ store, products, storeSlug, planId, onProductC
   }, [products, selectedCategory, searchQuery, priceRange, sortBy])
 
   const categories = getStoreCategories(products)
+  const activeCatName = selectedCategory === 'all' ? null : (categories.find((c) => c.id === selectedCategory)?.name ?? null)
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white flex flex-col">
       {/* Banner with overlaid name — or standalone header */}
       {store.bannerUrl ? (
-        <div className="relative h-48 md:h-64 overflow-hidden">
+        <div className="relative h-56 md:h-72 overflow-hidden">
           <img src={store.bannerUrl} alt="" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-black/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/20" />
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
             {store.logo && (
-              <div className="w-14 h-14 rounded-full mx-auto mb-4 flex items-center justify-center bg-white/20 backdrop-blur-sm ring-2 ring-white/30">
-                <StoreLogo logo={store.logo} size={56} />
+              <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center bg-white/15 backdrop-blur-md ring-1 ring-white/40 shadow-lg">
+                <StoreLogo logo={store.logo} size={60} />
               </div>
             )}
-            <h1 className="text-2xl md:text-3xl font-semibold text-white tracking-tight">
+            <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight drop-shadow-sm">
               {store.name}
             </h1>
-            <p className="text-sm text-white/70 mt-2 leading-relaxed max-w-sm mx-auto">
+            <p className="text-sm md:text-base text-white/80 mt-2.5 leading-relaxed max-w-md mx-auto">
               {store.description}
             </p>
             <div className="mt-4">
@@ -87,27 +87,31 @@ export function ModernaTemplate({ store, products, storeSlug, planId, onProductC
                 hasShipping={store.hasShipping}
                 hasSecurePayment={store.hasSecurePayment}
                 hasReturns={store.hasReturns}
-                variant="light"
+                variant="vibrant"
                 primaryColor={store.colors.primary}
               />
             </div>
           </div>
         </div>
       ) : (
-        <header className="text-center pt-16 pb-12">
-          <div className="max-w-xl mx-auto px-6">
+        <header className="relative overflow-hidden">
+          {/* Decoración suave de fondo — da vida sin necesidad de banner */}
+          <div className="absolute inset-0 bg-gradient-to-b from-violet-50/90 via-white to-white" />
+          <div className="absolute -top-28 left-1/2 -translate-x-1/2 w-[34rem] h-[34rem] rounded-full bg-violet-100/70 blur-3xl pointer-events-none" />
+          <div className="absolute -top-10 right-[8%] w-40 h-40 rounded-full bg-purple-100/60 blur-2xl pointer-events-none" />
+          <div className="relative max-w-xl mx-auto px-6 pt-14 pb-11 text-center">
             {store.logo && (
-              <div className="w-14 h-14 rounded-full mx-auto mb-5 flex items-center justify-center text-2xl grayscale opacity-80">
-                <StoreLogo logo={store.logo} size={56} />
+              <div className="w-16 h-16 rounded-full mx-auto mb-5 flex items-center justify-center ring-4 ring-white shadow-lg shadow-violet-100">
+                <StoreLogo logo={store.logo} size={64} />
               </div>
             )}
-            <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
               {store.name}
             </h1>
-            <p className="text-sm text-gray-400 mt-2 leading-relaxed max-w-sm mx-auto">
+            <p className="text-sm md:text-base text-gray-500 mt-2.5 leading-relaxed max-w-sm mx-auto">
               {store.description}
             </p>
-            <div className="mt-4">
+            <div className="mt-5">
               <StoreFeatureBadges
                 hasShipping={store.hasShipping}
                 hasSecurePayment={store.hasSecurePayment}
@@ -121,18 +125,18 @@ export function ModernaTemplate({ store, products, storeSlug, planId, onProductC
       )}
 
       {/* Search bar + Category Pills */}
-      <nav className="sticky top-[53px] z-30 bg-white/90 backdrop-blur-sm border-b border-gray-50">
+      <nav className="sticky top-[53px] z-30 bg-white/85 backdrop-blur-md border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-6 py-4 space-y-3">
           {/* Search input — Pro & Premium only */}
           {planId !== 'free' ? (
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
                 placeholder="Buscar productos..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-10 py-2.5 text-sm rounded-lg border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-gray-300 transition-all"
+                className="w-full pl-10 pr-10 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-50/60 focus:outline-none focus:ring-2 focus:ring-violet-100 focus:border-violet-200 bg-white transition-all"
               />
               {searchQuery && (
                 <button
@@ -149,36 +153,36 @@ export function ModernaTemplate({ store, products, storeSlug, planId, onProductC
           <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide">
             <button
               onClick={() => setSelectedCategory('all')}
-              className={`px-3.5 py-1 rounded-full text-xs font-medium tracking-wide uppercase whitespace-nowrap transition-all duration-200 ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-medium tracking-wide uppercase whitespace-nowrap transition-all duration-200 ${
                 selectedCategory === 'all'
-                  ? 'text-white'
-                  : 'text-gray-400 hover:text-gray-600'
+                  ? 'text-white shadow-sm'
+                  : 'text-gray-500 bg-white border border-gray-200 hover:border-gray-300 hover:text-gray-700'
               }`}
               style={
                 selectedCategory === 'all'
                   ? { backgroundColor: store.colors.primary }
-                  : { backgroundColor: '#f5f5f5' }
+                  : undefined
               }
             >
               Todos
             </button>
             {categories.map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
-                  className={`px-3.5 py-1 rounded-full text-xs font-medium tracking-wide uppercase whitespace-nowrap transition-all duration-200 ${
-                    selectedCategory === cat.id
-                      ? 'text-white'
-                      : 'text-gray-400 hover:text-gray-600'
-                  }`}
-                  style={
-                    selectedCategory === cat.id
-                      ? { backgroundColor: store.colors.primary }
-                      : { backgroundColor: '#f5f5f5' }
-                  }
-                >
-                  {cat.name}
-                </button>
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id)}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-medium tracking-wide uppercase whitespace-nowrap transition-all duration-200 ${
+                  selectedCategory === cat.id
+                    ? 'text-white shadow-sm'
+                    : 'text-gray-500 bg-white border border-gray-200 hover:border-gray-300 hover:text-gray-700'
+                }`}
+                style={
+                  selectedCategory === cat.id
+                    ? { backgroundColor: store.colors.primary }
+                    : undefined
+                }
+              >
+                {cat.name}
+              </button>
             ))}
           </div>
 
@@ -193,7 +197,7 @@ export function ModernaTemplate({ store, products, storeSlug, planId, onProductC
                   placeholder="Min"
                   value={priceRange.min ?? ''}
                   onChange={(e) => setPriceRange(prev => ({ ...prev, min: e.target.value ? Number(e.target.value) : null }))}
-                  className="w-20 px-2 py-1.5 rounded-md border border-gray-200 bg-gray-50 text-xs focus:outline-none focus:ring-1 focus:ring-gray-200"
+                  className="w-20 px-2 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-xs focus:outline-none focus:ring-1 focus:ring-violet-100"
                 />
                 <span>-</span>
                 <input
@@ -201,7 +205,7 @@ export function ModernaTemplate({ store, products, storeSlug, planId, onProductC
                   placeholder="Max"
                   value={priceRange.max ?? ''}
                   onChange={(e) => setPriceRange(prev => ({ ...prev, max: e.target.value ? Number(e.target.value) : null }))}
-                  className="w-20 px-2 py-1.5 rounded-md border border-gray-200 bg-gray-50 text-xs focus:outline-none focus:ring-1 focus:ring-gray-200"
+                  className="w-20 px-2 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-xs focus:outline-none focus:ring-1 focus:ring-violet-100"
                 />
               </div>
 
@@ -209,7 +213,7 @@ export function ModernaTemplate({ store, products, storeSlug, planId, onProductC
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="px-2.5 py-1.5 rounded-md border border-gray-200 bg-gray-50 text-xs text-gray-600 focus:outline-none focus:ring-1 focus:ring-gray-200"
+                className="px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-xs text-gray-600 focus:outline-none focus:ring-1 focus:ring-violet-100"
               >
                 <option value="newest">Más recientes</option>
                 <option value="price-asc">Precio: menor a mayor</option>
@@ -232,7 +236,7 @@ export function ModernaTemplate({ store, products, storeSlug, planId, onProductC
       </nav>
 
       {/* Product Grid */}
-      <main className="max-w-5xl mx-auto px-6 py-10 flex-1">
+      <main className="max-w-5xl mx-auto px-6 py-10 flex-1 w-full">
         {/* Combos/Packs */}
         <div className="mb-8">
           <CombosSection products={products} store={store} storeSlug={storeSlug} primaryColor={store.colors.primary} />
@@ -240,14 +244,16 @@ export function ModernaTemplate({ store, products, storeSlug, planId, onProductC
 
         {filteredProducts.length === 0 ? (
           <div className="text-center py-24">
-            <ShoppingBag className="w-12 h-12 mx-auto mb-4 text-gray-200" />
-            <p className="text-gray-300 text-sm">
-              {searchQuery ? `No se encontraron resultados para "${searchQuery}"` : 'No hay productos en esta categoria'}
+            <div className="w-16 h-16 rounded-full bg-gray-50 mx-auto mb-5 flex items-center justify-center">
+              <ShoppingBag className="w-7 h-7 text-gray-200" />
+            </div>
+            <p className="text-gray-400 text-sm font-medium">
+              {searchQuery ? `No se encontraron resultados para "${searchQuery}"` : 'No hay productos en esta categoría'}
             </p>
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="mt-2 text-xs text-gray-500 hover:text-gray-700 underline"
+                className="mt-3 text-xs text-violet-500 hover:text-violet-700 underline"
               >
                 Limpiar búsqueda
               </button>
@@ -255,35 +261,46 @@ export function ModernaTemplate({ store, products, storeSlug, planId, onProductC
           </div>
         ) : (
           <>
-            {searchQuery && (
-              <p className="text-sm text-gray-400 mb-4">{filteredProducts.length} resultado{filteredProducts.length !== 1 ? 's' : ''} para "{searchQuery}"</p>
-            )}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-8">
+            {/* Encabezado de sección — jerarquía editorial */}
+            <div className="flex items-end justify-between mb-6">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-violet-500 mb-0.5">
+                  {activeCatName ? 'Categoría' : 'Catálogo'}
+                </p>
+                <h2 className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight">
+                  {activeCatName || 'Nuestros productos'}
+                </h2>
+              </div>
+              <span className="text-xs text-gray-400 mb-1">{filteredProducts.length} producto{filteredProducts.length !== 1 ? 's' : ''}</span>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-8 md:gap-x-7">
               <AnimatePresence mode="popLayout">
-                {filteredProducts.map((product) => (
+                {filteredProducts.map((product, i) => (
                   <motion.div
                     key={product.id}
                     layout
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
+                    initial={{ opacity: 0, y: 14 }}
+                    animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.35 }}
+                    transition={{ duration: 0.35, delay: Math.min(i * 0.04, 0.3) }}
                     className="group cursor-pointer"
                     onClick={() => onProductClick ? onProductClick(product.id) : navigate({ page: 'product-detail', slug: storeSlug, productId: product.id })}
                   >
-                    <div className="aspect-square bg-gray-50 rounded-lg overflow-hidden border border-gray-100 relative">
+                    <div className="aspect-square bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 relative shadow-sm group-hover:shadow-xl group-hover:shadow-gray-200/60 group-hover:-translate-y-1 transition-all duration-300">
                       <img
                         src={product.imageUrl || PRODUCT_IMG_FALLBACK}
                         alt={product.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover group-hover:scale-[1.06] transition-transform duration-500"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src =
                             'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect fill="%23fafafa" width="400" height="400"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="14" fill="%23ccc">Imagen no disponible</text></svg>'
                         }}
                       />
-                      {product.originalPrice && (
+                      {/* Descuento o Destacado */}
+                      {product.originalPrice ? (
                         <div
-                          className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md text-white text-[10px] font-semibold tracking-wide uppercase"
+                          className="absolute top-2.5 left-2.5 px-2 py-1 rounded-lg text-white text-[10px] font-bold tracking-wide shadow-sm"
                           style={{ backgroundColor: store.colors.primary }}
                         >
                           -
@@ -292,24 +309,29 @@ export function ModernaTemplate({ store, products, storeSlug, planId, onProductC
                           )}
                           %
                         </div>
-                      )}
+                      ) : product.featured ? (
+                        <div className="absolute top-2.5 left-2.5 px-2 py-1 rounded-lg bg-white/90 backdrop-blur-sm text-[10px] font-bold tracking-wide text-amber-600 shadow-sm flex items-center gap-1">
+                          <Sparkles className="w-3 h-3" />
+                          Destacado
+                        </div>
+                      ) : null}
                       {((product.images?.length || 0) + (product.imageUrl ? 1 : 0)) > 1 && (
-                        <div className="absolute top-2.5 right-2.5 px-1.5 py-0.5 rounded-md bg-black/50 text-white text-[10px] font-medium flex items-center gap-1">
+                        <div className="absolute top-2.5 right-2.5 px-1.5 py-1 rounded-lg bg-black/50 backdrop-blur-sm text-white text-[10px] font-medium flex items-center gap-1">
                           <ImageIcon className="w-3 h-3" />
                           {(product.images?.length || 0) + 1}
                         </div>
                       )}
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
                         <span
-                          className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white text-xs font-semibold px-4 py-2 rounded-full"
-                          style={{ backgroundColor: store.colors.primary + 'CC' }}
+                          className="opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-300 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-lg"
+                          style={{ backgroundColor: store.colors.primary + 'E6' }}
                         >
                           Ver detalle
                         </span>
                       </div>
                     </div>
                     <div className="mt-3 px-0.5">
-                      <h3 className="text-sm font-medium text-gray-800 truncate tracking-tight">
+                      <h3 className="text-sm font-semibold text-gray-800 truncate tracking-tight">
                         {product.name}
                       </h3>
                       {product.color && (
@@ -323,7 +345,7 @@ export function ModernaTemplate({ store, products, storeSlug, planId, onProductC
                                 key={star}
                                 size={11}
                                 className={star <= Math.round(product.rating)
-                                  ? 'fill-yellow-400 text-yellow-400'
+                                  ? 'fill-amber-400 text-amber-400'
                                   : 'text-gray-200'}
                               />
                             ))}
@@ -331,9 +353,9 @@ export function ModernaTemplate({ store, products, storeSlug, planId, onProductC
                           <span className="text-[11px] text-gray-400">{product.rating}</span>
                         </div>
                       )}
-                      <div className="flex items-center gap-2 mt-1">
+                      <div className="flex items-center gap-2 mt-1.5">
                         <span
-                          className="text-sm font-semibold"
+                          className="text-[15px] font-bold tracking-tight"
                           style={{ color: store.colors.primary }}
                         >
                           S/{Number(product.price).toFixed(2)}

@@ -7,7 +7,7 @@
 
 import { db } from '@/lib/db'
 
-export const PREMIUM_TEMPLATES: string[] = ['luxury', 'minimalist', 'bodega', 'sabor', 'moda']
+export const PREMIUM_TEMPLATES: string[] = ['luxury', 'minimalist', 'bodega', 'sabor', 'moda', 'vitrina', 'neon']
 
 export const VALID_TEMPLATES: string[] = ['moderna', 'vibrante', 'clasica', ...PREMIUM_TEMPLATES]
 

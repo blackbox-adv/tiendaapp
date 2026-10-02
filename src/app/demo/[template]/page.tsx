@@ -37,6 +37,14 @@ const templateMeta: Record<string, { name: string; description: string }> = {
     name: 'Pasarela',
     description: 'Demo de la plantilla Pasarela para boutiques de moda - TiendApp',
   },
+  vitrina: {
+    name: 'Vitrina',
+    description: 'Demo de la plantilla Vitrina estilo lookbook editorial para joyería, flores y belleza - TiendApp',
+  },
+  neon: {
+    name: 'Neón',
+    description: 'Demo de la plantilla Neón tech para celulares y electrónica - TiendApp',
+  },
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ template: string }> }): Promise<Metadata> {

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Eye, Crown, ArrowRight, Search, Sparkles, Gem, Sun, Minimize2, ShoppingBasket, UtensilsCrossed, Shirt } from 'lucide-react'
+import { Eye, Crown, ArrowRight, Search, Sparkles, Gem, Sun, Minimize2, ShoppingBasket, UtensilsCrossed, Shirt, BookOpen, Cpu } from 'lucide-react'
 import { PLAN_PRICES } from '@/lib/plans'
 import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/lib/store'
@@ -60,6 +60,26 @@ const templates: Template[] = [
     bestFor: ['Ropa', 'Gamarra', 'Accesorios'],
     isNew: true,
     icon: Shirt,
+  },
+  {
+    id: 'vitrina',
+    name: 'Vitrina',
+    plan: 'premium',
+    planLabel: 'Premium',
+    description: 'Lookbook editorial claro con serif elegante y producto estrella.',
+    bestFor: ['Joyería', 'Flores', 'Belleza'],
+    isNew: true,
+    icon: BookOpen,
+  },
+  {
+    id: 'neon',
+    name: 'Neón',
+    plan: 'premium',
+    planLabel: 'Premium',
+    description: 'Tech oscura con acentos eléctricos. Ideal para celulares y gadgets.',
+    bestFor: ['Celulares', 'Electrónica', 'Gaming'],
+    isNew: true,
+    icon: Cpu,
   },
   {
     id: 'vibrante',
