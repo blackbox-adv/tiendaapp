@@ -36,24 +36,24 @@ const LEVELS: Level[] = [
   },
   {
     icon: Sparkles,
-    level: 'Próximamente',
-    title: 'Landing con IA para lanzar productos',
+    level: 'Diferénciate',
+    title: 'Landing IA para tus lanzamientos',
     description:
-      '¿Lanzaste un modelo nuevo de zapatillas? Sube una foto y la IA crea la página de lanzamiento con copy y diseño profesional. También te escribe las descripciones de tus productos. Comparte el link y mide qué producto encanta.',
-    badge: 'Muy pronto · Premium',
+      '¿Lanzaste un producto nuevo? Describe qué es y para quién es, y la IA te escribe el copy completo: titular gancho, beneficios y llamado a la acción, montado en una página lista para compartir por WhatsApp y medir qué encanta.',
+    badge: 'Plan Premium',
     badgeClass: 'bg-[#E8A87C]/15 text-[#E8A87C] border-[#E8A87C]/30',
     iconClass: 'text-[#E8A87C] bg-[#E8A87C]/10 border-[#E8A87C]/30',
-    soon: true,
+    cta: { label: 'Ver planes', action: 'scroll' as const },
   },
   {
     icon: Rocket,
     level: 'Cuando vendas más',
     title: 'La tienda completa',
     description:
-      '8 diseños profesionales según tu rubro, buscador y filtros, packs con descuento, reportes de ventas descargables y hasta 3 tiendas. Todo lo que necesitas para vivir de tu negocio.',
-    badge: `Desde S/29.99/mes`,
+      'Packs con descuento, tu catálogo en Excel o Sheets, reportes de ventas, Landing IA y hasta 3 tiendas con 21 diseños profesionales según tu rubro: ropa, joyería, café, deporte y más. Todo para vivir de tu negocio.',
+    badge: 'Pro S/29.99 · Premium S/79.99',
     badgeClass: 'bg-[#BC5A38]/20 text-[#E29B77] border-[#BC5A38]/40',
-    iconClass: 'text-[#E29B77] bg-[#BC5A38]/10 border-[#BC5A38]/30',
+    iconClass: 'text-[#E29B77] bg-[#E29B77]/10 border-[#E29B77]/30',
     cta: { label: 'Ver planes', action: 'scroll' as const },
   },
 ]

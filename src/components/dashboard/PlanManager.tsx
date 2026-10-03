@@ -59,15 +59,20 @@ function isPlanCurrent(plan: ApiPlan, currentPlanId: string): boolean {
 function buildComparisonRows() {
   return [
     { label: 'Productos', fn: (p: ApiPlan) => (p.maxProducts === -1 ? '∞' : String(p.maxProducts)), isText: true },
-    { label: 'Plantilla básica', fn: () => true },
-    { label: 'Todas las plantillas', fn: (p: ApiPlan) => p.type !== 'free' },
-    { label: 'Botón WhatsApp', fn: () => true },
+    { label: 'Pedidos por WhatsApp con carrito', fn: () => true },
+    { label: 'Plantillas base (3)', fn: () => true },
+    // Las 18 plantillas premium requieren plan Premium (plan-gating.ts) —
+    // antes esta fila mostraba ✓ en Pro y era engañoso.
+    { label: 'Plantillas exclusivas por rubro', fn: (p: ApiPlan) => p.type === 'premium' },
+    { label: 'Packs y combos con descuento', fn: (p: ApiPlan) => p.type !== 'free' },
+    { label: 'Importar/exportar catálogo (Excel/Sheets)', fn: (p: ApiPlan) => p.type !== 'free' },
+    { label: 'Reportes de ventas en Excel', fn: (p: ApiPlan) => p.type !== 'free' },
+    { label: 'Buscador de productos', fn: (p: ApiPlan) => p.type !== 'free' },
     { label: 'Dominio personalizado', fn: (p: ApiPlan) => p.type !== 'free' },
     { label: 'Estadísticas avanzadas', fn: (p: ApiPlan) => p.type !== 'free' },
-    { label: 'Reportes en Excel', fn: (p: ApiPlan) => p.type !== 'free' },
-    { label: 'Descripciones con IA', fn: (p: ApiPlan) => p.type !== 'free' },
+    // La IA de descripciones aún no existe — no puede mostrarse como ✓ activo
+    { label: 'Descripciones con IA', fn: () => 'Muy pronto', isText: true },
     { label: 'Landing IA para lanzamientos', fn: (p: ApiPlan) => p.type === 'premium' },
-    { label: 'Soporte prioritario', fn: (p: ApiPlan) => p.type !== 'free' },
     { label: 'Soporte 24/7', fn: (p: ApiPlan) => p.type === 'premium' },
     { label: 'Sin marca TiendApp', fn: (p: ApiPlan) => p.type === 'premium' },
   ]

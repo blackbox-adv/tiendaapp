@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import {
   Smartphone, MessageCircle, Wallet, Clock, Rocket, Package, Gift, Sparkles, Wand2,
+  ShoppingCart, FileSpreadsheet, BarChart3,
 } from 'lucide-react'
 
 // Features escritas como BENEFICIOS (qué gana el emprendedor),
@@ -43,7 +44,25 @@ const features = [
     icon: Gift,
     title: 'Packs y promociones que se venden solos',
     description:
-      'TiendApp arma packs con descuento automáticamente (ej. pollo + gaseosa + papas) y resalta tus ofertas. El cliente toca un botón y te pide el pack completo por WhatsApp.',
+      'TiendApp arma packs con descuento automáticamente (ej. pollo + gaseosa + papas) y resalta tus ofertas. El cliente toca un botón y te pide el pack completo por WhatsApp. Disponible en los planes Pro y Premium.',
+  },
+  {
+    icon: ShoppingCart,
+    title: 'Pedidos completos en un solo WhatsApp',
+    description:
+      'Tu cliente arma su pedido: agrega varios productos, ajusta cantidades y te lo envía todo junto por WhatsApp con el total calculado. Nada de andar sumando a mano ni mensajes sueltos.',
+  },
+  {
+    icon: FileSpreadsheet,
+    title: 'Tu catálogo en Excel o Google Sheets',
+    description:
+      '¿Tienes muchos productos? Descarga tu catálogo en Excel, edita precios y stock donde ya trabajas, y vuelve a subirlo. Actualizar 50 productos toma minutos, no horas. En los planes Pro y Premium.',
+  },
+  {
+    icon: BarChart3,
+    title: 'Reportes de ventas en Excel',
+    description:
+      'Descarga tu resumen de ventas por día, tus pedidos y tus productos más vendidos. Saber qué se vende te deja comprar mejor inventario y dejar de adivinar.',
   },
   {
     icon: Sparkles,
