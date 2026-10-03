@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Eye, Crown, ArrowRight, Search, Sparkles, Gem, Sun, Minimize2, ShoppingBasket, UtensilsCrossed, Shirt, BookOpen, Cpu, ShoppingBag, Newspaper, Flower2, Hand, Cake, Zap, LayoutGrid } from 'lucide-react'
+import { Eye, Crown, ArrowRight, Search, Sparkles, Gem, Sun, Minimize2, ShoppingBasket, UtensilsCrossed, Shirt, BookOpen, Cpu, ShoppingBag, Newspaper, Flower2, Hand, Cake, Zap, Armchair, Dumbbell, Coffee, Flower, LayoutGrid } from 'lucide-react'
 import { PLAN_PRICES } from '@/lib/plans'
 import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/lib/store'
@@ -92,6 +92,61 @@ const templates: Template[] = [
     tags: ['moda'],
     isNew: true,
     icon: Zap,
+  },
+  {
+    id: 'aura',
+    name: 'Aura',
+    plan: 'premium',
+    planLabel: 'Premium',
+    description: 'Joyería fina: champán y oro, serif editorial y líneas doradas. Piezas que se sienten de marca.',
+    bestFor: ['Joyería', 'Relojes', 'Accesorios'],
+    tags: ['belleza'],
+    isNew: true,
+    icon: Gem,
+  },
+  {
+    id: 'teca',
+    name: 'Teca',
+    plan: 'premium',
+    planLabel: 'Premium',
+    description: 'Hogar y decoración: verde salvia, madera cálida y ambiente acogedor para renovar rincones.',
+    bestFor: ['Decoración', 'Textil', 'Cocina'],
+    tags: ['hogar'],
+    isNew: true,
+    icon: Armchair,
+  },
+  {
+    id: 'volt',
+    name: 'Volt',
+    plan: 'premium',
+    planLabel: 'Premium',
+    description: 'Deporte y fitness: azul marino y naranja eléctrico, stats de confianza y envío 24h protagonista.',
+    bestFor: ['Gym', 'Deporte', 'Suplementos'],
+    tags: ['general'],
+    isNew: true,
+    icon: Dumbbell,
+  },
+  {
+    id: 'grano',
+    name: 'Grano',
+    plan: 'premium',
+    planLabel: 'Premium',
+    description: 'Café de especialidad y pan artesanal: crema y espresso, con carta estilo menú con líneas punteadas.',
+    bestFor: ['Cafeterías', 'Panaderías', 'Deli'],
+    tags: ['comida'],
+    isNew: true,
+    icon: Coffee,
+  },
+  {
+    id: 'flora',
+    name: 'Flora',
+    plan: 'premium',
+    planLabel: 'Premium',
+    description: 'Florería y regalos: aireado, verde botánico y rosa empolvado. Ramos que se regalan con el corazón.',
+    bestFor: ['Flores', 'Regalos', 'Detalles'],
+    tags: ['general'],
+    isNew: true,
+    icon: Flower,
   },
   {
     id: 'moda',
@@ -382,7 +437,7 @@ export function Templates() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.1 }}
             transition={{ duration: 0.5, delay: 0.14, ease: 'easeOut' }}
-            className="group rounded-2xl border-2 border-dashed border-[#E5DCCB] bg-white/50 flex flex-col items-center justify-center text-center p-6 min-h-[280px]"
+            className="group rounded-2xl border-2 border-dashed border-[#E5DCCB] bg-white/50 flex flex-col items-center justify-center text-center p-6 min-h-[280px] sm:col-span-2"
           >
             <span className="w-12 h-12 rounded-full bg-[#F6E7DE] flex items-center justify-center mb-4">
               <Sparkles className="w-5 h-5 text-[#BC5A38]" />

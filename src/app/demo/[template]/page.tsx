@@ -69,6 +69,26 @@ const templateMeta: Record<string, { name: string; description: string }> = {
     name: 'Calle',
     description: 'Demo de la plantilla Calle streetwear urbano: negro y lima ácido, drops limitados y tipografía gigante - TiendApp',
   },
+  aura: {
+    name: 'Aura',
+    description: 'Demo de la plantilla Aura para joyerías y accesorios finos: champán y oro, serif editorial y líneas doradas - TiendApp',
+  },
+  teca: {
+    name: 'Teca',
+    description: 'Demo de la plantilla Teca para hogar y decoración: verde salvia, madera cálida y ambiente acogedor - TiendApp',
+  },
+  volt: {
+    name: 'Volt',
+    description: 'Demo de la plantilla Volt para deporte y fitness: azul marino y naranja eléctrico, envío 24h y energía pura - TiendApp',
+  },
+  grano: {
+    name: 'Grano',
+    description: 'Demo de la plantilla Grano para cafeterías y panadería artesanal: crema y espresso, carta estilo menú - TiendApp',
+  },
+  flora: {
+    name: 'Flora',
+    description: 'Demo de la plantilla Flora para florerías y regalos: verde botánico, rosa empolvado y ramos frescos - TiendApp',
+  },
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ template: string }> }): Promise<Metadata> {

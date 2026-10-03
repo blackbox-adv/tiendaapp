@@ -18,6 +18,11 @@ import { AtelierTemplate } from '@/components/store-templates/AtelierTemplate'
 import { TerracotaTemplate } from '@/components/store-templates/TerracotaTemplate'
 import { DulceTemplate } from '@/components/store-templates/DulceTemplate'
 import { CalleTemplate } from '@/components/store-templates/CalleTemplate'
+import { AuraTemplate } from '@/components/store-templates/AuraTemplate'
+import { TecaTemplate } from '@/components/store-templates/TecaTemplate'
+import { VoltTemplate } from '@/components/store-templates/VoltTemplate'
+import { GranoTemplate } from '@/components/store-templates/GranoTemplate'
+import { FloraTemplate } from '@/components/store-templates/FloraTemplate'
 import { ProductDetailView } from '@/components/store-templates/ProductDetailView'
 import { ArrowLeft, Crown, Sparkles, Gem } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -410,6 +415,126 @@ const demoStores: Record<string, Store> = {
     ],
     otherPayments: [],
   },
+  aura: {
+    id: 'demo-aura',
+    name: 'Aura Joyería',
+    slug: 'demo-aura',
+    description: 'Joyería y accesorios finos: piezas seleccionadas para cada ocasión.',
+    logo: '💎',
+    categoryId: 'accesorios',
+    planId: 'premium',
+    colors: { primary: '#B08D57', secondary: '#211A10' },
+    whatsappNumber: '+51999990017',
+    template: 'aura',
+    bannerUrl: '',
+    userId: '',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    hasShipping: true, hasSecurePayment: true, hasReturns: true,
+    popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
+    yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
+    shippingOptions: [
+      { label: 'Envío asegurado', price: 12, time: '24 horas' },
+      { label: 'Recojo en tienda', price: null, time: 'Cuando quieras' },
+    ],
+    otherPayments: [],
+  },
+  teca: {
+    id: 'demo-teca',
+    name: 'Teca Hogar',
+    slug: 'demo-teca',
+    description: 'Decoración y textil para el hogar: piezas nobles elegidas con calma.',
+    logo: '🏡',
+    categoryId: 'hogar',
+    planId: 'premium',
+    colors: { primary: '#5F6F52', secondary: '#9A6B44' },
+    whatsappNumber: '+51999990018',
+    template: 'teca',
+    bannerUrl: '',
+    userId: '',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    hasShipping: true, hasSecurePayment: true, hasReturns: true,
+    popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
+    yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
+    shippingOptions: [
+      { label: 'Delivery en la ciudad', price: 10, time: '1-2 días' },
+      { label: 'Recojo en tienda', price: null, time: 'Cuando quieras' },
+    ],
+    otherPayments: [],
+  },
+  volt: {
+    id: 'demo-volt',
+    name: 'Volt Depot',
+    slug: 'demo-volt',
+    description: 'Todo para tu entrenamiento: indumentaria, accesorios y stock real.',
+    logo: '⚡',
+    categoryId: 'deportes',
+    planId: 'premium',
+    colors: { primary: '#FF5A1F', secondary: '#0E1A38' },
+    whatsappNumber: '+51999990019',
+    template: 'volt',
+    bannerUrl: '',
+    userId: '',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    hasShipping: true, hasSecurePayment: true, hasReturns: true,
+    popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
+    yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
+    shippingOptions: [
+      { label: 'Envío 24h en la ciudad', price: 10, time: '24 horas' },
+      { label: 'Provincias', price: 15, time: '2 a 4 días' },
+    ],
+    otherPayments: [],
+  },
+  grano: {
+    id: 'demo-grano',
+    name: 'Grano & Masa',
+    slug: 'demo-grano',
+    description: 'Café de especialidad y pan artesanal, horneado cada mañana.',
+    logo: '☕',
+    categoryId: 'comida',
+    planId: 'premium',
+    colors: { primary: '#B5793B', secondary: '#3E2C1E' },
+    whatsappNumber: '+51999990020',
+    template: 'grano',
+    bannerUrl: '',
+    userId: '',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    hasShipping: true, hasSecurePayment: true, hasReturns: true,
+    popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
+    yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
+    shippingOptions: [
+      { label: 'Envío en el día', price: 8, time: 'Mismo día' },
+      { label: 'Recojo en tienda', price: null, time: 'Cuando quieras' },
+    ],
+    otherPayments: [],
+  },
+  flora: {
+    id: 'demo-flora',
+    name: 'Flora Viva',
+    slug: 'demo-flora',
+    description: 'Ramos y regalos para cada ocasión, con flores frescas del día.',
+    logo: '🌷',
+    categoryId: 'flores',
+    planId: 'premium',
+    colors: { primary: '#4C7A5A', secondary: '#E9B8C4' },
+    whatsappNumber: '+51999990021',
+    template: 'flora',
+    bannerUrl: '',
+    userId: '',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    hasShipping: true, hasSecurePayment: true, hasReturns: true,
+    popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
+    yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
+    shippingOptions: [
+      { label: 'Envío con delicadeza', price: 12, time: 'Mismo día' },
+      { label: 'Recojo en tienda', price: null, time: 'Cuando quieras' },
+    ],
+    otherPayments: [],
+  },
 }
 
 // Product images match the preview generation script (same Unsplash URLs)
@@ -567,6 +692,56 @@ const demoProducts: Record<string, Product[]> = {
     { id: 'dcb7', name: 'Zapatillas Urbanas', description: 'Zapatillas urbanas ligeras con suela amortiguada.', price: 149.0, originalPrice: 189.0, categoryId: 'calzado', imageUrl: '/sample-products/zapatillas-running.jpg', images: ['/sample-products/zapatillas-running.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-calle', createdAt: '2024-03-10T10:00:00.000Z' },
     { id: 'dcb8', name: 'Bufanda Neón', description: 'Bufanda tejida con detalle neón para la temporada.', price: 29.0, originalPrice: null, categoryId: 'accesorios', imageUrl: '/sample-products/bufanda-neon.jpg', images: ['/sample-products/bufanda-neon.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-calle', createdAt: '2024-03-20T10:00:00.000Z' },
   ],
+  aura: [
+    { id: 'dau1', name: 'Anillo Diamante Eterno', description: 'Anillo con piedra central y montura bañada en oro 18K.', price: 189.9, originalPrice: 219.9, categoryId: 'anillos', imageUrl: '/sample-products/anillo-diamond.jpg', images: ['/sample-products/anillo-diamond.jpg'], color: null, stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-aura', createdAt: '2024-01-10T10:00:00.000Z' },
+    { id: 'dau2', name: 'Aretes Plata 925', description: 'Aretes de plata 925 con brillo espejo, hipergénicos.', price: 79.9, originalPrice: null, categoryId: 'aretes', imageUrl: '/sample-products/aretes-plateados.jpg', images: ['/sample-products/aretes-plateados.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-aura', createdAt: '2024-01-20T10:00:00.000Z' },
+    { id: 'dau3', name: 'Collar Artesanal Dorado', description: 'Collar artesanal con baño dorado y dije elegante.', price: 129.0, originalPrice: null, categoryId: 'collares', imageUrl: '/sample-products/collar-artesanal.jpg', images: ['/sample-products/collar-artesanal.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-aura', createdAt: '2024-02-01T10:00:00.000Z' },
+    { id: 'dau4', name: 'Pulsera Tejida a Mano', description: 'Pulsera tejida a mano con hilos encerados y detalles.', price: 45.0, originalPrice: null, categoryId: 'pulseras', imageUrl: '/sample-products/pulsera-tejida-mano.jpg', images: ['/sample-products/pulsera-tejida-mano.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-aura', createdAt: '2024-02-10T10:00:00.000Z' },
+    { id: 'dau5', name: 'Set Joyería Plata 925', description: 'Set de joyería en plata 925: collar, aretes y pulsera.', price: 219.0, originalPrice: null, categoryId: 'sets', imageUrl: '/sample-products/joyeria-plata-925.jpg', images: ['/sample-products/joyeria-plata-925.jpg'], color: null, stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-aura', createdAt: '2024-02-20T10:00:00.000Z' },
+    { id: 'dau6', name: 'Reloj Clásico Dorado', description: 'Reloj clásico con caja dorada y correa de acero.', price: 159.0, originalPrice: 199.0, categoryId: 'relojes', imageUrl: '/sample-products/reloj-clasico.jpg', images: ['/sample-products/reloj-clasico.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-aura', createdAt: '2024-03-01T10:00:00.000Z' },
+    { id: 'dau7', name: 'Bolso de Mano Cuero', description: 'Bolso de mano en cuero con acabado premium.', price: 249.0, originalPrice: null, categoryId: 'accesorios', imageUrl: '/sample-products/bolso-mano.jpg', images: ['/sample-products/bolso-mano.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-aura', createdAt: '2024-03-10T10:00:00.000Z' },
+    { id: 'dau8', name: 'Lentes de Sol UV400', description: 'Lentes de sol con protección UV400 y montura fina.', price: 89.0, originalPrice: null, categoryId: 'accesorios', imageUrl: '/sample-products/lentes-sol-uv400.jpg', images: ['/sample-products/lentes-sol-uv400.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-aura', createdAt: '2024-03-20T10:00:00.000Z' },
+  ],
+  teca: [
+    { id: 'dtk1', name: 'Cojín Decorativo de Lino', description: 'Cojín de lino natural con relleno incluido, 45x45cm.', price: 39.9, originalPrice: null, categoryId: 'textil', imageUrl: '/sample-products/cojin-decorativo.jpg', images: ['/sample-products/cojin-decorativo.jpg'], color: null, stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-teca', createdAt: '2024-01-10T10:00:00.000Z' },
+    { id: 'dtk2', name: 'Edredón Matrimonial Suave', description: 'Edredón matrimonial ultra suave, abriga sin peso.', price: 129.0, originalPrice: 159.0, categoryId: 'dormitorio', imageUrl: '/sample-products/edredon-matrimonial.jpg', images: ['/sample-products/edredon-matrimonial.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-teca', createdAt: '2024-01-20T10:00:00.000Z' },
+    { id: 'dtk3', name: 'Cortina de Lino 2m', description: 'Cortina de lino 2 metros, caída natural y elegante.', price: 59.0, originalPrice: null, categoryId: 'textil', imageUrl: '/sample-products/cortina-2m.jpg', images: ['/sample-products/cortina-2m.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-teca', createdAt: '2024-02-01T10:00:00.000Z' },
+    { id: 'dtk4', name: 'Lámpara LED Cálida', description: 'Lámpara LED de luz cálida, ideal para rincones de lectura.', price: 24.9, originalPrice: null, categoryId: 'luces', imageUrl: '/sample-products/lampara-led-12w.jpg', images: ['/sample-products/lampara-led-12w.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-teca', createdAt: '2024-02-10T10:00:00.000Z' },
+    { id: 'dtk5', name: 'Set Sartenes Antiadherentes', description: 'Set de sartenes antiadherentes con base de inducción.', price: 119.0, originalPrice: null, categoryId: 'cocina', imageUrl: '/sample-products/sartenes-antiadherentes.jpg', images: ['/sample-products/sartenes-antiadherentes.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-teca', createdAt: '2024-02-20T10:00:00.000Z' },
+    { id: 'dtk6', name: 'Vasos Decorativos x6', description: 'Set de 6 vasos con diseño artesanal para mesa.', price: 34.9, originalPrice: null, categoryId: 'cocina', imageUrl: '/sample-products/vasos-x6.jpg', images: ['/sample-products/vasos-x6.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-teca', createdAt: '2024-03-01T10:00:00.000Z' },
+    { id: 'dtk7', name: 'Cerámica Decorativa', description: 'Pieza de cerámica hecha a mano, edición limitada.', price: 49.0, originalPrice: null, categoryId: 'deco', imageUrl: '/sample-products/ceramica-navidena.jpg', images: ['/sample-products/ceramica-navidena.jpg'], color: null, stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-teca', createdAt: '2024-03-10T10:00:00.000Z' },
+    { id: 'dtk8', name: 'Manta de Alpaca', description: 'Manta de alpaca baby 100% natural, suavidad peruana.', price: 149.0, originalPrice: 179.0, categoryId: 'textil', imageUrl: '/sample-products/manta-alpaca.jpg', images: ['/sample-products/manta-alpaca.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-teca', createdAt: '2024-03-20T10:00:00.000Z' },
+  ],
+  volt: [
+    { id: 'dvt1', name: 'Mancuernas 5kg (Par)', description: 'Par de mancuernas de 5kg con recubrimiento antideslizante.', price: 89.9, originalPrice: null, categoryId: 'pesas', imageUrl: '/sample-products/mancuernas-5kg-par.jpg', images: ['/sample-products/mancuernas-5kg-par.jpg'], color: null, stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-volt', createdAt: '2024-01-10T10:00:00.000Z' },
+    { id: 'dvt2', name: 'Guantes de Gimnasio Pro', description: 'Guantes de gimnasio con soporte de muñeca y grip.', price: 39.9, originalPrice: null, categoryId: 'training', imageUrl: '/sample-products/guantes-gimnasio.jpg', images: ['/sample-products/guantes-gimnasio.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-volt', createdAt: '2024-01-20T10:00:00.000Z' },
+    { id: 'dvt3', name: 'Balón de Fútbol N°5', description: 'Balón de fútbol N°5 cosido a máquina, uso profesional.', price: 59.9, originalPrice: 79.9, categoryId: 'futbol', imageUrl: '/sample-products/balon-futbol-5.jpg', images: ['/sample-products/balon-futbol-5.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-volt', createdAt: '2024-02-01T10:00:00.000Z' },
+    { id: 'dvt4', name: 'Botella Deportiva 750ml', description: 'Botella deportiva 750ml libre de BPA, con boquilla.', price: 25.0, originalPrice: null, categoryId: 'accesorios', imageUrl: '/sample-products/botella-deportiva-750ml.jpg', images: ['/sample-products/botella-deportiva-750ml.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-volt', createdAt: '2024-02-10T10:00:00.000Z' },
+    { id: 'dvt5', name: 'Zapatillas Running Pro', description: 'Zapatillas de running con amortiguación de alto retorno.', price: 149.0, originalPrice: 199.0, categoryId: 'calzado', imageUrl: '/sample-products/zapatillas-running.jpg', images: ['/sample-products/zapatillas-running.jpg'], color: null, stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-volt', createdAt: '2024-02-20T10:00:00.000Z' },
+    { id: 'dvt6', name: 'Smartwatch Deportivo', description: 'Smartwatch con GPS, pulsómetro y modos de entrenamiento.', price: 129.0, originalPrice: null, categoryId: 'wearables', imageUrl: '/sample-products/smartwatch-basico.jpg', images: ['/sample-products/smartwatch-basico.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-volt', createdAt: '2024-03-01T10:00:00.000Z' },
+    { id: 'dvt7', name: 'Cinta de Medir 5m', description: 'Cinta métrica de 5m con freno, ideal para progreso.', price: 9.9, originalPrice: null, categoryId: 'training', imageUrl: '/sample-products/cinta-medir-5m.jpg', images: ['/sample-products/cinta-medir-5m.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-volt', createdAt: '2024-03-10T10:00:00.000Z' },
+    { id: 'dvt8', name: 'Toalla Deportiva', description: 'Toalla deportiva de microfibra, seca rápido y no huele.', price: 19.9, originalPrice: null, categoryId: 'accesorios', imageUrl: '/sample-products/toalla-bano.jpg', images: ['/sample-products/toalla-bano.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-volt', createdAt: '2024-03-20T10:00:00.000Z' },
+  ],
+  grano: [
+    { id: 'dgr1', name: 'Café Molido Origen 500g', description: 'Grano de altura tostado de la semana, notas de chocolate.', price: 28.0, originalPrice: null, categoryId: 'cafe', imageUrl: '/sample-products/cafe-molido-500g.jpg', images: ['/sample-products/cafe-molido-500g.jpg'], color: null, stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-grano', createdAt: '2024-01-10T10:00:00.000Z' },
+    { id: 'dgr2', name: 'Café con Leche', description: 'Doble shot con leche vaporizada, cremoso y redondo.', price: 8.0, originalPrice: null, categoryId: 'bebidas', imageUrl: '/sample-products/cafe-con-leche.jpg', images: ['/sample-products/cafe-con-leche.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-grano', createdAt: '2024-01-20T10:00:00.000Z' },
+    { id: 'dgr3', name: 'Pan Francés (docena)', description: 'Crujiente por fuera, suave por dentro. Sale 6am.', price: 12.0, originalPrice: null, categoryId: 'panaderia', imageUrl: '/sample-products/pan-frances-docena.jpg', images: ['/sample-products/pan-frances-docena.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-grano', createdAt: '2024-02-01T10:00:00.000Z' },
+    { id: 'dgr4', name: 'Empanada de Pollo', description: 'Empanada horneada rellena de pollo jugoso con aceituna.', price: 6.5, originalPrice: null, categoryId: 'salado', imageUrl: '/sample-products/empanada-pollo.jpg', images: ['/sample-products/empanada-pollo.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-grano', createdAt: '2024-02-10T10:00:00.000Z' },
+    { id: 'dgr5', name: 'Torta de Chocolate (porción)', description: 'Porción húmeda de chocolate con fudge casero.', price: 7.5, originalPrice: null, categoryId: 'dulces', imageUrl: '/sample-products/torta-chocolate-porcion.jpg', images: ['/sample-products/torta-chocolate-porcion.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-grano', createdAt: '2024-02-20T10:00:00.000Z' },
+    { id: 'dgr6', name: 'Cheesecake Frutos Rojos', description: 'Base crocante, crema suave y mermelada de frutos rojos.', price: 8.5, originalPrice: null, categoryId: 'dulces', imageUrl: '/sample-products/cheesecake-porcion.jpg', images: ['/sample-products/cheesecake-porcion.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-grano', createdAt: '2024-03-01T10:00:00.000Z' },
+    { id: 'dgr7', name: 'Bocaditos Surtidos 1kg', description: 'Bandeja surtida para reuniones: mini panes y dulces.', price: 32.0, originalPrice: 38.0, categoryId: 'dulces', imageUrl: '/sample-products/bocaditos-surtidos-kg.jpg', images: ['/sample-products/bocaditos-surtidos-kg.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-grano', createdAt: '2024-03-10T10:00:00.000Z' },
+    { id: 'dgr8', name: 'Combo Desayuno x2', description: '2 cafés + pan con mantequilla + jugo recién exprimido.', price: 39.0, originalPrice: null, categoryId: 'combos', imageUrl: '/sample-products/combo-especial.jpg', images: ['/sample-products/combo-especial.jpg'], color: null, stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-grano', createdAt: '2024-03-20T10:00:00.000Z' },
+  ],
+  flora: [
+    { id: 'dfl1', name: 'Ramo de Girasoles', description: 'Ramo de girasoles frescos con papel kraft y moño.', price: 65.0, originalPrice: null, categoryId: 'ramos', imageUrl: '/sample-products/ramo-girasoles.jpg', images: ['/sample-products/ramo-girasoles.jpg'], color: null, stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-flora', createdAt: '2024-01-10T10:00:00.000Z' },
+    { id: 'dfl2', name: 'Rosas Rojas x12', description: 'Docena de rosas rojas de tallo largo, envoltorio premium.', price: 89.0, originalPrice: 109.0, categoryId: 'ramos', imageUrl: '/sample-products/rosas-rojas-x12.jpg', images: ['/sample-products/rosas-rojas-x12.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-flora', createdAt: '2024-01-20T10:00:00.000Z' },
+    { id: 'dfl3', name: 'Globo de Helio con Mensaje', description: 'Globo de helio metálico con mensaje personalizado.', price: 25.0, originalPrice: null, categoryId: 'extras', imageUrl: '/sample-products/globo-helio.jpg', images: ['/sample-products/globo-helio.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-flora', createdAt: '2024-02-01T10:00:00.000Z' },
+    { id: 'dfl4', name: 'Peluche Grande 60cm', description: 'Peluche suave de 60cm, abrazo garantizado.', price: 79.0, originalPrice: null, categoryId: 'regalos', imageUrl: '/sample-products/peluche-grande-60cm.jpg', images: ['/sample-products/peluche-grande-60cm.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-flora', createdAt: '2024-02-10T10:00:00.000Z' },
+    { id: 'dfl5', name: 'Peluche Mediano 40cm', description: 'Peluche mediano de 40cm, ideal para acompañar flores.', price: 49.0, originalPrice: null, categoryId: 'regalos', imageUrl: '/sample-products/peluche-mediano-40cm.jpg', images: ['/sample-products/peluche-mediano-40cm.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-flora', createdAt: '2024-02-20T10:00:00.000Z' },
+    { id: 'dfl6', name: 'Tarjeta de Dedicatoria', description: 'Tarjeta escrita a mano con tu mensaje especial.', price: 5.0, originalPrice: null, categoryId: 'extras', imageUrl: '/sample-products/tarjeta-dedicatoria.jpg', images: ['/sample-products/tarjeta-dedicatoria.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-flora', createdAt: '2024-03-01T10:00:00.000Z' },
+    { id: 'dfl7', name: 'Combo Aniversario', description: 'Ramo + peluche + tarjeta con delivery sorpresa.', price: 129.0, originalPrice: null, categoryId: 'combos', imageUrl: '/sample-products/combo-especial.jpg', images: ['/sample-products/combo-especial.jpg'], color: null, stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-flora', createdAt: '2024-03-10T10:00:00.000Z' },
+    { id: 'dfl8', name: 'Jarrón Decorativo Cerámica', description: 'Jarrón de cerámica artesanal para tus flores.', price: 55.0, originalPrice: null, categoryId: 'regalos', imageUrl: '/sample-products/ceramica-navidena.jpg', images: ['/sample-products/ceramica-navidena.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-flora', createdAt: '2024-03-20T10:00:00.000Z' },
+  ],
 }
 
 // Map template ID to plan for rendering
@@ -587,6 +762,11 @@ const templatePlanId: Record<string, string> = {
   terracota: 'premium',
   dulce: 'premium',
   calle: 'premium',
+  aura: 'premium',
+  teca: 'premium',
+  volt: 'premium',
+  grano: 'premium',
+  flora: 'premium',
 }
 
 // Map template ID to plan label for the banner
@@ -607,7 +787,12 @@ function getPlanLabel(template: string): string {
     case 'atelier':
     case 'terracota':
     case 'dulce':
-    case 'calle': return 'Plan Premium'
+    case 'calle':
+    case 'aura':
+    case 'teca':
+    case 'volt':
+    case 'grano':
+    case 'flora': return 'Plan Premium'
     default: return ''
   }
 }
@@ -728,6 +913,11 @@ export function DemoTemplateClient({ template }: { template: string }) {
       {template === 'terracota' && <TerracotaTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
       {template === 'dulce' && <DulceTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
       {template === 'calle' && <CalleTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
+      {template === 'aura' && <AuraTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
+      {template === 'teca' && <TecaTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
+      {template === 'volt' && <VoltTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
+      {template === 'grano' && <GranoTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
+      {template === 'flora' && <FloraTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
     </div>
   )
 }
