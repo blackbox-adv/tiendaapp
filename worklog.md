@@ -529,3 +529,26 @@ Stage Summary:
 - Entregado al dueño: opinión (techo práctico 18 plantillas: +4 = Dulce/Aura/Teca/Pixel) + 3 conceptos de landing para elegir antes de implementar en Next.js
 - Recomendación experta: Opción B como base (más conversora para emprendedores) con elementos de C si quiere look premium
 - Sin cambios en el repo de TiendaApp en esta tarea (solo ejemplos); implementación pendiente de elección del dueño
+
+---
+Task ID: 25
+Agent: Main Agent
+Task: Corrección de diseño landing — quitar cintillo sobre catálogos y ordenar galería
+
+Work Log:
+- Reporte del dueño: "cintillo de color sobre los catálogos" + "página principal desordenada" + quiere ver los catálogos bien para que la gente se anime
+- Diagnóstico con agent-browser: la barra fija de demo ("Vista previa de la plantilla X — Plan Y", dorada/violeta) + barra blanca Volver/Crear quedaron IMPRESAS dentro de los 14 PNG de /public/templates/*-preview.png (capturas de Task 23 no las removieron). Además cada tarjeta tenía 2-3 pastillas flotantes ("Nuevo" + plan) tapando el preview. Grid 4-col dejaba hueco final (14 items).
+- Fix 1 — regen-previews.sh: re-capturados los 14 previews a 900x1200 removiendo por eval div.fixed.top-0 + spacers h-[76px]/h-[40px] de DemoTemplateClient. Verificados boutique y clasica: sin cintillo. Respaldo de los viejos en download/ejemplos-landing/old-previews/
+- Fix 2 — Templates.tsx: eliminados badges flotantes sobre imagen ("⭐ Nuevo" y plan); plan ahora como chip pequeño en la fila del título (mismos colores planStyles, consistente con leyenda); grid lg:4-col → lg:3-col con gap-8 (Boutique 2-col + 13 = 15 slots = 5 filas exactas sin hueco); stagger delay %3. Pill "El favorito para tiendas de ropa" se mantiene solo en Boutique (abajo).
+- PhoneMockup.tsx usa bodega-preview.png → se corrige solo con el preview nuevo.
+- Gate: tsc --noEmit = 0 errores. Commit 881d82e y push a main; deploy Vercel on-push.
+
+Stage Summary:
+- Galería de la landing ahora muestra los catálogos limpios y grandes (3 col), sin cintillo de demo ni pastillas sobre la imagen
+- Previews regenerados = también mejora el hero (teléfono con bodega) y cualquier uso futuro
+- Pendiente: verificación visual en producción tras el deploy
+
+Verificación Task 25 (post-deploy):
+- Hash del preview boutique live = local (0b758ec8...) → nuevos previews servidos en producción
+- Capturas de verificación: ver-galeria-corregida-top.png, ver-galeria-corregida-mid.png, prod-galeria-y3600.png, prod-galeria-y4450.png (3 col, sin cintillo, sin badges flotantes, sin huecos), ver-hero-corregido.png (teléfono limpio)
+- Nota: etiquetas de plan en landing (vibrante/clasica = Pro) son consistentes con onboarding y demos; el gating API es más permisivo pero es capa funcional — no se toca sin aprobación
