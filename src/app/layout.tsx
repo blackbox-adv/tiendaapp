@@ -128,11 +128,6 @@ export default async function RootLayout({
                   addressLocality: 'Lima',
                   addressCountry: 'PE',
                 },
-                sameAs: [
-                  'https://twitter.com/tiendapp',
-                  'https://instagram.com/tiendapp',
-                  'https://facebook.com/tiendapp',
-                ],
                 contactPoint: {
                   '@type': 'ContactPoint',
                   contactType: 'customer support',
