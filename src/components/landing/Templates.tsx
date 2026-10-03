@@ -269,7 +269,7 @@ export function Templates() {
         </motion.div>
 
         {/* Galería de plantillas (todas visibles, estilo mosaico) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {visible.map((tpl, i) => {
             const style = planStyles[tpl.plan]
             return (
@@ -278,7 +278,7 @@ export function Templates() {
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.1 }}
-                transition={{ duration: 0.5, delay: (i % 4) * 0.07, ease: 'easeOut' }}
+                transition={{ duration: 0.5, delay: (i % 3) * 0.07, ease: 'easeOut' }}
                 className={`group bg-white rounded-2xl border border-[#E5DCCB] shadow-sm hover:shadow-xl ${style.ring} ${style.hover} transition-all duration-300 overflow-hidden flex flex-col ${
                   tpl.featured ? 'sm:col-span-2' : ''
                 }`}
@@ -296,16 +296,6 @@ export function Templates() {
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     className="object-cover object-top group-hover:scale-[1.03] transition-transform duration-500"
                   />
-                  {/* Plan badge */}
-                  <div className={`absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold border shadow-md ${style.badge}`}>
-                    {tpl.plan === 'premium' && <Crown className="w-3 h-3" />}
-                    {tpl.planLabel}
-                  </div>
-                  {tpl.isNew && (
-                    <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold bg-[#BC5A38] text-white shadow-md">
-                      ⭐ Nuevo
-                    </div>
-                  )}
                   {tpl.featured && (
                     <div className="absolute bottom-3 left-3 px-3 py-1.5 rounded-full text-xs font-bold bg-stone-900/85 backdrop-blur-sm text-white shadow-md">
                       El favorito para tiendas de ropa
@@ -325,6 +315,10 @@ export function Templates() {
                   <div className="flex items-center gap-2 mb-1">
                     <tpl.icon className="w-4 h-4 text-[#BC5A38] shrink-0" />
                     <h3 className="font-display font-bold text-stone-900">{tpl.name}</h3>
+                    <span className={`ml-auto shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${style.badge}`}>
+                      {tpl.plan === 'premium' && <Crown className="w-2.5 h-2.5" />}
+                      {tpl.planLabel}
+                    </span>
                   </div>
                   <p className="text-sm text-stone-500 mb-3 flex-1">{tpl.description}</p>
                   <div className="flex flex-wrap gap-1.5 mb-4">
