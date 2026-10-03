@@ -16,6 +16,8 @@ import { BoutiqueTemplate } from '@/components/store-templates/BoutiqueTemplate'
 import { EditorialTemplate } from '@/components/store-templates/EditorialTemplate'
 import { AtelierTemplate } from '@/components/store-templates/AtelierTemplate'
 import { TerracotaTemplate } from '@/components/store-templates/TerracotaTemplate'
+import { DulceTemplate } from '@/components/store-templates/DulceTemplate'
+import { CalleTemplate } from '@/components/store-templates/CalleTemplate'
 import { ProductDetailView } from '@/components/store-templates/ProductDetailView'
 import { ArrowLeft, Crown, Sparkles, Gem } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -360,6 +362,54 @@ const demoStores: Record<string, Store> = {
     ],
     otherPayments: [],
   },
+  dulce: {
+    id: 'demo-dulce',
+    name: 'Dulce Mía',
+    slug: 'demo-dulce',
+    description: 'Pastelería artesanal: tortas, bocaditos y encargos para tus celebraciones.',
+    logo: '🧁',
+    categoryId: 'comida',
+    planId: 'premium',
+    colors: { primary: '#A64AC9', secondary: '#F472B6' },
+    whatsappNumber: '+51999990015',
+    template: 'dulce',
+    bannerUrl: '',
+    userId: '',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    hasShipping: true, hasSecurePayment: true, hasReturns: true,
+    popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
+    yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
+    shippingOptions: [
+      { label: 'Delivery en la ciudad', price: 12, time: 'Mismo día' },
+      { label: 'Recojo en tienda', price: null, time: 'Cuando quieras' },
+    ],
+    otherPayments: [],
+  },
+  calle: {
+    id: 'demo-calle',
+    name: 'Calle Brava',
+    slug: 'demo-calle',
+    description: 'Ropa urbana de edición limitada. Drops cortos, estilo real.',
+    logo: '🧢',
+    categoryId: 'ropa',
+    planId: 'premium',
+    colors: { primary: '#D9FF3F', secondary: '#0B0B0C' },
+    whatsappNumber: '+51999990016',
+    template: 'calle',
+    bannerUrl: '',
+    userId: '',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    hasShipping: true, hasSecurePayment: true, hasReturns: true,
+    popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
+    yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
+    shippingOptions: [
+      { label: 'Envío Lima 24h', price: 10, time: '24 horas' },
+      { label: 'Provincias 2-4 días', price: 15, time: '2 a 4 días' },
+    ],
+    otherPayments: [],
+  },
 }
 
 // Product images match the preview generation script (same Unsplash URLs)
@@ -497,6 +547,26 @@ const demoProducts: Record<string, Product[]> = {
     { id: 'dtt11', name: 'Edredón Matrimonial', description: 'Edredón abrigador con acabado artesanal.', price: 220.0, originalPrice: 280.0, categoryId: 'hogar', imageUrl: '/sample-products/edredon-matrimonial.jpg', images: ['/sample-products/edredon-matrimonial.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-terracota', createdAt: '2024-04-20T10:00:00.000Z' },
     { id: 'dtt12', name: 'Set Plata 925', description: 'Set de joyería en plata 925 elaborado a mano.', price: 140.0, originalPrice: null, categoryId: 'joyeria', imageUrl: '/sample-products/joyeria-plata-925.jpg', images: ['/sample-products/joyeria-plata-925.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-terracota', createdAt: '2024-05-01T10:00:00.000Z' },
   ],
+  dulce: [
+    { id: 'ddd1', name: 'Torta Chocolate Fudge 1kg', description: 'Torta húmeda de chocolate con fudge casero y chips.', price: 85.0, originalPrice: 95.0, categoryId: 'tortas', imageUrl: '/sample-products/torta-chocolate-porcion.jpg', images: ['/sample-products/torta-chocolate-porcion.jpg'], color: null, stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-dulce', createdAt: '2024-01-10T10:00:00.000Z' },
+    { id: 'ddd2', name: 'Cheesecake Frutos Rojos', description: 'Porción cremosa de cheesecake con mermelada casera.', price: 18.0, originalPrice: null, categoryId: 'postres', imageUrl: '/sample-products/cheesecake-porcion.jpg', images: ['/sample-products/cheesecake-porcion.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-dulce', createdAt: '2024-01-20T10:00:00.000Z' },
+    { id: 'ddd3', name: 'Caja Chocolates x12', description: 'Docena de chocolates artesanales rellenos surtidos.', price: 45.0, originalPrice: 55.0, categoryId: 'postres', imageUrl: '/sample-products/caja-chocolates.jpg', images: ['/sample-products/caja-chocolates.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-dulce', createdAt: '2024-02-01T10:00:00.000Z' },
+    { id: 'ddd4', name: 'Bocaditos Surtidos 1kg', description: 'Bandeja surtida de bocaditos para fiestas y reuniones.', price: 32.0, originalPrice: null, categoryId: 'bocaditos', imageUrl: '/sample-products/bocaditos-surtidos-kg.jpg', images: ['/sample-products/bocaditos-surtidos-kg.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-dulce', createdAt: '2024-02-10T10:00:00.000Z' },
+    { id: 'ddd5', name: 'Pan Francés (docena)', description: 'Pan crujiente salido del horno cada mañana.', price: 12.0, originalPrice: null, categoryId: 'panaderia', imageUrl: '/sample-products/pan-frances-docena.jpg', images: ['/sample-products/pan-frances-docena.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-dulce', createdAt: '2024-02-20T10:00:00.000Z' },
+    { id: 'ddd6', name: 'Empanada de Pollo', description: 'Empanada jugosa horneada, ideal para acompañar.', price: 6.5, originalPrice: null, categoryId: 'panaderia', imageUrl: '/sample-products/empanada-pollo.jpg', images: ['/sample-products/empanada-pollo.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-dulce', createdAt: '2024-03-01T10:00:00.000Z' },
+    { id: 'ddd7', name: 'Café con Leche', description: 'Café cremoso con leche vaporizada, para llevar o tomar.', price: 8.0, originalPrice: null, categoryId: 'bebidas', imageUrl: '/sample-products/cafe-con-leche.jpg', images: ['/sample-products/cafe-con-leche.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-dulce', createdAt: '2024-03-10T10:00:00.000Z' },
+    { id: 'ddd8', name: 'Combo Merienda x4', description: 'Caja merienda: 4 porciones dulces + 2 cafés.', price: 39.0, originalPrice: 48.0, categoryId: 'combos', imageUrl: '/sample-products/combo-especial.jpg', images: ['/sample-products/combo-especial.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-dulce', createdAt: '2024-03-20T10:00:00.000Z' },
+  ],
+  calle: [
+    { id: 'dcb1', name: 'Gorra Urban Baseball', description: 'Gorra de baseball con bordado minimal, ajuste universal.', price: 49.0, originalPrice: null, categoryId: 'gorras', imageUrl: '/sample-products/gorra-urban-baseball.jpg', images: ['/sample-products/gorra-urban-baseball.jpg'], color: null, stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-calle', createdAt: '2024-01-10T10:00:00.000Z' },
+    { id: 'dcb2', name: 'Polo Básico Algodón', description: 'Polo de algodón pesado, corte boxy estilo street.', price: 45.0, originalPrice: 59.0, categoryId: 'polos', imageUrl: '/sample-products/polo-basico-algodon.jpg', images: ['/sample-products/polo-basico-algodon.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-calle', createdAt: '2024-01-20T10:00:00.000Z' },
+    { id: 'dcb3', name: 'Polo Dry Fit', description: 'Polo técnico dry fit, transpirable para el día a día.', price: 52.0, originalPrice: null, categoryId: 'polos', imageUrl: '/sample-products/polo-dry-fit.jpg', images: ['/sample-products/polo-dry-fit.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-calle', createdAt: '2024-02-01T10:00:00.000Z' },
+    { id: 'dcb4', name: 'Jean Unisex Recto', description: 'Jean recto de mezclilla resistente, corte unisex.', price: 95.0, originalPrice: 120.0, categoryId: 'jeans', imageUrl: '/sample-products/jean-unisex.jpg', images: ['/sample-products/jean-unisex.jpg'], color: 'Azul', stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-calle', createdAt: '2024-02-10T10:00:00.000Z' },
+    { id: 'dcb5', name: 'Casaca Denim', description: 'Casaca de mezclilla clásica, ideal para cualquier drop.', price: 139.0, originalPrice: null, categoryId: 'casacas', imageUrl: '/sample-products/casaca-jean.jpg', images: ['/sample-products/casaca-jean.jpg'], color: 'Denim', stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-calle', createdAt: '2024-02-20T10:00:00.000Z' },
+    { id: 'dcb6', name: 'Chompa Tejida', description: 'Chompa tejida suave, fit oversize.', price: 89.0, originalPrice: null, categoryId: 'casacas', imageUrl: '/sample-products/chompa-tejida.jpg', images: ['/sample-products/chompa-tejida.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-calle', createdAt: '2024-03-01T10:00:00.000Z' },
+    { id: 'dcb7', name: 'Zapatillas Urbanas', description: 'Zapatillas urbanas ligeras con suela amortiguada.', price: 149.0, originalPrice: 189.0, categoryId: 'calzado', imageUrl: '/sample-products/zapatillas-running.jpg', images: ['/sample-products/zapatillas-running.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-calle', createdAt: '2024-03-10T10:00:00.000Z' },
+    { id: 'dcb8', name: 'Bufanda Neón', description: 'Bufanda tejida con detalle neón para la temporada.', price: 29.0, originalPrice: null, categoryId: 'accesorios', imageUrl: '/sample-products/bufanda-neon.jpg', images: ['/sample-products/bufanda-neon.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-calle', createdAt: '2024-03-20T10:00:00.000Z' },
+  ],
 }
 
 // Map template ID to plan for rendering
@@ -515,6 +585,8 @@ const templatePlanId: Record<string, string> = {
   editorial: 'premium',
   atelier: 'premium',
   terracota: 'premium',
+  dulce: 'premium',
+  calle: 'premium',
 }
 
 // Map template ID to plan label for the banner
@@ -533,7 +605,9 @@ function getPlanLabel(template: string): string {
     case 'boutique':
     case 'editorial':
     case 'atelier':
-    case 'terracota': return 'Plan Premium'
+    case 'terracota':
+    case 'dulce':
+    case 'calle': return 'Plan Premium'
     default: return ''
   }
 }
@@ -652,6 +726,8 @@ export function DemoTemplateClient({ template }: { template: string }) {
       {template === 'editorial' && <EditorialTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
       {template === 'atelier' && <AtelierTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
       {template === 'terracota' && <TerracotaTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
+      {template === 'dulce' && <DulceTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
+      {template === 'calle' && <CalleTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
     </div>
   )
 }

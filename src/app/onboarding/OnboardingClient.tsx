@@ -32,6 +32,8 @@ import {
   Newspaper,
   Flower2,
   Hand,
+  Cake,
+  Zap,
 } from 'lucide-react';
 import { RUBROS, getRubro } from '@/lib/rubros';
 import { createDemoProducts } from '@/lib/demo-products';
@@ -162,6 +164,24 @@ const templates = [
     icon: Hand,
     plan: 'premium',
     demoSlug: 'terracota',
+  },
+  {
+    id: 'dulce',
+    name: 'Dulce',
+    desc: 'Pastelería y postres: lila pastel, stickers y encargos',
+    color: 'from-[#A64AC9] to-[#F9A8D4]',
+    icon: Cake,
+    plan: 'premium',
+    demoSlug: 'dulce',
+  },
+  {
+    id: 'calle',
+    name: 'Calle',
+    desc: 'Streetwear urbano: negro y lima ácido, drops limitados',
+    color: 'from-[#0B0B0C] to-[#D9FF3F]',
+    icon: Zap,
+    plan: 'premium',
+    demoSlug: 'calle',
   },
 ];
 

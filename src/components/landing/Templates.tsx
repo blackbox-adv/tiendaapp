@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Eye, Crown, ArrowRight, Search, Sparkles, Gem, Sun, Minimize2, ShoppingBasket, UtensilsCrossed, Shirt, BookOpen, Cpu, ShoppingBag, Newspaper, Flower2, Hand, LayoutGrid } from 'lucide-react'
+import { Eye, Crown, ArrowRight, Search, Sparkles, Gem, Sun, Minimize2, ShoppingBasket, UtensilsCrossed, Shirt, BookOpen, Cpu, ShoppingBag, Newspaper, Flower2, Hand, Cake, Zap, LayoutGrid } from 'lucide-react'
 import { PLAN_PRICES } from '@/lib/plans'
 import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/lib/store'
@@ -70,6 +70,28 @@ const templates: Template[] = [
     tags: ['moda', 'hogar'],
     isNew: true,
     icon: Hand,
+  },
+  {
+    id: 'dulce',
+    name: 'Dulce',
+    plan: 'premium',
+    planLabel: 'Premium',
+    description: 'Pastelería y postres: lila pastel, stickers y precios amigables. Encargos para cumpleaños y eventos.',
+    bestFor: ['Pastelerías', 'Postres', 'Cafeterías'],
+    tags: ['comida'],
+    isNew: true,
+    icon: Cake,
+  },
+  {
+    id: 'calle',
+    name: 'Calle',
+    plan: 'premium',
+    planLabel: 'Premium',
+    description: 'Streetwear urbano: negro y lima ácido, tipografía gigante y drops en edición limitada.',
+    bestFor: ['Polos', 'Gorras', 'Sneakers'],
+    tags: ['moda'],
+    isNew: true,
+    icon: Zap,
   },
   {
     id: 'moda',
@@ -353,6 +375,29 @@ export function Templates() {
               </motion.div>
             )
           })}
+
+          {/* Tarjeta CTA: cierra el grid perfecto y anuncia más diseños */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.1 }}
+            transition={{ duration: 0.5, delay: 0.14, ease: 'easeOut' }}
+            className="group rounded-2xl border-2 border-dashed border-[#E5DCCB] bg-white/50 flex flex-col items-center justify-center text-center p-6 min-h-[280px]"
+          >
+            <span className="w-12 h-12 rounded-full bg-[#F6E7DE] flex items-center justify-center mb-4">
+              <Sparkles className="w-5 h-5 text-[#BC5A38]" />
+            </span>
+            <h3 className="font-display font-bold text-stone-900 text-lg">Y siguen los diseños</h3>
+            <p className="text-sm text-stone-500 mt-1.5 mb-5 max-w-[240px]">
+              Un estilo nuevo cada mes con tu plan Premium, al nivel de los grandes catálogos.
+            </p>
+            <button
+              onClick={() => navigate({ page: 'register' })}
+              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full border-2 border-stone-900 text-stone-900 text-sm font-bold hover:bg-stone-900 hover:text-white transition-colors"
+            >
+              Empezar hoy <ArrowRight className="w-4 h-4" />
+            </button>
+          </motion.div>
         </div>
 
         {/* CTA final */}
