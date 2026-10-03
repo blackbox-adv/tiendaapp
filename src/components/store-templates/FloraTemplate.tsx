@@ -5,7 +5,7 @@ import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { StoreLogo } from './StoreLogo'
 import { getStoreCategories } from '@/lib/store-categories'
-import { Search, X, ArrowRight, MessageCircle, Flower, Truck, HeartHandshake, Sparkles } from 'lucide-react'
+import { Search, X, ArrowRight, MessageCircle, Flower, Truck, HeartHandshake } from 'lucide-react'
 import { StoreFeatureBadges } from './StoreFeatureBadges'
 import { CombosSection } from './CombosSection'
 import { PaymentMethods } from './PaymentMethods'
@@ -47,6 +47,10 @@ export function FloraTemplate({ store, products, storeSlug, planId, onProductCli
   const secondProduct = useMemo(
     () => products.filter((p) => p.id !== heroProduct?.id)[0] || null,
     [products, heroProduct]
+  )
+  const thirdProduct = useMemo(
+    () => products.filter((p) => p.id !== heroProduct?.id && p.id !== secondProduct?.id)[0] || null,
+    [products, heroProduct, secondProduct]
   )
 
   const dealProduct = useMemo(() => {
@@ -179,19 +183,15 @@ export function FloraTemplate({ store, products, storeSlug, planId, onProductCli
                   </span>
                 </button>
                 <button
-                  onClick={() => openProduct(heroProduct.id)}
+                  onClick={() => openProduct((thirdProduct || dealProduct || heroProduct).id)}
                   className="group relative block w-full aspect-[3/4] overflow-hidden rounded-[1.8rem] bg-[#E5EDE4] cursor-pointer shadow-[0_26px_50px_-24px_rgba(39,64,50,0.4)] col-span-1"
                 >
-                  {dealProduct ? (
-                    <img
-                      src={dealProduct.imageUrl || PRODUCT_IMG_FALLBACK}
-                      alt={dealProduct.name}
-                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-700"
-                      onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
-                    />
-                  ) : (
-                    <Sparkles className="absolute inset-0 m-auto w-8 h-8 text-[#B76E84]/40" />
-                  )}
+                  <img
+                    src={(thirdProduct || dealProduct)?.imageUrl || PRODUCT_IMG_FALLBACK}
+                    alt={(thirdProduct || dealProduct)?.name || 'Producto'}
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-700"
+                    onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
+                  />
                 </button>
               </div>
             )}
