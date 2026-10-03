@@ -654,3 +654,27 @@ Work Log:
 
 Stage Summary:
 - Todo verificado en https://tienda.blackboxperu.com
+
+---
+Task ID: 29
+Agent: Main
+Task: Auditoría SEO + recorrido E2E como cliente + inventario IA + propuestas para justificar plan pago
+
+Work Log:
+- SEO: robots/sitemap OK; landing con meta/OG/canonical completos. Hallazgos: og:image de tiendas apuntaba a tiendapp.pe (dominio muerto, no resuelve), demos heredaban canonical "/" del layout raíz, JSON-LD con teléfonos/redes/email falsos (tiendapp.pe, 51999888777), /api/og/store referenciada pero nunca creada (404)
+- E2E en producción (qa.recorrido.2026@tiendapp-test.com / tienda "QA Recorrido Test" slug qa-recorrido-test): registro→login→crear tienda (API)→producto→tienda pública→detalle→WhatsApp individual (mensaje perfecto, número correcto)→carrito x2→pedido multi-producto por WhatsApp (perfecto)→dashboard→Mi Plan. EXCELENTE salvo 2 bugs P0
+- BUG P0 #1: /api/upload 404 en producción — borrada de nuevo por commit de limpieza 12e2f66 (ya había pasado antes, commit 7ac8f09 la restauró). Sin ella: ni fotos de producto, ni logo, ni banner, ni QR Yape/Plin. Restaurada desde git
+- BUG P0 #2: PUT /api/store-products SIEMPRE 500 — "images" es jsonb y el raw SQL pasaba texto sin cast. La edición de productos del dashboard nunca funcionó. Además .partial() con .default() pisaba description/imageUrl/stock con defaults. Fix: cast ::jsonb + sentKeys para update parcial real
+- BUG menor: /api/og/store devolvía 204 (helper handleCorsPreflight devuelve 204 SIEMPRE — solo sirve para OPTIONS; el middleware ya maneja preflight global). Eliminada la llamada del route
+- Nueva /api/og/store/[slug] (ImageResponse 1200x630): tarjeta OG por tienda con nombre/descripcion/color primario. Verificada en producción (200 image/png, tarjeta con datos de boutique-elegance)
+- Corregidos dominios viejos: store page og:image, JSON-LD Store/Product/Organization, about, contact, whatsapp route. not-found.tsx ya no muestra número falso si no hay teléfono configurado
+- Verificado post-deploy: upload 200 con URL de Supabase storage; PUT parcial preserva datos; PUT con galería OK; canonical demos correcta; og:image /api/og/store/...
+- IA: SOLO existe /api/ai/landing (Gemini, Premium, genera copy de landing: headline/benefits/CTA; fotos se suben pero no influyen en generación). NO existe: foto→fondo blanco, descripciones IA. Landing ya promete esas funciones como "(muy pronto)"
+- Commits: c64fa8c, 3326e7a, 1245d6c
+
+Stage Summary:
+- 2 bugs P0 arreglados y verificados en producción: subida de fotos y edición de productos
+- SEO: OG dinámica por tienda activa; canonicals correctos; dominio viejo y datos falsos fuera
+- Tienda QA: qa-recorrido-test (dueño puede borrarla desde admin o yo lo hago)
+- Pendiente dueño: número/email de soporte reales en Admin→Configuración (DB tiene placeholders 51999888777 / hola@tiendapp.pe / whatsappSupport 51999999999 — no los cambié sin aprobación); tiendas de prueba en sitemap (tienda-uno, prueba, aceshop) desactivarlas si no son reales; rotar credenciales
+- Propuestas IA entregadas (fotos fondo blanco + descripciones + más) — SIN implementar, esperando aprobación
