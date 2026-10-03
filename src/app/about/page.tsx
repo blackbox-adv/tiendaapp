@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Sobre Nosotros | TiendApp',
     description: 'Conoce TiendApp, la plataforma lider en Peru para crear tiendas online.',
-    url: 'https://tiendapp.pe/about',
+    url: 'https://tienda.blackboxperu.com/about',
     type: 'website',
     siteName: 'TiendApp',
   },

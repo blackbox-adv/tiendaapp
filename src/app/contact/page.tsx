@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Contacto | TiendApp',
     description: 'Contacta al equipo de TiendApp para crear tu tienda online en Peru.',
-    url: 'https://tiendapp.pe/contact',
+    url: 'https://tienda.blackboxperu.com/contact',
     type: 'website',
     siteName: 'TiendApp',
   },

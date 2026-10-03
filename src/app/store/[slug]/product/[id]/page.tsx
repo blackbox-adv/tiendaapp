@@ -172,7 +172,7 @@ function generateProductJsonLd(
     name: product.name,
     description: product.description || `Producto disponible en ${store.name}`,
     image: product.imageUrl,
-    url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://tiendapp.pe'}/store/${store.slug}/product/${product.id}`,
+    url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://tienda.blackboxperu.com'}/store/${store.slug}/product/${product.id}`,
     offers: {
       '@type': 'Offer',
       price: product.price,

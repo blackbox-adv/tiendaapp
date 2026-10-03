@@ -51,7 +51,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ? `${store.description} - Visita la tienda online de ${store.name} en TiendApp.`
       : `Visita la tienda online de ${store.name} en TiendApp. Productos y precios increibles.`
 
-    const ogImage = store.logo || 'https://tiendapp.pe/og-image.png'
+    // OG dinámica por tienda: tarjeta de marca con el nombre y color de la tienda.
+    // Si el generador falla, las redes sociales simplemente no muestran imagen (no rompe la página).
+    const ogImage = `/api/og/store/${slug}`
 
     return {
       title,
@@ -189,8 +191,8 @@ function generateStoreJsonLd(store: {
     '@type': 'Store',
     name: store.name,
     description: store.description,
-    url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://tiendapp.pe'}/store/${store.slug}`,
-    image: `${process.env.NEXT_PUBLIC_APP_URL || 'https://tiendapp.pe'}/api/og/store/${store.slug}`,
+    url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://tienda.blackboxperu.com'}/store/${store.slug}`,
+    image: `${process.env.NEXT_PUBLIC_APP_URL || 'https://tienda.blackboxperu.com'}/api/og/store/${store.slug}`,
     address: {
       '@type': 'PostalAddress',
       addressCountry: 'PE',
