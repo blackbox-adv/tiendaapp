@@ -617,3 +617,40 @@ Stage Summary:
 - Recomendador por rubro ahora cubre joyería, hogar, deporte, café y flores
 - Respuesta al dueño entregada: NO regalar todas las plantillas (3 gratis correctos + previews completos + premium como motor de conversión)
 - Pendiente para el dueño: banner por tienda (bannerUrl ya en BD, falta editor en Settings + uso visual en plantillas — capa visual, sin migración), rotar token GitHub y contraseña BD
+
+---
+Task ID: 27
+Agent: Main
+Task: Packs solo premium + plantilla Tech blanca con banner + CSV import/export de productos
+
+Work Log:
+- Descartado clon viejo /home/z/my-project/tiendaapp (la copia activa es la raíz; las 21 plantillas ya viven aquí)
+- CombosSection: gating packs → solo tiendas reales Pro/Premium (plan premium|pro y id que NO empiece por 'demo-'); ocultos en free y en demos
+- Corregido hueco: SSR /store/[slug] no traía plan → agregado query SQL de planType por storeId + prop a StorePublicClient (si falla → 'free', seguro para el negocio)
+- NeonTemplate reescrita: blanca premium, banner hero (usa bannerUrl o banner degradado azul/indigo con grid tech sutil), pills negras, acento blue-600, hover con sombra suave; id 'neon' sin cambios (compat BD)
+- Etiqueta 'Neón' → 'Tech' en 4 registros: landing/Templates.tsx, dashboard/template/page.tsx, onboarding/OnboardingClient.tsx, demo/[template]/page.tsx
+- Nuevo GET /api/store-products/export: CSV con BOM + ';' (Excel/Sheets), ownership check, plan pro/premium requerido, ?template=1 devuelve solo encabezados
+- Nuevo POST /api/store-products/import: multipart storeId+file, parser CSV propio (comillas, BOM, detecta ';' vs ',', alias de encabezados con/sin acentos), upsert (id existente → update parcial, si no → create), respeta maxProducts del plan para creaciones, nunca borra, revalidatePath
+- ProductList: botones Importar CSV / Descargar CSV (corona para free con upsell toast → /dashboard/plan), modal de importación con pasos + plantilla, reload tras importar
+- QA: bunx tsc --noEmit → 0 errores en src/ raíz (errores restantes son de copias viejas anidadas, no se despliegan)
+- Deploy: commit 8f630bf push a main
+
+Stage Summary:
+- Los packs ahora son un incentivo de pago real: visibles SOLO en tiendas Pro/Premium reales
+- Plantilla de tecnología ahora clara tipo catálogo premium con banner (feedback del dueño)
+- Los merchants de pago pueden descargar su catálogo, editarlo en Excel/Sheets y volverlo a subir
+- Pendiente verificación visual post-deploy de /demo/neon y /demo/boutique
+
+---
+Task ID: 27-verificacion
+Agent: Main
+Task: Verificación post-deploy
+
+Work Log:
+- /demo/neon en producción: fondo rgb(255,255,255), título "Demo: Tech", SIN packs ✓
+- /demo/boutique en producción: SIN packs ✓ (antes los mostraba)
+- /api/store-products/export e import → 401 sin auth (rutas activas y protegidas) ✓
+- neon-preview.png regenerado desde producción con nuevo diseño y subido (commit final)
+
+Stage Summary:
+- Todo verificado en https://tienda.blackboxperu.com
