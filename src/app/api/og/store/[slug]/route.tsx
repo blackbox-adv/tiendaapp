@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og'
 import { db } from '@/lib/db'
-import { apiError, handleCorsPreflight } from '@/lib/api-response'
+import { apiError } from '@/lib/api-response'
 
 export const runtime = 'nodejs'
 // Las redes sociales cachean agresivamente; 1 hora de freshness es suficiente
@@ -13,8 +13,7 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ slug: string }> }
 ) {
-  const cors = handleCorsPreflight(request)
-  if (cors) return cors
+  // El preflight CORS (OPTIONS) lo resuelve el middleware para todas las rutas /api/*
 
   const { slug } = await params
   if (!/^[a-z0-9-]+$/.test(slug)) {
