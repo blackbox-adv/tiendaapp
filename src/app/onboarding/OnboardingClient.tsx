@@ -34,6 +34,10 @@ import {
   Hand,
   Cake,
   Zap,
+  Armchair,
+  Dumbbell,
+  Coffee,
+  Flower,
 } from 'lucide-react';
 import { RUBROS, getRubro } from '@/lib/rubros';
 import { createDemoProducts } from '@/lib/demo-products';
@@ -182,6 +186,51 @@ const templates = [
     icon: Zap,
     plan: 'premium',
     demoSlug: 'calle',
+  },
+  {
+    id: 'aura',
+    name: 'Aura',
+    desc: 'Joyería y accesorios finos: champán y oro, serif editorial',
+    color: 'from-[#B08D57] to-[#EFE3C8]',
+    icon: Gem,
+    plan: 'premium',
+    demoSlug: 'aura',
+  },
+  {
+    id: 'teca',
+    name: 'Teca',
+    desc: 'Hogar y decoración: verde salvia, madera y calma',
+    color: 'from-[#5F6F52] to-[#DCE3D2]',
+    icon: Armchair,
+    plan: 'premium',
+    demoSlug: 'teca',
+  },
+  {
+    id: 'volt',
+    name: 'Volt',
+    desc: 'Deporte y fitness: azul marino y naranja eléctrico',
+    color: 'from-[#0E1A38] to-[#FF5A1F]',
+    icon: Dumbbell,
+    plan: 'premium',
+    demoSlug: 'volt',
+  },
+  {
+    id: 'grano',
+    name: 'Grano',
+    desc: 'Café y panadería artesanal: crema y espresso, carta estilo menú',
+    color: 'from-[#3E2C1E] to-[#B5793B]',
+    icon: Coffee,
+    plan: 'premium',
+    demoSlug: 'grano',
+  },
+  {
+    id: 'flora',
+    name: 'Flora',
+    desc: 'Florería y regalos: verde botánico y rosa empolvado',
+    color: 'from-[#4C7A5A] to-[#F0D9DE]',
+    icon: Flower,
+    plan: 'premium',
+    demoSlug: 'flora',
   },
 ];
 
