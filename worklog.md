@@ -591,3 +591,29 @@ Stage Summary:
 - Galería landing con grid perfecto estilo Dribbble + teaser de "diseño nuevo cada mes"
 - Recomendador por rubro ampliado (panadería→Dulce, urbano→Calle)
 - Pendiente para el dueño: banner imagen (bannerUrl ya en BD, falta editor en Settings + uso en plantillas — capa visual), rotar token GitHub y contraseña BD
+
+---
+Task ID: 28
+Agent: Main Agent
+Task: 5 plantillas nuevas distintas (Aura, Teca, Volt, Grano, Flora) premium + respuesta estudio de mercado (regalar vs cobrar)
+
+Work Log:
+- El dueño aprobó Dulce/Calle (Task 27) y pidió 5 plantillas MÁS distintas; preguntó si regalar cualquier plantilla o cobrar premium
+- Creadas 5 plantillas premium (~400 líneas c/u, patrón Dulce: esqueleto funcional intacto — carrito, WhatsApp, Yape/Plin, envíos, combos, popup):
+  * AuraTemplate — joyería/accesorios finos: champán #FAF7F0 + oro #B08D57, Cormorant Garamond + Jost, marco dorado desplazado en hero, categorías subrayadas, edición especial en bloque oscuro
+  * TecaTemplate — hogar/decoración: salvia #5F6F52 + madera #9A6B44, Fraunces + Karla, tarjeta flotante "El rincón de la semana", ambiente cálido
+  * VoltTemplate — deporte/fitness: navy #0E1A38 + naranja #FF5A1F, Anton + Inter, hero con stats (8+/24h/4.9★), formas angulares, cards con bordes duros, oferta mix-blend-luminosity
+  * GranoTemplate — café/panadería artesanal: crema #FAF4EB + espresso #3E2C1E + caramelo #B5793B, DM Serif Display + Work Sans, sección "La carta" con líneas punteadas estilo menú
+  * FloraTemplate — florería/regalos: verde botánico #4C7A5A + rosa #F0D9DE, Marcellus + Quicksand, collage central de 3 fotos (corregido para usar 3 productos distintos), chips por ocasión
+- Registro en 8 puntos: types.ts (union 21), plan-gating PREMIUM_TEMPLATES (18 premium), StoreView (imports+cast+renders), demo page templateMeta, DemoTemplateClient (Aura Joyería 💎 + Teca Hogar 🏡 + Volt Depot ⚡ + Grano & Masa ☕ + Flora Viva 🌷, 8 productos c/u con imágenes /sample-products existentes), OnboardingClient, dashboard/template + RECOMMENDED_BY_CATEGORY ampliado (joyeria→aura, hogar/decoracion/muebles→teca, deportes/fitness/suplementos→volt, cafeteria/cafe→grano, flores/regalos→flora; accesorios vitrina→aura), landing Templates
+- Landing galería: 21 diseños + Boutique ancha (favorito) + CTA "Y siguen los diseños" ahora sm:col-span-2 → 24 celdas exactas = 8 filas de 3 SIN huecos
+- Gate: bunx tsc --noEmit = 0 errores en src/
+- Commits: d928733 (plantillas+registros), afb74f0 (fix flora collage + previews 900x1200), 32ea1d4 (flora preview final sin cookies)
+- Previews capturados desde producción (scripts/regen-previews-new.sh), verificados visualmente los 5
+- Verificado en producción: /demo/{aura,teca,volt,grano,flora} = 200; galería capturada (download/ver-galeria-21-*.png) — 3 filas visibles correctas, previews cargando, grid uniforme
+
+Stage Summary:
+- 21 plantillas en producción (3 gratis + 18 premium); demos /demo/aura /demo/teca /demo/volt /demo/grano /demo/flora activas
+- Recomendador por rubro ahora cubre joyería, hogar, deporte, café y flores
+- Respuesta al dueño entregada: NO regalar todas las plantillas (3 gratis correctos + previews completos + premium como motor de conversión)
+- Pendiente para el dueño: banner por tienda (bannerUrl ya en BD, falta editor en Settings + uso visual en plantillas — capa visual, sin migración), rotar token GitHub y contraseña BD
