@@ -23,6 +23,8 @@ import { BoutiqueTemplate } from './BoutiqueTemplate'
 import { EditorialTemplate } from './EditorialTemplate'
 import { AtelierTemplate } from './AtelierTemplate'
 import { TerracotaTemplate } from './TerracotaTemplate'
+import { DulceTemplate } from './DulceTemplate'
+import { CalleTemplate } from './CalleTemplate'
 import { PromoPopup } from './PromoPopup'
 import { CartButton } from './CartButton'
 import type { Product, Store as StoreType } from '@/lib/types'
@@ -83,7 +85,7 @@ export function StoreView({ slug }: { slug: string }) {
                 secondary: data.secondaryColor || '#10B981',
               },
               whatsappNumber: data.whatsappNumber || '',
-              template: (data.template as 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist' | 'bodega' | 'sabor' | 'moda' | 'vitrina' | 'neon' | 'boutique' | 'editorial' | 'atelier' | 'terracota') || 'moderna',
+              template: (data.template as 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist' | 'bodega' | 'sabor' | 'moda' | 'vitrina' | 'neon' | 'boutique' | 'editorial' | 'atelier' | 'terracota' | 'dulce' | 'calle') || 'moderna',
               bannerUrl: data.bannerUrl || '',
               userId: data.ownerId || '',
               isActive: data.isActive ?? true,
@@ -296,6 +298,8 @@ export function StoreView({ slug }: { slug: string }) {
       {displayStore!.template === 'editorial' && <EditorialTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} onProductClick={handleProductClick} />}
       {displayStore!.template === 'atelier' && <AtelierTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} onProductClick={handleProductClick} />}
       {displayStore!.template === 'terracota' && <TerracotaTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} onProductClick={handleProductClick} />}
+      {displayStore!.template === 'dulce' && <DulceTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} onProductClick={handleProductClick} />}
+      {displayStore!.template === 'calle' && <CalleTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} onProductClick={handleProductClick} />}
 
       {/* WhatsApp Float */}
       <WhatsAppButton whatsappNumber={displayStore!.whatsappNumber} />

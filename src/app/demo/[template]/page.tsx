@@ -61,6 +61,14 @@ const templateMeta: Record<string, { name: string; description: string }> = {
     name: 'Terracota',
     description: 'Demo de la plantilla Terracota artesanal y cálida: hecho a mano, valores del oficio y ofertas del mes - TiendApp',
   },
+  dulce: {
+    name: 'Dulce',
+    description: 'Demo de la plantilla Dulce para pastelerías y postres: lila pastel, stickers y encargos por WhatsApp - TiendApp',
+  },
+  calle: {
+    name: 'Calle',
+    description: 'Demo de la plantilla Calle streetwear urbano: negro y lima ácido, drops limitados y tipografía gigante - TiendApp',
+  },
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ template: string }> }): Promise<Metadata> {
