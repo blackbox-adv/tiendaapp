@@ -239,8 +239,13 @@ export async function PUT(request: NextRequest) {
     const values: unknown[] = []
     let paramIdx = 1
 
+    // Claves que el cliente envió explícitamente. createProductSchema tiene
+    // .default() en varios campos, así que .partial() NO basta: sin esto, un
+    // update de solo nombre pisaría description/imageUrl/stock con defaults.
+    const sentKeys = new Set(Object.keys((body ?? {}) as Record<string, unknown>))
+
     const addField = (fieldName: string, value: unknown) => {
-      if (value !== undefined) {
+      if (value !== undefined && sentKeys.has(fieldName)) {
         setClauses.push(`"${fieldName}" = $${paramIdx}`)
         values.push(value)
         paramIdx++
@@ -252,12 +257,13 @@ export async function PUT(request: NextRequest) {
     addField('price', data.price)
     addField('originalPrice', data.originalPrice)
     addField('imageUrl', data.imageUrl)
-    // Handle images array (JSON string for raw SQL)
-    if (data.images !== undefined) {
+    // Handle images array (JSON string for raw SQL, con cast ::jsonb — la
+    // columna es jsonb y un parámetro de texto sin cast rompe la query)
+    if (data.images !== undefined && sentKeys.has('images')) {
       const sanitizedImages = Array.isArray(data.images) && data.images.length > 0
         ? JSON.stringify(data.images.map((url: string) => sanitizeUrl(url)).filter(Boolean))
         : '[]'
-      setClauses.push(`"images" = $${paramIdx}`)
+      setClauses.push(`"images" = $${paramIdx}::jsonb`)
       values.push(sanitizedImages)
       paramIdx++
     }
