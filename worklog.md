@@ -568,3 +568,26 @@ Stage Summary:
 - Confirmado: 3 gratis actuales (moderna v2, vibrante, clásica) correctos; premium prioriza los estilos "wow" por rubro
 - Nuevos candidatos validados por evidencia: Dulce (postres) y Calle/Street (urbano) arriba; Aura (joyería) y Teca (hogar) después — esperando aprobación del dueño
 - Capturas de referencia en download/pinterest/ para el dueño
+
+---
+Task ID: 27
+Agent: Main Agent
+Task: Aprobación del dueño — plantillas Dulce + Calle, galería ordenada estilo tablero, respuesta sobre escalado de plantillas y logo/banner
+
+Work Log:
+- El dueño aprobó ("si") construir Dulce y Calle; también pidió que SU web se vea "ordenada como los tableros", preguntó cómo tener un montón de plantillas y que los emprendedores puedan poner banner/logo
+- Creadas 2 plantillas premium (~400 líneas c/u, patrón Terracota: esqueleto funcional intacto):
+  * DulceTemplate — pastelería/postres: lila pastel #A64AC9 + rosa #F9A8D4, fondo #FEF6FB, Baloo 2 + Nunito, arco redondeado, sticker "¡Recién horneado!", tarjeta flotante de 2do producto, banda de valores, combo dulce -%
+  * CalleTemplate — streetwear: negro #0B0B0C + lima ácido #D9FF3F, Archivo Black + Space Grotesk, cinta marquee CSS (cl-ticker), hero "VISTE LO TUYO" con fotos en grayscale, tabs de categorías duras, bordes rectos, drop -%
+- Registro en 8 puntos: types.ts (union +dulce +calle), plan-gating PREMIUM_TEMPLATES (13 premium), StoreView (imports+cast+renders), demo page templateMeta, DemoTemplateClient (Dulce Mía 🧁 con torta/cheesecake/bocaditos/pan/café + Calle Brava 🧢 con gorra/polos/jean/zapatillas; templatePlanId; getPlanLabel; renders), OnboardingClient (Cake/Zap + entradas), dashboard/template (entradas + RECOMMENDED_BY_CATEGORY: panaderia/pasteleria/postres→dulce, streetwear/urbano→calle), landing Templates
+- Landing galería: 16 diseños + Boutique ancha (favorito) + NUEVA tarjeta CTA "Y siguen los diseños" (anuncia un estilo nuevo cada mes en Premium) → 18 celdas exactas = 6 filas de 3 SIN huecos
+- Gate: bunx tsc --noEmit = 0 errores en src/
+- Deploy: commit ff3b1b3 (plantillas+registros) y 67fe9ad (previews 900x1200 capturados desde producción sin barra demo, verificados visualmente)
+- Verificado en producción: /demo/dulce 200, /demo/calle 200, previews 200, galería capturada (download/ver-galeria-16-*.png, ver-fila2-3*.png, ver-fila3-calle.png) — uniforme, sin huecos, Dulce y Calle visibles
+- Descubiertos para siguiente conversación: logo ya existe (Store.logo, StoreLogo en nav/footer), franja de anuncio ya existe (announcementText configurable en Settings), bannerUrl YA ESTÁ en BD/validaciones/sync pero sin uso visual ni editor → exponerlo = solo capa visual, sin migración
+
+Stage Summary:
+- 16 plantillas en producción (3 gratis + 13 premium); demos /demo/dulce y /demo/calle activas
+- Galería landing con grid perfecto estilo Dribbble + teaser de "diseño nuevo cada mes"
+- Recomendador por rubro ampliado (panadería→Dulce, urbano→Calle)
+- Pendiente para el dueño: banner imagen (bannerUrl ya en BD, falta editor en Settings + uso en plantillas — capa visual), rotar token GitHub y contraseña BD
