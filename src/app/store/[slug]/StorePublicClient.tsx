@@ -43,6 +43,11 @@ function transformStore(s: Record<string, unknown>): Store {
   }
 }
 
+// Fallback de plan desde el objeto crudo del server (si existiera planType ahí)
+function s_planFallback(s: Record<string, unknown>): string {
+  return (s.planType as string) || ''
+}
+
 function transformProduct(p: Record<string, unknown>): Product {
   // Price/originalPrice/rating may come as Prisma Decimal (number or string after serialization)
   const toNum = (v: unknown): number => {
@@ -74,11 +79,15 @@ interface StorePublicClientProps {
   products: Record<string, unknown>[]
   announcementText?: string | null
   announcementLink?: string | null
+  planType?: string | null
 }
 
-export function StorePublicClient({ store, products, announcementText, announcementLink }: StorePublicClientProps) {
+export function StorePublicClient({ store, products, announcementText, announcementLink, planType }: StorePublicClientProps) {
   useEffect(() => {
     const ts = transformStore(store)
+    // El plan viene del query dedicado del server (page.tsx). Si falta, 'free'
+    // (más seguro para el negocio: sin plan confirmado no se muestran extras).
+    ts.planId = (planType as string) || (s_planFallback(store)) || 'free'
     ts.announcementText = announcementText ?? null
     ts.announcementLink = announcementLink ?? null
     const tp = products

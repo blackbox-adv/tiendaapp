@@ -14,7 +14,7 @@ const CATEGORIES = [
   { id: 'juguetes', name: 'Juguetes' },
   { id: 'otros', name: 'Otros' },
 ]
-import { Search, Plus, Edit3, Trash2, Package } from 'lucide-react'
+import { Search, Plus, Edit3, Trash2, Package, Download, Upload, Crown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
@@ -25,6 +25,7 @@ import {
   AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { toast } from 'sonner'
 
 export function ProductList() {
@@ -32,6 +33,13 @@ export function ProductList() {
   const router = useRouter()
   const [search, setSearch] = useState('')
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
+  const [importOpen, setImportOpen] = useState(false)
+  const [importing, setImporting] = useState(false)
+  const [importFile, setImportFile] = useState<File | null>(null)
+
+  // Import/Export CSV: función de planes de pago (Pro / Premium)
+  const planId = (currentStore?.planId || '').toLowerCase()
+  const isPaidPlan = planId === 'premium' || planId === 'pro'
 
   if (!currentStore) {
     return (
@@ -91,6 +99,74 @@ export function ProductList() {
 
   const productToDelete = deleteTarget ? products.find(p => p.id === deleteTarget) : null
 
+  const authHeader = () => {
+    const t = localStorage.getItem('tiendapp_token')
+    return (t ? { Authorization: `Bearer ${t}` } : {}) as Record<string, string>
+  }
+
+  const upsellCsv = () => {
+    toast.error('Función de planes de pago', {
+      description: 'Importa y exporta tu catálogo con Excel o Google Sheets en los planes Pro o Premium.',
+      action: { label: 'Ver planes', onClick: () => router.push('/dashboard/plan') },
+    })
+  }
+
+  const handleDownloadCsv = async (template = false) => {
+    if (!isPaidPlan) { upsellCsv(); return }
+    if (!currentStore) return
+    try {
+      const url = `/api/store-products/export?storeId=${currentStore.id}${template ? '&template=1' : ''}`
+      const res = await fetch(url, { headers: authHeader() })
+      if (!res.ok) {
+        toast.error('No se pudo descargar el CSV')
+        return
+      }
+      const blob = await res.blob()
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = template ? 'plantilla-productos-tiendapp.csv' : `productos-${currentStore.slug}.csv`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(a.href)
+      toast.success(template ? 'Plantilla descargada' : 'Catálogo descargado', {
+        description: 'Ábrelo con Excel o Google Sheets, edítalo y vuélvelo a subir.',
+      })
+    } catch {
+      toast.error('Error de conexión')
+    }
+  }
+
+  const handleImport = async () => {
+    if (!importFile || !currentStore) return
+    setImporting(true)
+    try {
+      const fd = new FormData()
+      fd.append('storeId', currentStore.id)
+      fd.append('file', importFile)
+      const res = await fetch('/api/store-products/import', {
+        method: 'POST',
+        headers: authHeader(),
+        body: fd,
+      })
+      const data = await res.json().catch(() => null)
+      if (res.ok && data?.success) {
+        toast.success('Importación completada', {
+          description: `${data.created} creados · ${data.updated} actualizados${data.skipped ? ` · ${data.skipped} omitidos` : ''}`,
+        })
+        setImportOpen(false)
+        setImportFile(null)
+        setTimeout(() => window.location.reload(), 1400)
+      } else {
+        toast.error(data?.error || 'No se pudo importar el CSV')
+      }
+    } catch {
+      toast.error('Error de conexión')
+    } finally {
+      setImporting(false)
+    }
+  }
+
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Header */}
@@ -99,13 +175,33 @@ export function ProductList() {
           <h1 className="text-2xl font-bold text-gray-900">Productos</h1>
           <p className="text-gray-500 mt-1">{storeProducts.length} productos en tu tienda</p>
         </div>
-        <Button
-          onClick={() => router.push('/dashboard/products/new')}
-          className="bg-violet-600 hover:bg-violet-700 text-white gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          Nuevo producto
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => isPaidPlan ? setImportOpen(true) : upsellCsv()}
+            className="gap-2 border-slate-200 text-slate-700 hover:bg-slate-50"
+          >
+            <Upload className="w-4 h-4" />
+            <span className="hidden sm:inline">Importar CSV</span>
+            {!isPaidPlan && <Crown className="w-3.5 h-3.5 text-amber-500" />}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => isPaidPlan ? handleDownloadCsv(false) : upsellCsv()}
+            className="gap-2 border-slate-200 text-slate-700 hover:bg-slate-50"
+          >
+            <Download className="w-4 h-4" />
+            <span className="hidden sm:inline">Descargar CSV</span>
+            {!isPaidPlan && <Crown className="w-3.5 h-3.5 text-amber-500" />}
+          </Button>
+          <Button
+            onClick={() => router.push('/dashboard/products/new')}
+            className="bg-violet-600 hover:bg-violet-700 text-white gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Nuevo producto
+          </Button>
+        </div>
       </div>
 
       {/* Search */}
@@ -197,6 +293,52 @@ export function ProductList() {
           })}
         </div>
       )}
+
+      {/* Import CSV Dialog */}
+      <Dialog open={importOpen} onOpenChange={setImportOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Importar productos desde CSV</DialogTitle>
+            <DialogDescription>
+              Sube tu catálogo en CSV desde Excel o Google Sheets. Si una fila tiene el ID de un producto existente se actualiza; si no, se crea nuevo.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <ol className="text-xs text-gray-500 space-y-1 list-decimal list-inside">
+              <li>Descarga tu catálogo o la plantilla vacía</li>
+              <li>Edítalo en Excel o Google Sheets (respeta los encabezados)</li>
+              <li>Guárdalo como CSV y súbelo aquí</li>
+            </ol>
+            <input
+              type="file"
+              accept=".csv,text/csv"
+              onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+              className="w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-violet-50 file:text-violet-700 file:font-semibold hover:file:bg-violet-100"
+            />
+            <div className="flex items-center justify-between gap-2">
+              <button
+                onClick={() => handleDownloadCsv(true)}
+                className="text-xs font-medium text-violet-600 hover:text-violet-700 underline underline-offset-2"
+              >
+                Descargar plantilla
+              </button>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => setImportOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button
+                  size="sm"
+                  disabled={!importFile || importing}
+                  onClick={handleImport}
+                  className="bg-violet-600 hover:bg-violet-700 text-white"
+                >
+                  {importing ? 'Importando…' : 'Importar'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}>

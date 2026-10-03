@@ -119,6 +119,22 @@ export default async function StorePage({ params }: Props) {
     notFound()
   }
 
+  // Plan activo de la tienda (para gating de funciones premium en la tienda
+  // pública, ej: packs/combos solo Pro-Premium). SQL crudo, tolerante a fallos.
+  let planType: string | null = null
+  try {
+    const planRows = await db.$queryRawUnsafe(
+      `SELECT pl.type FROM "Subscription" sub
+       JOIN "Plan" pl ON pl.id = sub."planId"
+       WHERE sub."storeId" = $1 AND sub.status = 'active'
+       ORDER BY sub."createdAt" DESC LIMIT 1`,
+      store.id as string
+    ) as Array<{ type?: string }>
+    planType = planRows?.[0]?.type ?? null
+  } catch {
+    // sin plan detectable → 'free' (más seguro para el negocio)
+  }
+
   // Franja de anuncio: columnas nuevas leídas con SQL crudo para no
   // depender del esquema de Prisma (si aún no existen → null, sin romper).
   let announcementText: string | null = null
@@ -155,6 +171,7 @@ export default async function StorePage({ params }: Props) {
         products={serializeDecimals(products)}
         announcementText={announcementText}
         announcementLink={announcementLink}
+        planType={planType}
       />
     </>
   )

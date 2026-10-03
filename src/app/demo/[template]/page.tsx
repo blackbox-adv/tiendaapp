@@ -42,8 +42,8 @@ const templateMeta: Record<string, { name: string; description: string }> = {
     description: 'Demo de la plantilla Vitrina estilo lookbook editorial para joyería, flores y belleza - TiendApp',
   },
   neon: {
-    name: 'Neón',
-    description: 'Demo de la plantilla Neón tech para celulares y electrónica - TiendApp',
+    name: 'Tech',
+    description: 'Demo de la plantilla Tech blanca premium con banner para celulares y electrónica - TiendApp',
   },
   boutique: {
     name: 'Boutique',
