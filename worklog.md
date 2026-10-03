@@ -552,3 +552,19 @@ Verificación Task 25 (post-deploy):
 - Hash del preview boutique live = local (0b758ec8...) → nuevos previews servidos en producción
 - Capturas de verificación: ver-galeria-corregida-top.png, ver-galeria-corregida-mid.png, prod-galeria-y3600.png, prod-galeria-y4450.png (3 col, sin cintillo, sin badges flotantes, sin huecos), ver-hero-corregido.png (teléfono limpio)
 - Nota: etiquetas de plan en landing (vibrante/clasica = Pro) son consistentes con onboarding y demos; el gating API es más permisivo pero es capa funcional — no se toca sin aprobación
+
+---
+Task ID: 26
+Agent: Main Agent
+Task: Pinterest — modelos de catálogos + definición gratis vs premium + estrategia de conversión a pago
+
+Work Log:
+- Pinterest bloqueó todo acceso sin cuenta: búsqueda = "no results" + muralla de login; registro con email temporal (mail.tm) rechazado con "Oops! Something went wrong"; endpoints resource/API 403 o Invalid Resource; DuckDuckGo/Bing caídos o sin URLs de pines; API pidgets de Pinterest funcionó (cuentas reales confirmadas: Squarespace/Shopify) pero sin búsqueda pública
+- Plan B exitoso: Dribbble (mismo material que Pinterest recircula, sin login) — 10 capturas en download/pinterest/: boutique (drb-01..03), fashion ecommerce (drb-04..05), product catalog fashion (drb-06..07), jewelry (drb-08), sweet shop (drb-09..10)
+- Evidencia de popularidad recogida (views): Pixelz grid catálogo 254k, BlueNile joyería 125k, Oripio street style 62.7k, LAIN streetwear 51.9k, Berry Burst dulces 35.6k, Grace joyería beige 35.2k, Trexa Lab lime 24.2k, Hatypo minimal 15.1k
+- Análisis entregado en chat: mapeo tendencias → plantillas TiendaApp, propuesta free vs premium (3 gratis + 11-15 premium, máx 18), estrategia de conversión (recomendador por rubro, preview completo/uso gating, callouts, prueba 7 días, ancla de precio)
+
+Stage Summary:
+- Confirmado: 3 gratis actuales (moderna v2, vibrante, clásica) correctos; premium prioriza los estilos "wow" por rubro
+- Nuevos candidatos validados por evidencia: Dulce (postres) y Calle/Street (urbano) arriba; Aura (joyería) y Teca (hogar) después — esperando aprobación del dueño
+- Capturas de referencia en download/pinterest/ para el dueño
