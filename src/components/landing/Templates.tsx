@@ -194,10 +194,10 @@ const templates: Template[] = [
   },
   {
     id: 'neon',
-    name: 'Neón',
+    name: 'Tech',
     plan: 'premium',
     planLabel: 'Premium',
-    description: 'Tech oscura con acentos eléctricos. Ideal para celulares y gadgets.',
+    description: 'Blanco premium con banner y acento azul. Ideal para celulares y gadgets.',
     bestFor: ['Celulares', 'Electrónica', 'Gaming'],
     tags: ['tech'],
     isNew: true,

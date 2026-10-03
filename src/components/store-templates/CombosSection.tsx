@@ -70,7 +70,15 @@ export function CombosSection({ products, store, storeSlug, primaryColor }: Comb
 
   const combos = getCombos(products)
 
-  if (combos.length === 0) return null
+  // ── PACKS SOLO PARA TIENDAS DE PAGO (Pro / Premium) ──
+  // Decisión de negocio: los packs son una función premium.
+  // - Tiendas free: no se muestran (motiva el upgrade sin estorbar la tienda)
+  // - Demos (/demo/*): no se muestran (la demo enseña la experiencia base)
+  // Las tiendas reales de pago (plan pro o premium) sí los muestran.
+  const storePlan = (store.planId || '').toLowerCase()
+  const isPaidStore = storePlan === 'premium' || storePlan === 'pro'
+  const isDemoStore = store.id.startsWith('demo-')
+  if (combos.length === 0 || !isPaidStore || isDemoStore) return null
 
   const openPackWhatsApp = async (combo: Combo) => {
     const productNames = combo.products.map((p) => `• ${p.name} (S/${Number(p.price).toFixed(2)})`).join('\n')

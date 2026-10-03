@@ -126,9 +126,9 @@ const templates = [
   },
   {
     id: 'neon',
-    name: 'Neón',
-    desc: 'Tech oscura para celulares, electrónica y gaming',
-    color: 'from-cyan-500 to-violet-600',
+    name: 'Tech',
+    desc: 'Blanca premium con banner para celulares, electrónica y gaming',
+    color: 'from-blue-500 to-indigo-600',
     icon: Cpu,
     plan: 'premium',
     demoSlug: 'neon',
