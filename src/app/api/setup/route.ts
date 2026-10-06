@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
         type: 'free',
         name: 'Free',
         price: 0,
-        maxProducts: 5,
+        maxProducts: 6,
         description: 'Perfecto para comenzar tu tienda online',
         features: JSON.stringify([
           '1 tienda online',
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
         type: 'pro',
         name: 'Pro',
         price: 29.99,
-        maxProducts: 20,
+        maxProducts: 50,
         description: 'Para tiendas en crecimiento',
         features: JSON.stringify([
           '1 tienda online',
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
         type: 'premium',
         name: 'Premium',
         price: 79.99,
-        maxProducts: 100,
+        maxProducts: -1,
         description: 'La mejor experiencia para tu negocio',
         features: JSON.stringify([
           'Hasta 3 tiendas online',

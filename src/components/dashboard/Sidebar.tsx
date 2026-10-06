@@ -11,6 +11,7 @@ import {
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
+import { NotificationsBell } from '@/components/dashboard/NotificationsBell'
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
 
 const navItems = [
@@ -64,11 +65,16 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
   return (
     <div className="flex flex-col h-full bg-[#1e1b4b] text-white">
       {/* Logo */}
-      <div className="px-5 py-5 flex items-center gap-2">
-        <div className="w-8 h-8 rounded-lg bg-violet-500 flex items-center justify-center">
-          <Store className="w-5 h-5 text-white" />
+      <div className="px-5 py-5 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-violet-500 flex items-center justify-center">
+            <Store className="w-5 h-5 text-white" />
+          </div>
+          <span className="text-lg font-bold">TiendApp</span>
         </div>
-        <span className="text-lg font-bold">TiendApp</span>
+        <div className="[&_button]:text-white [&_button]:hover:bg-white/10">
+          <NotificationsBell />
+        </div>
       </div>
 
       <Separator className="bg-white/10" />

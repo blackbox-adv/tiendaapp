@@ -549,7 +549,7 @@ export function AdminUsers() {
                           )}
                         </div>
                         <p className="text-xs text-gray-500">
-                          S/{plan.price.toFixed(2)}/mes · {plan.maxProducts >= 100 ? '∞' : plan.maxProducts} productos
+                          S/{plan.price.toFixed(2)}/mes · {plan.maxProducts === -1 || plan.maxProducts >= 100 ? '∞' : plan.maxProducts} productos
                         </p>
                       </div>
                       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
