@@ -356,14 +356,12 @@ export function Templates() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.1 }}
                 transition={{ duration: 0.5, delay: (i % 3) * 0.07, ease: 'easeOut' }}
-                className={`group bg-white rounded-2xl border border-[#E5DCCB] shadow-sm hover:shadow-xl ${style.ring} ${style.hover} transition-all duration-300 overflow-hidden flex flex-col ${
-                  tpl.featured ? 'sm:col-span-2' : ''
-                }`}
+                className={`group bg-white rounded-2xl border border-[#E5DCCB] shadow-sm hover:shadow-xl ${style.ring} ${style.hover} transition-all duration-300 overflow-hidden flex flex-col`}
               >
                 {/* Preview (recortado como portada de catálogo) + link a demo */}
                 <a
                   href={`/demo/${tpl.id}`}
-                  className={`relative block overflow-hidden bg-gray-100 ${tpl.featured ? 'aspect-[4/3] sm:aspect-[16/10]' : 'aspect-[3/4]'}`}
+                  className="relative block overflow-hidden bg-gray-100 aspect-[16/10]"
                   aria-label={`Ver demo de la plantilla ${tpl.name}`}
                 >
                   <Image

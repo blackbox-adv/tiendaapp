@@ -5,6 +5,7 @@ import { validateBody, loginSchema } from '@/lib/validations'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 import { auditLog, getClientIp } from '@/lib/env'
 import { sendPasswordResetEmail } from '@/lib/email'
+import { sweepIfNeeded } from '@/lib/billing-sweep'
 import { v4 as uuidv4 } from 'uuid'
 
 // POST /api/auth - Login
@@ -142,6 +143,10 @@ export async function GET(request: Request) {
     } catch {
       // sin suscripción → el frontend cae a 'free'
     }
+
+    // Barrido perezoso de facturación: aplica mora/baja a planes vencidos
+    // (guard barato: 1 query; normalmente no hay nada que procesar)
+    await sweepIfNeeded()
 
     return apiSuccess({ user: { ...user, subscriptions: subscription ? [subscription] : [] } }, 200, request)
   } catch (err) {

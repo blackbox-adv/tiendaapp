@@ -65,8 +65,8 @@ function LandingView() {
       <Navbar />
       {variant === 'B' ? <HeroClassic /> : <Hero />}
       <Problem />
-      <Templates />
       <HowItWorks />
+      <Templates />
       <Features />
       <Comparison />
       <GrowthLadder />

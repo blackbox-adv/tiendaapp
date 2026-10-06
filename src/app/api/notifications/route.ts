@@ -40,7 +40,7 @@ async function notifyOnce(userId: string, title: string, message: string, type: 
 // Avisos automáticos según estado del plan y del catálogo
 async function generateAutomaticNotifications(userId: string) {
   try {
-    // ── 1) Plan por vencer (próximo cobro en menos de 7 días) ──
+    // ── 1) Plan por vencer: avisos escalonados 7 / 3 / 1 día ──
     const expiring = await db.$queryRawUnsafe(
       `SELECT pl.name AS "planName", sub."nextBillingDate"
        FROM "Subscription" sub
@@ -55,14 +55,30 @@ async function generateAutomaticNotifications(userId: string) {
     if (Array.isArray(expiring) && expiring.length > 0 && expiring[0].planName) {
       const date = new Date(expiring[0].nextBillingDate as string | Date)
       const fecha = new Intl.DateTimeFormat('es-PE', { day: '2-digit', month: '2-digit' }).format(date)
-      await notifyOnce(
-        userId,
-        `Tu plan ${expiring[0].planName} vence el ${fecha}`,
-        'Renuévalo a tiempo para no perder los beneficios de tu plan.',
-        'warning',
-        '⏰',
-        '/dashboard/plan'
-      )
+      const daysLeft = Math.ceil((date.getTime() - Date.now()) / 86400000)
+      const planName = expiring[0].planName
+      if (daysLeft <= 1) {
+        await notifyOnce(
+          userId,
+          `Tu plan ${planName} vence mañana`,
+          'Si ya pagaste, tu pago será confirmado pronto. Si no, renuévalo hoy para no perder los beneficios.',
+          'warning', '⏰', '/dashboard/plan'
+        )
+      } else if (daysLeft <= 3) {
+        await notifyOnce(
+          userId,
+          `Últimos 3 días de tu plan ${planName}`,
+          `Vence el ${fecha}. Renueva a tiempo y sigue vendiendo sin interrupciones.`,
+          'warning', '⏰', '/dashboard/plan'
+        )
+      } else {
+        await notifyOnce(
+          userId,
+          `Tu plan ${planName} vence el ${fecha}`,
+          'Renuévalo a tiempo para no perder los beneficios de tu plan.',
+          'warning', '⏰', '/dashboard/plan'
+        )
+      }
     }
 
     // ── 2) Límite de productos (queda 1 o 0) ──
