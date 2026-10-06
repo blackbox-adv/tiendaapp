@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { useAppStore } from '@/lib/store'
 import { ModernaTemplate } from '@/components/store-templates/ModernaTemplate'
 import { VibranteTemplate } from '@/components/store-templates/VibranteTemplate'
@@ -57,16 +58,16 @@ const demoStores: Record<string, Store> = {
   },
   vibrante: {
     id: 'demo-vibrante',
-    name: 'La Tienda',
+    name: 'Kalle District',
     slug: 'demo-vibrante',
-    description: 'Streetwear y accesorios urbanos. Estilo que se nota.',
+    description: 'Polos, casacas y gorras streetwear. Nuevos drops cada mes.',
     logo: '🔥',
     categoryId: 'ropa',
     planId: 'pro',
     colors: { primary: '#F97316', secondary: '#EC4899' },
     whatsappNumber: '+51999990004',
     template: 'vibrante',
-    bannerUrl: '',
+    bannerUrl: 'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1600&q=80',
     userId: '',
     isActive: true,
     createdAt: new Date().toISOString(),
@@ -797,6 +798,31 @@ function getPlanLabel(template: string): string {
   }
 }
 
+// Galería inferior de cada demo: otras tiendas distintas para explorar
+const demoGallery: { id: string; name: string }[] = [
+  { id: 'boutique', name: 'Boutique' },
+  { id: 'editorial', name: 'Editorial' },
+  { id: 'atelier', name: 'Atelier' },
+  { id: 'terracota', name: 'Terracota' },
+  { id: 'dulce', name: 'Dulce' },
+  { id: 'calle', name: 'Calle' },
+  { id: 'aura', name: 'Aura' },
+  { id: 'teca', name: 'Teca' },
+  { id: 'volt', name: 'Volt' },
+  { id: 'grano', name: 'Grano' },
+  { id: 'flora', name: 'Flora' },
+  { id: 'moda', name: 'Pasarela' },
+  { id: 'vitrina', name: 'Vitrina' },
+  { id: 'sabor', name: 'Sabores' },
+  { id: 'bodega', name: 'Mercadito' },
+  { id: 'neon', name: 'Tech' },
+  { id: 'moderna', name: 'Moderna' },
+  { id: 'vibrante', name: 'Vibrante' },
+  { id: 'clasica', name: 'Clásica' },
+  { id: 'luxury', name: 'Luxury' },
+  { id: 'minimalist', name: 'Minimalist' },
+]
+
 export function DemoTemplateClient({ template }: { template: string }) {
   const store = demoStores[template]
   const products = demoProducts[template] || []
@@ -808,6 +834,12 @@ export function DemoTemplateClient({ template }: { template: string }) {
   const isPremium = planId === 'premium'
   const isFree = planId === 'free'
   const planLabel = getPlanLabel(template)
+
+  // Sugerencias de otras tiendas: rota según la plantilla actual para que
+  // cada demo muestre vecinos distintos
+  const others = demoGallery.filter((t) => t.id !== template)
+  const pivot = Math.max(0, demoGallery.findIndex((t) => t.id === template)) % (others.length || 1)
+  const suggestions = [...others.slice(pivot), ...others.slice(0, pivot)].slice(0, 6)
 
   // Populate Zustand store so ProductDetailView can find the data
   const setStoreData = () => {
@@ -918,6 +950,38 @@ export function DemoTemplateClient({ template }: { template: string }) {
       {template === 'volt' && <VoltTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
       {template === 'grano' && <GranoTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
       {template === 'flora' && <FloraTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
+
+      {/* Más tiendas distintas para explorar (estilo Pinterest) */}
+      <section className="bg-stone-50 border-t border-stone-200/70 py-10 px-4">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-center text-lg sm:text-xl font-bold text-stone-900">Más tiendas para inspirarte</h2>
+          <p className="text-center text-sm text-stone-500 mt-1 mb-6">
+            Cada diseño es una tienda distinta, con su propio estilo y colores. Toca una y recórrela.
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            {suggestions.map((t) => (
+              <a
+                key={t.id}
+                href={`/demo/${t.id}`}
+                className="group relative rounded-xl overflow-hidden aspect-[3/4] bg-gray-100 shadow-sm hover:shadow-lg transition-shadow"
+                aria-label={`Ver demo de la plantilla ${t.name}`}
+              >
+                <Image
+                  src={`/templates/${t.id}-preview.png`}
+                  alt={`Tienda de ejemplo con la plantilla ${t.name} de TiendApp`}
+                  width={300}
+                  height={400}
+                  loading="lazy"
+                  className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent pt-6 pb-1.5 px-2 text-center">
+                  <span className="text-xs font-bold text-white drop-shadow">{t.name}</span>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
     </div>
   )
 }

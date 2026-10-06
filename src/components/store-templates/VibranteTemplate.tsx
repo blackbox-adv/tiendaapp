@@ -123,6 +123,8 @@ export function VibranteTemplate({ store, products, storeSlug, planId, onProduct
           <div className="absolute inset-0 overflow-hidden">
             <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-white/10 blur-2xl" />
             <div className="absolute -bottom-10 -left-10 w-48 h-48 rounded-full bg-black/10 blur-xl" />
+            <div className="absolute top-1/3 -left-16 w-40 h-40 rounded-full bg-white/5 blur-2xl" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-white/10" />
           </div>
         )}
 
@@ -140,6 +142,7 @@ export function VibranteTemplate({ store, products, storeSlug, planId, onProduct
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.1, type: 'spring', stiffness: 200 }}
             className="text-4xl md:text-5xl font-black text-white tracking-tight"
+            style={{ textShadow: '0 2px 16px rgba(0,0,0,0.25)' }}
           >
             {store.name}
           </motion.h1>
@@ -147,7 +150,8 @@ export function VibranteTemplate({ store, products, storeSlug, planId, onProduct
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-            className="text-white/80 mt-3 max-w-lg mx-auto text-lg"
+            className="text-white/90 mt-3 max-w-lg mx-auto text-lg"
+            style={{ textShadow: '0 1px 8px rgba(0,0,0,0.2)' }}
           >
             {store.description}
           </motion.p>

@@ -5,7 +5,6 @@ import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { Eye, Crown, ArrowRight, Search, Sparkles, Gem, Sun, Minimize2, ShoppingBasket, UtensilsCrossed, Shirt, BookOpen, Cpu, ShoppingBag, Newspaper, Flower2, Hand, Cake, Zap, Armchair, Dumbbell, Coffee, Flower, LayoutGrid } from 'lucide-react'
 import { PLAN_PRICES } from '@/lib/plans'
-import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/lib/store'
 
 type PlanType = 'free' | 'pro' | 'premium'
@@ -345,118 +344,62 @@ export function Templates() {
           </div>
         </motion.div>
 
-        {/* Galería de plantillas (todas visibles, estilo mosaico) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+        {/* Muro estilo Pinterest: cada ficha es una tienda distinta */}
+        <div className="columns-2 md:columns-3 xl:columns-4 gap-4 md:gap-5">
           {visible.map((tpl, i) => {
             const style = planStyles[tpl.plan]
+            const pinAspects = ['aspect-[3/4]', 'aspect-[4/5]', 'aspect-[3/4]', 'aspect-[1/1]', 'aspect-[4/5]', 'aspect-[4/3]']
             return (
               <motion.div
                 key={tpl.id}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.1 }}
-                transition={{ duration: 0.5, delay: (i % 3) * 0.07, ease: 'easeOut' }}
-                className={`group bg-white rounded-2xl border border-[#E5DCCB] shadow-sm hover:shadow-xl ${style.ring} ${style.hover} transition-all duration-300 overflow-hidden flex flex-col`}
+                viewport={{ once: true, amount: 0.05 }}
+                transition={{ duration: 0.45, delay: (i % 4) * 0.06, ease: 'easeOut' }}
+                className="break-inside-avoid mb-4 md:mb-5"
               >
-                {/* Preview (recortado como portada de catálogo) + link a demo */}
-                <a
-                  href={`/demo/${tpl.id}`}
-                  className="relative block overflow-hidden bg-gray-100 aspect-[16/10]"
-                  aria-label={`Ver demo de la plantilla ${tpl.name}`}
-                >
-                  <Image
-                    src={`/templates/${tpl.id}-preview.png`}
-                    alt={`Tienda de ejemplo con la plantilla ${tpl.name} de TiendApp`}
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    className="object-cover object-top group-hover:scale-[1.03] transition-transform duration-500"
-                  />
-                  {tpl.featured && (
-                    <div className="absolute bottom-3 left-3 px-3 py-1.5 rounded-full text-xs font-bold bg-stone-900/85 backdrop-blur-sm text-white shadow-md">
-                      El favorito para tiendas de ropa
+                <a href={`/demo/${tpl.id}`} className="group block" aria-label={`Ver demo de la tienda ${tpl.name}`}>
+                  <div className={`relative rounded-2xl overflow-hidden bg-gray-100 shadow-sm group-hover:shadow-xl transition-shadow duration-300 ${pinAspects[i % pinAspects.length]}`}>
+                    <Image
+                      src={`/templates/${tpl.id}-preview.png`}
+                      alt={`Tienda de ejemplo con la plantilla ${tpl.name} de TiendApp`}
+                      fill
+                      sizes="(max-width: 768px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                      className="object-cover object-top group-hover:scale-[1.03] transition-transform duration-500"
+                    />
+                    {tpl.featured && (
+                      <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold bg-stone-900/85 backdrop-blur-sm text-white shadow-md">
+                        El favorito para tiendas de ropa
+                      </div>
+                    )}
+                    {/* Hover CTA */}
+                    <div className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                      <span className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-gray-900 text-sm font-bold shadow-xl">
+                        <Eye className="w-4 h-4" />
+                        Ver tienda
+                      </span>
                     </div>
-                  )}
-                  {/* Hover overlay con CTA */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent flex items-end justify-center pb-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-gray-900 text-sm font-bold shadow-xl">
-                      <Eye className="w-4 h-4" />
-                      Ver tienda en vivo
-                    </span>
+                    {/* Nombre y plan siempre visibles (móvil no tiene hover) */}
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/35 to-transparent pt-8 pb-2.5 px-3 flex items-end justify-between gap-2">
+                      <h3 className="font-display font-bold text-white text-sm md:text-base leading-tight drop-shadow-sm">
+                        {tpl.name}
+                      </h3>
+                      <span className={`shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border backdrop-blur-sm ${style.badge}`}>
+                        {tpl.plan === 'premium' && <Crown className="w-2.5 h-2.5" />}
+                        {tpl.planLabel}
+                      </span>
+                    </div>
                   </div>
                 </a>
-
-                {/* Info */}
-                <div className="p-4 flex flex-col flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <tpl.icon className="w-4 h-4 text-[#BC5A38] shrink-0" />
-                    <h3 className="font-display font-bold text-stone-900">{tpl.name}</h3>
-                    <span className={`ml-auto shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${style.badge}`}>
-                      {tpl.plan === 'premium' && <Crown className="w-2.5 h-2.5" />}
-                      {tpl.planLabel}
-                    </span>
-                  </div>
-                  <p className="text-sm text-stone-500 mb-3 flex-1">{tpl.description}</p>
-                  <div className="flex flex-wrap gap-1.5 mb-4">
-                    {tpl.bestFor.map((tag) => (
-                      <span key={tag} className="px-2 py-0.5 rounded-full bg-[#F6E7DE] text-[#BC5A38] text-xs font-medium border border-[#BC5A38]/15">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                  {/* CTAs: SIEMPRE visibles (móvil no tiene hover) */}
-                  <div className="flex items-center gap-2 mt-auto">
-                    <Button
-                      size="sm"
-                      onClick={() => window.location.href = `/demo/${tpl.id}`}
-                      className="flex-1 bg-stone-900 hover:bg-[#BC5A38] text-white font-semibold rounded-full"
-                    >
-                      <Eye className="w-4 h-4 mr-1" />
-                      Ver demo
-                    </Button>
-                    {tpl.plan === 'free' ? (
-                      <Button
-                        size="sm"
-                        onClick={() => navigate({ page: 'register' })}
-                        variant="outline"
-                        className="border-emerald-300 text-emerald-700 hover:bg-emerald-50 font-semibold rounded-lg"
-                      >
-                        Usar gratis
-                      </Button>
-                    ) : null}
-                  </div>
-                </div>
               </motion.div>
             )
           })}
-
-          {/* Tarjeta CTA: cierra el grid perfecto y anuncia más diseños */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.1 }}
-            transition={{ duration: 0.5, delay: 0.14, ease: 'easeOut' }}
-            className="group rounded-2xl border-2 border-dashed border-[#E5DCCB] bg-white/50 flex flex-col items-center justify-center text-center p-6 min-h-[280px] sm:col-span-2"
-          >
-            <span className="w-12 h-12 rounded-full bg-[#F6E7DE] flex items-center justify-center mb-4">
-              <Sparkles className="w-5 h-5 text-[#BC5A38]" />
-            </span>
-            <h3 className="font-display font-bold text-stone-900 text-lg">Y siguen los diseños</h3>
-            <p className="text-sm text-stone-500 mt-1.5 mb-5 max-w-[240px]">
-              Un estilo nuevo cada mes con tu plan Premium, al nivel de los grandes catálogos.
-            </p>
-            <button
-              onClick={() => navigate({ page: 'register' })}
-              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full border-2 border-stone-900 text-stone-900 text-sm font-bold hover:bg-stone-900 hover:text-white transition-colors"
-            >
-              Empezar hoy <ArrowRight className="w-4 h-4" />
-            </button>
-          </motion.div>
         </div>
 
         {/* CTA final */}
         <div className="text-center mt-12">
           <p className="text-stone-500 mb-4 text-sm">
-            Todos los diseños incluyen carrito, pedidos por WhatsApp, Yape/Plin y envíos.
+            Todos los diseños incluyen carrito, pedidos por WhatsApp, Yape/Plin y envíos. Cada mes sumamos un diseño nuevo.
           </p>
           <button
             onClick={() => navigate({ page: 'register' })}

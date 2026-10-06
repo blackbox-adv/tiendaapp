@@ -30,6 +30,7 @@ export function StoreSettings() {
   const [description, setDescription] = useState(currentStore?.description || '')
   const [whatsapp, setWhatsapp] = useState(currentStore?.whatsappNumber || '')
   const [primaryColor, setPrimaryColor] = useState(currentStore?.colors.primary || '#7C3AED')
+  const [secondaryColor, setSecondaryColor] = useState(currentStore?.colors.secondary || '#10B981')
   const [template, setTemplate] = useState<string>(currentStore?.template || 'moderna')
   const [category, setCategory] = useState(currentStore?.categoryId || '')
   const [logo, setLogo] = useState(currentStore?.logo || '')
@@ -308,7 +309,7 @@ export function StoreSettings() {
         whatsappNumber: whatsapp,
         logo,
         bannerUrl,
-        colors: { primary: primaryColor, secondary: currentStore?.colors.secondary || primaryColor },
+        colors: { primary: primaryColor, secondary: secondaryColor || primaryColor },
         template: template as 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist' | 'bodega' | 'sabor' | 'moda',
         categoryId: category,
         hasShipping,
@@ -542,6 +543,19 @@ export function StoreSettings() {
                   />
                   <Input value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)} className="max-w-[200px]" />
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Color secundario</Label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={secondaryColor}
+                    onChange={(e) => setSecondaryColor(e.target.value)}
+                    className="w-10 h-10 rounded-lg cursor-pointer border-0"
+                  />
+                  <Input value={secondaryColor} onChange={(e) => setSecondaryColor(e.target.value)} className="max-w-[200px]" />
+                </div>
+                <p className="text-xs text-gray-400">Se usa en fondos y detalles de tu plantilla.</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500 mb-2">Colores predefinidos</p>
