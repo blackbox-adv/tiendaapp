@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { authenticateRequest } from '@/lib/auth';
 import { apiError, apiSuccess } from '@/lib/api-response';
 import { serializeDecimals } from '@/lib/utils';
+import { PLAN_BY_TYPE } from '@/lib/plans';
 import { validateBody, createProductSchema } from '@/lib/validations';
 
 export async function GET(request: NextRequest) {
@@ -61,7 +62,7 @@ export async function POST(request: NextRequest) {
       where: { userId: auth.user.userId, storeId, status: 'active' },
       include: { plan: true },
     });
-    const maxProducts = subscription?.plan?.maxProducts ?? 10;
+    const maxProducts = subscription?.plan?.maxProducts ?? PLAN_BY_TYPE.free.maxProducts;
     // -1 = ilimitado (plan Premium)
     if (maxProducts !== -1 && productCount >= maxProducts) {
       return apiError(`Limite de productos alcanzado (${maxProducts}). Actualiza tu plan.`, 403, undefined, request);
