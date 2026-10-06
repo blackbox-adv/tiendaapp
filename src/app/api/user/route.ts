@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server';
 import { authenticateRequest } from '@/lib/auth';
 import { apiError, apiSuccess } from '@/lib/api-response';
 import { serializeDecimals } from '@/lib/utils';
+import { sweepIfNeeded } from '@/lib/billing-sweep';
 
 // GET /api/user - Get current user data with stores and subscription info
 // Uses raw SQL to avoid PgBouncer timeout with Prisma include
@@ -14,6 +15,9 @@ export async function GET(request: NextRequest) {
     }
 
     const userId = auth.user.userId;
+
+    // Barrido perezoso de facturación antes de leer el plan
+    await sweepIfNeeded();
 
     // 1) Get basic user info
     const user = await db.user.findUnique({

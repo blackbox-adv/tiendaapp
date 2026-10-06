@@ -36,9 +36,9 @@ const features = [
   },
   {
     icon: Package,
-    title: 'Catálogo ilimitado con fotos',
+    title: 'Catálogo con fotos que venden',
     description:
-      'Sube todos los productos que quieras con foto, precio, descripción y stock. Organízalos por categorías. Tus clientes ven todo ordenado, no andan preguntando "¿qué tienes?" por WhatsApp.',
+      'Sube tus productos con foto, precio, descripción y stock, y organízalos por categorías. Empiezas gratis con 6 productos y tu catálogo crece contigo: hasta 50 con Pro e ilimitado con Premium.',
   },
   {
     icon: Gift,

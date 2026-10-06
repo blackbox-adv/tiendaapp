@@ -4,6 +4,7 @@ import { authenticateRequest } from '@/lib/auth';
 import { apiError, apiSuccess } from '@/lib/api-response';
 import { serializeDecimals } from '@/lib/utils';
 import { checkTemplatePermission } from '@/lib/plan-gating';
+import { sweepIfNeeded } from '@/lib/billing-sweep';
 
 export async function GET(
   request: NextRequest,
@@ -11,6 +12,11 @@ export async function GET(
 ) {
   try {
     const { slug } = await params;
+
+    // Barrido perezoso de facturación: si el dueño dejó de pagar, su tienda
+    // muestra el plan Free en la próxima visita (sin esperar a que entre al panel)
+    await sweepIfNeeded();
+
     const store = await db.store.findUnique({
       where: { slug },
       include: {
