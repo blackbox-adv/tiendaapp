@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAppStore } from '@/lib/store';
+import { NotificationsBell } from '@/components/dashboard/NotificationsBell';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -61,6 +62,8 @@ export default function DashboardHeader() {
         </Link>
 
         <div className="flex items-center gap-3">
+          <NotificationsBell />
+
           <Badge className={planInfo.color} variant="secondary">
             {planInfo.text}
           </Badge>

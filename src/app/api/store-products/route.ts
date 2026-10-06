@@ -102,7 +102,8 @@ export async function POST(request: NextRequest) {
     const product = await db.$transaction(async (tx) => {
       const currentCount = await tx.storeProduct.count({ where: { storeId } })
 
-      if (currentCount >= maxProducts) {
+      // -1 = ilimitado (plan Premium)
+      if (maxProducts !== -1 && currentCount >= maxProducts) {
         throw new Error('PRODUCT_LIMIT')
       }
 

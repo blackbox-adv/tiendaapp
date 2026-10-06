@@ -61,8 +61,9 @@ export async function POST(request: NextRequest) {
       where: { userId: auth.user.userId, storeId, status: 'active' },
       include: { plan: true },
     });
-    const maxProducts = subscription?.plan?.maxProducts || 10;
-    if (productCount >= maxProducts) {
+    const maxProducts = subscription?.plan?.maxProducts ?? 10;
+    // -1 = ilimitado (plan Premium)
+    if (maxProducts !== -1 && productCount >= maxProducts) {
       return apiError(`Limite de productos alcanzado (${maxProducts}). Actualiza tu plan.`, 403, undefined, request);
     }
 
