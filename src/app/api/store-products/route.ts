@@ -5,6 +5,7 @@ import { validateBody, createProductSchema, updateProductSchema } from '@/lib/va
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 import { sanitizeBasic, sanitizeHtml, sanitizeUrl } from '@/lib/sanitize'
 import { serializeDecimals } from '@/lib/utils'
+import { PLAN_BY_TYPE } from '@/lib/plans'
 import { revalidatePath } from 'next/cache'
 
 // GET /api/store-products - Public (product browsing)
@@ -84,16 +85,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Check product limit based on plan — use raw SQL to avoid PgBouncer include timeout
-    let maxProducts = 5 // Default for free plan
+    let maxProducts = PLAN_BY_TYPE.free.maxProducts // Default: plan Gratis canónico (6)
     try {
       const planResult = await db.$queryRawUnsafe(`
-        SELECT pl."maxProducts" 
+        SELECT pl."maxProducts"
         FROM "Subscription" sub
         JOIN "Plan" pl ON pl.id = sub."planId"
         WHERE sub."userId" = $1 AND sub.status = 'active'
         ORDER BY sub."createdAt" DESC LIMIT 1
       `, auth.user.userId) as Array<Record<string, unknown>>
-      if (Array.isArray(planResult) && planResult.length > 0 && planResult[0].maxProducts) {
+      if (Array.isArray(planResult) && planResult.length > 0 && planResult[0].maxProducts !== null && planResult[0].maxProducts !== undefined) {
         maxProducts = Number(planResult[0].maxProducts)
       }
     } catch { /* use default */ }
