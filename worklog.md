@@ -716,3 +716,33 @@ Work Log:
 Stage Summary:
 - Feature Premium completo en producción: chat interno (ahorra WhatsApp) + empleados con login propio y WhatsApp para derivar. Commits: 9435ce8 (feature). QA scripts: qa-premium.mjs (up/down), qa-chat-e2e.sh, qa-cleanup.mjs.
 - Pendiente conocido: badge de no leídos en Navbar (opcional); notificaciones push de nuevos mensajes (opcional).
+
+---
+Task ID: 40
+Agent: Super Z (main)
+Task: Guia de tallas (Pro/Premium) + envio con pago anticipado por zona
+
+Work Log:
+- Guia de tallas (Pro/Premium, aprobado por dueno): columna Store.sizeGuide (ALTER TABLE idempotente scripts/add-size-guide-column.mjs, sin migracion destructiva), editor en Configuracion con diagrama SVG estandar (polo/pantalon/vestido/zapatos con flechas), tabla de medidas del vendedor (max 12 filas), boton "Guia de tallas" + modal en ficha de producto con diagrama, tabla, nota y CTA WhatsApp; gate server-side (getUserPlanType) y en UI con badge Pro/Premium.
+- Envio con pago anticipado por zona (inic. todos los planes): checkbox "El envio se paga primero" por opcion de envio en Configuracion; cliente ve badge "Se paga primero - producto contra entrega", resumen del carrito lo marca, mensaje WhatsApp incluye instruccion con Yape de la tienda si esta configurado.
+- FIX CRITICO /api/user: SELECT raw habia perdido yapeNumber/plinNumber/yapeQrUrl/plinQrUrl/otherPayments/shippingOptions (y no tenia sizeGuide/bannerUrl/popup*) -> Configuracion cargaba vacio y al guardar BORRABA datos del dueno. Restauradas ambas ramas (owner y empleado). Commit e44ec43.
+- Fix mapper (3ra copia): sizeGuide faltaba en transforms de StorePublicClient/ProductPublicClient, boton no aparecia en carga directa ni SPA. Commit 2241510. Cleanup QA: 5de031b.
+
+Stage Summary:
+- Ambas features en produccion. sizeGuide = Pro/Premium; payFirst inicialmente todos los planes (luego re-gateado en Task 41). /api/user restaurado (riesgo de perdida de datos cerrado).
+
+---
+Task ID: 41
+Agent: Super Z (main)
+Task: Gating payFirst (envio se paga primero) -> solo Pro/Premium, opcional por zona (peticion del dueno)
+
+Work Log:
+- Dueno pidio: el boton de pagar envio primero "recien desde el plan pro", y opcional (quien no quiera cobra todo de frente). El checkbox por zona ya era opt-in; faltaba el gating de plan.
+- PUT /api/stores/[slug]: si el plan no es Pro/Premium (o super_admin), payFirst se recorta EN SILENCIO al guardar (no rechaza: evita bloquear guardados tras una baja de plan). Solo consulta el plan si alguna opcion trae payFirst.
+- GET publico /api/stores/[slug]: si la tienda sirve opciones con payFirst y no tiene plan pago, el flag se reculta (defensa en profundidad para datos guardados antes del gating); consulta de plan solo cuando aplica, hot path sin costo.
+- Configuracion UI: checkbox "El envio se paga primero" visible solo Pro/Premium; Free ve nota ambar de upgrade con link a Mi Plan; flags payFirst obsoletos se limpian al cargar si el plan es Free.
+- tsc limpio (EXIT=0). Commit 2c757fb -> deploy Vercel success (verificado via GitHub status API).
+- QA E2E en produccion (scripts/qa-payfirst-gate.mjs): 9/9 PASS — FREE: PUT recorta + GET publico no sirve payFirst; PREMIUM (sub temporal directa en BD): PUT conserva + GET publico sirve; cleanup restaura opciones y elimina sub.
+
+Stage Summary:
+- Regla de negocio final: zonas de envio con costo = TODOS los planes (todo por WhatsApp como siempre); "el envio se paga primero" = Pro/Premium, opt-in por zona. QA store queda free y limpia. Deploy f31374f (solo script QA).
