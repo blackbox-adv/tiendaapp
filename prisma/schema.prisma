@@ -330,3 +330,38 @@ model LandingPage {
   @@index([storeId])
   @@index([published, createdAt(sort: Desc)])
 }
+
+// ── Chat interno cliente-vendedor (Premium) ──
+// Mensajería ligera por-tienda con hilos por visitante (threadId = capability
+// UUID en localStorage del cliente). Polling indexado, sin Realtime: escala
+// trivial a miles de tiendas (ver índices).
+model ChatMessage {
+  id             String   @id @default(cuid())
+  storeId        String
+  threadId       String                                 // sesión del visitante
+  sender         String   @default("customer")          // customer | store
+  authorName     String   @default("")                  // nombre mostrado
+  authorWhatsapp String?                                 // para "continuar en WhatsApp" (derivar a vendedor)
+  body           String   @db.Text
+  readByStore    Boolean  @default(false)
+  readByCustomer Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  @@index([storeId, threadId, createdAt])                // hilo: carga rápida
+  @@index([storeId, readByStore, createdAt])             // bandeja: no leídos
+}
+
+// ── Empleados / vendedoras (Premium) ──
+// El empleado ES un User con role='store_employee' (reusa todo el auth JWT +
+// tokenVersion + isActive). StoreMember es el vínculo a la tienda que atiende
+// y guarda su WhatsApp propio para derivar conversaciones.
+model StoreMember {
+  id             String   @id @default(cuid())
+  storeId        String
+  userId         String   @unique
+  whatsappNumber String?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+
+  @@index([storeId])
+}

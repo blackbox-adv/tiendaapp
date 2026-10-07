@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
       ORDER BY s."createdAt" DESC
     `, userId) as Array<Record<string, unknown>>;
 
-    const stores = storeRows.map((s) => ({
+    const stores: Array<Record<string, unknown>> = storeRows.map((s) => ({
       id: s.id,
       slug: s.slug,
       name: s.name,
@@ -83,6 +83,47 @@ export async function GET(request: NextRequest) {
         categories: Number(s.categoryCount) || 0,
       },
     }));
+
+    // Empleados: sin tiendas propias pero vinculados via StoreMember -> entregar
+    // la tienda donde trabajan con la MISMA forma (pedidos/chats funcionan igual).
+    if (stores.length === 0 && user.role === 'store_employee') {
+      const memberStore = await db.$queryRawUnsafe(`
+        SELECT s.id, s.slug, s.name, s.description, s.template, s.logo,
+          s."whatsappNumber", s.category, s."primaryColor", s."secondaryColor",
+          s."hasShipping", s."hasSecurePayment", s."hasReturns",
+          s."popupEnabled", s."popupType", s."popupButtonText",
+          s."isDemo", s."isActive"
+        FROM "StoreMember" m
+        JOIN "Store" s ON s.id = m."storeId"
+        WHERE m."userId" = $1 AND m."isActive" = true
+        LIMIT 1
+      `, userId) as Array<Record<string, unknown>>;
+      if (memberStore.length > 0) {
+        const s = memberStore[0];
+        stores.push({
+          id: s.id,
+          slug: s.slug,
+          name: s.name,
+          description: s.description,
+          template: s.template,
+          logo: s.logo,
+          whatsappNumber: s.whatsappNumber,
+          category: s.category,
+          primaryColor: s.primaryColor,
+          secondaryColor: s.secondaryColor,
+          hasShipping: s.hasShipping,
+          hasSecurePayment: s.hasSecurePayment,
+          hasReturns: s.hasReturns,
+          popupEnabled: s.popupEnabled,
+          popupType: s.popupType,
+          popupButtonText: s.popupButtonText,
+          isDemo: s.isDemo,
+          isActive: s.isActive,
+          _count: { products: 0, categories: 0 },
+          isEmployeeView: true,
+        } as Record<string, unknown>);
+      }
+    }
 
     // 3) Get active subscription with plan info using raw SQL
     const subRows = await db.$queryRawUnsafe(`

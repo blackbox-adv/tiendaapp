@@ -37,6 +37,7 @@ import { BarTemplate } from './BarTemplate'
 import { PopTemplate } from './PopTemplate'
 import { PromoPopup } from './PromoPopup'
 import { CartButton } from './CartButton'
+import { ChatWidget } from './ChatWidget'
 import type { Product, Store as StoreType } from '@/lib/types'
 
 export function StoreView({ slug }: { slug: string }) {
@@ -323,6 +324,11 @@ export function StoreView({ slug }: { slug: string }) {
 
       {/* WhatsApp Float */}
       <WhatsAppButton whatsappNumber={displayStore!.whatsappNumber} />
+
+      {/* Chat interno cliente-tienda (solo Premium) */}
+      {storePlanId === 'premium' && (
+        <ChatWidget storeSlug={slug} storeName={displayStore!.name} />
+      )}
 
       {/* Cart Button */}
       <CartButton storeId={displayStore!.id} whatsappNumber={displayStore!.whatsappNumber} storeName={displayStore!.name} shippingOptions={displayStore!.shippingOptions} />

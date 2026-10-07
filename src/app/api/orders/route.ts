@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
       return apiError('storeId es requerido', 400, undefined, request)
     }
 
-    // Verify store ownership
+    // Verify store access: dueno, super_admin o empleado activo
     const store = await db.store.findUnique({
       where: { id: storeId },
       select: { ownerId: true },
@@ -28,7 +28,15 @@ export async function GET(request: NextRequest) {
     if (!store) {
       return apiError('Tienda no encontrada', 404, undefined, request)
     }
-    if (store.ownerId !== auth.user.userId && auth.user.role !== 'super_admin') {
+    let hasAccess = store.ownerId === auth.user.userId || auth.user.role === 'super_admin'
+    if (!hasAccess && auth.user.role === 'store_employee') {
+      const member = await db.storeMember.findFirst({
+        where: { userId: auth.user.userId, storeId, isActive: true },
+        select: { id: true },
+      })
+      hasAccess = !!member
+    }
+    if (!hasAccess) {
       return apiError('No tienes permisos para esta tienda', 403, undefined, request)
     }
 
