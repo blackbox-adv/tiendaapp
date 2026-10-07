@@ -746,3 +746,18 @@ Work Log:
 
 Stage Summary:
 - Regla de negocio final: zonas de envio con costo = TODOS los planes (todo por WhatsApp como siempre); "el envio se paga primero" = Pro/Premium, opt-in por zona. QA store queda free y limpia. Deploy f31374f (solo script QA).
+
+---
+Task ID: 42
+Agent: Super Z (main)
+Task: Relabel 3 plantillas base -> gratis en toda la UI (aprobado por dueno: "primero lo primero")
+
+Work Log:
+- Hallazgo: el server (plan-gating.ts) ya trataba vibrante/clasica como free (no estan en PREMIUM_TEMPLATES), pero 4 UIs las mostraban como "Pro" con candado: StoreWizard, TemplateGallery (PLAN_ACCESS.free las bloqueaba), landing Templates.tsx y OnboardingClient (isRestricted impedia seleccionarlas). La UI era mas restrictiva que el server: un free podia asignarlas via API pero no desde el panel.
+- Alineado: requiredPlan/plan -> 'free' y planLabel -> 'Gratis'/'vacio' en los 4 lugares; Moderna ademas dejo de decir "la del plan gratis".
+- plans.ts: Free = "3 plantillas gratis (Moderna, Vibrante y Clasica)"; Pro pierde "3 plantillas base" (ya no diferenciador). /api/plans sirve el nuevo copy (verificado en produccion).
+- tsc EXIT=0. Commit 75c3b0a -> deploy success verificado.
+- QA en produccion (scripts/qa-templates-free.mjs): 4/4 PASS — free asigna vibrante y clasica (200), free NO asigna luxury (403 PLAN_REQUIRED), template restaurado. Badge landing renderiza planLabel incondicional (Gratis visible tras hidratacion).
+
+Stage Summary:
+- Escalera de plantillas final: Free = 3 base; Pro = 3 base + features de venta; Premium = las 26 (por rubro). Gating premium intacto. Sin cambios de BD.
