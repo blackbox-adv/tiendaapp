@@ -1,4 +1,5 @@
 'use client'
+import { ShareProductButton } from './ShareProductButton'
 import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 
 import { useState, useMemo } from 'react'
@@ -142,12 +143,13 @@ export function AtelierTemplate({ store, products, storeSlug, planId, onProductC
               <div className="relative pb-10">
                 <div className="absolute -inset-3 border border-[#EADDD6] rounded-t-[999px] rounded-b-2xl pointer-events-none translate-x-4 translate-y-4" />
                 <button onClick={() => openProduct(heroProduct.id)} className="group relative block w-full aspect-[4/5] overflow-hidden rounded-t-[999px] rounded-b-2xl bg-white cursor-pointer text-left">
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={heroProduct.imageUrl || PRODUCT_IMG_FALLBACK}
                     alt={heroProduct.name}
                     className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
                     onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
                   />
+                    <ShareProductButton productName={heroProduct.name} price={heroProduct.price} productId={heroProduct.id} slug={storeSlug} storeName={store.name} />
                 </button>
                 {secondProduct && (
                   <button
@@ -155,12 +157,13 @@ export function AtelierTemplate({ store, products, storeSlug, planId, onProductC
                     className="group absolute bottom-0 -left-2 md:-left-8 flex items-center gap-3 bg-white/95 backdrop-blur-sm border border-[#EADDD6] rounded-full py-2 pl-2 pr-5 shadow-lg hover:shadow-xl transition-shadow cursor-pointer text-left"
                   >
                     <span className="w-12 h-12 rounded-full overflow-hidden shrink-0">
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={secondProduct.imageUrl || PRODUCT_IMG_FALLBACK}
                         alt={secondProduct.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
                       />
+                    <ShareProductButton productName={secondProduct.name} price={secondProduct.price} productId={secondProduct.id} slug={storeSlug} storeName={store.name} />
                     </span>
                     <span>
                       <span className="block text-[9px] uppercase tracking-[0.22em] text-[#B0A0A5]">También</span>
@@ -216,12 +219,13 @@ export function AtelierTemplate({ store, products, storeSlug, planId, onProductC
                   Edición limitada · -{dealPct}%
                 </span>
                 <button onClick={() => openProduct(dealProduct.id)} className="group relative aspect-[16/11] md:aspect-auto md:min-h-[300px] overflow-hidden cursor-pointer">
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={dealProduct.imageUrl || PRODUCT_IMG_FALLBACK}
                     alt={dealProduct.name}
                     className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
                     onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
                   />
+                    <ShareProductButton productName={dealProduct.name} price={dealProduct.price} productId={dealProduct.id} slug={storeSlug} storeName={store.name} />
                 </button>
                 <div className="flex flex-col justify-center items-start p-8 md:p-12">
                   <p className="at-serif italic text-2xl text-[#B76E79]">Oferta especial</p>
@@ -311,12 +315,13 @@ export function AtelierTemplate({ store, products, storeSlug, planId, onProductC
                       onClick={() => openProduct(product.id)}
                     >
                       <div className={`relative aspect-[3/4] overflow-hidden bg-white ${i % 5 === 0 ? 'rounded-t-[999px] rounded-b-xl' : 'rounded-2xl'}`}>
-                        <img
+                        <img loading="lazy" decoding="async"
                           src={product.imageUrl || PRODUCT_IMG_FALLBACK}
                           alt={product.name}
                           className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-700"
                           onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
                         />
+                    <ShareProductButton productName={product.name} price={product.price} productId={product.id} slug={storeSlug} storeName={store.name} />
                         {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
                           <span className="absolute top-3 right-3 bg-[#B76E79] text-white text-[9px] font-medium tracking-widest px-2.5 py-1 rounded-full">
                             -{Math.round((1 - Number(product.price) / Number(product.originalPrice)) * 100)}%

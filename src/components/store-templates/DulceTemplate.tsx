@@ -1,4 +1,5 @@
 'use client'
+import { ShareProductButton } from './ShareProductButton'
 import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 
 import { useState, useMemo } from 'react'
@@ -155,12 +156,13 @@ export function DulceTemplate({ store, products, storeSlug, planId, onProductCli
                     onClick={() => openProduct(heroProduct.id)}
                     className="group relative block w-full aspect-[4/5] max-h-[470px] overflow-hidden rounded-t-[10rem] md:rounded-t-[12rem] rounded-b-[2.5rem] bg-[#FDE7F1] cursor-pointer border-4 border-white shadow-[0_30px_60px_-24px_rgba(166,74,201,0.45)]"
                   >
-                    <img
+                    <img loading="lazy" decoding="async"
                       src={heroProduct.imageUrl || PRODUCT_IMG_FALLBACK}
                       alt={heroProduct.name}
                       className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
                       onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
                     />
+                    <ShareProductButton productName={heroProduct.name} price={heroProduct.price} productId={heroProduct.id} slug={storeSlug} storeName={store.name} />
                   </button>
                   <span className="absolute top-8 -left-1 md:-left-4 rotate-[-9deg] bg-[#F9A8D4] text-[#4A2440] text-[11px] font-extrabold px-4 py-2 rounded-full shadow-lg border-2 border-white">
                     ¡Recién horneado!
@@ -172,12 +174,13 @@ export function DulceTemplate({ store, products, storeSlug, planId, onProductCli
                         className="group block w-full text-left cursor-pointer"
                       >
                         <div className="aspect-[5/3] overflow-hidden rounded-2xl bg-[#FDE7F1]">
-                          <img
+                          <img loading="lazy" decoding="async"
                             src={secondProduct.imageUrl || PRODUCT_IMG_FALLBACK}
                             alt={secondProduct.name}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                             onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
                           />
+                    <ShareProductButton productName={secondProduct.name} price={secondProduct.price} productId={secondProduct.id} slug={storeSlug} storeName={store.name} />
                         </div>
                         <p className="mt-2 text-[11px] font-bold text-[#7C5373] leading-snug line-clamp-1">{secondProduct.name}</p>
                         <div className="flex items-center justify-between mt-0.5">
@@ -267,12 +270,13 @@ export function DulceTemplate({ store, products, storeSlug, planId, onProductCli
                   </button>
                 </div>
                 <button onClick={() => openProduct(dealProduct.id)} className="group relative aspect-[16/10] md:aspect-auto md:min-h-[320px] overflow-hidden cursor-pointer order-1 md:order-2">
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={dealProduct.imageUrl || PRODUCT_IMG_FALLBACK}
                     alt={dealProduct.name}
                     className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
                     onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
                   />
+                    <ShareProductButton productName={dealProduct.name} price={dealProduct.price} productId={dealProduct.id} slug={storeSlug} storeName={store.name} />
                 </button>
                 <Cookie className="absolute -bottom-6 -left-6 w-28 h-28 text-white/10 pointer-events-none" />
               </motion.div>
@@ -350,12 +354,13 @@ export function DulceTemplate({ store, products, storeSlug, planId, onProductCli
                     >
                       <div className="relative bg-white rounded-3xl p-2.5 border-2 border-[#FBD9EC] group-hover:-translate-y-1.5 group-hover:shadow-[0_28px_44px_-24px_rgba(166,74,201,0.5)] transition-all duration-300">
                         <div className="relative aspect-square overflow-hidden rounded-[1.4rem] bg-[#FDE7F1]">
-                          <img
+                          <img loading="lazy" decoding="async"
                             src={product.imageUrl || PRODUCT_IMG_FALLBACK}
                             alt={product.name}
                             className="w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-700"
                             onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
                           />
+                    <ShareProductButton productName={product.name} price={product.price} productId={product.id} slug={storeSlug} storeName={store.name} />
                           {product.featured && !product.originalPrice && (
                             <span className="absolute top-2 left-2 rotate-[-6deg] bg-[#F9A8D4] text-[#4A2440] text-[9px] font-extrabold uppercase tracking-wide px-2.5 py-1 rounded-full border border-white shadow">
                               Favorito

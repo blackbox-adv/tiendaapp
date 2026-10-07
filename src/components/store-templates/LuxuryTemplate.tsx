@@ -1,4 +1,5 @@
 'use client'
+import { ShareProductButton } from './ShareProductButton'
 import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 
 import { useState, useMemo } from 'react'
@@ -100,7 +101,7 @@ export function LuxuryTemplate({ store, products, storeSlug, planId, onProductCl
       {/* Banner with overlaid name — or standalone header */}
       {store.bannerUrl ? (
         <div className="relative h-48 md:h-64 overflow-hidden">
-          <img src={store.bannerUrl} alt="" className="w-full h-full object-cover" />
+          <img loading="lazy" decoding="async" src={store.bannerUrl} alt="" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/50" />
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
             {store.logo && (
@@ -378,7 +379,7 @@ export function LuxuryTemplate({ store, products, storeSlug, planId, onProductCl
                     >
                       {/* Hero-style product image */}
                       <div className="aspect-[3/4] overflow-hidden relative">
-                        <img
+                        <img loading="lazy" decoding="async"
                           src={product.imageUrl || PRODUCT_IMG_FALLBACK}
                           alt={product.name}
                           className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
@@ -387,6 +388,7 @@ export function LuxuryTemplate({ store, products, storeSlug, planId, onProductCl
                               'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="533"><rect fill="%231a1a2e" width="400" height="533"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="serif" font-size="14" fill="%234a4a5a">Imagen no disponible</text></svg>'
                           }}
                         />
+                        <ShareProductButton productName={product.name} price={product.price} productId={product.id} slug={storeSlug} storeName={store.name} />
                         {product.originalPrice && (
                           <div
                             className="absolute top-3 left-3 px-2.5 py-1 rounded text-[10px] font-semibold tracking-widest uppercase"

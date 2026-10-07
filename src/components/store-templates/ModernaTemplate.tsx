@@ -1,4 +1,5 @@
 'use client'
+import { ShareProductButton } from './ShareProductButton'
 import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 
 import { useState, useMemo } from 'react'
@@ -68,7 +69,7 @@ export function ModernaTemplate({ store, products, storeSlug, planId, onProductC
       {/* Banner with overlaid name — or standalone header */}
       {store.bannerUrl ? (
         <div className="relative h-56 md:h-72 overflow-hidden">
-          <img src={store.bannerUrl} alt="" className="w-full h-full object-cover" />
+          <img loading="lazy" decoding="async" src={store.bannerUrl} alt="" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/20" />
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
             {store.logo && (
@@ -288,7 +289,7 @@ export function ModernaTemplate({ store, products, storeSlug, planId, onProductC
                     onClick={() => onProductClick ? onProductClick(product.id) : navigate({ page: 'product-detail', slug: storeSlug, productId: product.id })}
                   >
                     <div className="aspect-square bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 relative shadow-sm group-hover:shadow-xl group-hover:shadow-gray-200/60 group-hover:-translate-y-1 transition-all duration-300">
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={product.imageUrl || PRODUCT_IMG_FALLBACK}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-[1.06] transition-transform duration-500"
@@ -297,6 +298,7 @@ export function ModernaTemplate({ store, products, storeSlug, planId, onProductC
                             'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect fill="%23fafafa" width="400" height="400"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="14" fill="%23ccc">Imagen no disponible</text></svg>'
                         }}
                       />
+                      <ShareProductButton productName={product.name} price={product.price} productId={product.id} slug={storeSlug} storeName={store.name} />
                       {/* Descuento o Destacado */}
                       {product.originalPrice ? (
                         <div

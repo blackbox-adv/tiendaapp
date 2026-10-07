@@ -1,4 +1,5 @@
 'use client'
+import { ShareProductButton } from './ShareProductButton'
 import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 
 import { useState, useMemo } from 'react'
@@ -166,12 +167,13 @@ export function VoltTemplate({ store, products, storeSlug, planId, onProductClic
                     onClick={() => openProduct(heroProduct.id)}
                     className="group relative block w-full aspect-[4/3] overflow-hidden bg-[#16224A] cursor-pointer border-2 border-white/10"
                   >
-                    <img
+                    <img loading="lazy" decoding="async"
                       src={heroProduct.imageUrl || PRODUCT_IMG_FALLBACK}
                       alt={heroProduct.name}
                       className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-700"
                       onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
                     />
+                    <ShareProductButton productName={heroProduct.name} price={heroProduct.price} productId={heroProduct.id} slug={storeSlug} storeName={store.name} />
                   </button>
                   <div className="absolute bottom-0 left-0 right-0 md:right-auto md:w-3/4 bg-[#141A2B] border-2 border-white/10 px-5 py-4 flex items-center justify-between gap-4">
                     <div className="min-w-0">
@@ -262,12 +264,13 @@ export function VoltTemplate({ store, products, storeSlug, planId, onProductClic
                   </button>
                 </div>
                 <button onClick={() => openProduct(dealProduct.id)} className="group relative aspect-[16/10] md:aspect-auto md:min-h-[320px] overflow-hidden cursor-pointer order-1 md:order-2">
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={dealProduct.imageUrl || PRODUCT_IMG_FALLBACK}
                     alt={dealProduct.name}
                     className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700 mix-blend-luminosity"
                     onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
                   />
+                    <ShareProductButton productName={dealProduct.name} price={dealProduct.price} productId={dealProduct.id} slug={storeSlug} storeName={store.name} />
                   <div className="absolute inset-0 bg-[#FF5A1F]/30" />
                 </button>
               </motion.div>
@@ -345,12 +348,13 @@ export function VoltTemplate({ store, products, storeSlug, planId, onProductClic
                     >
                       <div className="relative bg-white border-2 border-[#E9EBF0] group-hover:border-[#141A2B] group-hover:-translate-y-1.5 group-hover:shadow-[0_24px_40px_-22px_rgba(20,26,43,0.5)] transition-all duration-300">
                         <div className="relative aspect-square overflow-hidden bg-[#F4F5F8]">
-                          <img
+                          <img loading="lazy" decoding="async"
                             src={product.imageUrl || PRODUCT_IMG_FALLBACK}
                             alt={product.name}
                             className="w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-700"
                             onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
                           />
+                    <ShareProductButton productName={product.name} price={product.price} productId={product.id} slug={storeSlug} storeName={store.name} />
                           {product.featured && !product.originalPrice && (
                             <span className="absolute top-0 left-0 bg-[#141A2B] text-white text-[9px] font-extrabold uppercase tracking-wider px-3 py-1.5">
                               Top

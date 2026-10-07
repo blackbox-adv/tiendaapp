@@ -1,4 +1,5 @@
 'use client'
+import { ShareProductButton } from './ShareProductButton'
 import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 
 import { useState, useMemo } from 'react'
@@ -150,12 +151,13 @@ export function SushiTemplate({ store, products, storeSlug, planId, onProductCli
                     onClick={() => openProduct(heroProduct.id)}
                     className="group relative block w-full aspect-[4/3] max-h-[430px] overflow-hidden rounded-[3rem] bg-[#FBE9E8] cursor-pointer shadow-[0_30px_60px_-26px_rgba(27,26,24,0.5)]"
                   >
-                    <img
+                    <img loading="lazy" decoding="async"
                       src={heroProduct.imageUrl || PRODUCT_IMG_FALLBACK}
                       alt={heroProduct.name}
                       className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
                       onError={(e) => { (e.target as HTMLImageElement).src = IMG_FALLBACK }}
                     />
+                    <ShareProductButton productName={heroProduct.name} price={heroProduct.price} productId={heroProduct.id} slug={storeSlug} storeName={store.name} />
                   </button>
                   <div className="absolute bottom-0 left-4 right-4 md:left-6 md:right-auto md:w-80 bg-white rounded-3xl shadow-[0_24px_44px_-20px_rgba(27,26,24,0.4)] p-4 border border-[#ECE7DE]">
                     <div className="flex items-center justify-between gap-3">
@@ -217,12 +219,13 @@ export function SushiTemplate({ store, products, storeSlug, planId, onProductCli
                     className="group text-left bg-white rounded-[2rem] border border-[#ECE7DE] p-3 hover:-translate-y-1 hover:shadow-[0_26px_44px_-24px_rgba(27,26,24,0.45)] transition-all duration-300 cursor-pointer"
                   >
                     <div className="relative aspect-[4/3] rounded-3xl overflow-hidden bg-[#FBE9E8]">
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={p.imageUrl || PRODUCT_IMG_FALLBACK}
                         alt={p.name}
                         className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-700"
                         onError={(e) => { (e.target as HTMLImageElement).src = IMG_FALLBACK }}
                       />
+                    <ShareProductButton productName={p.name} price={p.price} productId={p.id} slug={storeSlug} storeName={store.name} />
                     </div>
                     <div className="px-2 pt-3.5 pb-2 flex items-center justify-between gap-2">
                       <div className="min-w-0">
@@ -253,12 +256,13 @@ export function SushiTemplate({ store, products, storeSlug, planId, onProductCli
                   </button>
                 </div>
                 <button onClick={() => openProduct(dealProduct.id)} className="group relative aspect-[16/10] md:aspect-auto md:min-h-[320px] overflow-hidden cursor-pointer order-1 md:order-2">
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={dealProduct.imageUrl || PRODUCT_IMG_FALLBACK}
                     alt={dealProduct.name}
                     className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
                     onError={(e) => { (e.target as HTMLImageElement).src = IMG_FALLBACK }}
                   />
+                    <ShareProductButton productName={dealProduct.name} price={dealProduct.price} productId={dealProduct.id} slug={storeSlug} storeName={store.name} />
                 </button>
               </div>
             </section>
@@ -353,12 +357,13 @@ export function SushiTemplate({ store, products, storeSlug, planId, onProductCli
                   >
                     <div className="relative bg-white rounded-3xl p-2.5 border border-[#ECE7DE] group-hover:-translate-y-1.5 group-hover:shadow-[0_28px_44px_-24px_rgba(199,62,58,0.45)] transition-all duration-300">
                       <div className="relative aspect-square overflow-hidden rounded-2xl bg-[#FBE9E8]">
-                        <img
+                        <img loading="lazy" decoding="async"
                           src={product.imageUrl || PRODUCT_IMG_FALLBACK}
                           alt={product.name}
                           className="w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-700"
                           onError={(e) => { (e.target as HTMLImageElement).src = IMG_FALLBACK }}
                         />
+                    <ShareProductButton productName={product.name} price={product.price} productId={product.id} slug={storeSlug} storeName={store.name} />
                         {product.featured && !product.originalPrice && (
                           <span className="absolute top-2 left-2 bg-[#1B1A18] text-white text-[9px] font-extrabold uppercase tracking-wide px-2.5 py-1 rounded-full">
                             Estrella

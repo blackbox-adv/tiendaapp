@@ -1,4 +1,5 @@
 'use client'
+import { ShareProductButton } from './ShareProductButton'
 import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 
 import { useState, useMemo } from 'react'
@@ -162,12 +163,13 @@ export function BodegaTemplate({ store, products, storeSlug, planId, onProductCl
                     onClick={() => openProduct(heroProduct.id)}
                     className="group relative block w-full aspect-[4/3] max-h-[420px] overflow-hidden rounded-[2rem] bg-amber-50 cursor-pointer shadow-[0_30px_60px_-26px_rgba(120,72,6,0.5)]"
                   >
-                    <img
+                    <img loading="lazy" decoding="async"
                       src={heroProduct.imageUrl || PRODUCT_IMG_FALLBACK}
                       alt={heroProduct.name}
                       className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
                       onError={(e) => { (e.target as HTMLImageElement).src = IMG_FALLBACK }}
                     />
+                    <ShareProductButton productName={heroProduct.name} price={heroProduct.price} productId={heroProduct.id} slug={storeSlug} storeName={store.name} />
                     {heroPct > 0 && (
                       <span
                         className="absolute top-4 left-4 text-white text-sm font-black px-3.5 py-1.5 rounded-full shadow-lg rotate-3"
@@ -233,12 +235,13 @@ export function BodegaTemplate({ store, products, storeSlug, planId, onProductCl
                     className="shrink-0 w-40 text-left group cursor-pointer"
                   >
                     <div className="relative aspect-square rounded-2xl overflow-hidden bg-amber-50 border-2 border-amber-100 shadow-sm group-hover:shadow-md group-hover:-translate-y-1 transition-all">
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={p.imageUrl || PRODUCT_IMG_FALLBACK}
                         alt={p.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         onError={(e) => { (e.target as HTMLImageElement).src = IMG_FALLBACK }}
                       />
+                    <ShareProductButton productName={p.name} price={p.price} productId={p.id} slug={storeSlug} storeName={store.name} />
                       <span
                         className="absolute top-2 left-2 text-white text-[10px] font-black px-2 py-1 rounded-full"
                         style={{ backgroundColor: primary }}
@@ -344,7 +347,7 @@ export function BodegaTemplate({ store, products, storeSlug, planId, onProductCl
                     onClick={() => openProduct(product.id)}
                   >
                     <div className="aspect-square bg-amber-50 relative overflow-hidden">
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={product.imageUrl || PRODUCT_IMG_FALLBACK}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -352,6 +355,7 @@ export function BodegaTemplate({ store, products, storeSlug, planId, onProductCl
                           (e.target as HTMLImageElement).src = IMG_FALLBACK
                         }}
                       />
+                    <ShareProductButton productName={product.name} price={product.price} productId={product.id} slug={storeSlug} storeName={store.name} />
                       {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
                         <div
                           className="absolute top-2 left-2 px-2 py-1 rounded-full text-white text-[10px] font-black shadow-sm"

@@ -1,4 +1,5 @@
 'use client'
+import { ShareProductButton } from './ShareProductButton'
 import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 
 import { useState, useMemo } from 'react'
@@ -58,7 +59,7 @@ export function NeonTemplate({ store, products, storeSlug, planId, onProductClic
       {/* ── Banner hero premium ── */}
       {store.bannerUrl ? (
         <div className="relative h-64 md:h-80 overflow-hidden bg-slate-900">
-          <img src={store.bannerUrl} alt="" className="w-full h-full object-cover" />
+          <img loading="lazy" decoding="async" src={store.bannerUrl} alt="" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/40 to-slate-900/20" />
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
             {store.logo && (
@@ -235,7 +236,7 @@ export function NeonTemplate({ store, products, storeSlug, planId, onProductClic
                     onClick={() => onProductClick ? onProductClick(product.id) : navigate({ page: 'product-detail', slug: storeSlug, productId: product.id })}
                   >
                     <div className="relative aspect-square rounded-2xl overflow-hidden bg-slate-50 border border-slate-200/90 group-hover:border-blue-300 group-hover:shadow-[0_12px_32px_-12px_rgba(37,99,235,0.25)] group-hover:-translate-y-0.5 transition-all duration-300">
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={product.imageUrl || PRODUCT_IMG_FALLBACK}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-[1.06] transition-transform duration-500"
@@ -243,6 +244,7 @@ export function NeonTemplate({ store, products, storeSlug, planId, onProductClic
                           (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK
                         }}
                       />
+                    <ShareProductButton productName={product.name} price={product.price} productId={product.id} slug={storeSlug} storeName={store.name} />
                       {product.originalPrice ? (
                         <div className="absolute top-2.5 left-2.5 px-2 py-1 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[10px] font-extrabold shadow-sm">
                           -{Math.round(((Number(product.originalPrice) - Number(product.price)) / Number(product.originalPrice)) * 100)}%

@@ -1,4 +1,5 @@
 'use client'
+import { ShareProductButton } from './ShareProductButton'
 import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 
 import { useState, useMemo } from 'react'
@@ -160,24 +161,28 @@ export function FloraTemplate({ store, products, storeSlug, planId, onProductCli
                   className="group relative block w-full aspect-[3/4] overflow-hidden rounded-[1.8rem] bg-[#F6E8EB] cursor-pointer shadow-[0_26px_50px_-24px_rgba(39,64,50,0.4)] col-span-1 translate-y-0"
                 >
                   {secondProduct && (
-                    <img
-                      src={secondProduct.imageUrl || PRODUCT_IMG_FALLBACK}
-                      alt={secondProduct.name}
-                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-700"
-                      onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
-                    />
+                    <>
+                      <img loading="lazy" decoding="async"
+                        src={secondProduct.imageUrl || PRODUCT_IMG_FALLBACK}
+                        alt={secondProduct.name}
+                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-700"
+                        onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
+                      />
+                      <ShareProductButton productName={secondProduct.name} price={secondProduct.price} productId={secondProduct.id} slug={storeSlug} storeName={store.name} />
+                    </>
                   )}
                 </button>
                 <button
                   onClick={() => openProduct(heroProduct.id)}
                   className="group relative block w-full aspect-[3/4] overflow-hidden rounded-[2rem] bg-[#F6E8EB] cursor-pointer shadow-[0_30px_60px_-24px_rgba(39,64,50,0.5)] col-span-1 scale-[1.08] z-10 border-4 border-white"
                 >
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={heroProduct.imageUrl || PRODUCT_IMG_FALLBACK}
                     alt={heroProduct.name}
                     className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-700"
                     onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
                   />
+                    <ShareProductButton productName={heroProduct.name} price={heroProduct.price} productId={heroProduct.id} slug={storeSlug} storeName={store.name} />
                   <span className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-sm text-[#4C7A5A] text-[10px] font-bold px-3.5 py-1.5 rounded-full shadow whitespace-nowrap">
                     El favorito
                   </span>
@@ -186,7 +191,7 @@ export function FloraTemplate({ store, products, storeSlug, planId, onProductCli
                   onClick={() => openProduct((thirdProduct || dealProduct || heroProduct).id)}
                   className="group relative block w-full aspect-[3/4] overflow-hidden rounded-[1.8rem] bg-[#E5EDE4] cursor-pointer shadow-[0_26px_50px_-24px_rgba(39,64,50,0.4)] col-span-1"
                 >
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={(thirdProduct || dealProduct)?.imageUrl || PRODUCT_IMG_FALLBACK}
                     alt={(thirdProduct || dealProduct)?.name || 'Producto'}
                     className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-700"
@@ -272,12 +277,13 @@ export function FloraTemplate({ store, products, storeSlug, planId, onProductCli
                   </button>
                 </div>
                 <button onClick={() => openProduct(dealProduct.id)} className="group relative aspect-[16/10] md:aspect-auto md:min-h-[320px] overflow-hidden cursor-pointer order-1 md:order-2">
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={dealProduct.imageUrl || PRODUCT_IMG_FALLBACK}
                     alt={dealProduct.name}
                     className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
                     onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
                   />
+                    <ShareProductButton productName={dealProduct.name} price={dealProduct.price} productId={dealProduct.id} slug={storeSlug} storeName={store.name} />
                 </button>
                 <Flower className="absolute -bottom-6 -left-6 w-28 h-28 text-white/10 pointer-events-none" />
               </motion.div>
@@ -355,12 +361,13 @@ export function FloraTemplate({ store, products, storeSlug, planId, onProductCli
                     >
                       <div className="relative bg-white rounded-[1.8rem] p-2.5 border border-[#EDE4D8] group-hover:-translate-y-1.5 group-hover:shadow-[0_28px_44px_-24px_rgba(76,122,90,0.55)] transition-all duration-300">
                         <div className="relative aspect-square overflow-hidden rounded-[1.4rem] bg-[#F6E8EB]">
-                          <img
+                          <img loading="lazy" decoding="async"
                             src={product.imageUrl || PRODUCT_IMG_FALLBACK}
                             alt={product.name}
                             className="w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-700"
                             onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
                           />
+                    <ShareProductButton productName={product.name} price={product.price} productId={product.id} slug={storeSlug} storeName={store.name} />
                           {product.featured && !product.originalPrice && (
                             <span className="absolute top-2 left-2 bg-[#F0D9DE] text-[#6B3B49] text-[9px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full">
                               Favorito

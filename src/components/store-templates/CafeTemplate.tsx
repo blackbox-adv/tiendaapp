@@ -1,4 +1,5 @@
 'use client'
+import { ShareProductButton } from './ShareProductButton'
 import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 
 import { useState, useMemo } from 'react'
@@ -148,12 +149,13 @@ export function CafeTemplate({ store, products, storeSlug, planId, onProductClic
                     onClick={() => openProduct(heroProduct.id)}
                     className="group relative block w-full aspect-[4/3] max-h-[430px] overflow-hidden rounded-[2.5rem] bg-[#F6ECDD] cursor-pointer shadow-[0_30px_60px_-26px_rgba(47,33,20,0.5)]"
                   >
-                    <img
+                    <img loading="lazy" decoding="async"
                       src={heroProduct.imageUrl || PRODUCT_IMG_FALLBACK}
                       alt={heroProduct.name}
                       className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
                       onError={(e) => { (e.target as HTMLImageElement).src = IMG_FALLBACK }}
                     />
+                    <ShareProductButton productName={heroProduct.name} price={heroProduct.price} productId={heroProduct.id} slug={storeSlug} storeName={store.name} />
                   </button>
                   <span className="absolute -top-3 left-8 -rotate-6 bg-[#708A4E] text-white text-[11px] font-extrabold px-4 py-2 rounded-full shadow-lg">
                     100% arábica ☕
@@ -211,12 +213,13 @@ export function CafeTemplate({ store, products, storeSlug, planId, onProductClic
                   </button>
                 </div>
                 <button onClick={() => openProduct(dealProduct.id)} className="group relative aspect-[16/10] md:aspect-auto md:min-h-[320px] overflow-hidden cursor-pointer order-1 md:order-2">
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={dealProduct.imageUrl || PRODUCT_IMG_FALLBACK}
                     alt={dealProduct.name}
                     className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
                     onError={(e) => { (e.target as HTMLImageElement).src = IMG_FALLBACK }}
                   />
+                    <ShareProductButton productName={dealProduct.name} price={dealProduct.price} productId={dealProduct.id} slug={storeSlug} storeName={store.name} />
                 </button>
                 <CupSoda className="absolute -bottom-6 -left-6 w-28 h-28 text-white/10 pointer-events-none" />
               </div>
@@ -312,12 +315,13 @@ export function CafeTemplate({ store, products, storeSlug, planId, onProductClic
                   >
                     <div className="relative bg-white rounded-3xl p-2.5 border border-[#F0E4D2] group-hover:-translate-y-1.5 group-hover:shadow-[0_28px_44px_-24px_rgba(185,127,69,0.6)] transition-all duration-300">
                       <div className="relative aspect-square overflow-hidden rounded-2xl bg-[#F6ECDD]">
-                        <img
+                        <img loading="lazy" decoding="async"
                           src={product.imageUrl || PRODUCT_IMG_FALLBACK}
                           alt={product.name}
                           className="w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-700"
                           onError={(e) => { (e.target as HTMLImageElement).src = IMG_FALLBACK }}
                         />
+                    <ShareProductButton productName={product.name} price={product.price} productId={product.id} slug={storeSlug} storeName={store.name} />
                         {product.featured && !product.originalPrice && (
                           <span className="absolute top-2 left-2 bg-[#2F2114] text-[#FFFDF8] text-[9px] font-extrabold uppercase tracking-wide px-2.5 py-1 rounded-full">
                             Favorito
