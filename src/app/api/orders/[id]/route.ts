@@ -4,6 +4,21 @@ import { authenticateRequest } from '@/lib/auth'
 import { apiError, apiSuccess } from '@/lib/api-response'
 import { serializeDecimals } from '@/lib/utils'
 
+// Acceso a pedidos: dueno, super_admin o empleado activo de la tienda
+async function canAccessStoreOrder(userId: string, role: string, storeId: string): Promise<boolean> {
+  const store = await db.store.findUnique({ where: { id: storeId }, select: { ownerId: true } })
+  if (!store) return false
+  if (store.ownerId === userId || role === 'super_admin') return true
+  if (role === 'store_employee') {
+    const member = await db.storeMember.findFirst({
+      where: { userId, storeId, isActive: true },
+      select: { id: true },
+    })
+    return !!member
+  }
+  return false
+}
+
 // ── GET /api/orders/[id] — Get single order (auth required, store ownership) ──
 export async function GET(
   request: NextRequest,
@@ -27,7 +42,7 @@ export async function GET(
       where: { id: order.storeId },
       select: { ownerId: true },
     })
-    if (!store || (store.ownerId !== auth.user.userId && auth.user.role !== 'super_admin')) {
+    if (!store || !(await canAccessStoreOrder(auth.user.userId, auth.user.role, order.storeId))) {
       return apiError('No tienes permisos para ver este pedido', 403, undefined, request)
     }
 
@@ -70,7 +85,7 @@ export async function PUT(
       where: { id: order.storeId },
       select: { ownerId: true },
     })
-    if (!store || (store.ownerId !== auth.user.userId && auth.user.role !== 'super_admin')) {
+    if (!store || !(await canAccessStoreOrder(auth.user.userId, auth.user.role, order.storeId))) {
       return apiError('No tienes permisos para actualizar este pedido', 403, undefined, request)
     }
 

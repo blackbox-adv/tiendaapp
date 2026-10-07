@@ -74,6 +74,8 @@ export const CANONICAL_PLANS: CanonicalPlan[] = [
       'Reportes de ventas en Excel',
       'Buscador y filtros avanzados',
       'Popup de ofertas y banner de anuncios',
+      'Chat con tus clientes dentro de la tienda',
+      'Hasta 5 empleados con su propio login y WhatsApp',
       'Landing IA para tus lanzamientos',
       'Notificaciones en tu panel',
       'Copys y descripciones con IA (muy pronto)',

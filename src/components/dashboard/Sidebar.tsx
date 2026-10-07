@@ -6,7 +6,8 @@ import { usePathname } from 'next/navigation'
 import { useAppStore } from '@/lib/store'
 import {
   LayoutDashboard, Package, Settings, Palette, CreditCard,
-  LogOut, ExternalLink, Store, Menu, X, QrCode, Megaphone, FolderOpen, ShoppingCart, Sparkles
+  LogOut, ExternalLink, Store, Menu, X, QrCode, Megaphone, FolderOpen, ShoppingCart, Sparkles,
+  MessageCircle, Users,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -14,15 +15,30 @@ import { Separator } from '@/components/ui/separator'
 import { NotificationsBell } from '@/components/dashboard/NotificationsBell'
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
 
-const navItems = [
+// El empleado ve SOLO lo que le corresponde: pedidos y chats de la tienda
+interface NavItem {
+  href: string
+  label: string
+  icon: typeof LayoutDashboard
+  premium?: boolean
+}
+
+const ownerNavItems: NavItem[] = [
   { href: '/dashboard', label: 'Panel', icon: LayoutDashboard },
   { href: '/dashboard/products', label: 'Productos', icon: Package },
   { href: '/dashboard/orders', label: 'Pedidos', icon: ShoppingCart },
+  { href: '/dashboard/chats', label: 'Chats', icon: MessageCircle, premium: true },
   { href: '/dashboard/categories', label: 'Categorías', icon: FolderOpen },
   { href: '/dashboard/template', label: 'Plantillas', icon: Palette },
   { href: '/dashboard/landing', label: 'Landing IA', icon: Sparkles },
+  { href: '/dashboard/employees', label: 'Empleados', icon: Users, premium: true },
   { href: '/dashboard/plan', label: 'Mi Plan', icon: CreditCard },
   { href: '/dashboard/settings', label: 'Configuración', icon: Settings },
+]
+
+const employeeNavItems: NavItem[] = [
+  { href: '/dashboard/orders', label: 'Pedidos', icon: ShoppingCart },
+  { href: '/dashboard/chats', label: 'Chats', icon: MessageCircle },
 ]
 
 function SidebarContent({ onClose }: { onClose?: () => void }) {
@@ -61,6 +77,9 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
     if (href === '/dashboard') return pathname === '/dashboard'
     return pathname.startsWith(href)
   }
+
+  const isEmployee = currentUser.role === 'store_employee'
+  const navItems = isEmployee ? employeeNavItems : ownerNavItems
 
   return (
     <div className="flex flex-col h-full bg-[#1e1b4b] text-white">
@@ -107,7 +126,10 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
               }`}
             >
               <Icon className="w-5 h-5" />
-              {item.label}
+              <span className="flex-1">{item.label}</span>
+              {item.premium && (
+                <span className="text-[9px] font-bold bg-violet-500/30 text-violet-100 rounded-full px-1.5 py-0.5">PRO</span>
+              )}
             </Link>
           )
         })}

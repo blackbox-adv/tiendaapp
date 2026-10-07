@@ -44,6 +44,15 @@ export default function DashboardLayoutClient({
     }
   }, [authResolved, isSyncing, currentUser, router]);
 
+  // El empleado no tiene panel propio: su hub es Pedidos
+  useEffect(() => {
+    if (authResolved && currentUser?.role === 'store_employee') {
+      if (typeof window !== 'undefined' && window.location.pathname === '/dashboard') {
+        router.replace('/dashboard/orders');
+      }
+    }
+  }, [authResolved, currentUser, router]);
+
   // Esperando restauración inicial o sincronización en curso → spinner
   if (!authResolved || isSyncing) {
     return (

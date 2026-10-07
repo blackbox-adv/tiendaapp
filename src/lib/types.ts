@@ -31,7 +31,7 @@ export interface User {
   name: string
   email: string
   password: string
-  role: 'owner' | 'admin' | 'store_owner' | 'super_admin'
+  role: 'owner' | 'admin' | 'store_owner' | 'super_admin' | 'store_employee'
   planId: string
   storeId: string | null
   isActive: boolean
