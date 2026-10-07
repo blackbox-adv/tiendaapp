@@ -62,7 +62,7 @@ const templates = [
     desc: 'Llena de color y energía',
     color: 'from-rose-500 to-orange-500',
     icon: Palette,
-    plan: 'pro',
+    plan: 'free',
     demoSlug: 'vibrante',
   },
   {
@@ -71,7 +71,7 @@ const templates = [
     desc: 'Atemporal y sofisticada',
     color: 'from-amber-600 to-amber-900',
     icon: Store,
-    plan: 'pro',
+    plan: 'free',
     demoSlug: 'clasica',
   },
   {
