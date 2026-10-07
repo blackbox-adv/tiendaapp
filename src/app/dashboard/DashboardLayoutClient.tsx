@@ -44,10 +44,13 @@ export default function DashboardLayoutClient({
     }
   }, [authResolved, isSyncing, currentUser, router]);
 
-  // El empleado no tiene panel propio: su hub es Pedidos
+  // El empleado no tiene panel propio: su hub es Pedidos. Cualquier otra ruta
+  // del dashboard (productos, plantillas, configuración...) también lo expulsa.
   useEffect(() => {
     if (authResolved && currentUser?.role === 'store_employee') {
-      if (typeof window !== 'undefined' && window.location.pathname === '/dashboard') {
+      const p = typeof window !== 'undefined' ? window.location.pathname : '';
+      const allowed = p.startsWith('/dashboard/orders') || p.startsWith('/dashboard/chats');
+      if (p === '/dashboard' || (p.startsWith('/dashboard') && !allowed)) {
         router.replace('/dashboard/orders');
       }
     }
