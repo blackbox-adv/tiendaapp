@@ -89,7 +89,9 @@ model Store {
   // LatAm: otros métodos de pago del país (Mercado Pago, Nequi, Sinpe Móvil, transferencia, etc.)
   otherPayments    Json     @default("[]")            // Array of {label, number}
   // Opciones de envío que la tienda ofrece a sus clientes
-  shippingOptions  Json     @default("[]")            // Array of {label, price, time}
+  shippingOptions  Json     @default("[]")            // Array of {label, price, time, payFirst?}
+  // Guía de tallas por tienda (Pro/Premium): {enabled, type, rows:[{size,a,b,c}], note}
+  sizeGuide        Json     @default("{}")
 
   isDemo         Boolean  @default(false)
   isActive       Boolean  @default(true)

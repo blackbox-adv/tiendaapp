@@ -22,9 +22,12 @@ import {
   Plus,
   Trash2,
   Megaphone,
+  Ruler,
 } from 'lucide-react';
 
-import type { ShippingOption, OtherPayment } from '@/lib/types';
+import type { ShippingOption, OtherPayment, SizeGuide, SizeGuideType, SizeGuideRow } from '@/lib/types';
+import { SIZE_GUIDE_COLUMNS, SIZE_GUIDE_TYPES, SIZE_GUIDE_TYPE_LABEL } from '@/lib/size-guide';
+import { SizeGuideDiagram } from '@/components/store-templates/SizeGuideDiagram';
 
 interface StoreData {
   id: string;
@@ -40,6 +43,7 @@ interface StoreData {
   logo: string | null;
   otherPayments?: OtherPayment[] | null;
   shippingOptions?: ShippingOption[] | null;
+  sizeGuide?: SizeGuide | null;
 }
 
 export default function SettingsClient() {
@@ -66,6 +70,16 @@ export default function SettingsClient() {
 
   // Opciones de envío que la tienda ofrece
   const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
+  // Guía de tallas (Pro/Premium)
+  const [planType, setPlanType] = useState<'free' | 'pro' | 'premium'>('free');
+  const [sizeGuideEnabled, setSizeGuideEnabled] = useState(false);
+  const [sizeGuideType, setSizeGuideType] = useState<SizeGuideType>('polo');
+  const [sizeGuideRows, setSizeGuideRows] = useState<SizeGuideRow[]>([
+    { size: 'S', a: '', b: '', c: '' },
+    { size: 'M', a: '', b: '', c: '' },
+    { size: 'L', a: '', b: '', c: '' },
+  ]);
+  const [sizeGuideNote, setSizeGuideNote] = useState('');
   // Franja de anuncio (banner de la tienda)
   const [announcementText, setAnnouncementText] = useState('');
   const [announcementLink, setAnnouncementLink] = useState('');
@@ -119,6 +133,18 @@ export default function SettingsClient() {
             ? (storeData as StoreData).shippingOptions!.filter((s) => s && s.label)
             : []
         );
+        // Plan del dueño (para gating de la guía de tallas)
+        const sub = data.subscriptions?.[0];
+        const t = sub?.plan?.type;
+        setPlanType(t === 'pro' || t === 'premium' ? t : 'free');
+        // Guía de tallas guardada
+        const sg = (storeData as StoreData).sizeGuide;
+        if (sg && sg.enabled && Array.isArray(sg.rows) && sg.rows.length > 0) {
+          setSizeGuideEnabled(true);
+          setSizeGuideType(sg.type || 'polo');
+          setSizeGuideRows(sg.rows.map((r: SizeGuideRow) => ({ size: r.size || '', a: r.a || '', b: r.b || '', c: r.c || '' })));
+          setSizeGuideNote(sg.note || '');
+        }
       }
     } catch {
       setError('Error de conexión');
@@ -188,6 +214,9 @@ export default function SettingsClient() {
           plinQrUrl,
           otherPayments: otherPayments.filter((p) => p.label.trim()),
           shippingOptions: shippingOptions.filter((s) => s.label.trim()),
+          sizeGuide: sizeGuideEnabled
+            ? { enabled: true, type: sizeGuideType, rows: sizeGuideRows, note: sizeGuideNote }
+            : { enabled: false },
         }),
       });
 
@@ -523,50 +552,67 @@ export default function SettingsClient() {
                 </p>
 
                 {shippingOptions.map((s, i) => (
-                  <div key={i} className="flex flex-col sm:flex-row gap-2 mb-2">
-                    <Input
-                      placeholder="Zona o método (ej: Delivery centro)"
-                      value={s.label}
-                      maxLength={60}
-                      onChange={(e) => {
-                        const next = [...shippingOptions];
-                        next[i] = { ...s, label: e.target.value };
-                        setShippingOptions(next);
-                      }}
-                    />
-                    <Input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      placeholder="Costo (vacío = gratis)"
-                      value={s.price ?? ''}
-                      onChange={(e) => {
-                        const next = [...shippingOptions];
-                        const v = e.target.value === '' ? null : parseFloat(e.target.value);
-                        next[i] = { ...s, price: v !== null && isFinite(v) && v > 0 ? v : null };
-                        setShippingOptions(next);
-                      }}
-                      className="sm:w-44"
-                    />
-                    <Input
-                      placeholder="Tiempo (ej: 24 horas)"
-                      value={s.time}
-                      maxLength={40}
-                      onChange={(e) => {
-                        const next = [...shippingOptions];
-                        next[i] = { ...s, time: e.target.value };
-                        setShippingOptions(next);
-                      }}
-                      className="sm:w-44"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShippingOptions(shippingOptions.filter((_, j) => j !== i))}
-                      className="p-2 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
-                      aria-label={`Quitar ${s.label || 'opción de envío'}`}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                  <div key={i} className="mb-3">
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <Input
+                        placeholder="Zona o método (ej: Delivery centro)"
+                        value={s.label}
+                        maxLength={60}
+                        onChange={(e) => {
+                          const next = [...shippingOptions];
+                          next[i] = { ...s, label: e.target.value };
+                          setShippingOptions(next);
+                        }}
+                      />
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="Costo (vacío = gratis)"
+                        value={s.price ?? ''}
+                        onChange={(e) => {
+                          const next = [...shippingOptions];
+                          const v = e.target.value === '' ? null : parseFloat(e.target.value);
+                          next[i] = { ...s, price: v !== null && isFinite(v) && v > 0 ? v : null };
+                          setShippingOptions(next);
+                        }}
+                        className="sm:w-44"
+                      />
+                      <Input
+                        placeholder="Tiempo (ej: 24 horas)"
+                        value={s.time}
+                        maxLength={40}
+                        onChange={(e) => {
+                          const next = [...shippingOptions];
+                          next[i] = { ...s, time: e.target.value };
+                          setShippingOptions(next);
+                        }}
+                        className="sm:w-44"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShippingOptions(shippingOptions.filter((_, j) => j !== i))}
+                        className="p-2 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
+                        aria-label={`Quitar ${s.label || 'opción de envío'}`}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <label className="mt-1.5 flex items-start gap-2 text-xs text-gray-600 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={!!s.payFirst}
+                        onChange={(e) => {
+                          const next = [...shippingOptions];
+                          next[i] = { ...s, payFirst: e.target.checked };
+                          setShippingOptions(next);
+                        }}
+                        className="accent-violet-600 mt-0.5"
+                      />
+                      <span>
+                        <span className="font-medium">El envío se paga primero</span> — el cliente yapea solo el costo de esta zona al confirmar y paga el producto contra entrega (ideal para clientes nuevos)
+                      </span>
+                    </label>
                   </div>
                 ))}
 
@@ -579,6 +625,155 @@ export default function SettingsClient() {
                     <Plus className="w-4 h-4" />
                     Agregar opción de envío
                   </button>
+                )}
+              </div>
+
+              {/* Guía de tallas (Pro y Premium) */}
+              <div className="pt-2 border-t border-gray-100">
+                <div className="flex items-center gap-2 mt-4 mb-1 flex-wrap">
+                  <Ruler className="w-4 h-4 text-violet-600" />
+                  <h4 className="text-sm font-semibold text-gray-900">Guía de tallas</h4>
+                  {planType === 'pro' || planType === 'premium' ? (
+                    <span className="text-[10px] font-semibold uppercase tracking-wide bg-violet-100 text-violet-700 rounded-full px-2 py-0.5">Incluido en tu plan</span>
+                  ) : (
+                    <span className="text-[10px] font-semibold uppercase tracking-wide bg-amber-100 text-amber-700 rounded-full px-2 py-0.5">Pro y Premium</span>
+                  )}
+                </div>
+                <p className="text-xs text-gray-500 mb-4">
+                  Nosotros te damos el diagrama estándar de medidas y tú solo llenas tus números. Tus clientes lo verán en cada producto antes de comprar — menos dudas, más ventas.
+                </p>
+
+                {planType !== 'pro' && planType !== 'premium' ? (
+                  <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 text-xs text-amber-800">
+                    La Guía de tallas está disponible en los planes <b>Pro y Premium</b>.{' '}
+                    <a href="/dashboard/plan" className="underline font-semibold">Ver planes</a>
+                  </div>
+                ) : (
+                  <>
+                    <label className="flex items-center gap-2 text-sm text-gray-700 mb-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={sizeGuideEnabled}
+                        onChange={(e) => setSizeGuideEnabled(e.target.checked)}
+                        className="accent-violet-600 w-4 h-4"
+                      />
+                      Mostrar guía de tallas en mis productos
+                    </label>
+
+                    {sizeGuideEnabled && (
+                      <div className="space-y-4">
+                        <div>
+                          <p className="text-xs font-medium text-gray-600 mb-1.5">Tipo de prenda (define el diagrama):</p>
+                          <div className="flex flex-wrap gap-2">
+                            {SIZE_GUIDE_TYPES.map((t) => (
+                              <button
+                                key={t}
+                                type="button"
+                                onClick={() => setSizeGuideType(t)}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                                  sizeGuideType === t
+                                    ? 'border-violet-500 bg-violet-50 text-violet-700'
+                                    : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                                }`}
+                              >
+                                {SIZE_GUIDE_TYPE_LABEL[t]}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row gap-4 items-start">
+                          <div className="rounded-xl border border-gray-200 bg-gray-50 p-3 text-gray-700 flex-shrink-0">
+                            <SizeGuideDiagram type={sizeGuideType} className="w-40 h-40" />
+                          </div>
+                          <div className="flex-1 min-w-0 w-full">
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-xs">
+                                <thead>
+                                  <tr className="text-left text-gray-500">
+                                    <th className="py-1.5 pr-2 font-medium">Talla</th>
+                                    {SIZE_GUIDE_COLUMNS[sizeGuideType].map((col) => (
+                                      <th key={col.key} className="py-1.5 pr-2 font-medium">{col.label}</th>
+                                    ))}
+                                    <th className="py-1.5" aria-label="Acciones" />
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {sizeGuideRows.map((row, i) => (
+                                    <tr key={i}>
+                                      <td className="py-1 pr-2">
+                                        <Input
+                                          value={row.size}
+                                          placeholder="S"
+                                          maxLength={10}
+                                          onChange={(e) => {
+                                            const next = [...sizeGuideRows];
+                                            next[i] = { ...row, size: e.target.value };
+                                            setSizeGuideRows(next);
+                                          }}
+                                          className="w-16 h-8 text-xs"
+                                        />
+                                      </td>
+                                      {SIZE_GUIDE_COLUMNS[sizeGuideType].map((col) => (
+                                        <td key={col.key} className="py-1 pr-2">
+                                          <Input
+                                            value={row[col.key] || ''}
+                                            placeholder="0"
+                                            maxLength={10}
+                                            onChange={(e) => {
+                                              const next = [...sizeGuideRows];
+                                              next[i] = { ...row, [col.key]: e.target.value };
+                                              setSizeGuideRows(next);
+                                            }}
+                                            className="w-20 h-8 text-xs"
+                                          />
+                                        </td>
+                                      ))}
+                                      <td className="py-1">
+                                        <button
+                                          type="button"
+                                          onClick={() => setSizeGuideRows(sizeGuideRows.filter((_, j) => j !== i))}
+                                          className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
+                                          aria-label={`Quitar talla ${row.size || i + 1}`}
+                                        >
+                                          <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                            {sizeGuideRows.length < 12 && (
+                              <button
+                                type="button"
+                                onClick={() => setSizeGuideRows([...sizeGuideRows, { size: '', a: '', b: '', c: '' }])}
+                                className="inline-flex items-center gap-1.5 text-xs text-violet-600 hover:text-violet-700 font-medium mt-2"
+                              >
+                                <Plus className="w-3.5 h-3.5" />
+                                Agregar talla
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        <div>
+                          <p className="text-xs font-medium text-gray-600 mb-1">Nota opcional (se muestra bajo la tabla):</p>
+                          <Input
+                            value={sizeGuideNote}
+                            placeholder="Ej: Medidas de la prenda, tolerancia ±2 cm"
+                            maxLength={200}
+                            onChange={(e) => setSizeGuideNote(e.target.value)}
+                            className="text-sm"
+                          />
+                        </div>
+
+                        <p className="text-xs text-gray-500">
+                          Se guarda cuando presiones <b>Guardar cambios</b>. El diagrama con las medidas señaladas aparece junto a tu tabla.
+                        </p>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
 
