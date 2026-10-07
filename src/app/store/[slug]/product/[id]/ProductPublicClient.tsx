@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import { useAppStore } from '@/lib/store'
 import { ProductDetailView } from '@/components/store-templates/ProductDetailView'
-import type { Store, Product, ShippingOption, OtherPayment } from '@/lib/types'
+import type { Store, Product, ShippingOption, OtherPayment, SizeGuide } from '@/lib/types'
 
 function transformStore(s: Record<string, unknown>): Store {
   return {
@@ -39,6 +39,9 @@ function transformStore(s: Record<string, unknown>): Store {
     plinNumber: (s.plinNumber as string) || null,
     otherPayments: Array.isArray(s.otherPayments) ? (s.otherPayments as OtherPayment[]) : [],
     shippingOptions: Array.isArray(s.shippingOptions) ? (s.shippingOptions as ShippingOption[]) : [],
+    sizeGuide: (s.sizeGuide && typeof s.sizeGuide === 'object' && !Array.isArray(s.sizeGuide))
+      ? (s.sizeGuide as SizeGuide)
+      : null,
   }
 }
 
