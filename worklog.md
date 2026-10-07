@@ -678,3 +678,41 @@ Stage Summary:
 - Tienda QA: qa-recorrido-test (dueño puede borrarla desde admin o yo lo hago)
 - Pendiente dueño: número/email de soporte reales en Admin→Configuración (DB tiene placeholders 51999888777 / hola@tiendapp.pe / whatsappSupport 51999999999 — no los cambié sin aprobación); tiendas de prueba en sitemap (tienda-uno, prueba, aceshop) desactivarlas si no son reales; rotar credenciales
 - Propuestas IA entregadas (fotos fondo blanco + descripciones + más) — SIN implementar, esperando aprobación
+
+---
+Task ID: 37
+Agent: Super Z (main)
+Task: Rebrand completo TiendApp -> Kyllari + dominio kyllari.com + contactos reales
+
+Work Log:
+- Verificado: kyllari.com VIVO (DNS Vercel + SSL automatico). tienda.blackboxperu.com removido por el dueno (ahora 404).
+- Repo real identificado: /home/z/my-project/tiendaapp (el root del workspace es snapshot viejo; NO tocar ni pushear desde ahi).
+- scripts/rebrand-kyllari.mjs: 253 reemplazos en 97 archivos (TiendApp->Kyllari, dominio viejo->kyllari.com, hola@tiendapp.pe->contacto@kyllari.com, +51999888777/+51999999999->+51958297236). Protegidos: tiendapp_token/user/ab/cookie_consent/cart_v1 (claves localStorage), admin@tiendapp.com y demo@tiendapp.pe (cuentas internas).
+- Footer: links Instagram/Facebook /tiendapp eliminados (cuentas ajenas); CSV plantilla renombrado; CORS agrega www.kyllari.com; support.ts default 51958297236.
+- Assets nuevos: favicon.ico (ICO real multi-tamano), apple-touch-icon.png 180, og-image.png 1200x630 (K terracota serif + tagline), logo.svg. Script: /home/z/my-project/scripts/rebrand-assets.py (Pillow).
+- BD: PlatformSetting VACIA en produccion (defaults de codigo ya corregidos). Tiendas demo sin placeholders. Sin tocar tiendas reales.
+- Descubierto post-deploy: NEXT_PUBLIC_APP_URL en Vercel apuntaba al dominio viejo y sobrescribia fallbacks (canonical/sitemap/OG/QR muertos). Fix: APP_URL centralizada en src/lib/env.ts con guardia anti-dominios-muertos; 11 archivos migrados (scripts/fix-app-url.mjs).
+- Incidente: commit e5c087a se pusheo con tsc roto (pipe con head enmascaro exit code; email.ts tenia const APP_URL duplicada). Vercel rechazo ese build; deploy anterior siguio vivo. Fix inmediato 7003878. Leccion: gate siempre con set -o pipefail y echo $?. 
+- Commits: 81269ab (rebrand), e5c087a (APP_URL), 7003878 (fix email.ts). Produccion verificada: title Kyllari, 0 TiendApp en HTML, canonical/og/sitemap kyllari.com, og-image nueva, health 200, upload 401, demo 200.
+
+Stage Summary:
+- Produccion = kyllari.com con marca Kyllari completa y contacto real. Pedientes del dueno: (1) Vercel env NEXT_PUBLIC_APP_URL -> https://kyllari.com o eliminarla; (2) re-agregar tienda.blackboxperu.com en Vercel como Redirect 301 -> kyllari.com (hoy 404); (3) crear buzon contacto@kyllari.com en su proveedor email; (4) opcional: verificar kyllari.com en Resend para FROM propio; (5) Search Console + sitemap.
+
+---
+Task ID: 38
+Agent: Super Z (main)
+Task: Chat interno cliente-tienda + empleados/vendedoras (Premium)
+
+Work Log:
+- Escalabilidad respondida al dueño ANTES de construir (su condición): BD trivial a 4k tiendas; sin Realtime (límite de conexiones Supabase) -> polling indexado; imágenes ya con lazy loading.
+- BD: tablas ChatMessage + StoreMember creadas en Supabase via SQL idempotente (scripts/create-chat-tables.sql, prisma db execute) + modelos en schema.prisma + prisma generate. StoreMember SIN relación Prisma a Store/User (queries en dos pasos indexados) para evitar tocar el modelo Store.
+- APIs nuevas: /api/chat (público: POST mensaje + GET hilo con capability UUID en localStorage, rate limit 20/min por ip+thread), /api/chats (bandeja: hilos con unread, marca leidos, responder con authorWhatsapp), /api/store-members + /[id] (CRUD empleados, max 5, premium, owner-only).
+- Empleados = User(role store_employee) + StoreMember: reusan TODO el auth JWT existente (login en /api/auth sin cambios, tokenVersion, isActive).
+- Parches: /api/user entrega la tienda del empleado (misma forma -> pedidos funciona sin cambios); /api/orders GET + /api/orders/[id] GET/PUT aceptan empleados activos (canAccessStoreOrder).
+- UI: ChatWidget flotante en StoreView (solo premium, arriba del botón WhatsApp, polling 5s solo abierto, nombre persistente, link WhatsApp por respuesta); /dashboard/chats (hilos + conversación, polling 6s/4s); /dashboard/employees (CRUD + editar WhatsApp); Sidebar con Chats/Empleados (badge PRO) y empleado ve solo Pedidos+Chats; /dashboard redirige a pedidos para empleados; plans.ts: +Chat +5 empleados en features Premium.
+- QA E2E en producción (qa-chat-e2e.sh): 10/11 reales PASS. Detectado: POST {} da 404 (cae a validación de tienda), el detector inicial del QA era erróneo, NO era deploy fallido (GitHub status confirmó success; middleware no bloquea, matcher catch-all incluye /api/chat).
+- Cleanup QA completo: 2 subs premium eliminadas (duplicada del timeout), empleado de prueba borrado, 6 mensajes QA borrados; tienda QA verificada free de nuevo (chat 404 correcto).
+
+Stage Summary:
+- Feature Premium completo en producción: chat interno (ahorra WhatsApp) + empleados con login propio y WhatsApp para derivar. Commits: 9435ce8 (feature). QA scripts: qa-premium.mjs (up/down), qa-chat-e2e.sh, qa-cleanup.mjs.
+- Pendiente conocido: badge de no leídos en Navbar (opcional); notificaciones push de nuevos mensajes (opcional).
