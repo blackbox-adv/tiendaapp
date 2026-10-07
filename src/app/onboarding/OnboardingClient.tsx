@@ -38,6 +38,10 @@ import {
   Dumbbell,
   Coffee,
   Flower,
+  ChefHat,
+  Fish,
+  Croissant,
+  Beer,
 } from 'lucide-react';
 import { RUBROS, getRubro } from '@/lib/rubros';
 import { createDemoProducts } from '@/lib/demo-products';
@@ -231,6 +235,51 @@ const templates = [
     icon: Flower,
     plan: 'premium',
     demoSlug: 'flora',
+  },
+  {
+    id: 'mesa',
+    name: 'Mesa',
+    desc: 'Restaurante de casa: menú del día y carta elegante',
+    color: 'from-[#A34A28] to-[#E2C9A8]',
+    icon: ChefHat,
+    plan: 'premium',
+    demoSlug: 'mesa',
+  },
+  {
+    id: 'sushi',
+    name: 'Nikkei',
+    desc: 'Sushi bar claro: rolls, tablas y rojo japonés',
+    color: 'from-[#C73E3A] to-[#FBE9E8]',
+    icon: Fish,
+    plan: 'premium',
+    demoSlug: 'sushi',
+  },
+  {
+    id: 'cafe',
+    name: 'Barista',
+    desc: 'Cafetería moderna: lattes, frappés y postres',
+    color: 'from-[#B97F45] to-[#F6ECDD]',
+    icon: Croissant,
+    plan: 'premium',
+    demoSlug: 'cafe',
+  },
+  {
+    id: 'bar',
+    name: 'Barra',
+    desc: 'Bar de barrio: happy hour, tragos y piqueos',
+    color: 'from-[#2E4B3F] to-[#C9862B]',
+    icon: Beer,
+    plan: 'premium',
+    demoSlug: 'bar',
+  },
+  {
+    id: 'pop',
+    name: 'Pop',
+    desc: 'E-commerce multi-rubro: ofertas y envío rápido',
+    color: 'from-[#0E9384] to-[#F59E0B]',
+    icon: Store,
+    plan: 'premium',
+    demoSlug: 'pop',
   },
 ];
 

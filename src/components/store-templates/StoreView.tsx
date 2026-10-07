@@ -30,6 +30,11 @@ import { TecaTemplate } from './TecaTemplate'
 import { VoltTemplate } from './VoltTemplate'
 import { GranoTemplate } from './GranoTemplate'
 import { FloraTemplate } from './FloraTemplate'
+import { MesaTemplate } from './MesaTemplate'
+import { SushiTemplate } from './SushiTemplate'
+import { CafeTemplate } from './CafeTemplate'
+import { BarTemplate } from './BarTemplate'
+import { PopTemplate } from './PopTemplate'
 import { PromoPopup } from './PromoPopup'
 import { CartButton } from './CartButton'
 import type { Product, Store as StoreType } from '@/lib/types'
@@ -90,7 +95,7 @@ export function StoreView({ slug }: { slug: string }) {
                 secondary: data.secondaryColor || '#10B981',
               },
               whatsappNumber: data.whatsappNumber || '',
-              template: (data.template as 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist' | 'bodega' | 'sabor' | 'moda' | 'vitrina' | 'neon' | 'boutique' | 'editorial' | 'atelier' | 'terracota' | 'dulce' | 'calle' | 'aura' | 'teca' | 'volt' | 'grano' | 'flora') || 'moderna',
+              template: (data.template as 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist' | 'bodega' | 'sabor' | 'moda' | 'vitrina' | 'neon' | 'boutique' | 'editorial' | 'atelier' | 'terracota' | 'dulce' | 'calle' | 'aura' | 'teca' | 'volt' | 'grano' | 'flora' | 'mesa' | 'sushi' | 'cafe' | 'bar' | 'pop') || 'moderna',
               bannerUrl: data.bannerUrl || '',
               userId: data.ownerId || '',
               isActive: data.isActive ?? true,
@@ -310,6 +315,11 @@ export function StoreView({ slug }: { slug: string }) {
       {displayStore!.template === 'volt' && <VoltTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} onProductClick={handleProductClick} />}
       {displayStore!.template === 'grano' && <GranoTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} onProductClick={handleProductClick} />}
       {displayStore!.template === 'flora' && <FloraTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} onProductClick={handleProductClick} />}
+      {displayStore!.template === 'mesa' && <MesaTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} onProductClick={handleProductClick} />}
+      {displayStore!.template === 'sushi' && <SushiTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} onProductClick={handleProductClick} />}
+      {displayStore!.template === 'cafe' && <CafeTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} onProductClick={handleProductClick} />}
+      {displayStore!.template === 'bar' && <BarTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} onProductClick={handleProductClick} />}
+      {displayStore!.template === 'pop' && <PopTemplate store={displayStore!} products={displayProducts} storeSlug={slug} planId={storePlanId} onProductClick={handleProductClick} />}
 
       {/* WhatsApp Float */}
       <WhatsAppButton whatsappNumber={displayStore!.whatsappNumber} />

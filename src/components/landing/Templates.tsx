@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Eye, Crown, ArrowRight, Search, Sparkles, Gem, Sun, Minimize2, ShoppingBasket, UtensilsCrossed, Shirt, BookOpen, Cpu, ShoppingBag, Newspaper, Flower2, Hand, Cake, Zap, Armchair, Dumbbell, Coffee, Flower, LayoutGrid } from 'lucide-react'
+import { Eye, Crown, ArrowRight, Search, Sparkles, Gem, Sun, Minimize2, ShoppingBasket, UtensilsCrossed, Shirt, BookOpen, Cpu, ShoppingBag, Newspaper, Flower2, Hand, Cake, Zap, Armchair, Dumbbell, Coffee, Flower, LayoutGrid, ChefHat, Fish, Croissant, Beer, Store } from 'lucide-react'
 import { PLAN_PRICES } from '@/lib/plans'
 import { useAppStore } from '@/lib/store'
 
@@ -146,6 +146,61 @@ const templates: Template[] = [
     tags: ['general'],
     isNew: true,
     icon: Flower,
+  },
+  {
+    id: 'mesa',
+    name: 'Mesa',
+    plan: 'premium',
+    planLabel: 'Premium',
+    description: 'Restaurante de casa: menú del día, carta elegante con serif y reservas por WhatsApp. Sazón que se nota.',
+    bestFor: ['Restaurantes', 'Menú del día', 'Delivery'],
+    tags: ['comida'],
+    isNew: true,
+    icon: ChefHat,
+  },
+  {
+    id: 'sushi',
+    name: 'Nikkei',
+    plan: 'premium',
+    planLabel: 'Premium',
+    description: 'Sushi bar claro y moderno: rojo japonés, círculos tipo nigiri y tablas protagonistas. Fresco de verdad.',
+    bestFor: ['Sushi', 'Nikkei', 'Ceviches'],
+    tags: ['comida'],
+    isNew: true,
+    icon: Fish,
+  },
+  {
+    id: 'cafe',
+    name: 'Barista',
+    plan: 'premium',
+    planLabel: 'Premium',
+    description: 'Cafetería moderna y amigable: lattes, frappés y postres con stickers y promos 2x1.',
+    bestFor: ['Cafeterías', 'Postres', 'Frappés'],
+    tags: ['comida'],
+    isNew: true,
+    icon: Croissant,
+  },
+  {
+    id: 'bar',
+    name: 'Barra',
+    plan: 'premium',
+    planLabel: 'Premium',
+    description: 'Bar de barrio con carácter: verde botella, ámbar, happy hour y piqueos que se comparten.',
+    bestFor: ['Bares', 'Piqueos', 'Cantinas'],
+    tags: ['comida'],
+    isNew: true,
+    icon: Beer,
+  },
+  {
+    id: 'pop',
+    name: 'Pop',
+    plan: 'premium',
+    planLabel: 'Premium',
+    description: 'E-commerce multi-rubro claro y directo: ofertas protagonistas, envío gratis y catálogo veloz.',
+    bestFor: ['Tiendas variadas', 'Hogar', 'Tech'],
+    tags: ['general', 'tech', 'hogar'],
+    isNew: true,
+    icon: Store,
   },
   {
     id: 'moda',
