@@ -5,7 +5,8 @@
   "scripts": {
     "postinstall": "prisma generate",
     "dev": "next dev -p 3000",
-    "build": "next build",
+    "build": "node scripts/check-critical-files.mjs && next build",
+    "guard": "node scripts/check-critical-files.mjs",
     "start": "NODE_ENV=production next start",
     "lint": "eslint .",
     "db:push": "prisma db push",
