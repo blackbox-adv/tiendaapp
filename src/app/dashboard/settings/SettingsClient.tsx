@@ -133,10 +133,14 @@ export default function SettingsClient() {
             ? (storeData as StoreData).shippingOptions!.filter((s) => s && s.label)
             : []
         );
-        // Plan del dueño (para gating de la guía de tallas)
+        // Plan del dueño (para gating de la guía de tallas y del envío por adelantado)
         const sub = data.subscriptions?.[0];
         const t = sub?.plan?.type;
         setPlanType(t === 'pro' || t === 'premium' ? t : 'free');
+        // Plan Free: limpiar flags "se paga primero" obsoletos (feature Pro/Premium)
+        if (t !== 'pro' && t !== 'premium') {
+          setShippingOptions((prev) => prev.map((s) => ({ ...s, payFirst: false })));
+        }
         // Guía de tallas guardada
         const sg = (storeData as StoreData).sizeGuide;
         if (sg && sg.enabled && Array.isArray(sg.rows) && sg.rows.length > 0) {
@@ -598,21 +602,23 @@ export default function SettingsClient() {
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
-                    <label className="mt-1.5 flex items-start gap-2 text-xs text-gray-600 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={!!s.payFirst}
-                        onChange={(e) => {
-                          const next = [...shippingOptions];
-                          next[i] = { ...s, payFirst: e.target.checked };
-                          setShippingOptions(next);
-                        }}
-                        className="accent-violet-600 mt-0.5"
-                      />
-                      <span>
-                        <span className="font-medium">El envío se paga primero</span> — el cliente yapea solo el costo de esta zona al confirmar y paga el producto contra entrega (ideal para clientes nuevos)
-                      </span>
-                    </label>
+                    {(planType === 'pro' || planType === 'premium') && (
+                      <label className="mt-1.5 flex items-start gap-2 text-xs text-gray-600 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={!!s.payFirst}
+                          onChange={(e) => {
+                            const next = [...shippingOptions];
+                            next[i] = { ...s, payFirst: e.target.checked };
+                            setShippingOptions(next);
+                          }}
+                          className="accent-violet-600 mt-0.5"
+                        />
+                        <span>
+                          <span className="font-medium">El envío se paga primero</span> — el cliente yapea solo el costo de esta zona al confirmar y paga el producto contra entrega (ideal para clientes nuevos)
+                        </span>
+                      </label>
+                    )}
                   </div>
                 ))}
 
@@ -625,6 +631,13 @@ export default function SettingsClient() {
                     <Plus className="w-4 h-4" />
                     Agregar opción de envío
                   </button>
+                )}
+
+                {shippingOptions.length > 0 && planType !== 'pro' && planType !== 'premium' && (
+                  <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 text-xs text-amber-800 mt-2">
+                    <span className="font-medium">El envío se paga primero</span> (el cliente yapea solo el costo de envío y paga el producto contra entrega) está disponible en los planes <b>Pro y Premium</b>.{' '}
+                    <a href="/dashboard/plan" className="underline font-semibold">Ver planes</a>
+                  </div>
                 )}
               </div>
 
