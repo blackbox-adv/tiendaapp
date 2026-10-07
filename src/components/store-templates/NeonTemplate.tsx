@@ -315,7 +315,7 @@ export function NeonTemplate({ store, products, storeSlug, planId, onProductClic
       <footer className="mt-auto py-6 text-center border-t border-slate-100">
         {planId === 'free' ? (
           <a href="/" className="text-xs text-slate-400 hover:text-slate-600 transition-colors">
-            Creado con TiendApp
+            Creado con Kyllari
           </a>
         ) : (
           <p className="text-xs text-slate-400">Hecho con tecnología</p>

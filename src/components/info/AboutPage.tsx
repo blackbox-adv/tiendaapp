@@ -24,7 +24,7 @@ export function AboutPage() {
             <div className="w-10 h-10 rounded-xl bg-violet-600 flex items-center justify-center">
               <Zap className="w-6 h-6 text-white" />
             </div>
-            <span className="text-2xl font-bold text-violet-700">TiendApp</span>
+            <span className="text-2xl font-bold text-violet-700">Kyllari</span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Sobre Nosotros</h1>
           <p className="text-lg text-gray-500 max-w-2xl mx-auto">
@@ -40,7 +40,7 @@ export function AboutPage() {
               <h2 className="text-xl font-bold text-gray-900">Nuestra Misión</h2>
             </div>
             <p className="text-gray-600 leading-relaxed">
-              En TiendApp creemos que todo emprendedor peruano merece tener su tienda online, sin importar su nivel de conocimientos técnicos. Por eso creamos una plataforma que permite montar una tienda profesional en minutos, sin necesidad de programar ni diseñar. Nuestro objetivo es ser el puente entre los negocios locales y el mundo digital, impulsando el crecimiento económico de miles de familias peruanas.
+              En Kyllari creemos que todo emprendedor peruano merece tener su tienda online, sin importar su nivel de conocimientos técnicos. Por eso creamos una plataforma que permite montar una tienda profesional en minutos, sin necesidad de programar ni diseñar. Nuestro objetivo es ser el puente entre los negocios locales y el mundo digital, impulsando el crecimiento económico de miles de familias peruanas.
             </p>
           </div>
         </motion.div>
@@ -51,7 +51,7 @@ export function AboutPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {[
               { icon: Heart, title: 'Pasión por el emprendimiento', desc: 'Apoyamos a cada emprendedor con dedicación y entusiasmo, porque sabemos que detrás de cada tienda hay un sueño.' },
-              { icon: Users, title: 'Comunidad primero', desc: 'Construimos juntos. Cada función de TiendApp nace de escuchar las necesidades reales de nuestros usuarios.' },
+              { icon: Users, title: 'Comunidad primero', desc: 'Construimos juntos. Cada función de Kyllari nace de escuchar las necesidades reales de nuestros usuarios.' },
               { icon: Globe, title: 'Innovación local', desc: 'Diseñamos soluciones pensadas para el mercado peruano, con integración a métodos de pago y logística local.' },
               { icon: Zap, title: 'Simplicidad', desc: 'La tecnología debe ser simple. Eliminamos la complejidad para que cualquiera pueda tener su tienda online.' },
             ].map((value, i) => (

@@ -493,7 +493,7 @@ export function LuxuryTemplate({ store, products, storeSlug, planId, onProductCl
                 className="text-[11px] transition-colors hover:underline"
                 style={{ color: GOLD + '50' }}
               >
-                Creado con TiendApp
+                Creado con Kyllari
               </a>
             </p>
           )}

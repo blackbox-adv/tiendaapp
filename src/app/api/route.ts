@@ -3,7 +3,7 @@ import { corsHeaders } from '@/lib/api-response'
 
 export async function GET() {
   return NextResponse.json(
-    { message: 'TiendApp API v2 - Secure', status: 'healthy' },
+    { message: 'Kyllari API v2 - Secure', status: 'healthy' },
     { headers: corsHeaders() }
   )
 }

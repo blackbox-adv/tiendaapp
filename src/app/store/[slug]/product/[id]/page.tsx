@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
     })
   } catch {
-    return { title: 'Producto | TiendApp' }
+    return { title: 'Producto | Kyllari' }
   }
 
   // notFound() aquí (en generateMetadata) y NO en el page: generateMetadata se resuelve
@@ -47,8 +47,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const title = `${product.name} | ${product.store.name}`
     const description = product.description
-      ? `${product.description.substring(0, 160)} - ${product.store.name} en TiendApp.`
-      : `Compra ${product.name} por S/${product.price.toFixed(2)} en ${product.store.name}. Visita la tienda en TiendApp.`
+      ? `${product.description.substring(0, 160)} - ${product.store.name} en Kyllari.`
+      : `Compra ${product.name} por S/${product.price.toFixed(2)} en ${product.store.name}. Visita la tienda en Kyllari.`
 
     return {
       title,
@@ -58,7 +58,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         description,
         type: 'website',
         images: product.imageUrl ? [{ url: product.imageUrl }] : [],
-        siteName: 'TiendApp',
+        siteName: 'Kyllari',
       },
       twitter: {
         card: 'summary_large_image',
@@ -172,7 +172,7 @@ function generateProductJsonLd(
     name: product.name,
     description: product.description || `Producto disponible en ${store.name}`,
     image: product.imageUrl,
-    url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://tienda.blackboxperu.com'}/store/${store.slug}/product/${product.id}`,
+    url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://kyllari.com'}/store/${store.slug}/product/${product.id}`,
     offers: {
       '@type': 'Offer',
       price: product.price,

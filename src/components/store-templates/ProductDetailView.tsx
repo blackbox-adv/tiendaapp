@@ -174,8 +174,8 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
     if (!displayStore || !displayProduct) return
     const title = `${displayProduct.name} | ${displayStore.name}`
     const description = displayProduct.description
-      ? `${displayProduct.description.substring(0, 160)} - ${displayStore.name} en TiendApp.`
-      : `Compra ${displayProduct.name} por S/${Number(displayProduct.price).toFixed(2)} en ${displayStore.name}. Visita la tienda en TiendApp.`
+      ? `${displayProduct.description.substring(0, 160)} - ${displayStore.name} en Kyllari.`
+      : `Compra ${displayProduct.name} por S/${Number(displayProduct.price).toFixed(2)} en ${displayStore.name}. Visita la tienda en Kyllari.`
 
     document.title = title
     // Update meta description
@@ -205,8 +205,8 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
     setMeta('product:price:currency', 'PEN')
 
     return () => {
-      document.title = 'TiendApp | Crea tu tienda online en Perú'
-      if (metaDesc) metaDesc.setAttribute('content', 'Crea tu tienda online en minutos con TiendApp. La plataforma #1 en Perú para emprendedores.')
+      document.title = 'Kyllari | Crea tu tienda online en Perú'
+      if (metaDesc) metaDesc.setAttribute('content', 'Crea tu tienda online en minutos con Kyllari. La plataforma #1 en Perú para emprendedores.')
     }
   }, [displayStore, displayProduct])
 
@@ -316,7 +316,7 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
     const qtyText = quantity > 1 ? `${quantity} unidades` : 'el producto'
     const totalText = quantity > 1 ? `\nTotal: S/${totalPrice.toFixed(2)}` : `\nPrecio: S/${Number(product.price).toFixed(2)}`
     const msg = encodeURIComponent(
-      `Hola! Me interesa ${qtyText} de: ${product.name}${totalText}\nLo vi en tu tienda en TiendApp.`
+      `Hola! Me interesa ${qtyText} de: ${product.name}${totalText}\nLo vi en tu tienda en Kyllari.`
     )
     window.open(`https://wa.me/${store.whatsappNumber.replace(/[^0-9]/g, '')}?text=${msg}`, '_blank')
   }

@@ -115,7 +115,7 @@ export function ResetPasswordPage() {
             <div className="w-10 h-10 rounded-xl bg-violet-600 flex items-center justify-center">
               <Zap className="w-6 h-6 text-white" />
             </div>
-            <span className="text-2xl font-bold text-violet-700">TiendApp</span>
+            <span className="text-2xl font-bold text-violet-700">Kyllari</span>
           </button>
           <h1 className="text-2xl font-bold text-gray-900">
             {step === 'email' && 'Recuperar contraseña'}

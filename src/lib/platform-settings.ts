@@ -5,9 +5,9 @@ let cachedSettings: Record<string, string> | null = null
 let cacheExpiry = 0
 
 const DEFAULTS: Record<string, string> = {
-  name: 'TiendApp',
-  contactEmail: 'hola@tiendapp.pe',
-  contactPhone: '+51999888777',
+  name: 'Kyllari',
+  contactEmail: 'contacto@kyllari.com',
+  contactPhone: '+51958297236',
 }
 
 export async function getPlatformContact(): Promise<{ contactEmail: string; contactPhone: string }> {

@@ -476,7 +476,7 @@ export default function OnboardingPage() {
             <div className="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center">
               <Store className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-violet-700">TiendApp</span>
+            <span className="text-xl font-bold text-violet-700">Kyllari</span>
           </Link>
           <div className="flex items-center gap-2 text-sm text-gray-500">
             <span>Paso {step} de 4</span>
@@ -632,7 +632,7 @@ export default function OnboardingPage() {
                   <Label htmlFor="storeSlug">URL de la tienda *</Label>
                   <div className="flex items-center">
                     <span className="text-sm text-gray-500 bg-gray-100 border border-r-0 border-gray-200 rounded-l-md px-3 py-2">
-                      tienda.blackboxperu.com/store/
+                      kyllari.com/store/
                     </span>
                     <Input
                       id="storeSlug"

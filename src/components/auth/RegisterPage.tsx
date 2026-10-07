@@ -52,7 +52,7 @@ export function RegisterPage() {
 
     if (result && typeof result === 'object' && 'success' in result) {
       if (result.success) {
-        toast.success('Cuenta creada', { description: 'Bienvenido a TiendApp. Configura tu tienda.' })
+        toast.success('Cuenta creada', { description: 'Bienvenido a Kyllari. Configura tu tienda.' })
         // Redirect to onboarding
         router.push('/onboarding')
       } else {
@@ -82,7 +82,7 @@ export function RegisterPage() {
             <div className="w-10 h-10 rounded-xl bg-violet-600 flex items-center justify-center">
               <Zap className="w-6 h-6 text-white" />
             </div>
-            <span className="text-2xl font-bold text-violet-700">TiendApp</span>
+            <span className="text-2xl font-bold text-violet-700">Kyllari</span>
           </button>
           <h1 className="text-2xl font-bold text-gray-900">Crea tu cuenta</h1>
           <p className="text-gray-500 mt-1">Empieza a vender online en minutos</p>

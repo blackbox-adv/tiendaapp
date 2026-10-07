@@ -197,12 +197,12 @@ async function syncFromAPI() {
               if (settingsData && typeof settingsData === 'object') {
                 useAppStore.setState({
                   platformSettings: {
-                    name: settingsData.name || 'TiendApp',
+                    name: settingsData.name || 'Kyllari',
                     defaultPlanId: settingsData.defaultPlanId || 'free',
                     maintenanceMode: settingsData.maintenanceMode === 'true',
                     registrationsEnabled: settingsData.registrationsEnabled !== 'false',
-                    contactEmail: settingsData.contactEmail || 'hola@tiendapp.pe',
-                    contactPhone: settingsData.contactPhone || '+51999888777',
+                    contactEmail: settingsData.contactEmail || 'contacto@kyllari.com',
+                    contactPhone: settingsData.contactPhone || '+51958297236',
                   },
                 })
               }
@@ -306,12 +306,12 @@ export const useAppStore = create<AppState>((set, get) => ({
   wizardStep: 1,
   wizardData: { ...defaultWizardData },
   platformSettings: {
-    name: 'TiendApp',
+    name: 'Kyllari',
     defaultPlanId: 'free',
     maintenanceMode: false,
     registrationsEnabled: true,
-    contactEmail: 'hola@tiendapp.pe',
-    contactPhone: '+51999888777',
+    contactEmail: 'contacto@kyllari.com',
+    contactPhone: '+51958297236',
   },
 
   navigate: (route) =>

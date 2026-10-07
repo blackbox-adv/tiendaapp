@@ -524,7 +524,7 @@ export function BoutiqueTemplate({ store, products, storeSlug, planId, onProduct
           </div>
           {planId === 'free' && (
             <a href="/" className="mt-2 text-[10px] text-white/25 hover:text-white/50 transition-colors">
-              Creado con TiendApp
+              Creado con Kyllari
             </a>
           )}
         </div>

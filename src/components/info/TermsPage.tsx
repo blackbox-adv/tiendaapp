@@ -38,49 +38,49 @@ export function TermsPage() {
             <section>
               <h2 className="text-xl font-bold text-gray-900 mb-3">1. Aceptación de los Términos</h2>
               <p className="text-gray-600 leading-relaxed">
-                Al acceder y utilizar la plataforma TiendApp (en adelante, &quot;el Servicio&quot;), usted acepta estar sujeto a estos Términos y Condiciones. Si no está de acuerdo con alguno de estos términos, le rogamos que no utilice nuestro Servicio. Estos términos aplican a todos los usuarios, incluidos visitantes, dueños de tiendas y administradores.
+                Al acceder y utilizar la plataforma Kyllari (en adelante, &quot;el Servicio&quot;), usted acepta estar sujeto a estos Términos y Condiciones. Si no está de acuerdo con alguno de estos términos, le rogamos que no utilice nuestro Servicio. Estos términos aplican a todos los usuarios, incluidos visitantes, dueños de tiendas y administradores.
               </p>
             </section>
 
             <section>
               <h2 className="text-xl font-bold text-gray-900 mb-3">2. Descripción del Servicio</h2>
               <p className="text-gray-600 leading-relaxed">
-                TiendApp es una plataforma SaaS que permite a emprendedores y pequeños negocios crear y gestionar su tienda online en Perú. El Servicio incluye la creación de tiendas virtuales, gestión de productos, integración con WhatsApp para atención al cliente, y herramientas de análisis y administración. Los planes de suscripción se describen en la página de precios y pueden variar según la disponibilidad.
+                Kyllari es una plataforma SaaS que permite a emprendedores y pequeños negocios crear y gestionar su tienda online en Perú. El Servicio incluye la creación de tiendas virtuales, gestión de productos, integración con WhatsApp para atención al cliente, y herramientas de análisis y administración. Los planes de suscripción se describen en la página de precios y pueden variar según la disponibilidad.
               </p>
             </section>
 
             <section>
               <h2 className="text-xl font-bold text-gray-900 mb-3">3. Cuentas de Usuario</h2>
               <p className="text-gray-600 leading-relaxed">
-                Para utilizar ciertas funciones del Servicio, debe crear una cuenta. Usted es responsable de mantener la confidencialidad de su contraseña y de todas las actividades que ocurran bajo su cuenta. TiendApp no se hace responsable por el uso no autorizado de su cuenta. Debe proporcionar información veraz y actualizada al registrarse. No está permitido crear múltiples cuentas con el objetivo de evadir las limitaciones del plan gratuito.
+                Para utilizar ciertas funciones del Servicio, debe crear una cuenta. Usted es responsable de mantener la confidencialidad de su contraseña y de todas las actividades que ocurran bajo su cuenta. Kyllari no se hace responsable por el uso no autorizado de su cuenta. Debe proporcionar información veraz y actualizada al registrarse. No está permitido crear múltiples cuentas con el objetivo de evadir las limitaciones del plan gratuito.
               </p>
             </section>
 
             <section>
               <h2 className="text-xl font-bold text-gray-900 mb-3">4. Contenido del Usuario</h2>
               <p className="text-gray-600 leading-relaxed">
-                Usted es el único responsable del contenido que publica en su tienda, incluyendo pero no limitándose a descripciones de productos, imágenes, precios y datos de contacto. Se compromete a no publicar contenido ilegal, fraudulento, difamatorio o que infrinja derechos de terceros. TiendApp se reserva el derecho de eliminar contenido que viole estos términos sin previo aviso.
+                Usted es el único responsable del contenido que publica en su tienda, incluyendo pero no limitándose a descripciones de productos, imágenes, precios y datos de contacto. Se compromete a no publicar contenido ilegal, fraudulento, difamatorio o que infrinja derechos de terceros. Kyllari se reserva el derecho de eliminar contenido que viole estos términos sin previo aviso.
               </p>
             </section>
 
             <section>
               <h2 className="text-xl font-bold text-gray-900 mb-3">5. Pagos y Suscripciones</h2>
               <p className="text-gray-600 leading-relaxed">
-                Los planes de pago se facturan de forma mensual o anual según la opción seleccionada. Los pagos se procesan a través de pasarelas de pago autorizadas. Las suscripciones se renuevan automáticamente al finalizar el periodo de facturación. Puede cancelar su suscripción en cualquier momento desde su panel de control. No se ofrecen reembolsos parciales por periodos ya facturados, salvo en casos excepcionales a discreción de TiendApp.
+                Los planes de pago se facturan de forma mensual o anual según la opción seleccionada. Los pagos se procesan a través de pasarelas de pago autorizadas. Las suscripciones se renuevan automáticamente al finalizar el periodo de facturación. Puede cancelar su suscripción en cualquier momento desde su panel de control. No se ofrecen reembolsos parciales por periodos ya facturados, salvo en casos excepcionales a discreción de Kyllari.
               </p>
             </section>
 
             <section>
               <h2 className="text-xl font-bold text-gray-900 mb-3">6. Propiedad Intelectual</h2>
               <p className="text-gray-600 leading-relaxed">
-                Todo el contenido de la plataforma TiendApp, incluyendo pero no limitándose al diseño, logos, código fuente, textos y elementos gráficos, es propiedad de TiendApp y está protegido por las leyes de propiedad intelectual. El uso de plantillas y herramientas proporcionadas por TiendApp no otorga ningún derecho de propiedad sobre las mismas.
+                Todo el contenido de la plataforma Kyllari, incluyendo pero no limitándose al diseño, logos, código fuente, textos y elementos gráficos, es propiedad de Kyllari y está protegido por las leyes de propiedad intelectual. El uso de plantillas y herramientas proporcionadas por Kyllari no otorga ningún derecho de propiedad sobre las mismas.
               </p>
             </section>
 
             <section>
               <h2 className="text-xl font-bold text-gray-900 mb-3">7. Limitación de Responsabilidad</h2>
               <p className="text-gray-600 leading-relaxed">
-                TiendApp proporciona el Servicio &quot;tal cual&quot; sin garantías de ningún tipo. No nos hacemos responsables por pérdidas de datos, interrupciones del servicio, o daños derivados del uso de la plataforma. Nuestra responsabilidad total no excederá el monto pagado por el usuario en los últimos 12 meses.
+                Kyllari proporciona el Servicio &quot;tal cual&quot; sin garantías de ningún tipo. No nos hacemos responsables por pérdidas de datos, interrupciones del servicio, o daños derivados del uso de la plataforma. Nuestra responsabilidad total no excederá el monto pagado por el usuario en los últimos 12 meses.
               </p>
             </section>
 

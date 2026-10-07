@@ -120,7 +120,7 @@ export async function GET(request: NextRequest) {
     }
 
     const filename = isTemplate
-      ? 'plantilla-productos-tiendapp.csv'
+      ? 'plantilla-productos-kyllari.csv'
       : `productos-${store.slug}.csv`
 
     return new Response('\uFEFF' + csvBody, {

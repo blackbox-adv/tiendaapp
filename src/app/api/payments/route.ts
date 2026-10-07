@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
     const paymentIntent = {
       amount: Math.round(price * 100),
       currency: 'PEN',
-      description: `Plan ${plan.name} - TiendApp`,
+      description: `Plan ${plan.name} - Kyllari`,
       metadata: {
         userId: auth.user.userId,
         planId: plan.id,

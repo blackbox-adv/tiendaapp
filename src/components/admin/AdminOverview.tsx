@@ -61,7 +61,7 @@ export function AdminOverview() {
     <div className="space-y-6 animate-fadeIn">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Panel de administración</h1>
-        <p className="text-gray-500 mt-1">Resumen general de la plataforma TiendApp</p>
+        <p className="text-gray-500 mt-1">Resumen general de la plataforma Kyllari</p>
       </div>
 
       {/* Alerts */}

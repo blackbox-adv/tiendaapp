@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Demo Store - TiendApp',
+  title: 'Demo Store - Kyllari',
   description: 'Vista previa de tienda demo',
 };
 

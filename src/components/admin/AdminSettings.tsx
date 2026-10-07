@@ -81,7 +81,7 @@ export function AdminSettings() {
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="TiendApp"
+              placeholder="Kyllari"
             />
           </div>
           <div className="space-y-2">
@@ -112,7 +112,7 @@ export function AdminSettings() {
               type="email"
               value={contactEmail}
               onChange={(e) => setContactEmail(e.target.value)}
-              placeholder="hola@tiendapp.pe"
+              placeholder="contacto@kyllari.com"
             />
             <p className="text-xs text-gray-400">Se muestra como email principal en toda la plataforma</p>
           </div>
@@ -121,7 +121,7 @@ export function AdminSettings() {
             <Input
               value={contactPhone}
               onChange={(e) => setContactPhone(e.target.value)}
-              placeholder="+51999888777"
+              placeholder="+51958297236"
             />
             <p className="text-xs text-gray-400">Formato: +51XXXXXXXXX. Se usa para el botón de WhatsApp y teléfono de contacto.</p>
           </div>

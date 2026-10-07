@@ -115,11 +115,11 @@ export async function POST(request: NextRequest) {
 
     // Create default platform settings
     const defaultSettings = [
-      { key: 'name', value: 'TiendApp' },
+      { key: 'name', value: 'Kyllari' },
       { key: 'defaultPlanId', value: 'free' },
       { key: 'maintenanceMode', value: 'false' },
       { key: 'registrationsEnabled', value: 'true' },
-      { key: 'whatsappSupport', value: '+51999999999' },
+      { key: 'whatsappSupport', value: '+51958297236' },
       { key: 'currency', value: 'PEN' },
       { key: 'countryCode', value: 'PE' },
     ]

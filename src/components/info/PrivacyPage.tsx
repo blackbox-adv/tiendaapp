@@ -38,7 +38,7 @@ export function PrivacyPage() {
             <section>
               <h2 className="text-xl font-bold text-gray-900 mb-3">1. Información que Recopilamos</h2>
               <p className="text-gray-600 leading-relaxed">
-                En TiendApp recopilamos información necesaria para brindar nuestros servicios. Al crear una cuenta, solicitamos su nombre, correo electrónico y contraseña. Cuando crea una tienda, almacenamos información sobre su negocio, productos y configuraciones. También recopilamos datos de uso automáticamente, como su dirección IP, tipo de navegador, páginas visitadas y tiempos de sesión, mediante cookies y tecnologías similares.
+                En Kyllari recopilamos información necesaria para brindar nuestros servicios. Al crear una cuenta, solicitamos su nombre, correo electrónico y contraseña. Cuando crea una tienda, almacenamos información sobre su negocio, productos y configuraciones. También recopilamos datos de uso automáticamente, como su dirección IP, tipo de navegador, páginas visitadas y tiempos de sesión, mediante cookies y tecnologías similares.
               </p>
             </section>
 
@@ -52,7 +52,7 @@ export function PrivacyPage() {
             <section>
               <h2 className="text-xl font-bold text-gray-900 mb-3">3. Compartir Información con Terceros</h2>
               <p className="text-gray-600 leading-relaxed">
-                Podemos compartir información limitada con proveedores de servicios esenciales para el funcionamiento de la plataforma, como procesadores de pagos (Culqi, Niubiz), servicios de almacenamiento en la nube (Supabase), y herramientas de análisis. También podemos divulgar información cuando sea requerido por ley, en respuesta a una orden judicial, o para proteger los derechos y la seguridad de TiendApp y sus usuarios. En ningún caso compartimos sus datos personales para fines de marketing de terceros.
+                Podemos compartir información limitada con proveedores de servicios esenciales para el funcionamiento de la plataforma, como procesadores de pagos (Culqi, Niubiz), servicios de almacenamiento en la nube (Supabase), y herramientas de análisis. También podemos divulgar información cuando sea requerido por ley, en respuesta a una orden judicial, o para proteger los derechos y la seguridad de Kyllari y sus usuarios. En ningún caso compartimos sus datos personales para fines de marketing de terceros.
               </p>
             </section>
 
@@ -66,7 +66,7 @@ export function PrivacyPage() {
             <section>
               <h2 className="text-xl font-bold text-gray-900 mb-3">5. Cookies y Tecnologías Similares</h2>
               <p className="text-gray-600 leading-relaxed">
-                Utilizamos cookies esenciales para el funcionamiento de la plataforma, como la sesión de usuario y preferencias. También podemos usar cookies de análisis para comprender cómo los usuarios interactúan con nuestro servicio. Puede configurar su navegador para rechazar cookies, aunque esto podría afectar la funcionalidad de ciertas características de TiendApp. No utilizamos cookies de publicidad de terceros.
+                Utilizamos cookies esenciales para el funcionamiento de la plataforma, como la sesión de usuario y preferencias. También podemos usar cookies de análisis para comprender cómo los usuarios interactúan con nuestro servicio. Puede configurar su navegador para rechazar cookies, aunque esto podría afectar la funcionalidad de ciertas características de Kyllari. No utilizamos cookies de publicidad de terceros.
               </p>
             </section>
 
@@ -87,14 +87,14 @@ export function PrivacyPage() {
             <section>
               <h2 className="text-xl font-bold text-gray-900 mb-3">8. Privacidad de los Clientes de Tiendas</h2>
               <p className="text-gray-600 leading-relaxed">
-                Cuando un cliente interactúa con una tienda creada en TiendApp (por ejemplo, al enviar un mensaje por WhatsApp), la información compartida es entre el cliente y el dueño de la tienda. TiendApp actúa como intermediario técnico y no almacena ni procesa las conversaciones de WhatsApp. Los dueños de tiendas son responsables de cumplir con sus propias políticas de privacidad respecto a los datos de sus clientes.
+                Cuando un cliente interactúa con una tienda creada en Kyllari (por ejemplo, al enviar un mensaje por WhatsApp), la información compartida es entre el cliente y el dueño de la tienda. Kyllari actúa como intermediario técnico y no almacena ni procesa las conversaciones de WhatsApp. Los dueños de tiendas son responsables de cumplir con sus propias políticas de privacidad respecto a los datos de sus clientes.
               </p>
             </section>
 
             <section>
               <h2 className="text-xl font-bold text-gray-900 mb-3">9. Menores de Edad</h2>
               <p className="text-gray-600 leading-relaxed">
-                TiendApp no está diseñada para menores de 18 años. No recopilamos intencionalmente información personal de menores. Si descubrimos que un menor nos ha proporcionado datos personales, los eliminaremos de inmediato. Si usted es padre o tutor y cree que su hijo ha usado nuestro servicio, contáctenos para solicitar la eliminación de sus datos.
+                Kyllari no está diseñada para menores de 18 años. No recopilamos intencionalmente información personal de menores. Si descubrimos que un menor nos ha proporcionado datos personales, los eliminaremos de inmediato. Si usted es padre o tutor y cree que su hijo ha usado nuestro servicio, contáctenos para solicitar la eliminación de sus datos.
               </p>
             </section>
 

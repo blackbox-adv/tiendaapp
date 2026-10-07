@@ -170,10 +170,10 @@ export function StoreView({ slug }: { slug: string }) {
   // SEO: Update document title and meta description
   useEffect(() => {
     if (!displayStore) return
-    const title = `${displayStore.name} | TiendApp`
+    const title = `${displayStore.name} | Kyllari`
     const description = displayStore.description
-      ? `${displayStore.description} - Visita la tienda online de ${displayStore.name} en TiendApp.`
-      : `Visita la tienda online de ${displayStore.name} en TiendApp. Productos y precios increibles.`
+      ? `${displayStore.description} - Visita la tienda online de ${displayStore.name} en Kyllari.`
+      : `Visita la tienda online de ${displayStore.name} en Kyllari. Productos y precios increibles.`
 
     document.title = title
     // Update meta description
@@ -200,8 +200,8 @@ export function StoreView({ slug }: { slug: string }) {
     setMeta('og:type', 'website')
 
     return () => {
-      document.title = 'TiendApp | Crea tu tienda online en Perú'
-      if (metaDesc) metaDesc.setAttribute('content', 'Crea tu tienda online en minutos con TiendApp. La plataforma #1 en Perú para emprendedores.')
+      document.title = 'Kyllari | Crea tu tienda online en Perú'
+      if (metaDesc) metaDesc.setAttribute('content', 'Crea tu tienda online en minutos con Kyllari. La plataforma #1 en Perú para emprendedores.')
     }
   }, [displayStore])
 

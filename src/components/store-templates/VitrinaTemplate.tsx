@@ -298,7 +298,7 @@ export function VitrinaTemplate({ store, products, storeSlug, planId, onProductC
         <p className="font-serif italic text-stone-400 text-sm">{store.name}</p>
         {planId === 'free' && (
           <a href="/" className="block mt-1.5 text-xs text-stone-300 hover:text-stone-500 transition-colors">
-            Creado con TiendApp
+            Creado con Kyllari
           </a>
         )}
       </footer>

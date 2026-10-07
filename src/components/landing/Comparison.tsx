@@ -35,7 +35,7 @@ export function Comparison() {
             ¿No es lo mismo que usar WhatsApp Business solo?
           </h2>
           <p className="text-lg text-stone-500 max-w-2xl mx-auto">
-            WhatsApp Business es tu canal de atención. TiendApp es tu tienda que lo
+            WhatsApp Business es tu canal de atención. Kyllari es tu tienda que lo
             alimenta con pedidos ordenados. Se complementan — mira la diferencia:
           </p>
         </motion.div>
@@ -62,7 +62,7 @@ export function Comparison() {
               <div className="w-10 h-10 mx-auto rounded-xl bg-stone-900 flex items-center justify-center mb-1">
                 <span className="text-white font-bold text-lg">T</span>
               </div>
-              <p className="text-xs sm:text-sm font-bold text-[#BC5A38]">Con TiendApp</p>
+              <p className="text-xs sm:text-sm font-bold text-[#BC5A38]">Con Kyllari</p>
             </div>
           </div>
 

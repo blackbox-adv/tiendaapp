@@ -12,9 +12,9 @@ interface FAQItem {
 
 const FAQ_ITEMS: FAQItem[] = [
   {
-    question: '¿TiendApp cobra comisión por cada venta?',
+    question: '¿Kyllari cobra comisión por cada venta?',
     answer:
-      'No. A diferencia de otras plataformas que cobran entre 5% y 15% por venta, TiendApp no se queda con nada de tus ventas. Solo pagas la mensualidad del plan que elijas (o nada si usas el plan gratis). Todo lo que cobres por Yape, Plin o transferencia es 100% tuyo.',
+      'No. A diferencia de otras plataformas que cobran entre 5% y 15% por venta, Kyllari no se queda con nada de tus ventas. Solo pagas la mensualidad del plan que elijas (o nada si usas el plan gratis). Todo lo que cobres por Yape, Plin o transferencia es 100% tuyo.',
   },
   {
     question: '¿Necesito RUC para crear mi tienda?',
@@ -24,7 +24,7 @@ const FAQ_ITEMS: FAQItem[] = [
   {
     question: '¿Cómo recibo los pagos de mis clientes? ¿Funciona con Yape y Plin?',
     answer:
-      'Sí. Desde el panel de tu tienda configuras tu número de Yape y Plin (y subes el código QR de tu app bancaria). Cuando un cliente hace un pedido, ve los QR directamente en la tienda y te paga al instante. El dinero llega a tu cuenta de Yape/Plin, no pasa por TiendApp. También funciona con transferencias bancarias.',
+      'Sí. Desde el panel de tu tienda configuras tu número de Yape y Plin (y subes el código QR de tu app bancaria). Cuando un cliente hace un pedido, ve los QR directamente en la tienda y te paga al instante. El dinero llega a tu cuenta de Yape/Plin, no pasa por Kyllari. También funciona con transferencias bancarias.',
   },
   {
     question: '¿Funciona bien desde el celular de mis clientes?',
@@ -44,7 +44,7 @@ const FAQ_ITEMS: FAQItem[] = [
 ]
 
 export function FAQ() {
-  const waHref = supportWhatsappUrl('Hola! Tengo una duda sobre TiendApp')
+  const waHref = supportWhatsappUrl('Hola! Tengo una duda sobre Kyllari')
   const [openIndex, setOpenIndex] = useState<number | null>(0)
 
   return (

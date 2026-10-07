@@ -3,14 +3,14 @@ import AppRouter from '@/components/AppRouter'
 
 export const metadata: Metadata = {
   title: 'Sobre Nosotros',
-  description: 'Conoce TiendApp, la plataforma lider en Peru para crear tiendas online. Nuestra mision es democratizar el e-commerce para emprendedores peruanos.',
+  description: 'Conoce Kyllari, la plataforma lider en Peru para crear tiendas online. Nuestra mision es democratizar el e-commerce para emprendedores peruanos.',
   alternates: { canonical: '/about' },
   openGraph: {
-    title: 'Sobre Nosotros | TiendApp',
-    description: 'Conoce TiendApp, la plataforma lider en Peru para crear tiendas online.',
-    url: 'https://tienda.blackboxperu.com/about',
+    title: 'Sobre Nosotros | Kyllari',
+    description: 'Conoce Kyllari, la plataforma lider en Peru para crear tiendas online.',
+    url: 'https://kyllari.com/about',
     type: 'website',
-    siteName: 'TiendApp',
+    siteName: 'Kyllari',
   },
 }
 

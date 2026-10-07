@@ -401,7 +401,7 @@ export function PopTemplate({ store, products, storeSlug, planId, onProductClick
             </div>
             {planId === 'free' && (
               <a href="/" className="mt-2 text-[10px] text-white/30 hover:text-white/60 transition-colors">
-                Creado con TiendApp
+                Creado con Kyllari
               </a>
             )}
           </div>

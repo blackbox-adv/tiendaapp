@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/lib/store'
 
 /**
- * Escalera de crecimiento: muestra que TiendApp acompaña al emprendedor
+ * Escalera de crecimiento: muestra que Kyllari acompaña al emprendedor
  * desde el día 1 (catálogo gratis) hasta lanzar productos con IA y
  * escalar con la tienda completa. Es la respuesta visual a "¿y luego qué?".
  */
@@ -75,7 +75,7 @@ export function GrowthLadder() {
           className="text-center mb-16"
         >
           <span className="text-sm font-semibold text-[#E29B77] uppercase tracking-wider">
-            Tu negocio crece, TiendApp crece contigo
+            Tu negocio crece, Kyllari crece contigo
           </span>
           <h2 className="font-display text-3xl sm:text-4xl font-bold text-white mt-3 mb-4">
             Empieza gratis. <span className="accent-serif">Vende.</span> Escala cuando

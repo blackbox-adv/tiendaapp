@@ -124,7 +124,7 @@ export function ProductList() {
       const blob = await res.blob()
       const a = document.createElement('a')
       a.href = URL.createObjectURL(blob)
-      a.download = template ? 'plantilla-productos-tiendapp.csv' : `productos-${currentStore.slug}.csv`
+      a.download = template ? 'plantilla-productos-kyllari.csv' : `productos-${currentStore.slug}.csv`
       document.body.appendChild(a)
       a.click()
       a.remove()

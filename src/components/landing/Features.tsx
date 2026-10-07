@@ -44,7 +44,7 @@ const features = [
     icon: Gift,
     title: 'Packs y promociones que se venden solos',
     description:
-      'TiendApp arma packs con descuento automáticamente (ej. pollo + gaseosa + papas) y resalta tus ofertas. El cliente toca un botón y te pide el pack completo por WhatsApp. Disponible en los planes Pro y Premium.',
+      'Kyllari arma packs con descuento automáticamente (ej. pollo + gaseosa + papas) y resalta tus ofertas. El cliente toca un botón y te pide el pack completo por WhatsApp. Disponible en los planes Pro y Premium.',
   },
   {
     icon: ShoppingCart,

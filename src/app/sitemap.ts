@@ -9,7 +9,7 @@ export const revalidate = 3600
 // (updatedAt from DB for dynamic pages)
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tienda.blackboxperu.com'
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://kyllari.com'
 
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [

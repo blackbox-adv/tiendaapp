@@ -455,7 +455,7 @@ export function GranoTemplate({ store, products, storeSlug, planId, onProductCli
             </div>
             {planId === 'free' && (
               <a href="/" className="mt-2 text-[10px] text-white/30 hover:text-white/60 transition-colors">
-                Creado con TiendApp
+                Creado con Kyllari
               </a>
             )}
           </div>

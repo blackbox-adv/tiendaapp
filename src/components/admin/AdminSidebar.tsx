@@ -34,7 +34,7 @@ export function AdminSidebar() {
         <div className="w-8 h-8 rounded-lg bg-violet-500 flex items-center justify-center">
           <Zap className="w-5 h-5 text-white" />
         </div>
-        <span className="text-lg font-bold">TiendApp</span>
+        <span className="text-lg font-bold">Kyllari</span>
         <span className="ml-auto text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-medium">Admin</span>
       </div>
 
