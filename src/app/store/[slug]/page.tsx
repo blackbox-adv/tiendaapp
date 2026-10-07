@@ -1,3 +1,4 @@
+import { APP_URL } from '@/lib/env'
 import { db } from '@/lib/db'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
@@ -191,8 +192,8 @@ function generateStoreJsonLd(store: {
     '@type': 'Store',
     name: store.name,
     description: store.description,
-    url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://kyllari.com'}/store/${store.slug}`,
-    image: `${process.env.NEXT_PUBLIC_APP_URL || 'https://kyllari.com'}/api/og/store/${store.slug}`,
+    url: `${APP_URL}/store/${store.slug}`,
+    image: `${APP_URL}/api/og/store/${store.slug}`,
     address: {
       '@type': 'PostalAddress',
       addressCountry: 'PE',

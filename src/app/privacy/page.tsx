@@ -1,3 +1,4 @@
+import { APP_URL } from '@/lib/env'
 import type { Metadata } from 'next'
 import AppRouter from '@/components/AppRouter'
 
@@ -8,7 +9,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Politica de Privacidad | Kyllari',
     description: 'Politica de privacidad de la plataforma Kyllari.',
-    url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://kyllari.com'}/privacy`,
+    url: `${APP_URL}/privacy`,
     type: 'website',
     siteName: 'Kyllari',
   },

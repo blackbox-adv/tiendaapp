@@ -1,3 +1,4 @@
+import { APP_URL } from '@/lib/env'
 import type { MetadataRoute } from 'next'
 
 export default function robots(): MetadataRoute.Robots {
@@ -9,6 +10,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/api/', '/admin/', '/dashboard/', '/wizard/'],
       },
     ],
-    sitemap: `${process.env.NEXT_PUBLIC_APP_URL || 'https://kyllari.com'}/sitemap.xml`,
+    sitemap: `${APP_URL}/sitemap.xml`,
   }
 }
