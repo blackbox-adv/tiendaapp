@@ -16,7 +16,6 @@ function getResend(): Resend {
 }
 
 const FROM_EMAIL = 'Kyllari <noreply@blackboxperu.com>'
-const APP_URL = APP_URL
 
 // ── Email Templates ──
 
