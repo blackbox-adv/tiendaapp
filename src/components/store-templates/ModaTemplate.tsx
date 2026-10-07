@@ -1,4 +1,5 @@
 'use client'
+import { ShareProductButton } from './ShareProductButton'
 import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 
 import { useState, useMemo } from 'react'
@@ -76,14 +77,17 @@ export function ModaTemplate({ store, products, storeSlug, planId, onProductClic
           </div>
           <div className="relative h-64 md:h-full min-h-[320px] bg-stone-100">
             {featured ? (
-              <img
-                src={featured.imageUrl || PRODUCT_IMG_FALLBACK}
-                alt={featured.name}
-                className="absolute inset-0 w-full h-full object-cover"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = IMG_FALLBACK
-                }}
-              />
+              <>
+                <img loading="lazy" decoding="async"
+                  src={featured.imageUrl || PRODUCT_IMG_FALLBACK}
+                  alt={featured.name}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = IMG_FALLBACK
+                  }}
+                />
+                <ShareProductButton productName={featured.name} price={featured.price} productId={featured.id} slug={storeSlug} storeName={store.name} />
+              </>
             ) : (
               <div
                 className="absolute inset-0"
@@ -163,7 +167,7 @@ export function ModaTemplate({ store, products, storeSlug, planId, onProductClic
                 onClick={() => handleClick(product.id)}
               >
                 <div className="relative aspect-[3/4] bg-stone-100 overflow-hidden">
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={product.imageUrl || PRODUCT_IMG_FALLBACK}
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
@@ -171,6 +175,7 @@ export function ModaTemplate({ store, products, storeSlug, planId, onProductClic
                       (e.target as HTMLImageElement).src = IMG_FALLBACK
                     }}
                   />
+                    <ShareProductButton productName={product.name} price={product.price} productId={product.id} slug={storeSlug} storeName={store.name} />
                   {product.originalPrice && (
                     <span
                       className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-widest px-2 py-1 text-white"

@@ -1,4 +1,5 @@
 'use client'
+import { ShareProductButton } from './ShareProductButton'
 import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 
 import { useState, useMemo } from 'react'
@@ -94,7 +95,7 @@ export function ClasicaTemplate({ store, products, storeSlug, planId, onProductC
       {/* Banner with overlaid name — or standalone header */}
       {store.bannerUrl ? (
         <div className="relative h-48 md:h-56 overflow-hidden">
-          <img src={store.bannerUrl} alt="" className="w-full h-full object-cover" />
+          <img loading="lazy" decoding="async" src={store.bannerUrl} alt="" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-black/60" />
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
             <div
@@ -344,7 +345,7 @@ export function ClasicaTemplate({ store, products, storeSlug, planId, onProductC
                     className="w-full sm:w-44 lg:w-52 flex-shrink-0 overflow-hidden relative"
                     style={{ backgroundColor: '#FFF8ED' }}
                   >
-                    <img
+                    <img loading="lazy" decoding="async"
                       src={product.imageUrl || PRODUCT_IMG_FALLBACK}
                       alt={product.name}
                       className="w-full h-48 sm:h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -353,6 +354,7 @@ export function ClasicaTemplate({ store, products, storeSlug, planId, onProductC
                           'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300"><rect fill="%23FFF5E6" width="300" height="300"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="48">🏷️</text></svg>'
                       }}
                     />
+                    <ShareProductButton productName={product.name} price={product.price} productId={product.id} slug={storeSlug} storeName={store.name} />
                     {/* Hover "Ver detalle" overlay */}
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
                       <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white text-xs font-semibold px-3 py-1.5 rounded-lg bg-black/30 backdrop-blur-sm">

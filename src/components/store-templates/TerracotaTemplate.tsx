@@ -1,4 +1,5 @@
 'use client'
+import { ShareProductButton } from './ShareProductButton'
 import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 
 import { useState, useMemo } from 'react'
@@ -150,12 +151,13 @@ export function TerracotaTemplate({ store, products, storeSlug, planId, onProduc
                   onClick={() => openProduct(heroProduct.id)}
                   className="group relative block w-full aspect-[4/5] max-h-[480px] overflow-hidden rounded-t-[10rem] md:rounded-t-[12rem] rounded-b-2xl bg-[#F3E3D0] cursor-pointer"
                 >
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={heroProduct.imageUrl || PRODUCT_IMG_FALLBACK}
                     alt={heroProduct.name}
                     className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
                     onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
                   />
+                    <ShareProductButton productName={heroProduct.name} price={heroProduct.price} productId={heroProduct.id} slug={storeSlug} storeName={store.name} />
                 </button>
                 <span className="absolute top-6 -left-1 md:-left-6 rotate-[-8deg] bg-[#5F6F52] text-[#FBF3EA] text-[9px] font-bold uppercase tracking-[0.25em] px-3.5 py-2 rounded-full shadow-lg">
                   100% artesanal
@@ -165,12 +167,13 @@ export function TerracotaTemplate({ store, products, storeSlug, planId, onProduc
                     onClick={() => openProduct(secondProduct.id)}
                     className="group absolute bottom-0 right-0 md:-right-3 w-28 h-28 md:w-36 md:h-36 rounded-2xl overflow-hidden border-4 border-[#FBF3EA] shadow-xl cursor-pointer"
                   >
-                    <img
+                    <img loading="lazy" decoding="async"
                       src={secondProduct.imageUrl || PRODUCT_IMG_FALLBACK}
                       alt={secondProduct.name}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
                     />
+                    <ShareProductButton productName={secondProduct.name} price={secondProduct.price} productId={secondProduct.id} slug={storeSlug} storeName={store.name} />
                   </button>
                 )}
               </div>
@@ -252,12 +255,13 @@ export function TerracotaTemplate({ store, products, storeSlug, planId, onProduc
                   </button>
                 </div>
                 <button onClick={() => openProduct(dealProduct.id)} className="group relative aspect-[16/10] md:aspect-auto md:min-h-[320px] overflow-hidden cursor-pointer order-1 md:order-2">
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={dealProduct.imageUrl || PRODUCT_IMG_FALLBACK}
                     alt={dealProduct.name}
                     className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
                     onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
                   />
+                    <ShareProductButton productName={dealProduct.name} price={dealProduct.price} productId={dealProduct.id} slug={storeSlug} storeName={store.name} />
                 </button>
               </motion.div>
             </section>
@@ -334,12 +338,13 @@ export function TerracotaTemplate({ store, products, storeSlug, planId, onProduc
                     >
                       <div className="relative bg-white rounded-2xl p-2.5 border border-[#EBD9C6] group-hover:-translate-y-1 group-hover:shadow-[0_24px_40px_-24px_rgba(74,46,35,0.4)] transition-all duration-300">
                         <div className="relative aspect-square overflow-hidden rounded-xl bg-[#F3E3D0]">
-                          <img
+                          <img loading="lazy" decoding="async"
                             src={product.imageUrl || PRODUCT_IMG_FALLBACK}
                             alt={product.name}
                             className="w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-700"
                             onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
                           />
+                    <ShareProductButton productName={product.name} price={product.price} productId={product.id} slug={storeSlug} storeName={store.name} />
                           {product.featured && !product.originalPrice && (
                             <span className="absolute top-2 left-2 bg-[#5F6F52] text-[#FBF3EA] text-[8px] font-bold uppercase tracking-[0.18em] px-2 py-1 rounded-full">
                               Hecho a mano

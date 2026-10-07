@@ -1,4 +1,5 @@
 'use client'
+import { ShareProductButton } from './ShareProductButton'
 import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 
 import { useState, useMemo } from 'react'
@@ -178,12 +179,13 @@ export function CalleTemplate({ store, products, storeSlug, planId, onProductCli
                   onClick={() => openProduct(heroProduct.id)}
                   className="group relative block w-full aspect-[4/5] max-h-[480px] overflow-hidden border-2 border-[#232326] cursor-pointer bg-[#141416]"
                 >
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={heroProduct.imageUrl || PRODUCT_IMG_FALLBACK}
                     alt={heroProduct.name}
                     className="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-[1.03] transition-all duration-700"
                     onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
                   />
+                    <ShareProductButton productName={heroProduct.name} price={heroProduct.price} productId={heroProduct.id} slug={storeSlug} storeName={store.name} />
                   <span className="absolute bottom-0 inset-x-0 bg-black/70 backdrop-blur-sm px-4 py-3 flex items-center justify-between">
                     <span className="cl-display text-sm uppercase truncate">{heroProduct.name}</span>
                     <span className="text-[#D9FF3F] font-bold text-sm shrink-0 ml-3">S/{Number(heroProduct.price).toFixed(2)}</span>
@@ -194,12 +196,13 @@ export function CalleTemplate({ store, products, storeSlug, planId, onProductCli
                     onClick={() => openProduct(secondProduct.id)}
                     className="group absolute -bottom-6 -left-4 md:-left-8 w-28 h-28 md:w-36 md:h-36 overflow-hidden border-4 border-[#0B0B0C] shadow-2xl cursor-pointer bg-[#141416]"
                   >
-                    <img
+                    <img loading="lazy" decoding="async"
                       src={secondProduct.imageUrl || PRODUCT_IMG_FALLBACK}
                       alt={secondProduct.name}
                       className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-500"
                       onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
                     />
+                    <ShareProductButton productName={secondProduct.name} price={secondProduct.price} productId={secondProduct.id} slug={storeSlug} storeName={store.name} />
                   </button>
                 )}
                 <span className="absolute -top-3 -right-2 rotate-[4deg] bg-[#D9FF3F] text-black text-[10px] font-bold uppercase tracking-[0.2em] px-3 py-2">
@@ -256,12 +259,13 @@ export function CalleTemplate({ store, products, storeSlug, planId, onProductCli
                   </button>
                 </div>
                 <button onClick={() => openProduct(dealProduct.id)} className="group relative aspect-[16/10] md:aspect-auto md:min-h-[320px] overflow-hidden cursor-pointer order-1 md:order-2">
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={dealProduct.imageUrl || PRODUCT_IMG_FALLBACK}
                     alt={dealProduct.name}
                     className="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-[1.03] transition-all duration-700"
                     onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
                   />
+                    <ShareProductButton productName={dealProduct.name} price={dealProduct.price} productId={dealProduct.id} slug={storeSlug} storeName={store.name} />
                 </button>
               </motion.div>
             </section>
@@ -335,12 +339,13 @@ export function CalleTemplate({ store, products, storeSlug, planId, onProductCli
                     >
                       <div className="relative border border-[#232326] bg-[#0F0F10] group-hover:border-[#D9FF3F]/70 group-hover:-translate-y-1 transition-all duration-300">
                         <div className="relative aspect-square overflow-hidden bg-[#141416]">
-                          <img
+                          <img loading="lazy" decoding="async"
                             src={product.imageUrl || PRODUCT_IMG_FALLBACK}
                             alt={product.name}
                             className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-[1.05] transition-all duration-700"
                             onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
                           />
+                    <ShareProductButton productName={product.name} price={product.price} productId={product.id} slug={storeSlug} storeName={store.name} />
                           {product.featured && !product.originalPrice && (
                             <span className="absolute top-2 left-2 bg-[#D9FF3F] text-black text-[9px] font-bold uppercase tracking-[0.14em] px-2 py-1">
                               Destacado

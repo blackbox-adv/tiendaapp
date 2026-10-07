@@ -1,4 +1,5 @@
 'use client'
+import { ShareProductButton } from './ShareProductButton'
 import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 
 import { useState, useMemo } from 'react'
@@ -155,12 +156,13 @@ export function AuraTemplate({ store, products, storeSlug, planId, onProductClic
                     onClick={() => openProduct(heroProduct.id)}
                     className="group relative block w-full aspect-[4/5] max-h-[480px] overflow-hidden bg-[#EFE6D4] cursor-pointer"
                   >
-                    <img
+                    <img loading="lazy" decoding="async"
                       src={heroProduct.imageUrl || PRODUCT_IMG_FALLBACK}
                       alt={heroProduct.name}
                       className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700"
                       onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
                     />
+                    <ShareProductButton productName={heroProduct.name} price={heroProduct.price} productId={heroProduct.id} slug={storeSlug} storeName={store.name} />
                   </button>
                   <span className="absolute bottom-6 left-6 bg-white/95 backdrop-blur-sm px-5 py-2 text-[10px] tracking-[0.25em] uppercase text-[#8A6B3F] font-medium shadow-sm">
                     Pieza destacada
@@ -247,12 +249,13 @@ export function AuraTemplate({ store, products, storeSlug, planId, onProductClic
                   </button>
                 </div>
                 <button onClick={() => openProduct(dealProduct.id)} className="group relative aspect-[16/10] md:aspect-auto md:min-h-[340px] overflow-hidden cursor-pointer order-1 md:order-2">
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={dealProduct.imageUrl || PRODUCT_IMG_FALLBACK}
                     alt={dealProduct.name}
                     className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700"
                     onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
                   />
+                    <ShareProductButton productName={dealProduct.name} price={dealProduct.price} productId={dealProduct.id} slug={storeSlug} storeName={store.name} />
                 </button>
                 <Sparkles className="absolute top-6 right-6 w-5 h-5 text-[#C9A96A]/60 pointer-events-none" />
               </motion.div>
@@ -327,12 +330,13 @@ export function AuraTemplate({ store, products, storeSlug, planId, onProductClic
                       onClick={() => openProduct(product.id)}
                     >
                       <div className="relative aspect-[4/5] overflow-hidden bg-[#EFE6D4]">
-                        <img
+                        <img loading="lazy" decoding="async"
                           src={product.imageUrl || PRODUCT_IMG_FALLBACK}
                           alt={product.name}
                           className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-700"
                           onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
                         />
+                    <ShareProductButton productName={product.name} price={product.price} productId={product.id} slug={storeSlug} storeName={store.name} />
                         {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
                           <span className="absolute top-3 left-3 bg-[#211A10] text-[#E8D9BC] text-[10px] tracking-[0.14em] px-2.5 py-1">
                             -{Math.round((1 - Number(product.price) / Number(product.originalPrice)) * 100)}%

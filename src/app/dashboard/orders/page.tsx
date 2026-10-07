@@ -15,9 +15,12 @@ import {
   Check,
   X,
   Package,
+  PackageCheck,
   Phone,
   StickyNote,
   Download,
+  Truck,
+  Banknote,
 } from 'lucide-react';
 
 // ── Types ────────────────────────────────────────────────
@@ -30,10 +33,12 @@ interface OrderItem {
   imageUrl?: string;
 }
 
+export type OrderStatus = 'pending' | 'confirmed' | 'paid' | 'shipped' | 'delivered' | 'cancelled';
+
 interface StoreOrder {
   id: string;
   orderNumber: string;
-  status: 'pending' | 'confirmed' | 'cancelled';
+  status: OrderStatus;
   customerName: string;
   customerPhone: string;
   customerEmail: string | null;
@@ -53,7 +58,10 @@ interface StoreData {
 
 const STATUS_META: Record<string, { label: string; className: string }> = {
   pending: { label: 'Pendiente', className: 'bg-amber-100 text-amber-700' },
-  confirmed: { label: 'Confirmado', className: 'bg-emerald-100 text-emerald-700' },
+  confirmed: { label: 'Confirmado', className: 'bg-sky-100 text-sky-700' },
+  paid: { label: 'Pagado', className: 'bg-violet-100 text-violet-700' },
+  shipped: { label: 'Enviado', className: 'bg-blue-100 text-blue-700' },
+  delivered: { label: 'Entregado', className: 'bg-emerald-100 text-emerald-700' },
   cancelled: { label: 'Cancelado', className: 'bg-red-100 text-red-700' },
 };
 
@@ -61,6 +69,9 @@ const FILTERS: { id: string; label: string }[] = [
   { id: 'todos', label: 'Todos' },
   { id: 'pending', label: 'Pendientes' },
   { id: 'confirmed', label: 'Confirmados' },
+  { id: 'paid', label: 'Pagados' },
+  { id: 'shipped', label: 'Enviados' },
+  { id: 'delivered', label: 'Entregados' },
   { id: 'cancelled', label: 'Cancelados' },
 ];
 
@@ -133,7 +144,7 @@ export default function OrdersPage() {
     fetchData();
   }, [fetchData]);
 
-  const updateStatus = async (orderId: string, status: 'confirmed' | 'cancelled') => {
+  const updateStatus = async (orderId: string, status: OrderStatus) => {
     setUpdating(orderId);
     try {
       const token = localStorage.getItem('tiendapp_token');
@@ -149,9 +160,7 @@ export default function OrdersPage() {
         setOrders((prev) =>
           prev.map((o) => (o.id === orderId ? { ...o, status } : o))
         );
-        toast.success(
-          status === 'confirmed' ? 'Pedido confirmado' : 'Pedido cancelado'
-        );
+        toast.success(`Pedido marcado como ${STATUS_META[status]?.label.toLowerCase() ?? 'actualizado'}`);
       } else {
         const data = await res.json().catch(() => ({}));
         toast.error(data.error || 'Error al actualizar el pedido');
@@ -193,11 +202,16 @@ export default function OrdersPage() {
 
   const whatsappReply = (order: StoreOrder) => {
     const phone = sanitizePhone(order.customerPhone);
+    const byStatus: Record<string, string> = {
+      pending: '¿Cómo quieres coordinar el pago y la entrega? ',
+      confirmed: '¡Tu pedido está confirmado! ',
+      paid: '¡Recibimos tu pago! Ya estamos preparando tu pedido. ',
+      shipped: '¡Tu pedido va en camino! ',
+      delivered: '¡Tu pedido fue entregado! ¿Qué tal todo? ',
+    };
     const msg =
       `Hola ${order.customerName}! Te escribo de ${store?.name ?? 'la tienda'} sobre tu pedido ${order.orderNumber} (S/ ${formatMoney(order.totalAmount)}). ` +
-      (order.status === 'confirmed'
-        ? '¡Tu pedido está confirmado! '
-        : '¿Cómo quieres coordinar el pago y la entrega? ');
+      (byStatus[order.status] ?? '¿Cómo quieres coordinar el pago y la entrega? ');
     return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
   };
 
@@ -414,6 +428,70 @@ export default function OrdersPage() {
                           Cancelar
                         </Button>
                       </>
+                    )}
+                    {order.status === 'confirmed' && (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-violet-600 border-violet-200 hover:bg-violet-50 gap-1"
+                          disabled={updating === order.id}
+                          onClick={() => updateStatus(order.id, 'paid')}
+                        >
+                          {updating === order.id ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <Banknote className="w-3.5 h-3.5" />
+                          )}
+                          Marcar pagado
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-red-500 border-red-200 hover:bg-red-50 gap-1"
+                          disabled={updating === order.id}
+                          onClick={() => updateStatus(order.id, 'cancelled')}
+                        >
+                          {updating === order.id ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <X className="w-3.5 h-3.5" />
+                          )}
+                          Cancelar
+                        </Button>
+                      </>
+                    )}
+                    {order.status === 'paid' && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-blue-600 border-blue-200 hover:bg-blue-50 gap-1"
+                        disabled={updating === order.id}
+                        onClick={() => updateStatus(order.id, 'shipped')}
+                      >
+                        {updating === order.id ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Truck className="w-3.5 h-3.5" />
+                        )}
+                        Marcar enviado
+                      </Button>
+                    )}
+                    {order.status === 'shipped' && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-emerald-600 border-emerald-200 hover:bg-emerald-50 gap-1"
+                        disabled={updating === order.id}
+                        onClick={() => updateStatus(order.id, 'delivered')}
+                      >
+                        {updating === order.id ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <PackageCheck className="w-3.5 h-3.5" />
+                        )}
+                        Marcar entregado
+                      </Button>
                     )}
                   </div>
                 </CardContent>

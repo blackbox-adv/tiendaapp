@@ -1,4 +1,5 @@
 'use client'
+import { ShareProductButton } from './ShareProductButton'
 import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 
 import { useState, useMemo } from 'react'
@@ -151,12 +152,13 @@ export function GranoTemplate({ store, products, storeSlug, planId, onProductCli
                     onClick={() => openProduct(heroProduct.id)}
                     className="group relative block w-full aspect-[4/3] max-h-[430px] overflow-hidden rounded-[2rem] bg-[#F1E4D0] cursor-pointer shadow-[0_30px_60px_-26px_rgba(62,44,30,0.5)]"
                   >
-                    <img
+                    <img loading="lazy" decoding="async"
                       src={heroProduct.imageUrl || PRODUCT_IMG_FALLBACK}
                       alt={heroProduct.name}
                       className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
                       onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
                     />
+                    <ShareProductButton productName={heroProduct.name} price={heroProduct.price} productId={heroProduct.id} slug={storeSlug} storeName={store.name} />
                   </button>
                   <div className="absolute bottom-0 left-4 right-4 md:left-6 md:right-auto md:w-80 bg-white rounded-3xl shadow-[0_24px_44px_-20px_rgba(62,44,30,0.45)] p-4 border border-[#E7D7C1]">
                     <div className="flex items-center justify-between gap-3">
@@ -279,12 +281,13 @@ export function GranoTemplate({ store, products, storeSlug, planId, onProductCli
                   </button>
                 </div>
                 <button onClick={() => openProduct(dealProduct.id)} className="group relative aspect-[16/10] md:aspect-auto md:min-h-[320px] overflow-hidden cursor-pointer order-1 md:order-2">
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={dealProduct.imageUrl || PRODUCT_IMG_FALLBACK}
                     alt={dealProduct.name}
                     className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
                     onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
                   />
+                    <ShareProductButton productName={dealProduct.name} price={dealProduct.price} productId={dealProduct.id} slug={storeSlug} storeName={store.name} />
                 </button>
                 <Flame className="absolute -bottom-6 -left-6 w-28 h-28 text-white/10 pointer-events-none" />
               </motion.div>
@@ -362,12 +365,13 @@ export function GranoTemplate({ store, products, storeSlug, planId, onProductCli
                     >
                       <div className="relative bg-white rounded-3xl p-2.5 border border-[#E7D7C1] group-hover:-translate-y-1.5 group-hover:shadow-[0_28px_44px_-24px_rgba(181,121,59,0.6)] transition-all duration-300">
                         <div className="relative aspect-square overflow-hidden rounded-2xl bg-[#F1E4D0]">
-                          <img
+                          <img loading="lazy" decoding="async"
                             src={product.imageUrl || PRODUCT_IMG_FALLBACK}
                             alt={product.name}
                             className="w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-700"
                             onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
                           />
+                    <ShareProductButton productName={product.name} price={product.price} productId={product.id} slug={storeSlug} storeName={store.name} />
                           {product.featured && !product.originalPrice && (
                             <span className="absolute top-2 left-2 bg-[#3E2C1E] text-[#F0E2CE] text-[9px] font-extrabold uppercase tracking-wide px-2.5 py-1 rounded-full">
                               Favorito

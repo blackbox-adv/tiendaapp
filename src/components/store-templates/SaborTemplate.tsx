@@ -1,4 +1,5 @@
 'use client'
+import { ShareProductButton } from './ShareProductButton'
 import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 
 import { useState, useMemo } from 'react'
@@ -162,12 +163,13 @@ export function SaborTemplate({ store, products, storeSlug, planId, onProductCli
                   onClick={() => openProduct(heroProduct.id)}
                   className="group relative block w-full aspect-[4/3] max-h-[360px] overflow-hidden rounded-[2rem] bg-white/20 cursor-pointer ring-1 ring-white/40 shadow-[0_30px_60px_-26px_rgba(0,0,0,0.55)]"
                 >
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={heroProduct.imageUrl || PRODUCT_IMG_FALLBACK}
                     alt={heroProduct.name}
                     className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
                     onError={(e) => { (e.target as HTMLImageElement).src = IMG_FALLBACK }}
                   />
+                    <ShareProductButton productName={heroProduct.name} price={heroProduct.price} productId={heroProduct.id} slug={storeSlug} storeName={store.name} />
                   {heroPct > 0 && (
                     <span className="absolute top-4 left-4 bg-white text-sm font-black px-3.5 py-1.5 rounded-full shadow-lg -rotate-3" style={{ color: primary }}>
                       -{heroPct}% hoy
@@ -259,7 +261,7 @@ export function SaborTemplate({ store, products, storeSlug, planId, onProductCli
                     onClick={() => openProduct(p.id)}
                   >
                     <div className="aspect-square rounded-2xl overflow-hidden bg-orange-50 border border-stone-200 shadow-sm group-hover:shadow-md group-hover:-translate-y-1 transition-all">
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={p.imageUrl || PRODUCT_IMG_FALLBACK}
                         alt={p.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -267,6 +269,7 @@ export function SaborTemplate({ store, products, storeSlug, planId, onProductCli
                           (e.target as HTMLImageElement).src = IMG_FALLBACK
                         }}
                       />
+                    <ShareProductButton productName={p.name} price={p.price} productId={p.id} slug={storeSlug} storeName={store.name} />
                     </div>
                     <p className="text-xs font-bold text-stone-800 mt-2 truncate">{p.name}</p>
                     <p className="text-sm font-extrabold" style={{ color: primary }}>
@@ -310,7 +313,7 @@ export function SaborTemplate({ store, products, storeSlug, planId, onProductCli
                         onClick={() => openProduct(p.id)}
                       >
                         <div className="w-14 h-14 rounded-xl overflow-hidden bg-orange-50 shrink-0 border border-stone-100">
-                          <img
+                          <img loading="lazy" decoding="async"
                             src={p.imageUrl || PRODUCT_IMG_FALLBACK}
                             alt={p.name}
                             className="w-full h-full object-cover"
@@ -318,6 +321,7 @@ export function SaborTemplate({ store, products, storeSlug, planId, onProductCli
                               (e.target as HTMLImageElement).src = IMG_FALLBACK
                             }}
                           />
+                    <ShareProductButton productName={p.name} price={p.price} productId={p.id} slug={storeSlug} storeName={store.name} />
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-baseline gap-1.5">

@@ -1,4 +1,5 @@
 'use client'
+import { ShareProductButton } from './ShareProductButton'
 import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 
 import { useState, useMemo } from 'react'
@@ -118,7 +119,7 @@ export function BoutiqueTemplate({ store, products, storeSlug, planId, onProduct
       {/* ── Hero editorial ── */}
       {store.bannerUrl ? (
         <section className="relative h-[68vh] min-h-[420px] max-h-[640px] overflow-hidden">
-          <img src={store.bannerUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <img loading="lazy" decoding="async" src={store.bannerUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
           <div className="relative max-w-6xl mx-auto px-6 h-full flex items-center">
             <div className="max-w-lg text-white">
@@ -183,7 +184,7 @@ export function BoutiqueTemplate({ store, products, storeSlug, planId, onProduct
                 onClick={() => openProduct(heroProduct.id)}
                 className="group relative aspect-[4/5] max-h-[460px] w-full overflow-hidden bg-stone-100 cursor-pointer text-left"
               >
-                <img
+                <img loading="lazy" decoding="async"
                   src={heroProduct.imageUrl || PRODUCT_IMG_FALLBACK}
                   alt={heroProduct.name}
                   className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
@@ -191,6 +192,7 @@ export function BoutiqueTemplate({ store, products, storeSlug, planId, onProduct
                     (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK
                   }}
                 />
+                    <ShareProductButton productName={heroProduct.name} price={heroProduct.price} productId={heroProduct.id} slug={storeSlug} storeName={store.name} />
                 <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm px-4 py-2.5 shadow-md">
                   <p className="text-[9px] uppercase tracking-[0.25em] text-stone-400">Destacado</p>
                   <p className="font-serif text-sm">{heroProduct.name}</p>
@@ -267,7 +269,7 @@ export function BoutiqueTemplate({ store, products, storeSlug, planId, onProduct
                       }`}
                       style={active ? { ['--tw-ring-color' as string]: store.colors.primary } : undefined}
                     >
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={categoryImages[cat.id] || PRODUCT_IMG_FALLBACK}
                         alt={cat.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
@@ -293,7 +295,7 @@ export function BoutiqueTemplate({ store, products, storeSlug, planId, onProduct
                     onClick={() => setSelectedCategory(cat.id)}
                     className="group relative aspect-[4/5] md:aspect-[3/4] overflow-hidden bg-stone-100 cursor-pointer"
                   >
-                    <img
+                    <img loading="lazy" decoding="async"
                       src={categoryImages[cat.id] || PRODUCT_IMG_FALLBACK}
                       alt={cat.name}
                       className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-700"
@@ -327,7 +329,7 @@ export function BoutiqueTemplate({ store, products, storeSlug, planId, onProduct
               className="group relative w-full overflow-hidden bg-stone-900 cursor-pointer text-left grid md:grid-cols-2"
             >
               <div className="aspect-[16/10] md:aspect-auto md:min-h-[300px] relative overflow-hidden">
-                <img
+                <img loading="lazy" decoding="async"
                   src={dealProduct.imageUrl || PRODUCT_IMG_FALLBACK}
                   alt={dealProduct.name}
                   className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:scale-[1.03] transition-transform duration-700"
@@ -335,6 +337,7 @@ export function BoutiqueTemplate({ store, products, storeSlug, planId, onProduct
                     (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK
                   }}
                 />
+                    <ShareProductButton productName={dealProduct.name} price={dealProduct.price} productId={dealProduct.id} slug={storeSlug} storeName={store.name} />
               </div>
               <div className="flex flex-col justify-center items-start p-8 md:p-12">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/60 mb-3">Oferta especial</p>
@@ -418,7 +421,7 @@ export function BoutiqueTemplate({ store, products, storeSlug, planId, onProduct
                     onClick={() => openProduct(product.id)}
                   >
                     <div className="aspect-[3/4] relative overflow-hidden bg-stone-100">
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={product.imageUrl || PRODUCT_IMG_FALLBACK}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-700"
@@ -426,6 +429,7 @@ export function BoutiqueTemplate({ store, products, storeSlug, planId, onProduct
                           (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK
                         }}
                       />
+                    <ShareProductButton productName={product.name} price={product.price} productId={product.id} slug={storeSlug} storeName={store.name} />
                       {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
                         <div
                           className="absolute top-3 left-3 px-2 py-0.5 text-[10px] font-bold tracking-widest text-white"

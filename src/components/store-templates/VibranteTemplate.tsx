@@ -1,4 +1,5 @@
 'use client'
+import { ShareProductButton } from './ShareProductButton'
 import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 
 import { useState, useMemo } from 'react'
@@ -345,7 +346,7 @@ export function VibranteTemplate({ store, products, storeSlug, planId, onProduct
                 >
                   {/* Tall image (Instagram-like) */}
                   <div className="aspect-[4/5] bg-gray-100 overflow-hidden relative">
-                    <img
+                    <img loading="lazy" decoding="async"
                       src={product.imageUrl || PRODUCT_IMG_FALLBACK}
                       alt={product.name}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
@@ -354,6 +355,7 @@ export function VibranteTemplate({ store, products, storeSlug, planId, onProduct
                           'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="500"><rect fill="%23f0f0f0" width="400" height="500"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="48">📸</text></svg>'
                       }}
                     />
+                    <ShareProductButton productName={product.name} price={product.price} productId={product.id} slug={storeSlug} storeName={store.name} />
                     {product.originalPrice && (
                       <Badge className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold rounded-lg px-2.5 py-1 shadow-lg border-0">
                         -{Math.round(((Number(product.originalPrice) - Number(product.price)) / Number(product.originalPrice)) * 100)}%

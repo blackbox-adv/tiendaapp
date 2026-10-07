@@ -1,4 +1,5 @@
 'use client'
+import { ShareProductButton } from './ShareProductButton'
 import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 
 import { useState, useMemo } from 'react'
@@ -107,7 +108,7 @@ export function EditorialTemplate({ store, products, storeSlug, planId, onProduc
         {/* ── Portada ── */}
         {store.bannerUrl ? (
           <section className="relative h-[72vh] min-h-[460px] max-h-[680px] overflow-hidden bg-[#141414]">
-            <img src={store.bannerUrl} alt="" className="absolute inset-0 w-full h-full object-cover opacity-90" />
+            <img loading="lazy" decoding="async" src={store.bannerUrl} alt="" className="absolute inset-0 w-full h-full object-cover opacity-90" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/10" />
             <div className="absolute inset-3 md:inset-5 border border-white/40 pointer-events-none" />
             <div className="relative max-w-6xl mx-auto px-6 md:px-16 h-full flex flex-col justify-end pb-14 md:pb-20">
@@ -153,12 +154,13 @@ export function EditorialTemplate({ store, products, storeSlug, planId, onProduc
                   <span className="ed-serif absolute -top-10 right-2 text-[7rem] md:text-[9rem] leading-none text-[#F0EBE3] select-none pointer-events-none font-semibold">01</span>
                   <button onClick={() => openProduct(heroProduct.id)} className="group relative block w-full bg-white border border-[#E7E2DA] p-2.5 shadow-[0_20px_60px_-20px_rgba(20,20,20,0.25)] cursor-pointer text-left">
                     <div className="aspect-[4/3] overflow-hidden relative">
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={heroProduct.imageUrl || PRODUCT_IMG_FALLBACK}
                         alt={heroProduct.name}
                         className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700"
                         onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
                       />
+                    <ShareProductButton productName={heroProduct.name} price={heroProduct.price} productId={heroProduct.id} slug={storeSlug} storeName={store.name} />
                       <span className="absolute top-4 left-4 bg-[#C8102E] text-white text-[9px] font-bold uppercase tracking-[0.25em] px-3 py-1.5 rotate-[-2deg]">Nueva temporada</span>
                     </div>
                     <div className="flex items-center justify-between pt-3 px-1 pb-1">
@@ -220,12 +222,13 @@ export function EditorialTemplate({ store, products, storeSlug, planId, onProduc
                 className="group relative w-full grid md:grid-cols-2 bg-[#141414] cursor-pointer text-left overflow-hidden"
               >
                 <div className="aspect-[16/10] md:aspect-auto md:min-h-[320px] relative overflow-hidden">
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={dealProduct.imageUrl || PRODUCT_IMG_FALLBACK}
                     alt={dealProduct.name}
                     className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:scale-[1.03] transition-transform duration-700"
                     onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
                   />
+                    <ShareProductButton productName={dealProduct.name} price={dealProduct.price} productId={dealProduct.id} slug={storeSlug} storeName={store.name} />
                 </div>
                 <div className="flex flex-col justify-center items-start p-8 md:p-12 relative">
                   <span className="absolute top-0 right-0 w-16 h-16 bg-[#C8102E]" style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }} />
@@ -310,12 +313,13 @@ export function EditorialTemplate({ store, products, storeSlug, planId, onProduc
                       onClick={() => openProduct(product.id)}
                     >
                       <div className="relative aspect-[3/4] overflow-hidden bg-[#F5F1EA]">
-                        <img
+                        <img loading="lazy" decoding="async"
                           src={product.imageUrl || PRODUCT_IMG_FALLBACK}
                           alt={product.name}
                           className="w-full h-full object-cover saturate-[0.85] group-hover:saturate-100 group-hover:scale-[1.04] transition-all duration-700"
                           onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK }}
                         />
+                    <ShareProductButton productName={product.name} price={product.price} productId={product.id} slug={storeSlug} storeName={store.name} />
                         <span className="absolute top-2.5 left-3 ed-serif italic text-sm text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.55)]">{folio(i)}</span>
                         {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
                           <span className="absolute top-2.5 right-2.5 bg-[#C8102E] text-white text-[9px] font-bold tracking-widest px-2 py-0.5">

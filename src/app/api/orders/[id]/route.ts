@@ -53,10 +53,10 @@ export async function PUT(
     const body = await request.json()
     const { status } = body
 
-    // Validate status
-    const validStatuses = ['confirmed', 'cancelled']
+    // Validate status — flujo: pending → confirmed → paid → shipped → delivered (o cancelled)
+    const validStatuses = ['confirmed', 'paid', 'shipped', 'delivered', 'cancelled']
     if (!status || !validStatuses.includes(status)) {
-      return apiError('status debe ser "confirmed" o "cancelled"', 400, undefined, request)
+      return apiError('status debe ser: confirmed, paid, shipped, delivered o cancelled', 400, undefined, request)
     }
 
     // Find the order

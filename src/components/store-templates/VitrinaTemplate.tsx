@@ -1,4 +1,5 @@
 'use client'
+import { ShareProductButton } from './ShareProductButton'
 import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 
 import { useState, useMemo } from 'react'
@@ -59,7 +60,7 @@ export function VitrinaTemplate({ store, products, storeSlug, planId, onProductC
       {/* ── Header editorial ── */}
       {store.bannerUrl ? (
         <div className="relative h-64 md:h-80 overflow-hidden">
-          <img src={store.bannerUrl} alt="" className="w-full h-full object-cover" />
+          <img loading="lazy" decoding="async" src={store.bannerUrl} alt="" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#FAF7F2] via-black/45 to-black/25" />
           <div className="absolute inset-x-0 bottom-0 pb-10 text-center px-6">
             {store.logo && (
@@ -184,7 +185,7 @@ export function VitrinaTemplate({ store, products, storeSlug, planId, onProductC
               >
                 <div className="grid md:grid-cols-5 gap-0 bg-white shadow-sm ring-1 ring-stone-200/70 overflow-hidden">
                   <div className="md:col-span-3 aspect-[4/3] md:aspect-auto md:min-h-[380px] relative overflow-hidden bg-stone-100">
-                    <img
+                    <img loading="lazy" decoding="async"
                       src={heroProduct.imageUrl || PRODUCT_IMG_FALLBACK}
                       alt={heroProduct.name}
                       className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
@@ -192,6 +193,7 @@ export function VitrinaTemplate({ store, products, storeSlug, planId, onProductC
                         (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK
                       }}
                     />
+                    <ShareProductButton productName={heroProduct.name} price={heroProduct.price} productId={heroProduct.id} slug={storeSlug} storeName={store.name} />
                     <div className="absolute top-4 left-4 px-3 py-1 bg-stone-900 text-[#FAF7F2] text-[10px] font-semibold uppercase tracking-[0.25em]">
                       Destacado
                     </div>
@@ -244,7 +246,7 @@ export function VitrinaTemplate({ store, products, storeSlug, planId, onProductC
                     onClick={() => openProduct(product.id)}
                   >
                     <div className="aspect-[3/4] relative overflow-hidden bg-stone-100 rounded-md">
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={product.imageUrl || PRODUCT_IMG_FALLBACK}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-700"
@@ -252,6 +254,7 @@ export function VitrinaTemplate({ store, products, storeSlug, planId, onProductC
                           (e.target as HTMLImageElement).src = PRODUCT_IMG_FALLBACK
                         }}
                       />
+                    <ShareProductButton productName={product.name} price={product.price} productId={product.id} slug={storeSlug} storeName={store.name} />
                       {product.originalPrice && (
                         <div className="absolute top-3 left-3 px-2 py-0.5 text-[10px] font-semibold tracking-widest text-white" style={{ backgroundColor: store.colors.primary }}>
                           -{Math.round(((Number(product.originalPrice) - Number(product.price)) / Number(product.originalPrice)) * 100)}%

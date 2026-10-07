@@ -39,6 +39,7 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
   const pathname = usePathname()
   const [showYape, setShowYape] = useState(false)
   const [showZoom, setShowZoom] = useState(false)
+  const [shareCopied, setShareCopied] = useState(false)
   const [quantity, setQuantity] = useState(1)
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [addedToOrder, setAddedToOrder] = useState(false)
@@ -323,17 +324,32 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
   const shareProduct = async () => {
     const shareData = {
       title: `${product.name} - ${store.name}`,
-      text: `Mira este producto: ${product.name} por S/${Number(product.price).toFixed(2)} en ${store.name}`,
+      text: `Mira: ${product.name} por S/${Number(product.price).toFixed(2)} en ${store.name}`,
       url: typeof window !== 'undefined' ? window.location.href : '',
     }
+    // 1) Móvil: hoja nativa del sistema (WhatsApp, Instagram, etc.)
     try {
       if (navigator.share) {
         await navigator.share(shareData)
-      } else {
-        await navigator.clipboard.writeText(shareData.text + ' ' + shareData.url)
+        return
       }
     } catch {
-      // User cancelled or clipboard failed
+      return // usuario canceló
+    }
+    // 2) Escritorio: WhatsApp directo con el mensaje y el enlace listos
+    try {
+      window.open(`https://wa.me/?text=${encodeURIComponent(`${shareData.text}. ${shareData.url}`)}`, '_blank')
+      return
+    } catch {
+      /* sigue al portapapeles */
+    }
+    // 3) Portapapeles con confirmación visible
+    try {
+      await navigator.clipboard.writeText(`${shareData.text}. ${shareData.url}`)
+      setShareCopied(true)
+      setTimeout(() => setShareCopied(false), 2000)
+    } catch {
+      /* navegador sin permisos */
     }
   }
 
@@ -401,9 +417,9 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
           <StoreLogo logo={store.logo} size={24} />
           <span className="font-semibold text-sm">{store.name}</span>
         </button>
-        <button onClick={shareProduct} className="flex items-center gap-1.5 text-gray-400 hover:text-gray-600 transition-colors">
-          <Share2 className="w-5 h-5" />
-          <span className="text-sm hidden sm:inline">Compartir</span>
+        <button onClick={shareProduct} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 transition-colors" aria-label="Compartir este producto por WhatsApp">
+          {shareCopied ? <Check className="w-5 h-5 text-emerald-600" /> : <Share2 className="w-5 h-5" />}
+          <span className="text-sm">{shareCopied ? '¡Enlace copiado!' : 'Compartir'}</span>
         </button>
       </div>
 

@@ -1,4 +1,5 @@
 'use client'
+import { ShareProductButton } from './ShareProductButton'
 import { PRODUCT_IMG_FALLBACK } from './product-image-fallback'
 
 import { useState, useMemo } from 'react'
@@ -93,7 +94,7 @@ export function MinimalistTemplate({ store, products, storeSlug, planId, onProdu
       {/* Banner with overlaid name — or standalone header */}
       {store.bannerUrl ? (
         <div className="relative h-44 md:h-56 overflow-hidden">
-          <img src={store.bannerUrl} alt="" className="w-full h-full object-cover" />
+          <img loading="lazy" decoding="async" src={store.bannerUrl} alt="" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/30" />
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
             {store.logo && (
@@ -297,7 +298,7 @@ export function MinimalistTemplate({ store, products, storeSlug, planId, onProdu
                   >
                     {/* Image — square, no border */}
                     <div className="aspect-square overflow-hidden relative bg-gray-50">
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={product.imageUrl || PRODUCT_IMG_FALLBACK}
                         alt={product.name}
                         className="w-full h-full object-cover transition-transform duration-600 ease-out group-hover:scale-[1.03]"
@@ -306,6 +307,7 @@ export function MinimalistTemplate({ store, products, storeSlug, planId, onProdu
                             'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect fill="%23fafafa" width="400" height="400"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="13" fill="%23ddd">No image</text></svg>'
                         }}
                       />
+                      <ShareProductButton productName={product.name} price={product.price} productId={product.id} slug={storeSlug} storeName={store.name} />
                       {product.originalPrice && (
                         <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full text-[10px] font-medium bg-black text-white">
                           -{Math.round(((Number(product.originalPrice) - Number(product.price)) / Number(product.originalPrice)) * 100)}%
