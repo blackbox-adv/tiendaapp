@@ -1147,19 +1147,16 @@ export function DemoTemplateClient({ template }: { template: string }) {
       {template === 'bar' && <BarTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
       {template === 'pop' && <PopTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
 
-      {/* Más tiendas distintas para explorar (estilo Pinterest) */}
-      <section className="bg-stone-50 border-t border-stone-200/70 py-10 px-4">
+      {/* Más tiendas distintas para explorar (estilo Pinterest, compacta) */}
+      <section className="bg-stone-50 border-t border-stone-200/70 py-6 px-4">
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-center text-lg sm:text-xl font-bold text-stone-900">Más tiendas para inspirarte</h2>
-          <p className="text-center text-sm text-stone-500 mt-1 mb-6">
-            Cada diseño es una tienda distinta, con su propio estilo y colores. Toca una y recórrela.
-          </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <h2 className="text-center text-base font-bold text-stone-900 mb-4">Más tiendas para inspirarte</h2>
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
             {suggestions.map((t) => (
               <a
                 key={t.id}
                 href={`/demo/${t.id}`}
-                className="group relative rounded-xl overflow-hidden aspect-[3/4] bg-gray-100 shadow-sm hover:shadow-lg transition-shadow"
+                className="group relative rounded-lg overflow-hidden aspect-[4/5] bg-gray-100 shadow-sm hover:shadow-lg transition-shadow"
                 aria-label={`Ver demo de la plantilla ${t.name}`}
               >
                 <Image
@@ -1170,8 +1167,8 @@ export function DemoTemplateClient({ template }: { template: string }) {
                   loading="lazy"
                   className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                 />
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent pt-6 pb-1.5 px-2 text-center">
-                  <span className="text-xs font-bold text-white drop-shadow">{t.name}</span>
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent pt-5 pb-1 px-1.5 text-center">
+                  <span className="text-[11px] font-bold text-white drop-shadow">{t.name}</span>
                 </div>
               </a>
             ))}
