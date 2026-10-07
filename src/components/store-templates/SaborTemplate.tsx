@@ -394,7 +394,7 @@ export function SaborTemplate({ store, products, storeSlug, planId, onProductCli
             )}
             {planId === 'free' && (
               <a href="/" className="mt-1 text-[10px] text-stone-500 hover:text-stone-300 transition-colors">
-                Creado con TiendApp
+                Creado con Kyllari
               </a>
             )}
           </div>

@@ -415,7 +415,7 @@ export function EditorialTemplate({ store, products, storeSlug, planId, onProduc
             <p className="text-[9px] uppercase tracking-[0.2em] text-white/25 mt-2">Catálogo digital — Edición 01</p>
             {planId === 'free' && (
               <a href="/" className="text-[10px] text-white/25 hover:text-white/50 transition-colors">
-                Creado con TiendApp
+                Creado con Kyllari
               </a>
             )}
           </div>

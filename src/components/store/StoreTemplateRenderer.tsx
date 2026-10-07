@@ -392,7 +392,7 @@ export default function StoreTemplateRenderer({ slug }: StoreTemplateRendererPro
       <footer className="bg-gray-900 text-gray-400 py-8">
         <div className="max-w-5xl mx-auto px-4 text-center">
           <p className="text-sm">
-            © 2026 TiendApp. Todos los derechos reservados. Hecho con ❤️ en Perú.
+            © 2026 Kyllari. Todos los derechos reservados. Hecho con ❤️ en Perú.
           </p>
         </div>
       </footer>

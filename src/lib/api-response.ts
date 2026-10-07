@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server'
 
 // ── CORS Configuration ──
 const ALLOWED_ORIGINS = [
-  'https://tienda.blackboxperu.com',
+  'https://kyllari.com',
+  'https://www.kyllari.com',
   'https://blackboxperu.com',
   'https://www.blackboxperu.com',
   'https://tiendapp.pe',

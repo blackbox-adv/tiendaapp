@@ -370,7 +370,7 @@ export function MinimalistTemplate({ store, products, storeSlug, planId, onProdu
                 href="/"
                 className="text-xs text-gray-300 hover:text-gray-500 transition-colors"
               >
-                Creado con TiendApp
+                Creado con Kyllari
               </a>
             )}
           </div>

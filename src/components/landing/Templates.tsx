@@ -417,7 +417,7 @@ export function Templates() {
                   <div className={`relative rounded-2xl overflow-hidden bg-gray-100 shadow-sm group-hover:shadow-xl transition-shadow duration-300 ${pinAspects[i % pinAspects.length]}`}>
                     <Image
                       src={`/templates/${tpl.id}-preview.png`}
-                      alt={`Tienda de ejemplo con la plantilla ${tpl.name} de TiendApp`}
+                      alt={`Tienda de ejemplo con la plantilla ${tpl.name} de Kyllari`}
                       fill
                       sizes="(max-width: 768px) 50vw, (max-width: 1280px) 33vw, 25vw"
                       className="object-cover object-top group-hover:scale-[1.03] transition-transform duration-500"

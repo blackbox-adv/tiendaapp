@@ -36,7 +36,7 @@ export async function generateMetadata(
   const { slug } = await params
   const landing = await getLanding(slug).catch(() => null)
   if (!landing) {
-    return { title: 'Landing no encontrada | TiendApp' }
+    return { title: 'Landing no encontrada | Kyllari' }
   }
   const ogImages = asStringArray(landing.photos)
   return {
@@ -228,7 +228,7 @@ export default async function LandingPublicPage(
         </div>
 
         <footer className="border-t border-neutral-100 px-5 py-5 text-center text-xs text-neutral-400">
-          Hecho con TiendApp — crea tu catálogo y vende por WhatsApp
+          Hecho con Kyllari — crea tu catálogo y vende por WhatsApp
         </footer>
       </article>
     </main>

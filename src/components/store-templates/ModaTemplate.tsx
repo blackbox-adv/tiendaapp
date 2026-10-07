@@ -220,7 +220,7 @@ export function ModaTemplate({ store, products, storeSlug, planId, onProductClic
         <p className="text-[10px] uppercase tracking-[0.3em] text-stone-300 mb-1">{store.name}</p>
         {planId === 'free' && (
           <a href="/" className="text-xs text-stone-300 hover:text-stone-500 transition-colors">
-            Creado con TiendApp
+            Creado con Kyllari
           </a>
         )}
       </footer>

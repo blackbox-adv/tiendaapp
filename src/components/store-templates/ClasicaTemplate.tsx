@@ -479,7 +479,7 @@ export function ClasicaTemplate({ store, products, storeSlug, planId, onProductC
                   className="hover:underline transition-colors"
                   style={{ color: '#A88B6E' }}
                 >
-                  Creado con TiendApp
+                  Creado con Kyllari
                 </a>
               )}
             </p>

@@ -69,7 +69,7 @@ export function PromoPopup({ store, products, onProductClick, onCustomCtaClick }
       } else if (store.whatsappNumber) {
         const promoTitle = store.popupTitle || 'Promocion especial'
         const msg = encodeURIComponent(
-          `Hola! Vi la promocion "${promoTitle}" en tu tienda en TiendApp y me interesa. Podrias darme mas informacion?`
+          `Hola! Vi la promocion "${promoTitle}" en tu tienda en Kyllari y me interesa. Podrias darme mas informacion?`
         )
         window.open(`https://wa.me/${store.whatsappNumber.replace(/[^0-9]/g, '')}?text=${msg}`, '_blank')
       }

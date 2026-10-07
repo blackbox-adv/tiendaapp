@@ -70,7 +70,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
           <div className="w-8 h-8 rounded-lg bg-violet-500 flex items-center justify-center">
             <Store className="w-5 h-5 text-white" />
           </div>
-          <span className="text-lg font-bold">TiendApp</span>
+          <span className="text-lg font-bold">Kyllari</span>
         </div>
         <div className="[&_button]:text-white [&_button]:hover:bg-white/10">
           <NotificationsBell />
@@ -188,7 +188,7 @@ export function Sidebar() {
           <div className="w-7 h-7 rounded-lg bg-violet-500 flex items-center justify-center">
             <Store className="w-4 h-4 text-white" />
           </div>
-          <span className="text-base font-bold text-white">TiendApp</span>
+          <span className="text-base font-bold text-white">Kyllari</span>
         </div>
       </div>
     </>

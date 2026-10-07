@@ -1,5 +1,5 @@
 // ============================================================
-// FUENTE ÚNICA DE VERDAD de los planes de TiendApp.
+// FUENTE ÚNICA DE VERDAD de los planes de Kyllari.
 // Cualquier precio, límite o feature que se muestre al público
 // DEBE salir de aquí. La tabla Plan de la BD se sincroniza con
 // este archivo (ver scripts/sync-plans.sql); si la BD está
@@ -30,7 +30,7 @@ export const CANONICAL_PLANS: CanonicalPlan[] = [
       '1 plantilla básica (Moderna)',
       'Botón de WhatsApp',
       'Reportes básicos de visitas en tu panel',
-      'Badge "Creado con TiendApp"',
+      'Badge "Creado con Kyllari"',
       'Soporte por email',
     ],
     popular: false,
@@ -53,7 +53,7 @@ export const CANONICAL_PLANS: CanonicalPlan[] = [
       'Notificaciones en tu panel',
       'Dominio personalizado (muy pronto)',
       'Estadísticas avanzadas',
-      'Sin badge TiendApp',
+      'Sin badge Kyllari',
       'Copys y descripciones con IA (muy pronto)',
       'Soporte prioritario',
     ],
@@ -79,7 +79,7 @@ export const CANONICAL_PLANS: CanonicalPlan[] = [
       'Copys y descripciones con IA (muy pronto)',
       'Dominio personalizado (muy pronto)',
       'Tarjeta de marca al compartir en WhatsApp',
-      'Sin marca TiendApp',
+      'Sin marca Kyllari',
       'Soporte 24/7',
     ],
     popular: false,

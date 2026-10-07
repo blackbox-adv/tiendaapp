@@ -449,7 +449,7 @@ export function VibranteTemplate({ store, products, storeSlug, planId, onProduct
             href="/"
             className="text-xs text-gray-400 hover:text-gray-500 transition-colors"
           >
-            Creado con TiendApp
+            Creado con Kyllari
           </a>
         )}
       </footer>

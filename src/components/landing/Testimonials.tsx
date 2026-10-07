@@ -40,7 +40,7 @@ const REAL_STORES = [
 
 export function Testimonials() {
   const navigate = useAppStore((s) => s.navigate)
-  const waHref = supportWhatsappUrl('Hola! Quiero saber si TiendApp funciona para mi negocio')
+  const waHref = supportWhatsappUrl('Hola! Quiero saber si Kyllari funciona para mi negocio')
 
   return (
     <section id="testimonials" className="py-20 sm:py-28 bg-white">

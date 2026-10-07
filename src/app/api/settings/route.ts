@@ -23,30 +23,30 @@ export async function GET(request: NextRequest) {
     }
 
     const defaults: Record<string, string> = {
-      name: 'TiendApp',
+      name: 'Kyllari',
       defaultPlanId: 'free',
       maintenanceMode: 'false',
       registrationsEnabled: 'true',
-      whatsappSupport: '+51999999999',
+      whatsappSupport: '+51958297236',
       currency: 'PEN',
       countryCode: 'PE',
-      contactEmail: 'hola@tiendapp.pe',
-      contactPhone: '+51999888777',
+      contactEmail: 'contacto@kyllari.com',
+      contactPhone: '+51958297236',
     }
 
     return apiSuccess({ ...defaults, ...settings }, 200, request)
   } catch {
     return apiSuccess(
       {
-        name: 'TiendApp',
+        name: 'Kyllari',
         defaultPlanId: 'free',
         maintenanceMode: 'false',
         registrationsEnabled: 'true',
-        whatsappSupport: '+51999999999',
+        whatsappSupport: '+51958297236',
         currency: 'PEN',
         countryCode: 'PE',
-        contactEmail: 'hola@tiendapp.pe',
-        contactPhone: '+51999888777',
+        contactEmail: 'contacto@kyllari.com',
+        contactPhone: '+51958297236',
       },
       200,
       request

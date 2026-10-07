@@ -430,7 +430,7 @@ export function BodegaTemplate({ store, products, storeSlug, planId, onProductCl
             </a>
             {planId === 'free' && (
               <a href="/" className="mt-1 text-[10px] text-amber-100/30 hover:text-amber-100/60 transition-colors">
-                Creado con TiendApp
+                Creado con Kyllari
               </a>
             )}
           </div>

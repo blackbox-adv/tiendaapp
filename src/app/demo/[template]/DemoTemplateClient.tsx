@@ -1161,7 +1161,7 @@ export function DemoTemplateClient({ template }: { template: string }) {
               >
                 <Image
                   src={`/templates/${t.id}-preview.png`}
-                  alt={`Tienda de ejemplo con la plantilla ${t.name} de TiendApp`}
+                  alt={`Tienda de ejemplo con la plantilla ${t.name} de Kyllari`}
                   width={300}
                   height={400}
                   loading="lazy"

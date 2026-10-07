@@ -44,7 +44,7 @@ export function Navbar() {
             <div className="w-8 h-8 rounded-lg bg-[#BC5A38] flex items-center justify-center group-hover:bg-[#A84C2D] transition-colors">
               <Zap className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold font-display text-stone-900">TiendApp</span>
+            <span className="text-xl font-bold font-display text-stone-900">Kyllari</span>
           </button>
 
           {/* Desktop Nav */}
@@ -56,7 +56,7 @@ export function Navbar() {
               Funciones
             </button>
             <button onClick={() => handleNav('#comparativa')} className="text-sm font-medium text-stone-600 hover:text-[#BC5A38] transition-colors">
-              ¿Por qué TiendApp?
+              ¿Por qué Kyllari?
             </button>
             <button onClick={() => handleNav('#pricing')} className="text-sm font-medium text-stone-600 hover:text-[#BC5A38] transition-colors">
               Precios
@@ -122,7 +122,7 @@ export function Navbar() {
               Funciones
             </button>
             <button onClick={() => handleNav('#comparativa')} className="block w-full text-left text-sm font-medium text-stone-600 hover:text-[#BC5A38] py-2">
-              ¿Por qué TiendApp?
+              ¿Por qué Kyllari?
             </button>
             <button onClick={() => handleNav('#pricing')} className="block w-full text-left text-sm font-medium text-stone-600 hover:text-[#BC5A38] py-2">
               Precios

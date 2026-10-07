@@ -79,7 +79,7 @@ export function Problem() {
           transition={{ duration: 0.8, delay: 0.4 }}
           className="text-center text-lg sm:text-xl font-semibold font-display text-stone-900 mt-12"
         >
-          Con TiendApp, mismos clientes, mismos WhatsApp —{' '}
+          Con Kyllari, mismos clientes, mismos WhatsApp —{' '}
           <span className="accent-serif">pero con una tienda que vende sola.</span>
         </motion.p>
       </div>

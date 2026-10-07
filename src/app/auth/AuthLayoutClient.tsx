@@ -18,7 +18,7 @@ export default function AuthLayoutClient({
             <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
               <Store className="w-5 h-5 text-violet-600" />
             </div>
-            <span className="text-xl font-bold text-white">TiendApp</span>
+            <span className="text-xl font-bold text-white">Kyllari</span>
           </Link>
         </div>
         <div className="flex-1 flex items-center justify-center px-4 py-8">

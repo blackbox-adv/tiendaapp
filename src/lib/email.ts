@@ -14,14 +14,14 @@ function getResend(): Resend {
   return resendInstance
 }
 
-const FROM_EMAIL = 'TiendApp <noreply@blackboxperu.com>'
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://tienda.blackboxperu.com'
+const FROM_EMAIL = 'Kyllari <noreply@blackboxperu.com>'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://kyllari.com'
 
 // ── Email Templates ──
 
 function passwordResetTemplate(name: string, resetUrl: string) {
   return {
-    subject: 'Restablece tu contraseña - TiendApp',
+    subject: 'Restablece tu contraseña - Kyllari',
     html: `
       <div style="max-width: 480px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
         <div style="text-align: center; padding: 32px 0 24px;">
@@ -30,7 +30,7 @@ function passwordResetTemplate(name: string, resetUrl: string) {
               <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
             </svg>
           </div>
-          <h1 style="margin: 16px 0 8px; font-size: 20px; font-weight: 700; color: #1f2937;">TiendApp</h1>
+          <h1 style="margin: 16px 0 8px; font-size: 20px; font-weight: 700; color: #1f2937;">Kyllari</h1>
         </div>
 
         <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 32px;">
@@ -38,7 +38,7 @@ function passwordResetTemplate(name: string, resetUrl: string) {
             Hola, ${name}
           </h2>
           <p style="margin: 0 0 24px; font-size: 15px; color: #4b5563; line-height: 1.6;">
-            Recibimos una solicitud para restablecer la contraseña de tu cuenta en TiendApp. 
+            Recibimos una solicitud para restablecer la contraseña de tu cuenta en Kyllari. 
             Haz clic en el botón de abajo para crear una nueva contraseña:
           </p>
 
@@ -58,7 +58,7 @@ function passwordResetTemplate(name: string, resetUrl: string) {
         </div>
 
         <div style="text-align: center; padding: 24px 0; font-size: 12px; color: #9ca3af;">
-          <p style="margin: 0 0 4px;">Enviado por TiendApp - BlackboxPeru</p>
+          <p style="margin: 0 0 4px;">Enviado por Kyllari</p>
           <p style="margin: 0;">Crea tu tienda online en minutos</p>
         </div>
       </div>
@@ -68,7 +68,7 @@ function passwordResetTemplate(name: string, resetUrl: string) {
 
 function welcomeTemplate(name: string, loginUrl: string) {
   return {
-    subject: 'Bienvenido a TiendApp - Tu tienda online lista',
+    subject: 'Bienvenido a Kyllari - Tu tienda online lista',
     html: `
       <div style="max-width: 480px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
         <div style="text-align: center; padding: 32px 0 24px;">
@@ -77,7 +77,7 @@ function welcomeTemplate(name: string, loginUrl: string) {
               <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
             </svg>
           </div>
-          <h1 style="margin: 16px 0 8px; font-size: 20px; font-weight: 700; color: #1f2937;">TiendApp</h1>
+          <h1 style="margin: 16px 0 8px; font-size: 20px; font-weight: 700; color: #1f2937;">Kyllari</h1>
         </div>
 
         <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 32px;">
@@ -85,7 +85,7 @@ function welcomeTemplate(name: string, loginUrl: string) {
             Bienvenido, ${name}!
           </h2>
           <p style="margin: 0 0 16px; font-size: 15px; color: #4b5563; line-height: 1.6;">
-            Tu cuenta en TiendApp ha sido creada exitosamente. Ya puedes comenzar a configurar tu tienda online y empezar a vender.
+            Tu cuenta en Kyllari ha sido creada exitosamente. Ya puedes comenzar a configurar tu tienda online y empezar a vender.
           </p>
 
           <div style="background: #f5f3ff; border-radius: 8px; padding: 16px; margin: 16px 0 24px;">
@@ -111,7 +111,7 @@ function welcomeTemplate(name: string, loginUrl: string) {
         </div>
 
         <div style="text-align: center; padding: 24px 0; font-size: 12px; color: #9ca3af;">
-          <p style="margin: 0 0 4px;">Enviado por TiendApp - BlackboxPeru</p>
+          <p style="margin: 0 0 4px;">Enviado por Kyllari</p>
           <p style="margin: 0;">Crea tu tienda online en minutos</p>
         </div>
       </div>
@@ -179,7 +179,7 @@ function subscriptionTemplate(
 ) {
   const config = {
     activated: {
-      subject: 'Tu suscripción a TiendApp ha sido activada',
+      subject: 'Tu suscripción a Kyllari ha sido activada',
       themeBg: '#ecfdf5',
       themeBorder: '#a7f3d0',
       themeColor: '#059669',
@@ -206,7 +206,7 @@ function subscriptionTemplate(
       footerNote: '',
     },
     cancelled: {
-      subject: 'Tu suscripción a TiendApp ha sido cancelada',
+      subject: 'Tu suscripción a Kyllari ha sido cancelada',
       themeBg: '#fff7ed',
       themeBorder: '#fed7aa',
       themeColor: '#ea580c',
@@ -226,13 +226,13 @@ function subscriptionTemplate(
           </p>
         </div>
       `,
-      ctaText: 'Volver a TiendApp',
+      ctaText: 'Volver a Kyllari',
       ctaUrl: APP_URL,
       ctaBg: '#ea580c',
       footerNote: '',
     },
     downgraded: {
-      subject: 'Tu plan en TiendApp ha cambiado',
+      subject: 'Tu plan en Kyllari ha cambiado',
       themeBg: '#eff6ff',
       themeBorder: '#bfdbfe',
       themeColor: '#2563eb',
@@ -271,7 +271,7 @@ function subscriptionTemplate(
               <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
             </svg>
           </div>
-          <h1 style="margin: 16px 0 8px; font-size: 20px; font-weight: 700; color: #1f2937;">TiendApp</h1>
+          <h1 style="margin: 16px 0 8px; font-size: 20px; font-weight: 700; color: #1f2937;">Kyllari</h1>
         </div>
 
         <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 32px;">
@@ -303,7 +303,7 @@ function subscriptionTemplate(
         </div>
 
         <div style="text-align: center; padding: 24px 0; font-size: 12px; color: #9ca3af;">
-          <p style="margin: 0 0 4px;">Enviado por TiendApp - BlackboxPeru</p>
+          <p style="margin: 0 0 4px;">Enviado por Kyllari</p>
           <p style="margin: 0;">Crea tu tienda online en minutos</p>
         </div>
       </div>
@@ -354,7 +354,7 @@ export async function sendPaymentSubmittedEmail(
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: userEmail,
-      subject: 'Comprobante de pago recibido - TiendApp',
+      subject: 'Comprobante de pago recibido - Kyllari',
       html: `
         <div style="max-width: 480px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
           <div style="text-align: center; padding: 32px 0 24px;">
@@ -363,7 +363,7 @@ export async function sendPaymentSubmittedEmail(
                 <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
               </svg>
             </div>
-            <h1 style="margin: 16px 0 8px; font-size: 20px; font-weight: 700; color: #1f2937;">TiendApp</h1>
+            <h1 style="margin: 16px 0 8px; font-size: 20px; font-weight: 700; color: #1f2937;">Kyllari</h1>
           </div>
 
           <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 32px;">
@@ -398,7 +398,7 @@ export async function sendPaymentSubmittedEmail(
           </div>
 
           <div style="text-align: center; padding: 24px 0; font-size: 12px; color: #9ca3af;">
-            <p style="margin: 0 0 4px;">Enviado por TiendApp - BlackboxPeru</p>
+            <p style="margin: 0 0 4px;">Enviado por Kyllari</p>
             <p style="margin: 0;">Crea tu tienda online en minutos</p>
           </div>
         </div>
@@ -429,7 +429,7 @@ export async function sendPaymentRejectedEmail(
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: userEmail,
-      subject: 'Comprobante de pago no verificado - TiendApp',
+      subject: 'Comprobante de pago no verificado - Kyllari',
       html: `
         <div style="max-width: 480px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
           <div style="text-align: center; padding: 32px 0 24px;">
@@ -438,7 +438,7 @@ export async function sendPaymentRejectedEmail(
                 <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
               </svg>
             </div>
-            <h1 style="margin: 16px 0 8px; font-size: 20px; font-weight: 700; color: #1f2937;">TiendApp</h1>
+            <h1 style="margin: 16px 0 8px; font-size: 20px; font-weight: 700; color: #1f2937;">Kyllari</h1>
           </div>
 
           <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 32px;">
@@ -473,7 +473,7 @@ export async function sendPaymentRejectedEmail(
           </div>
 
           <div style="text-align: center; padding: 24px 0; font-size: 12px; color: #9ca3af;">
-            <p style="margin: 0 0 4px;">Enviado por TiendApp - BlackboxPeru</p>
+            <p style="margin: 0 0 4px;">Enviado por Kyllari</p>
             <p style="margin: 0;">Crea tu tienda online en minutos</p>
           </div>
         </div>

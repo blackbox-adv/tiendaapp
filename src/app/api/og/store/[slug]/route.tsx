@@ -20,7 +20,7 @@ export async function GET(
     return apiError('Slug inválido', 400, undefined, request)
   }
 
-  let name = 'TiendApp'
+  let name = 'Kyllari'
   let description = 'Catálogo online con pedidos por WhatsApp'
   let primaryColor = '#7C3AED'
   try {
@@ -37,7 +37,7 @@ export async function GET(
       }
     }
   } catch {
-    // Si la BD falla, devolvemos la tarjeta genérica de TiendApp (mejor que un 500)
+    // Si la BD falla, devolvemos la tarjeta genérica de Kyllari (mejor que un 500)
   }
 
   const safeDescription = description.length > 120 ? `${description.slice(0, 117)}...` : description
@@ -79,7 +79,7 @@ export async function GET(
                 }}
               />
             </div>
-            <div style={{ fontSize: 30, fontWeight: 600, color: '#1e1b2e' }}>TiendApp</div>
+            <div style={{ fontSize: 30, fontWeight: 600, color: '#1e1b2e' }}>Kyllari</div>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>

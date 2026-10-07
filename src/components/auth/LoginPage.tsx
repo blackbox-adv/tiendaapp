@@ -29,7 +29,7 @@ export function LoginPage() {
     setLoading(false)
 
     if (success) {
-      toast.success('Sesión iniciada', { description: 'Bienvenido de vuelta a TiendApp.' })
+      toast.success('Sesión iniciada', { description: 'Bienvenido de vuelta a Kyllari.' })
       // Redirect to Next.js dashboard page
       const user = useAppStore.getState().currentUser
       if (user?.role === 'admin') {
@@ -56,7 +56,7 @@ export function LoginPage() {
             <div className="w-10 h-10 rounded-xl bg-violet-600 flex items-center justify-center">
               <Zap className="w-6 h-6 text-white" />
             </div>
-            <span className="text-2xl font-bold text-violet-700">TiendApp</span>
+            <span className="text-2xl font-bold text-violet-700">Kyllari</span>
           </button>
           <h1 className="text-2xl font-bold text-gray-900">Bienvenido de vuelta</h1>
           <p className="text-gray-500 mt-1">Ingresa a tu cuenta para gestionar tu tienda</p>

@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/api/', '/admin/', '/dashboard/', '/wizard/'],
       },
     ],
-    sitemap: `${process.env.NEXT_PUBLIC_APP_URL || 'https://tienda.blackboxperu.com'}/sitemap.xml`,
+    sitemap: `${process.env.NEXT_PUBLIC_APP_URL || 'https://kyllari.com'}/sitemap.xml`,
   }
 }

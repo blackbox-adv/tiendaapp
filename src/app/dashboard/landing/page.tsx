@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import LandingAIClient from './LandingAIClient'
 
 export const metadata: Metadata = {
-  title: 'Landing IA | TiendApp',
+  title: 'Landing IA | Kyllari',
   robots: { index: false, follow: false },
 }
 

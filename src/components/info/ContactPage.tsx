@@ -36,9 +36,9 @@ export function ContactPage() {
       return
     }
 
-    // Send via WhatsApp to TiendApp support
+    // Send via WhatsApp to Kyllari support
     const whatsappMsg = encodeURIComponent(
-      `Hola TiendApp! Nuevo mensaje de contacto:\n\n` +
+      `Hola Kyllari! Nuevo mensaje de contacto:\n\n` +
       `Nombre: ${name}\n` +
       `Email: ${email}\n` +
       `Asunto: ${subject}\n` +
@@ -114,7 +114,7 @@ export function ContactPage() {
                 <h3 className="text-sm font-bold text-gray-900">¿Prefieres WhatsApp?</h3>
               </div>
               <p className="text-sm text-gray-500 mb-3">Escríbenos directamente por WhatsApp para una respuesta rápida.</p>
-              <Button className="w-full bg-green-500 hover:bg-green-600 text-white gap-2" onClick={() => window.open(`https://wa.me/${whatsappDigits}?text=Hola, necesito ayuda con TiendApp`, '_blank')}>
+              <Button className="w-full bg-green-500 hover:bg-green-600 text-white gap-2" onClick={() => window.open(`https://wa.me/${whatsappDigits}?text=Hola, necesito ayuda con Kyllari`, '_blank')}>
                 <MessageCircle className="w-4 h-4" />
                 Escribir por WhatsApp
               </Button>

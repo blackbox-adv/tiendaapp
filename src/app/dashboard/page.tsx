@@ -184,7 +184,7 @@ export default function DashboardPage() {
         <div className="w-16 h-16 bg-violet-100 rounded-2xl flex items-center justify-center">
           <Store className="w-8 h-8 text-violet-600" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900">¡Bienvenido a TiendApp!</h2>
+        <h2 className="text-2xl font-bold text-gray-900">¡Bienvenido a Kyllari!</h2>
         <p className="text-gray-500 max-w-md">
           Aún no tienes una tienda. Crea tu primera tienda online en minutos.
         </p>
@@ -225,7 +225,7 @@ export default function DashboardPage() {
                   Plantilla: <span className="capitalize">{store.template}</span>
                 </p>
                 <p className="text-gray-400 text-xs mt-1">
-                  tienda.blackboxperu.com/store/{store.slug}
+                  kyllari.com/store/{store.slug}
                 </p>
               </div>
             </div>

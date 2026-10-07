@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
     })
   } catch {
-    return { title: `${slug} | TiendApp` }
+    return { title: `${slug} | Kyllari` }
   }
 
   // notFound() aquí (en generateMetadata) y NO en el page: generateMetadata se resuelve
@@ -48,8 +48,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const title = store.name
     const description = store.description
-      ? `${store.description} - Visita la tienda online de ${store.name} en TiendApp.`
-      : `Visita la tienda online de ${store.name} en TiendApp. Productos y precios increibles.`
+      ? `${store.description} - Visita la tienda online de ${store.name} en Kyllari.`
+      : `Visita la tienda online de ${store.name} en Kyllari. Productos y precios increibles.`
 
     // OG dinámica por tienda: tarjeta de marca con el nombre y color de la tienda.
     // Si el generador falla, las redes sociales simplemente no muestran imagen (no rompe la página).
@@ -62,7 +62,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         title,
         description,
         type: 'website',
-        siteName: 'TiendApp',
+        siteName: 'Kyllari',
         images: [{ url: ogImage, width: 1200, height: 630 }],
       },
       twitter: {
@@ -191,8 +191,8 @@ function generateStoreJsonLd(store: {
     '@type': 'Store',
     name: store.name,
     description: store.description,
-    url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://tienda.blackboxperu.com'}/store/${store.slug}`,
-    image: `${process.env.NEXT_PUBLIC_APP_URL || 'https://tienda.blackboxperu.com'}/api/og/store/${store.slug}`,
+    url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://kyllari.com'}/store/${store.slug}`,
+    image: `${process.env.NEXT_PUBLIC_APP_URL || 'https://kyllari.com'}/api/og/store/${store.slug}`,
     address: {
       '@type': 'PostalAddress',
       addressCountry: 'PE',

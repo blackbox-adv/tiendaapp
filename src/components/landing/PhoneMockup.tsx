@@ -19,7 +19,7 @@ export function PhoneMockup() {
       <div className="aspect-[9/16] bg-white overflow-hidden relative">
         <Image
           src="/templates/bodega-preview.png"
-          alt="Tienda online de bodega creada con TiendApp con pedidos por WhatsApp"
+          alt="Tienda online de bodega creada con Kyllari con pedidos por WhatsApp"
           width={300}
           height={533}
           priority
