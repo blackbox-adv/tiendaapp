@@ -24,6 +24,11 @@ import { TecaTemplate } from '@/components/store-templates/TecaTemplate'
 import { VoltTemplate } from '@/components/store-templates/VoltTemplate'
 import { GranoTemplate } from '@/components/store-templates/GranoTemplate'
 import { FloraTemplate } from '@/components/store-templates/FloraTemplate'
+import { MesaTemplate } from '@/components/store-templates/MesaTemplate'
+import { SushiTemplate } from '@/components/store-templates/SushiTemplate'
+import { CafeTemplate } from '@/components/store-templates/CafeTemplate'
+import { BarTemplate } from '@/components/store-templates/BarTemplate'
+import { PopTemplate } from '@/components/store-templates/PopTemplate'
 import { ProductDetailView } from '@/components/store-templates/ProductDetailView'
 import { ArrowLeft, Crown, Sparkles, Gem } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -536,6 +541,126 @@ const demoStores: Record<string, Store> = {
     ],
     otherPayments: [],
   },
+  mesa: {
+    id: 'demo-mesa',
+    name: 'Fogón de Matilde',
+    slug: 'demo-mesa',
+    description: 'Comida casera de verdad: menú del día, criollo y piqueos de la casa.',
+    logo: '🍲',
+    categoryId: 'restaurante',
+    planId: 'premium',
+    colors: { primary: '#A34A28', secondary: '#E2C9A8' },
+    whatsappNumber: '+51999990022',
+    template: 'mesa',
+    bannerUrl: '',
+    userId: '',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    hasShipping: true, hasSecurePayment: true, hasReturns: false,
+    popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
+    yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
+    shippingOptions: [
+      { label: 'Delivery en la ciudad', price: 10, time: '45 minutos' },
+      { label: 'Recojo en local', price: null, time: 'Cuando quieras' },
+    ],
+    otherPayments: [],
+  },
+  sushi: {
+    id: 'demo-sushi',
+    name: 'Tokyo Nikkei',
+    slug: 'demo-sushi',
+    description: 'Sushi nikkei fresco: rolls, ceviches japoneses y tablas para compartir.',
+    logo: '🍣',
+    categoryId: 'restaurante',
+    planId: 'premium',
+    colors: { primary: '#C73E3A', secondary: '#1B1A18' },
+    whatsappNumber: '+51999990023',
+    template: 'sushi',
+    bannerUrl: '',
+    userId: '',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    hasShipping: true, hasSecurePayment: true, hasReturns: false,
+    popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
+    yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
+    shippingOptions: [
+      { label: 'Delivery exprés', price: 12, time: '40 minutos' },
+      { label: 'Recojo en barra', price: null, time: 'Cuando quieras' },
+    ],
+    otherPayments: [],
+  },
+  cafe: {
+    id: 'demo-cafe',
+    name: 'Café Lumen',
+    slug: 'demo-cafe',
+    description: 'Cafetería de especialidad: lattes, frappés, postres caseros y pan artesanal.',
+    logo: '☕',
+    categoryId: 'comida',
+    planId: 'premium',
+    colors: { primary: '#B97F45', secondary: '#2F2114' },
+    whatsappNumber: '+51999990024',
+    template: 'cafe',
+    bannerUrl: '',
+    userId: '',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    hasShipping: true, hasSecurePayment: true, hasReturns: true,
+    popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
+    yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
+    shippingOptions: [
+      { label: 'Envío en el día', price: 8, time: '30 minutos' },
+      { label: 'Recojo en tienda', price: null, time: 'Cuando quieras' },
+    ],
+    otherPayments: [],
+  },
+  bar: {
+    id: 'demo-bar',
+    name: 'La Botica Bar',
+    slug: 'demo-bar',
+    description: 'Piqueos, tragos artesanales y happy hour todos los días de 5 a 8 pm.',
+    logo: '🍸',
+    categoryId: 'restaurante',
+    planId: 'premium',
+    colors: { primary: '#2E4B3F', secondary: '#C9862B' },
+    whatsappNumber: '+51999990025',
+    template: 'bar',
+    bannerUrl: '',
+    userId: '',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    hasShipping: true, hasSecurePayment: true, hasReturns: false,
+    popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
+    yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
+    shippingOptions: [
+      { label: 'Piqueos a domicilio', price: 12, time: '45 minutos' },
+      { label: 'Reserva en local', price: null, time: 'A partir de 5 pm' },
+    ],
+    otherPayments: [],
+  },
+  pop: {
+    id: 'demo-pop',
+    name: 'Pop Market',
+    slug: 'demo-pop',
+    description: 'Hogar, tech y más en un solo lugar. Envío rápido y pagos con Yape.',
+    logo: '🛍️',
+    categoryId: 'general',
+    planId: 'premium',
+    colors: { primary: '#0E9384', secondary: '#F59E0B' },
+    whatsappNumber: '+51999990026',
+    template: 'pop',
+    bannerUrl: '',
+    userId: '',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    hasShipping: true, hasSecurePayment: true, hasReturns: true,
+    popupEnabled: false, popupType: 'product', popupProductId: null, popupCustomImage: null, popupTitle: null, popupButtonText: 'Ver oferta',
+    yapeQrUrl: null, plinQrUrl: null, yapeNumber: null, plinNumber: null,
+    shippingOptions: [
+      { label: 'Envío Lima 24-48h', price: 10, time: '24 a 48 horas' },
+      { label: 'Gratis desde S/99', price: null, time: '24 a 48 horas' },
+    ],
+    otherPayments: [],
+  },
 }
 
 // Product images match the preview generation script (same Unsplash URLs)
@@ -743,6 +868,57 @@ const demoProducts: Record<string, Product[]> = {
     { id: 'dfl7', name: 'Combo Aniversario', description: 'Ramo + peluche + tarjeta con delivery sorpresa.', price: 129.0, originalPrice: null, categoryId: 'combos', imageUrl: '/sample-products/combo-especial.jpg', images: ['/sample-products/combo-especial.jpg'], color: null, stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-flora', createdAt: '2024-03-10T10:00:00.000Z' },
     { id: 'dfl8', name: 'Jarrón Decorativo Cerámica', description: 'Jarrón de cerámica artesanal para tus flores.', price: 55.0, originalPrice: null, categoryId: 'regalos', imageUrl: '/sample-products/ceramica-navidena.jpg', images: ['/sample-products/ceramica-navidena.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-flora', createdAt: '2024-03-20T10:00:00.000Z' },
   ],
+  mesa: [
+    { id: 'dme1', name: 'Menú del Día Clásico', description: 'Entrada, fondo, postre y refresco. Cambia todos los días.', price: 15.0, originalPrice: 18.0, categoryId: 'menús', imageUrl: '/sample-products/menu-del-dia.jpg', images: ['/sample-products/menu-del-dia.jpg'], color: null, stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-mesa', createdAt: '2024-01-10T10:00:00.000Z' },
+    { id: 'dme2', name: 'Lomo Saltado', description: 'Lomo fino al wok con papas fritas y arroz graneado.', price: 28.0, originalPrice: null, categoryId: 'platos', imageUrl: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600', images: ['https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600'], color: null, stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-mesa', createdAt: '2024-01-20T10:00:00.000Z' },
+    { id: 'dme3', name: 'Ají de Gallina', description: 'Crema de ají amarillo con gallina, arroz y papa sancochada.', price: 24.0, originalPrice: null, categoryId: 'platos', imageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600', images: ['https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-mesa', createdAt: '2024-02-01T10:00:00.000Z' },
+    { id: 'dme4', name: 'Ceviche Clásico', description: 'Pescado fresco del día en leche de tigre con camote y choclo.', price: 22.0, originalPrice: null, categoryId: 'platos', imageUrl: '/sample-products/ceviche-fresco.jpg', images: ['/sample-products/ceviche-fresco.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-mesa', createdAt: '2024-02-10T10:00:00.000Z' },
+    { id: 'dme5', name: 'Anticuchos de Corazón', description: 'Anticuchos a la parrilla con papas doradas y choclo.', price: 18.0, originalPrice: 22.0, categoryId: 'parrillas', imageUrl: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600', images: ['https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-mesa', createdAt: '2024-02-20T10:00:00.000Z' },
+    { id: 'dme6', name: 'Chicha Morada (Jarra)', description: 'Jarra artesanal de maíz morado con limón y canela.', price: 10.0, originalPrice: null, categoryId: 'bebidas', imageUrl: '/sample-products/chicha-morada-jarra.jpg', images: ['/sample-products/chicha-morada-jarra.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-mesa', createdAt: '2024-03-01T10:00:00.000Z' },
+    { id: 'dme7', name: 'Torta de Chocolate (Porción)', description: 'Porción húmeda de chocolate con cobertura casera.', price: 6.5, originalPrice: null, categoryId: 'postres', imageUrl: '/sample-products/torta-chocolate-porcion.jpg', images: ['/sample-products/torta-chocolate-porcion.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-mesa', createdAt: '2024-03-10T10:00:00.000Z' },
+    { id: 'dme8', name: 'Cuarto de Pollo con Papas', description: 'Pollo a la brasa jugoso con papas y cremas de la casa.', price: 16.0, originalPrice: null, categoryId: 'parrillas', imageUrl: '/sample-products/cuarto-pollo-papas.jpg', images: ['/sample-products/cuarto-pollo-papas.jpg'], color: null, stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-mesa', createdAt: '2024-03-20T10:00:00.000Z' },
+  ],
+  sushi: [
+    { id: 'dsu1', name: 'Rolls Acevichados x10', description: 'Rolls nikkei con salmón fresco, ají amarillo y leche de tigre.', price: 32.0, originalPrice: 39.0, categoryId: 'rolls', imageUrl: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=600', images: ['https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=600'], color: null, stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-sushi', createdAt: '2024-01-10T10:00:00.000Z' },
+    { id: 'dsu2', name: 'Tabla Nikkei 24 piezas', description: 'Selección de la casa: rolls, nigiris y ceviche japonés.', price: 68.0, originalPrice: 85.0, categoryId: 'tablas', imageUrl: 'https://images.unsplash.com/photo-1553621042-f6e147245754?w=600', images: ['https://images.unsplash.com/photo-1553621042-f6e147245754?w=600'], color: null, stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-sushi', createdAt: '2024-01-20T10:00:00.000Z' },
+    { id: 'dsu3', name: 'Nigiri de Salmón x6', description: 'Nigiris de salmón fresco con toque de salsa nikkei.', price: 28.0, originalPrice: null, categoryId: 'nigiris', imageUrl: 'https://images.unsplash.com/photo-1559847844-5315695dadae?w=600', images: ['https://images.unsplash.com/photo-1559847844-5315695dadae?w=600'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-sushi', createdAt: '2024-02-01T10:00:00.000Z' },
+    { id: 'dsu4', name: 'Roll Chifa x10', description: 'Rolls con Langostino, pallares y salsa de tamarindo.', price: 30.0, originalPrice: null, categoryId: 'rolls', imageUrl: 'https://images.unsplash.com/photo-1611143669185-af224c5e3252?w=600', images: ['https://images.unsplash.com/photo-1611143669185-af224c5e3252?w=600'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-sushi', createdAt: '2024-02-10T10:00:00.000Z' },
+    { id: 'dsu5', name: 'Ceviche Nikkei', description: 'Pescado blanco con leche de tigre nikkei, sésamo y tare.', price: 26.0, originalPrice: null, categoryId: 'frios', imageUrl: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600', images: ['https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-sushi', createdAt: '2024-02-20T10:00:00.000Z' },
+    { id: 'dsu6', name: 'Ramen Tonkotsu', description: 'Caldo de cerdo 12 horas con chashu, huevo y cebollita.', price: 25.0, originalPrice: null, categoryId: 'calientes', imageUrl: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=600', images: ['https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=600'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-sushi', createdAt: '2024-03-01T10:00:00.000Z' },
+    { id: 'dsu7', name: 'Gyoza de Pollo x5', description: 'Dumplings sellados a la plancha con salsa ponzu.', price: 16.0, originalPrice: 19.0, categoryId: 'calientes', imageUrl: 'https://images.unsplash.com/photo-1496116218417-1a781b1c416c?w=600', images: ['https://images.unsplash.com/photo-1496116218417-1a781b1c416c?w=600'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-sushi', createdAt: '2024-03-10T10:00:00.000Z' },
+    { id: 'dsu8', name: 'Matcha Frío', description: 'Té matcha de calidad ceremonial con hielo y leche.', price: 12.0, originalPrice: null, categoryId: 'bebidas', imageUrl: 'https://images.unsplash.com/photo-1515823064-d6e0c04616a7?w=600', images: ['https://images.unsplash.com/photo-1515823064-d6e0c04616a7?w=600'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-sushi', createdAt: '2024-03-20T10:00:00.000Z' },
+  ],
+  cafe: [
+    { id: 'dcf1', name: 'Latte de la Casa', description: 'Doble shot con leche texturizada, cremoso y balanceado.', price: 9.0, originalPrice: 11.0, categoryId: 'calientes', imageUrl: '/sample-products/cafe-con-leche.jpg', images: ['/sample-products/cafe-con-leche.jpg'], color: null, stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-cafe', createdAt: '2024-01-10T10:00:00.000Z' },
+    { id: 'dcf2', name: 'Cappuccino Doble', description: 'Espresso doble con espuma de leche y cacao.', price: 10.0, originalPrice: null, categoryId: 'calientes', imageUrl: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600', images: ['https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-cafe', createdAt: '2024-01-20T10:00:00.000Z' },
+    { id: 'dcf3', name: 'Frappé Caramelo', description: 'Frappé cremoso con caramelo, crema chantilly y hielo.', price: 14.0, originalPrice: null, categoryId: 'fríos', imageUrl: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=600', images: ['https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=600'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-cafe', createdAt: '2024-02-01T10:00:00.000Z' },
+    { id: 'dcf4', name: 'Croissant de Mantequilla', description: 'Hojaldre francés horneado cada mañana, crujiente y dorado.', price: 6.0, originalPrice: null, categoryId: 'panadería', imageUrl: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600', images: ['https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-cafe', createdAt: '2024-02-10T10:00:00.000Z' },
+    { id: 'dcf5', name: 'Torta de Chocolate (Porción)', description: 'Chocolate intenso con fudge casero y avellanas.', price: 7.5, originalPrice: null, categoryId: 'postres', imageUrl: '/sample-products/torta-chocolate-porcion.jpg', images: ['/sample-products/torta-chocolate-porcion.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-cafe', createdAt: '2024-02-20T10:00:00.000Z' },
+    { id: 'dcf6', name: 'Cheesecake de Maracuyá', description: 'Base crocante con crema suave y maracuyá fresco.', price: 8.5, originalPrice: null, categoryId: 'postres', imageUrl: '/sample-products/cheesecake-porcion.jpg', images: ['/sample-products/cheesecake-porcion.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-cafe', createdAt: '2024-03-01T10:00:00.000Z' },
+    { id: 'dcf7', name: 'Café Molido 500g', description: 'Grano de altura tostado de la semana, notas de chocolate.', price: 22.0, originalPrice: null, categoryId: 'granos', imageUrl: '/sample-products/cafe-molido-500g.jpg', images: ['/sample-products/cafe-molido-500g.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-cafe', createdAt: '2024-03-10T10:00:00.000Z' },
+    { id: 'dcf8', name: 'Empanada de Pollo', description: 'Empanada horneada rellena de pollo jugoso con aceituna.', price: 4.5, originalPrice: null, categoryId: 'panadería', imageUrl: '/sample-products/empanada-pollo.jpg', images: ['/sample-products/empanada-pollo.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-cafe', createdAt: '2024-03-20T10:00:00.000Z' },
+  ],
+  bar: [
+    { id: 'dba1', name: 'Chilcano de Maracuyá', description: 'Pisco quebranta, maracuyá fresco, ginger ale y limón.', price: 18.0, originalPrice: 25.0, categoryId: 'tragos', imageUrl: 'https://images.unsplash.com/photo-1551538827-9c037cb4f32a?w=600', images: ['https://images.unsplash.com/photo-1551538827-9c037cb4f32a?w=600'], color: null, stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-bar', createdAt: '2024-01-10T10:00:00.000Z' },
+    { id: 'dba2', name: 'Margarita Clásica', description: 'Tequila, triple sec, limón y sal de maras.', price: 22.0, originalPrice: null, categoryId: 'tragos', imageUrl: 'https://images.unsplash.com/photo-1536935338788-846bb9981813?w=600', images: ['https://images.unsplash.com/photo-1536935338788-846bb9981813?w=600'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-bar', createdAt: '2024-01-20T10:00:00.000Z' },
+    { id: 'dba3', name: 'Negroni de la Casa', description: 'Gin, campari y vermouth rojo con naranja flameada.', price: 26.0, originalPrice: null, categoryId: 'tragos', imageUrl: 'https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=600', images: ['https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=600'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-bar', createdAt: '2024-02-01T10:00:00.000Z' },
+    { id: 'dba4', name: 'Cerveza Artesanal IPA', description: 'IPA local con notas cítricas, bien fría.', price: 15.0, originalPrice: null, categoryId: 'cervezas', imageUrl: 'https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=600', images: ['https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=600'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-bar', createdAt: '2024-02-10T10:00:00.000Z' },
+    { id: 'dba5', name: 'Alitas BBQ x8', description: 'Alitas glaseadas en BBQ casero, directo de la plancha.', price: 24.0, originalPrice: 29.0, categoryId: 'piqueos', imageUrl: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=600', images: ['https://images.unsplash.com/photo-1544025162-d76694265947?w=600'], color: null, stock: -1, isActive: true, featured: false, rating: 5, storeId: 'demo-bar', createdAt: '2024-02-20T10:00:00.000Z' },
+    { id: 'dba6', name: 'Papas al Hilo', description: 'Montaña de papas al hilo con salsas de la casa.', price: 14.0, originalPrice: null, categoryId: 'piqueos', imageUrl: 'https://images.unsplash.com/photo-1576107232684-1279f390859f?w=600', images: ['https://images.unsplash.com/photo-1576107232684-1279f390859f?w=600'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-bar', createdAt: '2024-03-01T10:00:00.000Z' },
+    { id: 'dba7', name: 'Tabla de Quesos y Jamones', description: 'Selección de quesos, jamón serrano y tostadas.', price: 38.0, originalPrice: null, categoryId: 'piqueos', imageUrl: 'https://images.unsplash.com/photo-1452195100486-9cc805987862?w=600', images: ['https://images.unsplash.com/photo-1452195100486-9cc805987862?w=600'], color: null, stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-bar', createdAt: '2024-03-10T10:00:00.000Z' },
+    { id: 'dba8', name: 'Pizza Artesanal Pepperoni', description: 'Masa de fermentación lenta, pepperoni y mozzarella.', price: 32.0, originalPrice: null, categoryId: 'piqueos', imageUrl: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600', images: ['https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-bar', createdAt: '2024-03-20T10:00:00.000Z' },
+  ],
+  pop: [
+    { id: 'dpp1', name: 'Audífonos Bluetooth Wireless', description: 'Over-ear con cancelación de ruido y 30h de batería.', price: 89.0, originalPrice: 119.0, categoryId: 'tech', imageUrl: '/sample-products/audifonos-bluetooth-wireless.jpg', images: ['/sample-products/audifonos-bluetooth-wireless.jpg'], color: null, stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-pop', createdAt: '2024-01-10T10:00:00.000Z' },
+    { id: 'dpp2', name: 'Power Bank 10000mAh', description: 'Carga rápida 22.5W, doble puerto para dos equipos.', price: 59.0, originalPrice: null, categoryId: 'tech', imageUrl: '/sample-products/power-bank-10000.jpg', images: ['/sample-products/power-bank-10000.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-pop', createdAt: '2024-01-20T10:00:00.000Z' },
+    { id: 'dpp3', name: 'Parlante Bluetooth Portátil', description: 'Sonido 360°, resistente a salpicaduras y 24h de música.', price: 75.0, originalPrice: null, categoryId: 'tech', imageUrl: '/sample-products/parlante-bluetooth-portatil.jpg', images: ['/sample-products/parlante-bluetooth-portatil.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-pop', createdAt: '2024-02-01T10:00:00.000Z' },
+    { id: 'dpp4', name: 'Set Sartenes Antiadherentes x2', description: 'Sartenes 20cm y 26cm con base antiadherente de inducción.', price: 99.0, originalPrice: 129.0, categoryId: 'hogar', imageUrl: '/sample-products/sartenes-antiadherentes.jpg', images: ['/sample-products/sartenes-antiadherentes.jpg'], color: null, stock: -1, isActive: true, featured: true, rating: 5, storeId: 'demo-pop', createdAt: '2024-02-10T10:00:00.000Z' },
+    { id: 'dpp5', name: 'Lámpara LED 12W', description: 'Luz cálida de bajo consumo, rosca estándar E27.', price: 15.0, originalPrice: null, categoryId: 'hogar', imageUrl: '/sample-products/lampara-led-12w.jpg', images: ['/sample-products/lampara-led-12w.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-pop', createdAt: '2024-02-20T10:00:00.000Z' },
+    { id: 'dpp6', name: 'Cojín Decorativo', description: 'Cojín decorativo suave 45x45cm con relleno incluido.', price: 29.0, originalPrice: null, categoryId: 'hogar', imageUrl: '/sample-products/cojin-decorativo.jpg', images: ['/sample-products/cojin-decorativo.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-pop', createdAt: '2024-03-01T10:00:00.000Z' },
+    { id: 'dpp7', name: 'Smartwatch Básico', description: 'Pulso, pasos y notificaciones. Batería de 7 días.', price: 129.0, originalPrice: 159.0, categoryId: 'tech', imageUrl: '/sample-products/smartwatch-basico.jpg', images: ['/sample-products/smartwatch-basico.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-pop', createdAt: '2024-03-10T10:00:00.000Z' },
+    { id: 'dpp8', name: 'Botella Deportiva 750ml', description: 'Botella libre de BPA con boquilla antigoteo.', price: 25.0, originalPrice: null, categoryId: 'deporte', imageUrl: '/sample-products/botella-deportiva-750ml.jpg', images: ['/sample-products/botella-deportiva-750ml.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4, storeId: 'demo-pop', createdAt: '2024-03-20T10:00:00.000Z' },
+    { id: 'dpp9', name: 'Mancuernas 5kg (Par)', description: 'Par de mancuernas recubiertas, grip antideslizante.', price: 79.0, originalPrice: null, categoryId: 'deporte', imageUrl: '/sample-products/mancuernas-5kg-par.jpg', images: ['/sample-products/mancuernas-5kg-par.jpg'], color: null, stock: -1, isActive: true, featured: false, rating: 4.5, storeId: 'demo-pop', createdAt: '2024-03-25T10:00:00.000Z' },
+  ],
 }
 
 // Map template ID to plan for rendering
@@ -768,6 +944,11 @@ const templatePlanId: Record<string, string> = {
   volt: 'premium',
   grano: 'premium',
   flora: 'premium',
+  mesa: 'premium',
+  sushi: 'premium',
+  cafe: 'premium',
+  bar: 'premium',
+  pop: 'premium',
 }
 
 // Map template ID to plan label for the banner
@@ -793,7 +974,12 @@ function getPlanLabel(template: string): string {
     case 'teca':
     case 'volt':
     case 'grano':
-    case 'flora': return 'Plan Premium'
+    case 'flora':
+    case 'mesa':
+    case 'sushi':
+    case 'cafe':
+    case 'bar':
+    case 'pop': return 'Plan Premium'
     default: return ''
   }
 }
@@ -811,6 +997,11 @@ const demoGallery: { id: string; name: string }[] = [
   { id: 'volt', name: 'Volt' },
   { id: 'grano', name: 'Grano' },
   { id: 'flora', name: 'Flora' },
+  { id: 'mesa', name: 'Mesa' },
+  { id: 'sushi', name: 'Nikkei' },
+  { id: 'cafe', name: 'Barista' },
+  { id: 'bar', name: 'Barra' },
+  { id: 'pop', name: 'Pop' },
   { id: 'moda', name: 'Pasarela' },
   { id: 'vitrina', name: 'Vitrina' },
   { id: 'sabor', name: 'Sabores' },
@@ -950,6 +1141,11 @@ export function DemoTemplateClient({ template }: { template: string }) {
       {template === 'volt' && <VoltTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
       {template === 'grano' && <GranoTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
       {template === 'flora' && <FloraTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
+      {template === 'mesa' && <MesaTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
+      {template === 'sushi' && <SushiTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
+      {template === 'cafe' && <CafeTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
+      {template === 'bar' && <BarTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
+      {template === 'pop' && <PopTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
 
       {/* Más tiendas distintas para explorar (estilo Pinterest) */}
       <section className="bg-stone-50 border-t border-stone-200/70 py-10 px-4">

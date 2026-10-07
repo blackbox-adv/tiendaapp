@@ -89,6 +89,26 @@ const templateMeta: Record<string, { name: string; description: string }> = {
     name: 'Flora',
     description: 'Demo de la plantilla Flora para florerías y regalos: verde botánico, rosa empolvado y ramos frescos - TiendApp',
   },
+  mesa: {
+    name: 'Mesa',
+    description: 'Demo de la plantilla Mesa para restaurantes: menú del día, carta elegante y reservas por WhatsApp - TiendApp',
+  },
+  sushi: {
+    name: 'Nikkei',
+    description: 'Demo de la plantilla Nikkei para sushi bars: rojo japonés, barra de rolls y tablas para compartir - TiendApp',
+  },
+  cafe: {
+    name: 'Barista',
+    description: 'Demo de la plantilla Barista para cafeterías: lattes, frappés, postres y pan artesanal - TiendApp',
+  },
+  bar: {
+    name: 'Barra',
+    description: 'Demo de la plantilla Barra para bares: happy hour, tragos artesanales y piqueos - TiendApp',
+  },
+  pop: {
+    name: 'Pop',
+    description: 'Demo de la plantilla Pop para e-commerce multi-rubro: ofertas, envíos rápidos y catálogo limpio - TiendApp',
+  },
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ template: string }> }): Promise<Metadata> {

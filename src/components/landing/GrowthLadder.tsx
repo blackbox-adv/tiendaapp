@@ -50,7 +50,7 @@ const LEVELS: Level[] = [
     level: 'Cuando vendas más',
     title: 'La tienda completa',
     description:
-      'Packs con descuento, tu catálogo en Excel o Sheets, reportes de ventas, Landing IA y hasta 3 tiendas con 21 diseños profesionales según tu rubro: ropa, joyería, café, deporte y más. Todo para vivir de tu negocio.',
+      'Packs con descuento, tu catálogo en Excel o Sheets, reportes de ventas, Landing IA y hasta 3 tiendas con 26 diseños profesionales según tu rubro: ropa, joyería, café, restaurante y más. Todo para vivir de tu negocio.',
     badge: 'Pro S/29.99 · Premium S/79.99',
     badgeClass: 'bg-[#BC5A38]/20 text-[#E29B77] border-[#BC5A38]/40',
     iconClass: 'text-[#E29B77] bg-[#E29B77]/10 border-[#E29B77]/30',
