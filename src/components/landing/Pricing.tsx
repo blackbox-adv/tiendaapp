@@ -67,7 +67,7 @@ export function Pricing() {
         </motion.div>
 
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {[1, 2, 3].map(i => (
               <div key={i} className="rounded-2xl p-8 bg-white border border-[#E5DCCB] space-y-4">
                 <Skeleton className="h-8 w-24" />
@@ -81,7 +81,7 @@ export function Pricing() {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {plans.map((plan, i) => {
               const Icon = iconMap[plan.type] || Gift
               return (

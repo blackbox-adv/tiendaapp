@@ -66,7 +66,7 @@ export function GrowthLadder() {
       <div className="absolute top-0 right-0 w-96 h-96 bg-[#BC5A38] rounded-full filter blur-3xl opacity-15" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#8A4A2F] rounded-full filter blur-3xl opacity-15" />
 
-      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
