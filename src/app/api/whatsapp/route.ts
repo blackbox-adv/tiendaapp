@@ -1,3 +1,4 @@
+import { APP_URL } from '@/lib/env'
 import { db } from '@/lib/db'
 import { NextRequest } from 'next/server'
 import { validateBody, whatsappSchema, normalizePeruWhatsapp, PERU_WHATSAPP_ERROR } from '@/lib/validations'
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
 
     // Build the WhatsApp message
     let message = ''
-    const storeUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://kyllari.com'}/store/${store.slug}`
+    const storeUrl = `${APP_URL}/store/${store.slug}`
 
     if (customerMessage) {
       // Sanitize customer message: limit length

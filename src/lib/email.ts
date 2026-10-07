@@ -1,3 +1,4 @@
+import { APP_URL } from '@/lib/env'
 import { Resend } from 'resend'
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY
@@ -15,7 +16,7 @@ function getResend(): Resend {
 }
 
 const FROM_EMAIL = 'Kyllari <noreply@blackboxperu.com>'
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://kyllari.com'
+const APP_URL = APP_URL
 
 // ── Email Templates ──
 

@@ -1,3 +1,4 @@
+import { APP_URL } from '@/lib/env'
 import type { MetadataRoute } from 'next'
 import { db } from '@/lib/db'
 
@@ -9,7 +10,7 @@ export const revalidate = 3600
 // (updatedAt from DB for dynamic pages)
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://kyllari.com'
+  const baseUrl = APP_URL
 
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [

@@ -1,3 +1,4 @@
+import { APP_URL } from '@/lib/env'
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Fraunces } from "next/font/google";
 import "./globals.css";
@@ -45,14 +46,14 @@ export const metadata: Metadata = {
   authors: [{ name: "Kyllari" }],
   creator: "Kyllari",
   publisher: "Kyllari",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://kyllari.com"),
+  metadataBase: new URL(APP_URL),
   alternates: {
     canonical: "/",
   },
   openGraph: {
     title: "Kyllari | Crea tu catálogo online y vende por WhatsApp",
     description: "Tu tienda con pedidos por WhatsApp, los métodos de pago de tu país y tus opciones de envío. Lista en 5 minutos, gratis y sin comisión por venta.",
-    url: process.env.NEXT_PUBLIC_APP_URL || "https://kyllari.com",
+    url: APP_URL,
     siteName: "Kyllari",
     images: [
       {
@@ -118,8 +119,8 @@ export default async function RootLayout({
                 '@context': 'https://schema.org',
                 '@type': 'Organization',
                 name: 'Kyllari',
-                url: process.env.NEXT_PUBLIC_APP_URL || 'https://kyllari.com',
-                logo: `${process.env.NEXT_PUBLIC_APP_URL || 'https://kyllari.com'}/logo.svg`,
+                url: APP_URL,
+                logo: `${APP_URL}/logo.svg`,
                 description: 'La plataforma para crear tiendas online sin conocimientos técnicos en toda Latinoamérica. WhatsApp integrado, plantillas profesionales, tus métodos de pago locales y tus opciones de envío.',
                 email: contact.contactEmail,
                 telephone: contact.contactPhone,

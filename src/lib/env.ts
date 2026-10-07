@@ -143,3 +143,12 @@ export function getClientIp(request: Request): string {
   const realIp = request.headers.get('x-real-ip')
   return realIp || 'unknown'
 }
+
+// ── URL canónica de la app ──
+// NEXT_PUBLIC_APP_URL puede quedar desactualizada en Vercel; si apunta a un
+// dominio viejo/muerto (blackboxperu.com, tiendapp.pe) se fuerza el canónico.
+export const APP_URL: string = (() => {
+  const raw = (process.env.NEXT_PUBLIC_APP_URL || 'https://kyllari.com').trim()
+  if (/blackboxperu\.com|tiendapp\.pe/i.test(raw)) return 'https://kyllari.com'
+  return raw.replace(/\/+$/, '')
+})()

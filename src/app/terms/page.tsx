@@ -1,3 +1,4 @@
+import { APP_URL } from '@/lib/env'
 import type { Metadata } from 'next'
 import AppRouter from '@/components/AppRouter'
 
@@ -8,7 +9,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Terminos y Condiciones | Kyllari',
     description: 'Terminos y condiciones de uso de la plataforma Kyllari.',
-    url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://kyllari.com'}/terms`,
+    url: `${APP_URL}/terms`,
     type: 'website',
     siteName: 'Kyllari',
   },

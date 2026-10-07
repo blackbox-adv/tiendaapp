@@ -1,3 +1,4 @@
+import { APP_URL } from '@/lib/env'
 import { db } from '@/lib/db'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
@@ -172,7 +173,7 @@ function generateProductJsonLd(
     name: product.name,
     description: product.description || `Producto disponible en ${store.name}`,
     image: product.imageUrl,
-    url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://kyllari.com'}/store/${store.slug}/product/${product.id}`,
+    url: `${APP_URL}/store/${store.slug}/product/${product.id}`,
     offers: {
       '@type': 'Offer',
       price: product.price,
