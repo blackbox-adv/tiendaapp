@@ -35,7 +35,20 @@ export async function GET(
     // Increment visit count (fire-and-forget)
     db.store.update({ where: { slug }, data: { visitCount: { increment: 1 } } }).catch(() => {});
 
-    return NextResponse.json(serializeDecimals(store));
+    const payload = serializeDecimals(store) as typeof store & { shippingOptions?: Array<{ payFirst?: boolean }> };
+
+    // "El envío se paga primero" es exclusivo de Pro/Premium: si la tienda ya no tiene
+    // plan pago (p.ej. tras una baja), el flag no se sirve a la tienda pública.
+    // La consulta de plan solo corre si alguna opción tiene payFirst (caso raro).
+    const storedOpts = store.shippingOptions as Array<{ payFirst?: boolean }> | null;
+    if (Array.isArray(storedOpts) && storedOpts.some((o) => o?.payFirst === true)) {
+      const planType = await getUserPlanType(store.ownerId);
+      if (planType !== 'pro' && planType !== 'premium') {
+        payload.shippingOptions = storedOpts.map((o) => ({ ...o, payFirst: undefined }));
+      }
+    }
+
+    return NextResponse.json(payload);
   } catch (error) {
     console.error('Error fetching store:', error);
     return NextResponse.json({ error: 'Failed to fetch store' }, { status: 500 });
@@ -96,11 +109,18 @@ export async function PUT(
           !body.shippingOptions.every((s: unknown) => typeof s === 'object' && s !== null && typeof (s as { label?: unknown }).label === 'string')) {
         return NextResponse.json({ error: 'Formato inválido en opciones de envío' }, { status: 400 });
       }
+      // "El envío se paga primero" solo Pro/Premium: si el plan no lo incluye se recorta
+      // en silencio (nunca bloqueamos el guardado; p.ej. tras una baja de plan).
+      let allowPayFirst = auth.user.role === 'super_admin';
+      if (!allowPayFirst && body.shippingOptions.some((s: { payFirst?: unknown }) => s?.payFirst === true)) {
+        const planType = await getUserPlanType(auth.user.userId);
+        allowPayFirst = planType === 'pro' || planType === 'premium';
+      }
       updateData.shippingOptions = body.shippingOptions.map((s: { label: string; price?: number | null; time?: string; payFirst?: boolean }) => ({
         label: String(s.label).slice(0, 60),
         price: (typeof s.price === 'number' && isFinite(s.price) && s.price > 0) ? Math.round(s.price * 100) / 100 : null,
         time: String(s.time ?? '').slice(0, 40),
-        ...(s.payFirst === true ? { payFirst: true } : {}),
+        ...(allowPayFirst && s.payFirst === true ? { payFirst: true } : {}),
       }));
     }
 
