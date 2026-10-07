@@ -5,7 +5,7 @@ const db = new PrismaClient()
 const QA_EMAIL = 'qa.recorrido.2026@tiendapp-test.com'
 const QA_STORE_ID = 'cmuswebj90002js04xa62ffx1'
 const PREMIUM_PLAN_ID = 'cms0qpek50002r4xlm100hlfe'
-const EMP_EMAIL = 'qa.empleado.2026@tiendapp-test.com'
+const EMP_EMAIL = process.env.QA_EMP_EMAIL || 'qa.empleado.2026@tiendapp-test.com'
 
 async function main() {
   // 1) Suscripción premium temporal -> fuera
