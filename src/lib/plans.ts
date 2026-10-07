@@ -27,7 +27,7 @@ export const CANONICAL_PLANS: CanonicalPlan[] = [
     features: [
       'Hasta 6 productos',
       '1 tienda online',
-      '1 plantilla básica (Moderna)',
+      '3 plantillas gratis (Moderna, Vibrante y Clásica)',
       'Botón de WhatsApp',
       'Reportes básicos de visitas en tu panel',
       'Badge "Creado con Kyllari"',
@@ -44,7 +44,6 @@ export const CANONICAL_PLANS: CanonicalPlan[] = [
     features: [
       'Hasta 50 productos',
       '1 tienda online',
-      '3 plantillas base',
       'Packs y combos con descuento',
       'Importa y exporta tu catálogo (Excel/Sheets)',
       'Reportes de ventas en Excel',

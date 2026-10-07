@@ -347,8 +347,8 @@ export function StoreWizard() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {[
                     { id: 'moderna' as const, name: 'Moderna', icon: Palette, desc: 'Diseño limpio y minimalista, perfecto para marcas sofisticadas.', color: '#7C3AED', gradient: 'from-violet-500 to-purple-600', requiredPlan: 'free' as const, planLabel: '' },
-                    { id: 'vibrante' as const, name: 'Vibrante', icon: Sparkles, desc: 'Colores vibrantes y dinámicos para tiendas con personalidad.', color: '#EC4899', gradient: 'from-pink-500 to-orange-400', requiredPlan: 'pro' as const, planLabel: 'Pro' },
-                    { id: 'clasica' as const, name: 'Clásica', icon: Sun, desc: 'Elegancia atemporal con tonos cálidos para tiendas tradicionales.', color: '#D97706', gradient: 'from-amber-500 to-yellow-500', requiredPlan: 'pro' as const, planLabel: 'Pro' },
+                    { id: 'vibrante' as const, name: 'Vibrante', icon: Sparkles, desc: 'Colores vibrantes y dinámicos para tiendas con personalidad.', color: '#EC4899', gradient: 'from-pink-500 to-orange-400', requiredPlan: 'free' as const, planLabel: '' },
+                    { id: 'clasica' as const, name: 'Clásica', icon: Sun, desc: 'Elegancia atemporal con tonos cálidos para tiendas tradicionales.', color: '#D97706', gradient: 'from-amber-500 to-yellow-500', requiredPlan: 'free' as const, planLabel: '' },
                     { id: 'luxury' as const, name: 'Luxury', icon: Crown, desc: 'Diseño de alta gama con tonos oscuros y acentos dorados para marcas premium.', color: '#c8a456', gradient: 'from-gray-900 via-gray-800 to-amber-900', requiredPlan: 'premium' as const, planLabel: 'Premium' },
                     { id: 'minimalist' as const, name: 'Minimalist', icon: Minimize2, desc: 'Ultra limpio al estilo Apple. Espacios amplios, tipografía ligera y sin distracciones.', color: '#374151', gradient: 'from-gray-50 via-white to-gray-100', requiredPlan: 'premium' as const, planLabel: 'Premium' },
                   ].map((tpl) => {

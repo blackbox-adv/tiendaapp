@@ -40,8 +40,8 @@ const templateList: TemplateItem[] = [
     desc: 'Colores vibrantes y dinámicos para tiendas con personalidad.',
     color: '#EC4899',
     gradient: 'from-pink-500 to-orange-400',
-    requiredPlan: 'pro',
-    planLabel: 'Pro',
+    requiredPlan: 'free',
+    planLabel: '',
   },
   {
     id: 'clasica',
@@ -50,8 +50,8 @@ const templateList: TemplateItem[] = [
     desc: 'Elegancia atemporal con tonos cálidos para tiendas tradicionales.',
     color: '#D97706',
     gradient: 'from-amber-500 to-yellow-500',
-    requiredPlan: 'pro',
-    planLabel: 'Pro',
+    requiredPlan: 'free',
+    planLabel: '',
   },
   {
     id: 'luxury',
