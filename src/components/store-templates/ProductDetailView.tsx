@@ -25,13 +25,16 @@ import {
   Plus,
   X,
   ZoomIn,
+  Ruler,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ProductBadges } from './ProductBadges'
 import { useCart } from '@/lib/cart-context'
 import { CartButton } from './CartButton'
-import type { Product, Store } from '@/lib/types'
+import { SizeGuideDiagram } from './SizeGuideDiagram'
+import { SIZE_GUIDE_COLUMNS } from '@/lib/size-guide'
+import type { Product, Store, SizeGuide } from '@/lib/types'
 
 export function ProductDetailView({ slug, productId, onDemoBack }: { slug: string; productId: string; onDemoBack?: () => void }) {
   const { stores, products, navigate, goBack } = useAppStore()
@@ -43,6 +46,7 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
   const [quantity, setQuantity] = useState(1)
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [addedToOrder, setAddedToOrder] = useState(false)
+  const [sizeGuideOpen, setSizeGuideOpen] = useState(false)
   const { addToCart, totalItems } = useCart()
 
   // Detect if we're on a public URL page (rendered by Next.js, not AppRouter)
@@ -123,6 +127,9 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
               plinNumber: data.plinNumber || null,
               otherPayments: Array.isArray(data.otherPayments) ? data.otherPayments : [],
               shippingOptions: Array.isArray(data.shippingOptions) ? data.shippingOptions : [],
+              sizeGuide: (data.sizeGuide && typeof data.sizeGuide === 'object' && !Array.isArray(data.sizeGuide))
+                ? (data.sizeGuide as SizeGuide)
+                : null,
             }
             setApiStore(mappedStore)
 
@@ -637,6 +644,23 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
               )
             })()}
 
+            {/* Guía de tallas (solo Pro/Premium con guía configurada) */}
+            {(() => {
+              const sg = store.sizeGuide
+              const planOk = store.planId === 'pro' || store.planId === 'premium'
+              const rowsOk = sg?.enabled && Array.isArray(sg.rows) && sg.rows.length > 0
+              if (!planOk || !rowsOk) return null
+              return (
+                <button
+                  onClick={() => setSizeGuideOpen(true)}
+                  className="mt-4 w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed border-gray-200 text-sm font-semibold text-gray-700 hover:border-gray-300 hover:bg-gray-50 transition-colors"
+                >
+                  <Ruler className="w-4 h-4" />
+                  Ver guía de tallas
+                </button>
+              )
+            })()}
+
             {/* Quantity Selector */}
             <div className="mt-6">
               <label className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3 block">
@@ -1123,7 +1147,76 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
           whatsappNumber={store.whatsappNumber}
           storeName={store.name}
           shippingOptions={store.shippingOptions}
+          yapeNumber={store.yapeNumber}
         />
+      )}
+
+      {/* Modal Guía de tallas */}
+      {sizeGuideOpen && store && store.sizeGuide && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60"
+          onClick={() => setSizeGuideOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Guía de tallas"
+        >
+          <div
+            className="bg-white rounded-2xl max-w-md w-full max-h-[88vh] overflow-y-auto p-5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-1">
+              <h3 className="text-lg font-bold text-gray-900">Guía de tallas</h3>
+              <button
+                onClick={() => setSizeGuideOpen(false)}
+                className="p-1.5 text-gray-400 hover:text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+                aria-label="Cerrar guía de tallas"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 mb-4">Mide tu prenda o cuerpo como indica el diagrama y compara con la tabla.</p>
+
+            <div className="flex justify-center rounded-xl border border-gray-200 bg-gray-50 p-4 text-gray-700 mb-4">
+              <SizeGuideDiagram type={store.sizeGuide.type || 'polo'} className="w-52 h-52" />
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm border-collapse">
+                <thead>
+                  <tr className="bg-gray-100 text-gray-700">
+                    <th className="py-2 px-3 text-left font-semibold rounded-tl-lg">Talla</th>
+                    {SIZE_GUIDE_COLUMNS[store.sizeGuide.type || 'polo'].map((col) => (
+                      <th key={col.key} className="py-2 px-3 text-left font-semibold">{col.label}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {(store.sizeGuide.rows || []).map((row, i) => (
+                    <tr key={i} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                      <td className="py-2 px-3 font-bold text-gray-900">{row.size}</td>
+                      {SIZE_GUIDE_COLUMNS[store.sizeGuide!.type || 'polo'].map((col) => (
+                        <td key={col.key} className="py-2 px-3 text-gray-700">{row[col.key] || '—'}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {store.sizeGuide.note && (
+              <p className="text-xs text-gray-500 mt-3">{store.sizeGuide.note}</p>
+            )}
+
+            <Button
+              className="w-full mt-5 text-white gap-2 rounded-xl py-3 font-semibold"
+              style={{ backgroundColor: '#25D366' }}
+              onClick={openWhatsApp}
+            >
+              <MessageCircle className="w-4 h-4" />
+              Consultar mi talla por WhatsApp
+            </Button>
+          </div>
+        </div>
       )}
     </div>
   )

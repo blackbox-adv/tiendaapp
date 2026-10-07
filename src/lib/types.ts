@@ -43,6 +43,22 @@ export interface ShippingOption {
   label: string
   price: number | null   // null o 0 = gratis
   time: string           // tiempo estimado ("24 horas", "2-3 días")
+  payFirst?: boolean     // el cliente paga este envío por adelantado (Yape); el producto contra entrega
+}
+
+// Guía de tallas de la tienda (Pro/Premium): diagrama estándar + tabla de medidas del vendedor
+export type SizeGuideType = 'polo' | 'pantalon' | 'vestido' | 'zapatos'
+export interface SizeGuideRow {
+  size: string           // "S", "M", "38", "32"...
+  a: string              // 1ª medida (según tipo: pecho/cintura/largo pie)
+  b: string              // 2ª medida (largo/cadera/ancho pie)
+  c?: string             // 3ª medida opcional (manga/cintura/cadera)
+}
+export interface SizeGuide {
+  enabled?: boolean
+  type?: SizeGuideType
+  rows?: SizeGuideRow[]
+  note?: string          // ej: "Medidas en cm, tolerancia ±2cm"
 }
 
 // Método de pago local de cualquier país (Mercado Pago, Nequi, Sinpe Móvil, etc.)
@@ -78,6 +94,7 @@ export interface Store {
   plinNumber: string | null
   otherPayments?: OtherPayment[]
   shippingOptions?: ShippingOption[]
+  sizeGuide?: SizeGuide | null
   announcementText?: string | null
   announcementLink?: string | null
   userId: string

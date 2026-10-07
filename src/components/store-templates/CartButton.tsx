@@ -16,9 +16,10 @@ interface CartButtonProps {
   whatsappNumber?: string
   storeName?: string
   shippingOptions?: ShippingOption[]
+  yapeNumber?: string | null
 }
 
-export function CartButton({ storeId, whatsappNumber, storeName, shippingOptions }: CartButtonProps) {
+export function CartButton({ storeId, whatsappNumber, storeName, shippingOptions, yapeNumber }: CartButtonProps) {
   const { cartItems, updateQuantity, removeFromCart, clearCart, totalAmount, totalItems } = useCart()
   const [open, setOpen] = useState(false)
   const [checkoutStep, setCheckoutStep] = useState<'cart' | 'checkout'>('cart')
@@ -47,6 +48,10 @@ export function CartButton({ storeId, whatsappNumber, storeName, shippingOptions
     ? `${selectedShipping.label} (${selectedShipping.price ? `S/ ${selectedShipping.price.toFixed(2)}` : 'Gratis'})${selectedShipping.time ? ` — ${selectedShipping.time}` : ''}`
     : ''
   const shippingCost = selectedShipping?.price ?? 0
+  // Envío pagado por adelantado: el cliente yapea solo el envío y paga el producto contra entrega
+  const payFirstNote = selectedShipping?.payFirst
+    ? `⚠️ Importante: el ENVÍO${selectedShipping.price ? ` (S/ ${selectedShipping.price.toFixed(2)})` : ''} se paga PRIMERO por Yape${yapeNumber ? ` al ${yapeNumber}` : ''} al confirmar el pedido. El producto se paga contra entrega con el motorizado.`
+    : ''
 
   const handleWhatsApp = useCallback(() => {
     if (!whatsappNumber || storeCartItems.length === 0) return
@@ -63,6 +68,7 @@ export function CartButton({ storeId, whatsappNumber, storeName, shippingOptions
       `Total productos: S/ ${storeTotal.toFixed(2)}`,
       shippingText ? `Envío: ${shippingText}` : '',
       shippingText && shippingCost ? `Total con envío: S/ ${(storeTotal + shippingCost).toFixed(2)}` : '',
+      payFirstNote,
       customerName ? `\nNombre: ${customerName}` : '',
       customerPhone ? `Teléfono: ${customerPhone}` : '',
       notes ? `\nNotas: ${notes}` : '',
@@ -74,7 +80,7 @@ export function CartButton({ storeId, whatsappNumber, storeName, shippingOptions
 
     const whatsappUrl = `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer')
-  }, [whatsappNumber, storeCartItems, storeName, storeTotal, customerName, customerPhone, notes, shippingText, shippingCost])
+  }, [whatsappNumber, storeCartItems, storeName, storeTotal, customerName, customerPhone, notes, shippingText, shippingCost, payFirstNote, yapeNumber])
 
   const handleConfirmOrder = useCallback(async () => {
     if (!customerName.trim() || !customerPhone.trim()) return
@@ -271,7 +277,7 @@ export function CartButton({ storeId, whatsappNumber, storeName, shippingOptions
                   </div>
                   {selectedShipping && (
                     <div className="flex justify-between text-sm mt-1">
-                      <span className="text-gray-500">+ Envío: {selectedShipping.label}</span>
+                      <span className="text-gray-500">+ Envío: {selectedShipping.label}{selectedShipping.payFirst ? ' (se paga primero)' : ''}</span>
                       <span className="font-medium text-gray-700">{shippingCost ? `S/ ${shippingCost.toFixed(2)}` : 'Gratis'}</span>
                     </div>
                   )}
@@ -360,6 +366,11 @@ export function CartButton({ storeId, whatsappNumber, storeName, shippingOptions
                               <span className="min-w-0">
                                 <span className="text-sm font-medium text-gray-900 block truncate">{o.label}</span>
                                 {o.time && <span className="text-xs text-gray-500 block">{o.time}</span>}
+                                {o.payFirst && (
+                                  <span className="text-[10px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded px-1.5 py-0.5 inline-block mt-0.5">
+                                    Se paga primero · producto contra entrega
+                                  </span>
+                                )}
                               </span>
                             </span>
                             <span className="text-sm font-semibold text-gray-900 flex-shrink-0">

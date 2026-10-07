@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { PageRoute, User, Store, Product, ShippingOption, OtherPayment } from './types'
+import type { PageRoute, User, Store, Product, ShippingOption, OtherPayment, SizeGuide } from './types'
 import { PLANS, MOCK_USERS, MOCK_STORES, MOCK_PRODUCTS, CATEGORIES } from './mock-data'
 
 // ── Schema transformation helpers (API → Frontend) ──
@@ -47,6 +47,10 @@ function transformApiStore(apiStore: Record<string, unknown>): Store {
     // LatAm: otros métodos de pago + opciones de envío
     otherPayments: Array.isArray(apiStore.otherPayments) ? (apiStore.otherPayments as OtherPayment[]) : [],
     shippingOptions: Array.isArray(apiStore.shippingOptions) ? (apiStore.shippingOptions as ShippingOption[]) : [],
+    // Guía de tallas (Pro/Premium)
+    sizeGuide: (apiStore.sizeGuide && typeof apiStore.sizeGuide === 'object' && !Array.isArray(apiStore.sizeGuide))
+      ? (apiStore.sizeGuide as SizeGuide)
+      : null,
   }
 }
 

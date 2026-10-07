@@ -3,7 +3,7 @@ import { db } from '@/lib/db';
 import { authenticateRequest } from '@/lib/auth';
 import { apiError, apiSuccess } from '@/lib/api-response';
 import { serializeDecimals } from '@/lib/utils';
-import { checkTemplatePermission } from '@/lib/plan-gating';
+import { checkTemplatePermission, getUserPlanType } from '@/lib/plan-gating';
 import { sweepIfNeeded } from '@/lib/billing-sweep';
 
 export async function GET(
@@ -96,11 +96,44 @@ export async function PUT(
           !body.shippingOptions.every((s: unknown) => typeof s === 'object' && s !== null && typeof (s as { label?: unknown }).label === 'string')) {
         return NextResponse.json({ error: 'Formato inválido en opciones de envío' }, { status: 400 });
       }
-      updateData.shippingOptions = body.shippingOptions.map((s: { label: string; price?: number | null; time?: string }) => ({
+      updateData.shippingOptions = body.shippingOptions.map((s: { label: string; price?: number | null; time?: string; payFirst?: boolean }) => ({
         label: String(s.label).slice(0, 60),
         price: (typeof s.price === 'number' && isFinite(s.price) && s.price > 0) ? Math.round(s.price * 100) / 100 : null,
         time: String(s.time ?? '').slice(0, 40),
+        ...(s.payFirst === true ? { payFirst: true } : {}),
       }));
+    }
+
+    // Guía de tallas (solo Pro/Premium cuando está activa); {} = apagada (todos los planes)
+    if (body.sizeGuide !== undefined) {
+      const g = body.sizeGuide;
+      const wantsActive = g && typeof g === 'object' && !Array.isArray(g) && g.enabled === true
+        && Array.isArray(g.rows) && g.rows.some((r: { size?: unknown }) => r && String(r.size ?? '').trim());
+      if (wantsActive) {
+        const planType = await getUserPlanType(auth.user.userId);
+        if (planType !== 'pro' && planType !== 'premium' && auth.user.role !== 'super_admin') {
+          return NextResponse.json(
+            { error: 'La Guía de tallas está disponible en los planes Pro y Premium. Actualiza tu plan desde "Mi Plan".', code: 'PLAN_REQUIRED' },
+            { status: 403 }
+          );
+        }
+        const SIZE_TYPES = ['polo', 'pantalon', 'vestido', 'zapatos'];
+        const type = SIZE_TYPES.includes(g.type) ? g.type : 'polo';
+        const rows = g.rows.slice(0, 12)
+          .map((r: { size?: unknown; a?: unknown; b?: unknown; c?: unknown }) => {
+            const row: Record<string, string> = {
+              size: String(r.size ?? '').slice(0, 10),
+              a: String(r.a ?? '').slice(0, 10),
+              b: String(r.b ?? '').slice(0, 10),
+            };
+            if (type !== 'zapatos') row.c = String(r.c ?? '').slice(0, 10);
+            return row;
+          })
+          .filter((r: { size: string }) => r.size);
+        updateData.sizeGuide = { enabled: true, type, rows, note: String(g.note ?? '').slice(0, 200) };
+      } else {
+        updateData.sizeGuide = {};
+      }
     }
 
     for (const field of allowedFields) {
