@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { VALID_TEMPLATES } from '@/lib/template-list'
 
 // ── Peru WhatsApp validation helper ──
 // Validates and normalizes Peru mobile numbers to format: 519XXXXXXXX
@@ -109,7 +110,7 @@ export const createStoreSchema = z.object({
     peruWhatsappString.optional()
   ),
   template: z
-    .enum(['moderna', 'vibrante', 'clasica', 'luxury', 'minimalist', 'bodega', 'sabor', 'moda'])
+    .enum(VALID_TEMPLATES as [string, ...string[]])
     .optional()
     .default('moderna'),
 })

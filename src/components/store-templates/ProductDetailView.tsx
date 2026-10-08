@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAppStore } from '@/lib/store'
+import { ProductColor } from './ProductColor'
 import { StoreLogo } from './StoreLogo'
 import { DEFAULT_CATEGORIES, getStoreCategories } from '@/lib/store-categories'
 import {
@@ -548,14 +549,8 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
                 {product.name}
               </h1>
               {product.color && (
-                <span
-                  className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border border-gray-200 bg-gray-50 text-gray-700"
-                >
-                  <span
-                    className="w-3 h-3 rounded-full border border-gray-300 flex-shrink-0"
-                    style={{ backgroundColor: product.color.toLowerCase() }}
-                  />
-                  {product.color}
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border border-gray-200 bg-gray-50 text-gray-700">
+                  <ProductColor color={product.color} size={12} />
                 </span>
               )}
             </div>

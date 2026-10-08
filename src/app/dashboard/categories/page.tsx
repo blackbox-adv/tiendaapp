@@ -14,6 +14,7 @@ import {
   FolderOpen,
   RefreshCw,
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface Category {
   id: string;
@@ -91,10 +92,14 @@ export default function CategoriesPage() {
 
       if (res.ok) {
         setNewCatName('');
+        toast.success('Categoría creada', { description: `"${newCatName.trim()}" ya aparece al crear productos.` });
         fetchStore();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        toast.error('No se pudo crear la categoría', { description: data.error || 'Inténtalo de nuevo.' });
       }
     } catch {
-      // ignore
+      toast.error('Error de conexión al crear la categoría');
     } finally {
       setCreating(false);
     }
@@ -110,14 +115,18 @@ export default function CategoriesPage() {
         headers: (delToken ? { Authorization: `Bearer ${delToken}` } : {}) as Record<string, string>,
       });
       if (res.ok) {
+        toast.success('Categoría eliminada');
         setStore((prev) =>
           prev
             ? { ...prev, categories: prev.categories.filter((c) => c.id !== catId) }
             : null
         );
+      } else {
+        const data = await res.json().catch(() => ({}));
+        toast.error('No se pudo eliminar la categoría', { description: data.error || 'Inténtalo de nuevo.' });
       }
     } catch {
-      // ignore
+      toast.error('Error de conexión al eliminar');
     } finally {
       setDeleting(null);
     }

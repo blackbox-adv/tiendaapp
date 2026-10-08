@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge'
 import { PaymentMethods } from './PaymentMethods'
 import { ShippingOptions } from './ShippingOptions'
 import { useAppStore } from '@/lib/store'
+import { ProductColor } from './ProductColor'
 import type { Store, Product } from '@/lib/types'
 
 const GOLD = '#c8a456'
@@ -442,7 +443,7 @@ export function LuxuryTemplate({ store, products, storeSlug, planId, onProductCl
                           {product.name}
                         </h3>
                         {product.color && (
-                          <span className="text-[11px] font-medium" style={{ color: '#8a8a9a' }}>{product.color}</span>
+                          <ProductColor color={product.color} size={12} labelClassName="text-[11px] font-medium" className="text-[#8a8a9a]" />
                         )}
                         {renderStars(product.rating)}
                         <div className="flex items-center gap-2.5 mt-2">

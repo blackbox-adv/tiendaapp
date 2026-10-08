@@ -12,6 +12,7 @@ import { CombosSection } from './CombosSection'
 import { PaymentMethods } from './PaymentMethods'
 import { ShippingOptions } from './ShippingOptions'
 import { useAppStore } from '@/lib/store'
+import { ProductColor } from './ProductColor'
 import type { Store, Product } from '@/lib/types'
 
 // ============================================================
@@ -270,7 +271,7 @@ export function NeonTemplate({ store, products, storeSlug, planId, onProductClic
                     <div className="mt-3 px-0.5">
                       <h3 className="text-sm font-semibold text-slate-900 truncate">{product.name}</h3>
                       {product.color && (
-                        <span className="text-[11px] text-slate-400 font-medium">{product.color}</span>
+                        <ProductColor color={product.color} size={12} labelClassName="text-[11px] text-slate-400 font-medium" />
                       )}
                       {product.rating > 0 && (
                         <div className="flex items-center gap-1 mt-1">

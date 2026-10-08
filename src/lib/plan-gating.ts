@@ -6,10 +6,10 @@
 // ============================================================
 
 import { db } from '@/lib/db'
+import { PREMIUM_TEMPLATES, VALID_TEMPLATES } from '@/lib/template-list'
 
-export const PREMIUM_TEMPLATES: string[] = ['luxury', 'minimalist', 'bodega', 'sabor', 'moda', 'vitrina', 'neon', 'boutique', 'editorial', 'atelier', 'terracota', 'dulce', 'calle', 'aura', 'teca', 'volt', 'grano', 'flora', 'mesa', 'sushi', 'cafe', 'bar', 'pop']
-
-export const VALID_TEMPLATES: string[] = ['moderna', 'vibrante', 'clasica', ...PREMIUM_TEMPLATES]
+// Re-export para compatibilidad con imports existentes.
+export { PREMIUM_TEMPLATES, VALID_TEMPLATES }
 
 // Obtiene el tipo de plan activo del usuario ('free' si no tiene suscripción activa)
 export async function getUserPlanType(userId: string): Promise<string> {
