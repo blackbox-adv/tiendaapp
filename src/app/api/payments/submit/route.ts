@@ -129,6 +129,29 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    // Notificar a los super_admin: hay un pago pendiente de verificar (no bloquea)
+    try {
+      const [storeRow, admins] = await Promise.all([
+        db.store.findUnique({ where: { id: targetStoreId }, select: { name: true } }),
+        db.user.findMany({ where: { role: 'super_admin' }, select: { id: true } }),
+      ])
+      if (admins.length > 0) {
+        const storeName = storeRow?.name || 'Una tienda'
+        await db.notification.createMany({
+          data: admins.map((a) => ({
+            title: `Nuevo pago por verificar: ${storeName}`,
+            message: `Plan ${plan.name} — S/${Number(plan.price).toFixed(2)} — comprobante ${externalRef}. Ábrelo en Admin → Pagos.`,
+            type: 'system',
+            icon: '💸',
+            link: '/admin',
+            userId: a.id,
+          })),
+        })
+      }
+    } catch (notifError) {
+      console.error('[PAYMENTS/SUBMIT] admin notification (non-blocking):', notifError)
+    }
+
     // Send payment submitted confirmation email (non-blocking)
     const user = await db.user.findUnique({ where: { id: auth.user.userId }, select: { name: true, email: true } })
     if (user) {

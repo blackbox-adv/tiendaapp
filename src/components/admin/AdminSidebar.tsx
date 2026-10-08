@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useAppStore } from '@/lib/store'
 import { LayoutDashboard, Store, Users, CreditCard, Settings, LogOut, Zap, Banknote, Menu, X, Bell } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -21,6 +21,29 @@ export function AdminSidebar() {
   const { navigate, logout } = useAppStore()
   const route = useAppStore((s) => s.route)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [pendingCount, setPendingCount] = useState(0)
+
+  // Badge de pagos pendientes por verificar (encuesta cada 60s, silencioso)
+  useEffect(() => {
+    let cancelled = false
+    const load = async () => {
+      try {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('tiendapp_token') : null
+        if (!token) return
+        const res = await fetch('/api/admin/payments?status=pending&limit=1', {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        if (!res.ok) return
+        const data = await res.json()
+        if (!cancelled) setPendingCount(Number(data?.total ?? 0))
+      } catch {
+        /* el badge nunca rompe el sidebar */
+      }
+    }
+    load()
+    const t = setInterval(load, 60000)
+    return () => { cancelled = true; clearInterval(t) }
+  }, [])
 
   const handleNav = (page: PageRoute['page']) => {
     navigate({ page } as PageRoute)
@@ -56,6 +79,11 @@ export function AdminSidebar() {
             >
               <item.icon className="w-5 h-5" />
               {item.label}
+              {item.page === 'admin-payments' && pendingCount > 0 && (
+                <span className="ml-auto min-w-[20px] h-5 px-1.5 inline-flex items-center justify-center rounded-full bg-red-500 text-white text-[11px] font-bold">
+                  {pendingCount > 99 ? '99+' : pendingCount}
+                </span>
+              )}
             </button>
           )
         })}
