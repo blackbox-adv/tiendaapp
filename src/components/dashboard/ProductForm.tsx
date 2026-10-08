@@ -14,7 +14,7 @@ const CATEGORIES = [
   { id: 'juguetes', name: 'Juguetes' },
   { id: 'otros', name: 'Otros' },
 ]
-import { ArrowLeft, Save, Star, Upload, X, ImageIcon } from 'lucide-react'
+import { ArrowLeft, Save, Star, Upload, X, ImageIcon, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -24,6 +24,7 @@ import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
+import { removeImageBackground, uploadProcessedImage } from '@/lib/background-remover'
 
 export function ProductForm({ productId }: { productId?: string }) {
   const { currentStore, products, syncFromAPI } = useAppStore()
@@ -64,6 +65,8 @@ export function ProductForm({ productId }: { productId?: string }) {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [uploading, setUploading] = useState(false)
   const [uploadingAdditional, setUploadingAdditional] = useState(false)
+  const [removingBg, setRemovingBg] = useState(false)
+  const [bgStatus, setBgStatus] = useState('')
 
   const validate = () => {
     const errs: Record<string, string> = {}
@@ -245,6 +248,45 @@ export function ProductForm({ productId }: { productId?: string }) {
       setUploadingAdditional(false)
     }
   }, [images.length])
+
+  // Quita-fondos: IA que corre 100% en el navegador del vendedor (gratis, sin servidor).
+  // El modelo (~45 MB) se descarga solo la primera vez y queda en caché.
+  const handleRemoveBackground = useCallback(async () => {
+    if (!imageUrl.trim() || removingBg) return
+    setRemovingBg(true)
+    setBgStatus('Preparando...')
+    try {
+      const res = await fetch(imageUrl)
+      if (!res.ok) throw new Error('no-image')
+      const blob = await res.blob()
+      const processed = await removeImageBackground(blob, (stage, pct) => {
+        setBgStatus(
+          stage === 'download'
+            ? pct == null || pct === 0
+              ? 'Descargando modelo (solo la 1ra vez)...'
+              : `Descargando modelo... ${pct}%`
+            : 'Quitando fondo...'
+        )
+      })
+      setBgStatus('Guardando imagen...')
+      const token = localStorage.getItem('tiendapp_token')
+      const url = await uploadProcessedImage(processed, token)
+      setImageUrl(url)
+      toast.success('Fondo quitado', {
+        description: 'La imagen quedó con fondo transparente. Guarda el producto para aplicarla.',
+      })
+    } catch (err) {
+      toast.error('No se pudo quitar el fondo', {
+        description:
+          err instanceof Error && err.message === 'no-image'
+            ? 'No se pudo leer la imagen. Si es una URL externa, descárgala y súbela desde tu dispositivo.'
+            : 'Ocurrió un error. Revisa tu conexión (el modelo se descarga una sola vez) e inténtalo de nuevo.',
+      })
+    } finally {
+      setRemovingBg(false)
+      setBgStatus('')
+    }
+  }, [imageUrl, removingBg])
 
   const handleRemoveImage = useCallback((index: number) => {
     setImages(prev => prev.filter((_, i) => i !== index))
@@ -517,6 +559,30 @@ export function ProductForm({ productId }: { productId?: string }) {
                   </div>
                 </div>
                 <p className="text-sm mt-1">Vista previa de la imagen</p>
+              </div>
+            )}
+
+            {/* Quitar fondo (IA gratis, en el navegador) */}
+            {imageUrl && (
+              <div className="flex items-center gap-3 flex-wrap">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRemoveBackground}
+                  disabled={removingBg || uploading}
+                  className="gap-2 text-sm"
+                >
+                  {removingBg ? (
+                    <div className="w-4 h-4 border-2 border-violet-200 border-t-violet-600 rounded-full animate-spin" />
+                  ) : (
+                    <Sparkles className="w-4 h-4 text-violet-500" />
+                  )}
+                  {removingBg ? (bgStatus || 'Procesando...') : 'Quitar fondo'}
+                </Button>
+                <span className="text-xs text-gray-400">
+                  IA gratis, en tu navegador. La 1ra vez descarga el modelo (~45 MB), luego queda guardado.
+                </span>
               </div>
             )}
 
