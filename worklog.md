@@ -761,3 +761,19 @@ Work Log:
 
 Stage Summary:
 - Escalera de plantillas final: Free = 3 base; Pro = 3 base + features de venta; Premium = las 26 (por rubro). Gating premium intacto. Sin cambios de BD.
+
+---
+Task ID: 43
+Agent: Super Z (main)
+Task: Flujo de cobro verificado + notificaciones de pagos para el admin + revisiones responsive/UX y SEO homepage
+
+Work Log:
+- Flujo de cobro (ya existia, verificado E2E): Mi Plan -> dialogo "Completa tu pago" (monto + Plin/Yape +51 958 297 236 + titular CARLOS ALBERTO GUZMAN SOTO, override via NEXT_PUBLIC_PAYMENTS_*) -> tienda envia numero de operacion -> Payment(pending) + Subscription(past_due) + emails -> admin aprueba/rechaza en /admin -> activa 30 dias -> billing-sweep degrada a Free si vence. Webhook Culqi ya escrito (firma HMAC, idempotencia, validacion de monto) pero INACTIVO (sin WEBHOOK_SECRET): la automatizacion total solo requiere gateway de pago con comision ~3%.
+- GAP cerrado: nadie avisaba al admin cuando llegaba un pago. Ahora POST /api/payments/submit crea Notification "Nuevo pago por verificar: {tienda}" para cada super_admin (no bloquea) y AdminSidebar muestra badge rojo con el conteo de pendientes (poll 60s, escritorio+movil). Commit 24075fb, deploy OK.
+- QA produccion (scripts/qa-payment-notify.mjs): 4/4 PASS — submit 201, notificacion creada con comprobante, cleanup completo (payment+sub+notif).
+- Responsive/UX con navegador real 375px: landing (sin overflowX, hero/plantillas/precios OK), tienda publica (catalogo, envio, chat widget OK), dashboard (limpio), dialogo de pago movil perfecto. Screenshots en /home/z/my-project/download/qa-mobile-*.png.
+- SEO homepage — BUG CRITICO encontrado y corregido: LandingView devolvia null en SSR por el test A/B (cerrado, siempre 'A') -> HTML de kyllari.com salia SIN H1/H2/contenido (23KB vacio). Fix f78a109: render directo (tracking A/B conservado). Verificado: 1 H1 ("Crea tu catalogo online y recibe pedidos por WhatsApp") + 10 H2 + 1818 palabras visibles, 200KB HTML. Title/OG/JSON-LD (Organization+SoftwareApplication+FAQPage) ya estaban excelentes.
+- IA (opinion dada al dueno): DeepSeek NO tiene APIs de imagen; para quitar fondo de fotos la via gratis = modelo WASM client-side ($0/foto, sin costo servidor); para descripciones IA = API de texto barata (GLM Flash/DeepSeek). Esperando OK del dueno para construir.
+
+Stage Summary:
+- Cobro manual Yape/Plin completo con notificaciones al admin y panel movil. SEO de la homepage reparado (SSR). Pendientes del dueno: buzon contacto@kyllari.com, QR de Plin (enviar captura para agregarlo al dialogo), decision sobre IA y redes sociales.
