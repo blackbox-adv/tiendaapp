@@ -3,18 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAppStore } from '@/lib/store'
-const CATEGORIES = [
-  { id: 'ropa', name: 'Ropa' },
-  { id: 'accesorios', name: 'Accesorios' },
-  { id: 'electronica', name: 'Electronica' },
-  { id: 'hogar', name: 'Hogar' },
-  { id: 'belleza', name: 'Belleza' },
-  { id: 'deportes', name: 'Deportes' },
-  { id: 'alimentos', name: 'Alimentos' },
-  { id: 'juguetes', name: 'Juguetes' },
-  { id: 'otros', name: 'Otros' },
-]
-import { Search, Plus, Edit3, Trash2, Package, Download, Upload, Crown } from 'lucide-react'
+import { Search, Plus, Edit3, Trash2, Package, Download, Upload, Crown, LayoutGrid, List as ListIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
@@ -27,11 +16,13 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { toast } from 'sonner'
+import { PLAN_BY_TYPE } from '@/lib/plans'
 
 export function ProductList() {
   const { currentStore, products, deleteProduct } = useAppStore()
   const router = useRouter()
   const [search, setSearch] = useState('')
+  const [view, setView] = useState<'grid' | 'list'>('grid')
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
   const [importOpen, setImportOpen] = useState(false)
   const [importing, setImporting] = useState(false)
@@ -72,6 +63,12 @@ export function ProductList() {
   const storeProducts = products.filter(
     (p) => p.storeId === currentStore.id && p.isActive && p.name.toLowerCase().includes(search.toLowerCase())
   )
+
+  // Límite de productos del plan actual (6 en Gratis, 50 en Pro, ∞ en Premium)
+  const planType = (currentStore.planId || 'free').toLowerCase()
+  const maxProducts = PLAN_BY_TYPE[planType]?.maxProducts ?? 6
+  const totalActiveProducts = products.filter((p) => p.storeId === currentStore.id && p.isActive).length
+  const atLimit = maxProducts !== -1 && totalActiveProducts >= maxProducts
 
   const handleDelete = async () => {
     if (deleteTarget) {
@@ -173,9 +170,33 @@ export function ProductList() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Productos</h1>
-          <p className="text-gray-500 mt-1">{storeProducts.length} productos en tu tienda</p>
+          <p className="text-gray-500 mt-1">
+            {totalActiveProducts} productos en tu tienda
+            {maxProducts !== -1 && (
+              <span className="text-gray-400"> · límite del plan: {maxProducts}</span>
+            )}
+          </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          {/* Toggle Grid / Lista */}
+          <div className="flex rounded-lg border border-gray-200 overflow-hidden" role="group" aria-label="Modo de vista">
+            <button
+              type="button"
+              onClick={() => setView('grid')}
+              title="Ver como tarjetas"
+              className={`px-2.5 py-2 transition-colors ${view === 'grid' ? 'bg-violet-600 text-white' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setView('list')}
+              title="Ver como lista"
+              className={`px-2.5 py-2 transition-colors ${view === 'list' ? 'bg-violet-600 text-white' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+            >
+              <ListIcon className="w-4 h-4" />
+            </button>
+          </div>
           <Button
             variant="outline"
             onClick={() => isPaidPlan ? setImportOpen(true) : upsellCsv()}
@@ -203,6 +224,29 @@ export function ProductList() {
           </Button>
         </div>
       </div>
+
+      {/* Aviso de límite del plan */}
+      {atLimit && (
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200">
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-amber-800">
+              Alcanzaste el límite de tu plan: {totalActiveProducts} de {maxProducts} productos
+            </p>
+            <p className="text-xs text-amber-700 mt-0.5">
+              Los productos nuevos no se guardarán hasta que elimines uno o actualices tu plan
+              {planType === 'free' ? ' (Pro: 50 productos, S/29.99/mes)' : ''}.
+            </p>
+          </div>
+          <Button
+            size="sm"
+            onClick={() => router.push('/dashboard/plan')}
+            className="bg-amber-600 hover:bg-amber-700 text-white flex-shrink-0"
+          >
+            <Crown className="w-4 h-4 mr-1.5" />
+            Ver planes
+          </Button>
+        </div>
+      )}
 
       {/* Search */}
       <div className="relative max-w-md">
@@ -235,10 +279,67 @@ export function ProductList() {
             )}
           </CardContent>
         </Card>
+      ) : view === 'list' ? (
+        /* Vista de lista: filas horizontales rápidas de revisar/editar */
+        <div className="space-y-2">
+          {storeProducts.map((product) => (
+            <Card key={product.id} className="overflow-hidden hover:shadow-md transition-shadow">
+              <CardContent className="p-3 flex items-center gap-3">
+                <img
+                  src={product.imageUrl}
+                  alt={product.name}
+                  className="w-14 h-14 rounded-lg object-cover flex-shrink-0 bg-gray-100"
+                  onError={(e) => { (e.target as HTMLImageElement).style.opacity = '0.3' }}
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-sm text-gray-900 truncate">{product.name}</h3>
+                    {product.originalPrice ? (
+                      <Badge className="bg-red-500 text-white text-[10px] px-1.5 flex-shrink-0">
+                        -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
+                      </Badge>
+                    ) : null}
+                  </div>
+                  <p className="text-xs text-gray-400 truncate mt-0.5">{product.description || 'Sin descripción'}</p>
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
+                    <span className="text-sm font-bold text-violet-600">S/{product.price.toFixed(2)}</span>
+                    {product.originalPrice ? (
+                      <span className="text-xs text-gray-400 line-through">S/{product.originalPrice.toFixed(2)}</span>
+                    ) : null}
+                    {product.categoryId ? (
+                      <Badge variant="secondary" className="text-[10px]">{product.categoryId}</Badge>
+                    ) : null}
+                    {product.stock === 0 ? (
+                      <Badge variant="secondary" className="text-[10px] bg-red-50 text-red-600">Agotado</Badge>
+                    ) : null}
+                  </div>
+                </div>
+                <div className="flex gap-1.5 flex-shrink-0">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => router.push(`/dashboard/products/${product.id}`)}
+                    className="text-violet-600 border-violet-200 hover:bg-violet-50 gap-1"
+                  >
+                    <Edit3 className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Editar</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setDeleteTarget(product.id)}
+                    className="text-red-500 border-red-200 hover:bg-red-50"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {storeProducts.map((product) => {
-            const category = CATEGORIES.find((c) => c.id === product.categoryId)
             return (
               <Card key={product.id} className="overflow-hidden group hover:shadow-md transition-shadow">
                 <div className="h-44 bg-gray-100 relative">
@@ -265,8 +366,8 @@ export function ProductList() {
                       )}
                     </div>
                   </div>
-                  {category && (
-                    <Badge variant="secondary" className="mt-2 text-xs">{category.name}</Badge>
+                  {product.categoryId && (
+                    <Badge variant="secondary" className="mt-2 text-xs">{product.categoryId}</Badge>
                   )}
                   <div className="flex gap-2 mt-3">
                     <Button

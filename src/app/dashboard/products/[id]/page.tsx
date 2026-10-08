@@ -23,22 +23,22 @@ import {
   Upload,
   Package,
   X,
-  Star,
   Plus,
+  Sparkles,
   Trash2,
 } from 'lucide-react';
 import { toast } from 'sonner';
-
-const CATEGORIES = [
-  'Ropa', 'Accesorios', 'Electrónica', 'Hogar', 'Belleza',
-  'Deportes', 'Alimentos', 'Juguetes', 'Otros',
-];
+import { useStoreCategories } from '@/lib/use-store-categories';
+import { compressImage } from '@/lib/image-compress';
+import { ColorPicker } from '@/components/dashboard/ColorPicker';
+import { removeImageBackground } from '@/lib/background-remover';
 
 export default function EditProductPage() {
   const router = useRouter();
   const params = useParams();
   const productId = params.id as string;
   const { currentStore, products, syncFromAPI } = useAppStore();
+  const baseCategories = useStoreCategories();
 
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
@@ -53,6 +53,7 @@ export default function EditProductPage() {
   const [color, setColor] = useState('');
   const [stock, setStock] = useState(-1);
   const [featured, setFeatured] = useState(false);
+  // rating: NO lo edita el dueño (lo ponen los clientes). Se conserva el valor existente.
   const [rating, setRating] = useState(0);
   const [isActive, setIsActive] = useState(true);
 
@@ -61,6 +62,8 @@ export default function EditProductPage() {
   const [newCoverFile, setNewCoverFile] = useState<File | null>(null);
   const [coverUploading, setCoverUploading] = useState(false);
   const [currentImageUrl, setCurrentImageUrl] = useState('');
+  const [removingBg, setRemovingBg] = useState(false);
+  const [bgStatus, setBgStatus] = useState('');
 
   // Gallery images
   const [existingImages, setExistingImages] = useState<string[]>([]);
@@ -128,17 +131,61 @@ export default function EditProductPage() {
     return null;
   };
 
-  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCoverChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
+    if (!file) return;
+    // Comprimir en el navegador: foto de celular pesada -> JPG liviano máx 1200px
+    setCoverUploading(true);
+    try {
+      const optimized = await compressImage(file);
+      setNewCoverFile(optimized);
+      const reader = new FileReader();
+      reader.onloadend = () => setCoverPreview(reader.result as string);
+      reader.readAsDataURL(optimized);
+    } finally {
+      setCoverUploading(false);
+    }
+  };
+
+  // Quita-fondos: IA 100% en el navegador (gratis). Funciona sobre la imagen
+  // recién elegida o sobre la imagen actual del producto.
+  const handleRemoveBackground = async () => {
+    if (removingBg) return;
+    setRemovingBg(true);
+    setBgStatus('Preparando...');
+    try {
+      let source: Blob | null = newCoverFile;
+      if (!source) {
+        const res = await fetch(coverPreview || currentImageUrl);
+        if (!res.ok) throw new Error('no-image');
+        source = await res.blob();
+      }
+      const processed = await removeImageBackground(source, (stage, pct) => {
+        setBgStatus(
+          stage === 'download'
+            ? pct == null || pct === 0
+              ? 'Descargando modelo (solo la 1ra vez)...'
+              : `Descargando modelo... ${pct}%`
+            : 'Quitando fondo...'
+        );
+      });
+      const file = new File([processed], 'producto-sin-fondo.png', { type: 'image/png' });
       setNewCoverFile(file);
       const reader = new FileReader();
       reader.onloadend = () => setCoverPreview(reader.result as string);
       reader.readAsDataURL(file);
+      toast.success('Fondo quitado', { description: 'Guarda los cambios para aplicarla.' });
+    } catch {
+      toast.error('No se pudo quitar el fondo', {
+        description: 'Revisa tu conexión (el modelo se descarga una sola vez) e inténtalo de nuevo.',
+      });
+    } finally {
+      setRemovingBg(false);
+      setBgStatus('');
     }
   };
 
-  const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleGalleryChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
     const newFiles = Array.from(files);
@@ -147,14 +194,20 @@ export default function EditProductPage() {
       setError('Máximo 8 imágenes adicionales en total');
       return;
     }
-    setGalleryFiles((prev) => [...prev, ...newFiles]);
-    newFiles.forEach((file) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setGalleryPreviews((prev) => [...prev, reader.result as string]);
-      };
-      reader.readAsDataURL(file);
-    });
+    setGalleryUploading(true);
+    try {
+      const optimized = await Promise.all(newFiles.map((f) => compressImage(f)));
+      setGalleryFiles((prev) => [...prev, ...optimized]);
+      optimized.forEach((file) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setGalleryPreviews((prev) => [...prev, reader.result as string]);
+        };
+        reader.readAsDataURL(file);
+      });
+    } finally {
+      setGalleryUploading(false);
+    }
   };
 
   const removeExistingImage = (index: number) => {
@@ -165,6 +218,10 @@ export default function EditProductPage() {
     setGalleryFiles((prev) => prev.filter((_, i) => i !== index));
     setGalleryPreviews((prev) => prev.filter((_, i) => i !== index));
   };
+
+  // Opciones de categoría: las de la tienda + la actual del producto si fuera una vieja
+  const categories =
+    category && !baseCategories.includes(category) ? [category, ...baseCategories] : baseCategories;
 
   const handleDelete = async () => {
     if (!confirm('¿Estás seguro de eliminar este producto?')) return;
@@ -333,6 +390,29 @@ export default function EditProductPage() {
                     <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleCoverChange} />
                   </label>
                 )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-[11px] text-gray-400 leading-relaxed">
+                    Recomendado: <span className="font-medium text-gray-500">800×800 px (cuadrada) u 800×1000 px (vertical)</span>.
+                    La foto se optimiza sola para que pese poco y cargue rápido.
+                  </p>
+                  {(coverPreview || currentImageUrl) && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleRemoveBackground}
+                      disabled={removingBg}
+                      className="mt-2 gap-1.5 text-xs"
+                    >
+                      {removingBg ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Sparkles className="w-3.5 h-3.5 text-violet-500" />
+                      )}
+                      {removingBg ? (bgStatus || 'Procesando...') : 'Quitar fondo (gratis)'}
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -402,20 +482,18 @@ export default function EditProductPage() {
                     <SelectValue placeholder="Seleccionar categoría" />
                   </SelectTrigger>
                   <SelectContent>
-                    {CATEGORIES.map((cat) => (
+                    {categories.map((cat) => (
                       <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                <p className="text-[11px] text-gray-400">
+                  Las primeras son las que creaste en <span className="font-medium">Categorías</span>.
+                </p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="color">Color / Variante</Label>
-                <div className="flex gap-2">
-                  <Input id="color" placeholder="Ej: Rojo, Azul..." value={color} onChange={(e) => setColor(e.target.value)} className="flex-1" />
-                  {color && (
-                    <div className="w-10 h-10 rounded-lg border border-gray-300 flex-shrink-0" style={{ backgroundColor: color.toLowerCase() }} />
-                  )}
-                </div>
+                <ColorPicker id="color" value={color} onChange={setColor} />
               </div>
             </div>
 
@@ -431,18 +509,7 @@ export default function EditProductPage() {
               <p className="text-[11px] text-gray-400">-1 = sin límite, 0 = agotado, número positivo = unidades disponibles</p>
             </div>
 
-            {/* Rating */}
-            <div className="space-y-2">
-              <Label>Calificación</Label>
-              <div className="flex items-center gap-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button key={star} type="button" onClick={() => setRating(star === rating ? 0 : star)} className="focus:outline-none">
-                    <Star className={`w-6 h-6 transition-colors ${star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 hover:text-yellow-300'}`} />
-                  </button>
-                ))}
-                {rating > 0 && <span className="text-sm text-gray-500 ml-2">{rating}.0</span>}
-              </div>
-            </div>
+            {/* Rating: lo ponen los clientes, el dueño no lo edita. Se conserva el valor existente. */}
 
             {/* Toggles */}
             <div className="space-y-3">

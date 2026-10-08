@@ -23,19 +23,19 @@ import {
   Upload,
   Package,
   X,
-  Star,
   Plus,
+  Sparkles,
 } from 'lucide-react';
 import { toast } from 'sonner';
-
-const CATEGORIES = [
-  'Ropa', 'Accesorios', 'Electrónica', 'Hogar', 'Belleza',
-  'Deportes', 'Alimentos', 'Juguetes', 'Otros',
-];
+import { useStoreCategories } from '@/lib/use-store-categories';
+import { compressImage } from '@/lib/image-compress';
+import { ColorPicker } from '@/components/dashboard/ColorPicker';
+import { removeImageBackground } from '@/lib/background-remover';
 
 export default function NewProductPage() {
   const router = useRouter();
   const { currentStore, syncFromAPI } = useAppStore();
+  const categories = useStoreCategories();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -48,13 +48,14 @@ export default function NewProductPage() {
   const [color, setColor] = useState('');
   const [stock, setStock] = useState(-1);
   const [featured, setFeatured] = useState(false);
-  const [rating, setRating] = useState(0);
   const [isActive, setIsActive] = useState(true);
 
   // Cover image
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [coverUploading, setCoverUploading] = useState(false);
+  const [removingBg, setRemovingBg] = useState(false);
+  const [bgStatus, setBgStatus] = useState('');
 
   // Additional images (gallery)
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
@@ -91,17 +92,55 @@ export default function NewProductPage() {
     return null;
   };
 
-  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCoverChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setCoverFile(file);
+    if (!file) return;
+    // Comprimir en el navegador: foto de celular pesada -> JPG liviano máx 1200px
+    setCoverUploading(true);
+    try {
+      const optimized = await compressImage(file);
+      setCoverFile(optimized);
       const reader = new FileReader();
       reader.onloadend = () => setCoverPreview(reader.result as string);
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(optimized);
+    } finally {
+      setCoverUploading(false);
     }
   };
 
-  const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Quita-fondos: IA 100% en el navegador (gratis). El modelo (~45 MB) se descarga
+  // solo la primera vez y queda en caché. Resultado: PNG transparente listo para vender.
+  const handleRemoveBackground = async () => {
+    if (!coverFile || removingBg) return;
+    setRemovingBg(true);
+    setBgStatus('Preparando...');
+    try {
+      const processed = await removeImageBackground(coverFile, (stage, pct) => {
+        setBgStatus(
+          stage === 'download'
+            ? pct == null || pct === 0
+              ? 'Descargando modelo (solo la 1ra vez)...'
+              : `Descargando modelo... ${pct}%`
+            : 'Quitando fondo...'
+        );
+      });
+      const newFile = new File([processed], 'producto-sin-fondo.png', { type: 'image/png' });
+      setCoverFile(newFile);
+      const reader = new FileReader();
+      reader.onloadend = () => setCoverPreview(reader.result as string);
+      reader.readAsDataURL(newFile);
+      toast.success('Fondo quitado', { description: 'La imagen quedó con fondo transparente.' });
+    } catch {
+      toast.error('No se pudo quitar el fondo', {
+        description: 'Revisa tu conexión (el modelo se descarga una sola vez) e inténtalo de nuevo.',
+      });
+    } finally {
+      setRemovingBg(false);
+      setBgStatus('');
+    }
+  };
+
+  const handleGalleryChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
     const newFiles = Array.from(files);
@@ -109,14 +148,20 @@ export default function NewProductPage() {
       setError('Máximo 8 imágenes adicionales');
       return;
     }
-    setGalleryFiles((prev) => [...prev, ...newFiles]);
-    newFiles.forEach((file) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setGalleryPreviews((prev) => [...prev, reader.result as string]);
-      };
-      reader.readAsDataURL(file);
-    });
+    setGalleryUploading(true);
+    try {
+      const optimized = await Promise.all(newFiles.map((f) => compressImage(f)));
+      setGalleryFiles((prev) => [...prev, ...optimized]);
+      optimized.forEach((file) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setGalleryPreviews((prev) => [...prev, reader.result as string]);
+        };
+        reader.readAsDataURL(file);
+      });
+    } finally {
+      setGalleryUploading(false);
+    }
   };
 
   const removeGalleryImage = (index: number) => {
@@ -198,7 +243,7 @@ export default function NewProductPage() {
           stock,
           isActive,
           featured,
-          rating,
+          rating: 0, // las calificaciones las ponen los clientes, no el dueño
         }),
       });
 
@@ -288,6 +333,29 @@ export default function NewProductPage() {
                     <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleCoverChange} />
                   </label>
                 )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-[11px] text-gray-400 leading-relaxed">
+                    Recomendado: <span className="font-medium text-gray-500">800×800 px (cuadrada) u 800×1000 px (vertical)</span>.
+                    La foto se optimiza sola para que pese poco y cargue rápido.
+                  </p>
+                  {coverFile && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleRemoveBackground}
+                      disabled={removingBg}
+                      className="mt-2 gap-1.5 text-xs"
+                    >
+                      {removingBg ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Sparkles className="w-3.5 h-3.5 text-violet-500" />
+                      )}
+                      {removingBg ? (bgStatus || 'Procesando...') : 'Quitar fondo (gratis)'}
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -349,20 +417,18 @@ export default function NewProductPage() {
                     <SelectValue placeholder="Seleccionar categoría" />
                   </SelectTrigger>
                   <SelectContent>
-                    {CATEGORIES.map((cat) => (
+                    {categories.map((cat) => (
                       <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                <p className="text-[11px] text-gray-400">
+                  Las primeras son las que creaste en <span className="font-medium">Categorías</span>.
+                </p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="color">Color / Variante</Label>
-                <div className="flex gap-2">
-                  <Input id="color" placeholder="Ej: Rojo, Azul..." value={color} onChange={(e) => setColor(e.target.value)} className="flex-1" />
-                  {color && (
-                    <div className="w-10 h-10 rounded-lg border border-gray-300 flex-shrink-0" style={{ backgroundColor: color.toLowerCase() }} />
-                  )}
-                </div>
+                <ColorPicker id="color" value={color} onChange={setColor} />
               </div>
             </div>
 
@@ -376,19 +442,6 @@ export default function NewProductPage() {
                 </span>
               </div>
               <p className="text-[11px] text-gray-400">-1 = sin límite, 0 = agotado, número positivo = unidades disponibles</p>
-            </div>
-
-            {/* Rating */}
-            <div className="space-y-2">
-              <Label>Calificación</Label>
-              <div className="flex items-center gap-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button key={star} type="button" onClick={() => setRating(star === rating ? 0 : star)} className="focus:outline-none">
-                    <Star className={`w-6 h-6 transition-colors ${star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 hover:text-yellow-300'}`} />
-                  </button>
-                ))}
-                {rating > 0 && <span className="text-sm text-gray-500 ml-2">{rating}.0</span>}
-              </div>
             </div>
 
             {/* Toggles */}

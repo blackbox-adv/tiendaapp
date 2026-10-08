@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge'
 import { PaymentMethods } from './PaymentMethods'
 import { ShippingOptions } from './ShippingOptions'
 import { useAppStore } from '@/lib/store'
+import { ProductColor } from './ProductColor'
 import type { Store, Product } from '@/lib/types'
 
 function hexToRgb(hex: string) {
@@ -381,7 +382,7 @@ export function VibranteTemplate({ store, products, storeSlug, planId, onProduct
                       {product.name}
                     </h3>
                     {product.color && (
-                      <span className="text-[11px] text-gray-400 font-medium">{product.color}</span>
+                      <ProductColor color={product.color} size={12} labelClassName="text-[11px] text-gray-400 font-medium" />
                     )}
                     {product.rating > 0 && (
                       <div className="flex items-center gap-1 mt-1.5">

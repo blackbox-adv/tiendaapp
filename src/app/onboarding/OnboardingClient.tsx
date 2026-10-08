@@ -45,6 +45,7 @@ import {
 } from 'lucide-react';
 import { RUBROS, getRubro } from '@/lib/rubros';
 import { createDemoProducts } from '@/lib/demo-products';
+import { toast } from 'sonner';
 
 const templates = [
   {
@@ -517,7 +518,10 @@ export default function OnboardingPage() {
                 const Icon = tmpl.icon;
                 const planInfo = planLabels[tmpl.plan];
                 const isSelected = selectedTemplate === tmpl.id;
-                const isRestricted = tmpl.plan !== 'free' && currentUser?.planId === 'free';
+                // Restringida si la plantilla no es gratis y el usuario NO es Premium.
+                // (robusto: si currentUser aún no cargó o su planId viene vacío, tratamos
+                //  las premium como restringidas para que nunca se elijan por error)
+                const isRestricted = tmpl.plan !== 'free' && currentUser?.planId !== 'premium';
 
                 return (
                   <Card
@@ -528,23 +532,31 @@ export default function OnboardingPage() {
                         : 'border-0 shadow-sm'
                     }`}
                     onClick={() => {
-                      if (!isRestricted) {
-                        setSelectedTemplate(tmpl.id);
+                      if (isRestricted) {
+                        toast.error(`${tmpl.name} es una plantilla Premium`, {
+                          description: 'Puedes actualizar tu plan en "Mi Plan" cuando quieras. Por ahora elige una de las 3 plantillas gratis.',
+                          action: { label: 'Ver planes', onClick: () => router.push('/dashboard/plan') },
+                        });
+                        return;
                       }
+                      setSelectedTemplate(tmpl.id);
                     }}
                   >
                     <div className={`h-32 bg-gradient-to-br ${tmpl.color} relative rounded-t-lg`}>
                       <div className="absolute inset-0 flex items-center justify-center">
                         <Icon className="w-12 h-12 text-white/60" />
                       </div>
+                      {isRestricted && (
+                        <div className="absolute inset-0 bg-black/30 rounded-t-lg" />
+                      )}
                       {isSelected && (
                         <div className="absolute top-2 right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center">
                           <Check className="w-4 h-4 text-violet-600" />
                         </div>
                       )}
                       {isRestricted && (
-                        <div className="absolute top-2 left-2">
-                          <Lock className="w-4 h-4 text-white/80" />
+                        <div className="absolute top-2 left-2 bg-white/90 rounded-full p-1">
+                          <Lock className="w-3.5 h-3.5 text-gray-700" />
                         </div>
                       )}
                     </div>
@@ -879,45 +891,48 @@ export default function OnboardingPage() {
           </div>
         )}
 
-        {/* Navigation Buttons */}
-        <div className="flex justify-between mt-8 max-w-lg mx-auto">
-          <Button
-            variant="outline"
-            onClick={() => setStep(step - 1)}
-            disabled={step === 1}
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Anterior
-          </Button>
+        {/* Navigation Buttons — barra FIJA abajo: siempre visible aunque haya que
+            hacer scroll por muchas plantillas (antes el botón quedaba fuera de pantalla) */}
+        <div className="sticky bottom-0 -mx-4 px-4 py-3 mt-8 bg-white/95 backdrop-blur border-t border-gray-100">
+          <div className="flex justify-between max-w-lg mx-auto">
+            <Button
+              variant="outline"
+              onClick={() => setStep(step - 1)}
+              disabled={step === 1}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Anterior
+            </Button>
 
-          {step < 4 ? (
-            <Button
-              className="bg-violet-600 hover:bg-violet-700 text-white"
-              onClick={() => setStep(step + 1)}
-              disabled={!canProceed()}
-            >
-              Siguiente
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-          ) : (
-            <Button
-              className="bg-violet-600 hover:bg-violet-700 text-white"
-              onClick={handleCreateStore}
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Creando tienda...
-                </>
-              ) : (
-                <>
-                  <Check className="w-4 h-4 mr-2" />
-                  Crear tienda
-                </>
-              )}
-            </Button>
-          )}
+            {step < 4 ? (
+              <Button
+                className="bg-violet-600 hover:bg-violet-700 text-white"
+                onClick={() => setStep(step + 1)}
+                disabled={!canProceed()}
+              >
+                Siguiente
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            ) : (
+              <Button
+                className="bg-violet-600 hover:bg-violet-700 text-white"
+                onClick={handleCreateStore}
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Creando tienda...
+                  </>
+                ) : (
+                  <>
+                    <Check className="w-4 h-4 mr-2" />
+                    Crear tienda
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -12,6 +12,7 @@ import { CombosSection } from './CombosSection'
 import { PaymentMethods } from './PaymentMethods'
 import { ShippingOptions } from './ShippingOptions'
 import { useAppStore } from '@/lib/store'
+import { ProductColor } from './ProductColor'
 import type { Store, Product } from '@/lib/types'
 
 interface MinimalistTemplateProps {
@@ -333,7 +334,7 @@ export function MinimalistTemplate({ store, products, storeSlug, planId, onProdu
                         {product.name}
                       </h3>
                       {product.color && (
-                        <span className="text-[11px] text-gray-400 font-medium">{product.color}</span>
+                        <ProductColor color={product.color} size={12} labelClassName="text-[11px] text-gray-400 font-medium" />
                       )}
                       {renderStars(product.rating)}
                       <div className="flex items-center gap-2 mt-1.5">
