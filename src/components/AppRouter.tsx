@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAppStore } from '@/lib/store'
@@ -9,7 +9,7 @@ import type { PageRoute } from '@/lib/types'
 // Landing
 import { Navbar } from '@/components/landing/Navbar'
 import { Hero } from '@/components/landing/Hero'
-import { HeroClassic } from '@/components/landing/HeroClassic'
+// HeroClassic (variante B del test cerrado) se carga perezosamente si se reactiva el test
 import { Problem } from '@/components/landing/Problem'
 import { HowItWorks } from '@/components/landing/HowItWorks'
 import { Features } from '@/components/landing/Features'
@@ -20,7 +20,7 @@ import { Pricing } from '@/components/landing/Pricing'
 import { Testimonials } from '@/components/landing/Testimonials'
 import { FAQ } from '@/components/landing/FAQ'
 import { Footer } from '@/components/landing/Footer'
-import { getAbVariant, logAbEvent, type AbVariant } from '@/lib/ab-test'
+import { getAbVariant, logAbEvent } from '@/lib/ab-test'
 
 // Auth
 import { LoginPage } from '@/components/auth/LoginPage'
@@ -47,23 +47,20 @@ const pageVariants = {
   transition: { duration: 0.3, ease: "easeInOut" as const },
 }
 
-// Landing con test A/B: el hero que ve cada visitante se decide 50/50
-// (persistente) y los resultados se miden en /api/ab/stats.
+// Landing con test A/B CERRADO (variante A = terracota, 100% de visitantes).
+// El contenido se renderiza DIRECTO en SSR: antes se esperaba a un useEffect
+// para elegir variante y la homepage salía vacía en el HTML (0 headings) —
+// Google indexaba el texto solo tras ejecutar JS. El tracking sigue activo.
 function LandingView() {
-  const [variant, setVariant] = useState<AbVariant | null>(null)
-
   useEffect(() => {
-    const v = getAbVariant()
-    setVariant(v)
-    logAbEvent('view', v)
+    getAbVariant() // normaliza cookie/localStorage de visitantes antiguos
+    logAbEvent('view', 'A')
   }, [])
-
-  if (variant === null) return null
 
   return (
     <motion.div key="landing" variants={pageVariants} initial="initial" animate="animate" exit="exit" className="min-h-screen">
       <Navbar />
-      {variant === 'B' ? <HeroClassic /> : <Hero />}
+      <Hero />
       <Problem />
       <HowItWorks />
       <Templates />
