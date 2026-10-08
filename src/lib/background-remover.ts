@@ -117,9 +117,10 @@ export async function removeImageBackground(
   const image = await mod.RawImage.fromBlob(pngBlob)
 
   // 3. Inferencia -> máscara al tamaño original.
+  //    (transformers.js >= 3.7: fromTensor exige [C,H,W]; output[0] es [1,H,W])
   const { pixel_values } = await processor(image)
   const { output } = await model({ input: pixel_values })
-  const mask = await mod.RawImage.fromTensor(output[0][0].mul(255).to('uint8')).resize(
+  const mask = await mod.RawImage.fromTensor(output[0].mul(255).to('uint8')).resize(
     image.width,
     image.height
   )
