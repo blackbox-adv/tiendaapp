@@ -95,7 +95,12 @@ export default function EditProductPage() {
           setDescription(product.description || '');
           setPrice(typeof product.price === 'object' ? String(product.price) : String(product.price || ''));
           setOriginalPrice(product.originalPrice ? String(product.originalPrice) : '');
-          setCategory(product.categoryId || '');
+          // La categoría puede llegar de 2 formas: producto crudo de la API (campo
+          // `category`) o del store de Zustand (mapeado como `categoryId`). Leer
+          // ambas: antes solo se leía `categoryId`, que NO existe en la respuesta
+          // de la API -> la categoría cargaba vacía y el guardado la borraba.
+          const apiProduct = product as unknown as { category?: string };
+          setCategory(apiProduct.category || product.categoryId || '');
           setColor(product.color || '');
           setFeatured(product.featured || false);
           setRating(product.rating || 0);
