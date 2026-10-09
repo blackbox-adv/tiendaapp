@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { authenticateRequest } from '@/lib/auth'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
+import { APP_URL } from '@/lib/env'
 
 // POST /api/admin/test-email - Envía un correo de prueba y devuelve el motivo
 // EXACTO si Resend lo rechaza (super_admin only).
@@ -76,9 +77,7 @@ export async function POST(request: NextRequest) {
       html: `
         <div style="max-width:480px;margin:0 auto;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
           <div style="text-align:center;padding:32px 0 16px;">
-            <div style="display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;background:#7C3AED;border-radius:12px;">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-            </div>
+            <img src="${APP_URL}/logo-email.png" width="48" height="48" alt="Kyllari" style="border-radius:12px;" />
             <h1 style="margin:16px 0 8px;font-size:20px;font-weight:700;color:#1f2937;">Kyllari</h1>
           </div>
           <div style="background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:32px;">

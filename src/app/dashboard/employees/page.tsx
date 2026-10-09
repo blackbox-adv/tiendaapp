@@ -43,7 +43,7 @@ export default function EmployeesPage() {
       const res = await fetch('/api/store-members', { headers: getAuthHeaders() })
       const data = await res.json().catch(() => ({}))
       if (res.status === 403) {
-        setBlocked(data?.error || 'Los empleados estan disponibles en el plan Premium.')
+        setBlocked(data?.error || 'El Equipo está disponible en el plan Premium.')
         return
       }
       if (res.ok) {
@@ -74,10 +74,10 @@ export default function EmployeesPage() {
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
-        toast.error(data?.error || 'No se pudo crear el empleado')
+        toast.error(data?.error || 'No se pudo crear el colaborador')
         return
       }
-      toast.success('Empleado creado', { description: `${form.name} ya puede iniciar sesión con su email y contraseña.` })
+      toast.success('Colaborador creado', { description: `${form.name} ya puede iniciar sesión con su email y contraseña.` })
       setCreating(false)
       setForm({ name: '', email: '', password: '', whatsapp: '' })
       await load()
@@ -93,7 +93,7 @@ export default function EmployeesPage() {
       body: JSON.stringify({ isActive: active }),
     })
     if (res.ok) {
-      toast.success(active ? 'Empleado reactivado' : 'Empleado desactivado')
+      toast.success(active ? 'Colaborador reactivado' : 'Colaborador desactivado')
       await load()
     } else {
       const data = await res.json().catch(() => ({}))
@@ -130,7 +130,7 @@ export default function EmployeesPage() {
         <div>
           <h1 className="text-2xl font-bold text-stone-900 flex items-center gap-2">
             <Users className="w-6 h-6 text-violet-600" />
-            Empleados
+            Equipo
             <span className="text-xs bg-violet-100 text-violet-700 font-semibold rounded-full px-2 py-0.5">Premium</span>
           </h1>
           <p className="text-stone-500 text-sm mt-1 max-w-2xl">
@@ -141,7 +141,7 @@ export default function EmployeesPage() {
         {!blocked && (
           <Button onClick={() => setCreating(true)} disabled={activeCount >= max} className="shrink-0">
             <UserPlus className="w-4 h-4 mr-2" />
-            Agregar empleado
+            Agregar colaborador
           </Button>
         )}
       </div>
@@ -163,7 +163,7 @@ export default function EmployeesPage() {
           <div className="w-14 h-14 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <UserPlus className="w-7 h-7 text-stone-500" />
           </div>
-          <p className="font-medium text-stone-800">Aún no tienes empleados</p>
+          <p className="font-medium text-stone-800">Aún no tienes colaboradores</p>
           <p className="text-sm text-stone-500 mt-1 max-w-md mx-auto">
             Crea cuentas para tus vendedoras: entran a {typeof window !== 'undefined' ? window.location.origin : ''}/auth/login con su email y verán solo los pedidos y los chats.
           </p>
@@ -185,7 +185,7 @@ export default function EmployeesPage() {
               <button
                 onClick={() => { setEditing(m); setEditWhatsapp(m.whatsappNumber || '') }}
                 className="text-xs text-stone-600 hover:text-violet-600 flex items-center gap-1 transition-colors"
-                title="Editar WhatsApp del empleado"
+                title="Editar WhatsApp del colaborador"
               >
                 <Phone className="w-3.5 h-3.5" />
                 {m.whatsappNumber ? `+${m.whatsappNumber}` : 'Sin WhatsApp'}
@@ -209,7 +209,7 @@ export default function EmployeesPage() {
       <Dialog open={creating} onOpenChange={setCreating}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Nuevo empleado</DialogTitle>
+            <DialogTitle>Nuevo colaborador</DialogTitle>
             <DialogDescription>
               Podrá ver los pedidos y responder los chats de tu tienda. No puede editar productos ni configuraciones.
             </DialogDescription>
@@ -234,7 +234,7 @@ export default function EmployeesPage() {
             <div className="flex gap-2 pt-1">
               <Button variant="outline" onClick={() => setCreating(false)} className="flex-1">Cancelar</Button>
               <Button onClick={create} disabled={saving || !form.name.trim() || !form.email.trim() || form.password.length < 6} className="flex-1">
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Crear empleado'}
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Crear colaborador'}
               </Button>
             </div>
           </div>

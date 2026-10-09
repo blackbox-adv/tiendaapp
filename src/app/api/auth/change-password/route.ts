@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import { db } from '@/lib/db';
 import { authenticateRequest } from '@/lib/auth';
 import { apiError } from '@/lib/api-response';
+import { sendPasswordChangedEmail } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   try {
@@ -51,6 +52,9 @@ export async function POST(request: NextRequest) {
       where: { id: user.id },
       data: { password: hashedPassword, tokenVersion: { increment: 1 } },
     });
+
+    // Confirmar por correo el cambio de clave (no bloquea)
+    sendPasswordChangedEmail(user.name, user.email).catch(() => {});
 
     return NextResponse.json({ message: 'Contraseña actualizada correctamente' });
   } catch (error) {
