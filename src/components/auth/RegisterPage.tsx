@@ -8,6 +8,7 @@ import { Zap, Mail, Lock, User, ArrowRight, Info, Check } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/components/ui/password-input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
 
@@ -134,13 +135,12 @@ export function RegisterPage() {
                 <Label htmlFor="reg-password">Contraseña</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <Input
+                  <PasswordInput
                     id="reg-password"
-                    type="password"
                     placeholder="Mínimo 8 caracteres"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10"
+                    hasLeftIcon
                     required
                   />
                 </div>
@@ -160,13 +160,12 @@ export function RegisterPage() {
                 <Label htmlFor="confirm-password">Confirmar contraseña</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <Input
+                  <PasswordInput
                     id="confirm-password"
-                    type="password"
                     placeholder="Repite tu contraseña"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="pl-10"
+                    hasLeftIcon
                     required
                   />
                 </div>

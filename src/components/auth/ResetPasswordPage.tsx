@@ -7,6 +7,7 @@ import { Zap, Mail, Lock, ArrowLeft, ArrowRight, Info, CheckCircle } from 'lucid
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/components/ui/password-input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
 
@@ -228,13 +229,12 @@ export function ResetPasswordPage() {
                   <Label htmlFor="new-password">Nueva contraseña</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input
+                    <PasswordInput
                       id="new-password"
-                      type="password"
                       placeholder="Mínimo 8 caracteres"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="pl-10"
+                      hasLeftIcon
                       required
                     />
                   </div>
@@ -243,13 +243,12 @@ export function ResetPasswordPage() {
                   <Label htmlFor="confirm-password">Confirmar contraseña</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input
+                    <PasswordInput
                       id="confirm-password"
-                      type="password"
                       placeholder="Repite tu contraseña"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="pl-10"
+                      hasLeftIcon
                       required
                     />
                   </div>

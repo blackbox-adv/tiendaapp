@@ -456,7 +456,6 @@ export default function TemplatePage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {orderedTemplates.map((tmpl) => {
-          const Icon = tmpl.icon;
           const planInfo = planLabels[tmpl.plan];
           const isCurrent = store.template === tmpl.id;
           const isRestricted = !canUseTemplate(tmpl.plan);
@@ -468,10 +467,15 @@ export default function TemplatePage() {
                 isCurrent ? 'ring-2 ring-violet-600' : ''
               }`}
             >
-              <div className={`h-32 bg-gradient-to-br ${tmpl.color} relative rounded-t-lg`}>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Icon className="w-12 h-12 text-white/60" />
-                </div>
+              <div className={`h-40 bg-gradient-to-br ${tmpl.color} relative rounded-t-lg overflow-hidden`}>
+                {/* Captura real del diseño (el degradado queda de respaldo si la imagen falla) */}
+                <img
+                  src={`/templates/${tmpl.id}-preview.png`}
+                  alt={`Vista previa plantilla ${tmpl.name}`}
+                  className="absolute inset-0 w-full h-full object-cover object-top"
+                  loading="lazy"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                />
                 {isCurrent && (
                   <Badge className="absolute top-2 right-2 bg-white text-violet-700">
                     <Check className="w-3 h-3 mr-1" />
