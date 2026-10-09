@@ -35,6 +35,7 @@ import { useCart } from '@/lib/cart-context'
 import { CartButton } from './CartButton'
 import { SizeGuideDiagram } from './SizeGuideDiagram'
 import { SIZE_GUIDE_COLUMNS } from '@/lib/size-guide'
+import { parseProductSpecs } from '@/lib/product-specs'
 import type { Product, Store, SizeGuide } from '@/lib/types'
 
 export function ProductDetailView({ slug, productId, onDemoBack }: { slug: string; productId: string; onDemoBack?: () => void }) {
@@ -607,15 +608,49 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
               )}
             </div>
 
-            {/* Description */}
-            <div className="mt-6">
-              <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">
-                Descripcion del producto
-              </h2>
-              <div className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
-                {product.description || 'Este producto no tiene una descripcion detallada todavia. Contacta al vendedor por WhatsApp para mas informacion.'}
-              </div>
-            </div>
+            {/* Description + Especificaciones (ficha tecnica automatica) */}
+            {(() => {
+              const { intro, specs } = parseProductSpecs(product.description)
+              if (specs.length === 0) {
+                return (
+                  <div className="mt-6">
+                    <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">
+                      Descripcion del producto
+                    </h2>
+                    <div className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
+                      {product.description || 'Este producto no tiene una descripcion detallada todavia. Contacta al vendedor por WhatsApp para mas informacion.'}
+                    </div>
+                  </div>
+                )
+              }
+              return (
+                <div className="mt-6 space-y-5">
+                  {intro && (
+                    <div>
+                      <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">
+                        Descripcion
+                      </h2>
+                      <div className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">{intro}</div>
+                    </div>
+                  )}
+                  <div>
+                    <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">
+                      Especificaciones
+                    </h2>
+                    <ul className="rounded-xl border border-gray-100 bg-gray-50/60 divide-y divide-gray-100 overflow-hidden">
+                      {specs.map((s, i) => (
+                        <li key={`${s.label}-${i}`} className="flex items-start gap-2.5 px-3.5 py-2.5 text-sm">
+                          <Check className="w-4 h-4 mt-0.5 shrink-0" style={{ color: store.colors.primary }} />
+                          <span className="text-gray-500 leading-snug">
+                            <span className="font-semibold text-gray-800">{s.label}:</span> {s.value}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              )
+            })()}
 
             {/* Features / Benefits - conditional based on store settings */}
             {(() => {
