@@ -515,7 +515,6 @@ export default function OnboardingPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {templates.map((tmpl) => {
-                const Icon = tmpl.icon;
                 const planInfo = planLabels[tmpl.plan];
                 const isSelected = selectedTemplate === tmpl.id;
                 // Restringida si la plantilla no es gratis y el usuario NO es Premium.
@@ -542,10 +541,15 @@ export default function OnboardingPage() {
                       setSelectedTemplate(tmpl.id);
                     }}
                   >
-                    <div className={`h-32 bg-gradient-to-br ${tmpl.color} relative rounded-t-lg`}>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <Icon className="w-12 h-12 text-white/60" />
-                      </div>
+                    <div className={`h-40 bg-gradient-to-br ${tmpl.color} relative rounded-t-lg overflow-hidden`}>
+                      {/* Captura real del diseño (el degradado queda de respaldo si la imagen falla) */}
+                      <img
+                        src={`/templates/${tmpl.id}-preview.png`}
+                        alt={`Vista previa plantilla ${tmpl.name}`}
+                        className="absolute inset-0 w-full h-full object-cover object-top"
+                        loading="lazy"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                      />
                       {isRestricted && (
                         <div className="absolute inset-0 bg-black/30 rounded-t-lg" />
                       )}

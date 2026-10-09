@@ -5,6 +5,7 @@ import { useAppStore } from '@/lib/store'
 import { Search, Users, Shield, User, ToggleLeft, ToggleRight, KeyRound, Trash2, Pencil, Crown, Zap, Gift, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/components/ui/password-input'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -470,8 +471,7 @@ export function AdminUsers() {
               <div className="space-y-4 py-2">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Nueva contraseña</label>
-                  <Input
-                    type="password"
+                  <PasswordInput
                     placeholder="Minimo 8 caracteres"
                     value={newPassword}
                     onChange={(e) => { setNewPassword(e.target.value); setPasswordError('') }}

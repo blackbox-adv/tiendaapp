@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -904,9 +905,8 @@ export default function SettingsClient() {
 
             <div className="space-y-2">
               <Label htmlFor="currentPassword">Contraseña actual</Label>
-              <Input
+              <PasswordInput
                 id="currentPassword"
-                type="password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 required
@@ -915,9 +915,8 @@ export default function SettingsClient() {
 
             <div className="space-y-2">
               <Label htmlFor="newPassword">Nueva contraseña</Label>
-              <Input
+              <PasswordInput
                 id="newPassword"
-                type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 required
@@ -926,9 +925,8 @@ export default function SettingsClient() {
 
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirmar nueva contraseña</Label>
-              <Input
+              <PasswordInput
                 id="confirmPassword"
-                type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
