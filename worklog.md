@@ -777,3 +777,22 @@ Work Log:
 
 Stage Summary:
 - Cobro manual Yape/Plin completo con notificaciones al admin y panel movil. SEO de la homepage reparado (SSR). Pendientes del dueno: buzon contacto@kyllari.com, QR de Plin (enviar captura para agregarlo al dialogo), decision sobre IA y redes sociales.
+
+---
+Task ID: 47
+Agent: Super Z (main)
+Task: Decisión del dueño sobre "especificaciones": implementar la opción SIN campo nuevo en BD (especificaciones dentro de la descripción -> ficha técnica automática)
+
+Work Log:
+- Respuesta al dueño: no hace falta campo nuevo; los vendedores escriben "Material: valor" una por línea en la descripción y la tienda lo muestra como ficha técnica.
+- Nuevo src/lib/product-specs.ts: parseProductSpecs() separa líneas "Etiqueta: valor" (regex con guardas: label 2-40 chars, value <=120, descarta URLs; requiere >=2 líneas para activarse — con 1 sola deja la descripción intacta y evita falsos positivos tipo "Importante: ...").
+- ProductDetailView.tsx: rama nueva — intro como "Descripcion" + bloque "Especificaciones" (UL redondeada, divisores, checks lucide con color primario de la tienda). Rama legacy intacta cuando no hay specs.
+- Formularios products/new + products/[id]: textarea descripción 3->5 filas + tip visible con ejemplo de formato.
+- tsc limpio (regenerado prisma client primero). Commit 4d76d1f, deploy success (deploy-wait.mjs RECREADO — se había perdido con el swap; ahora token desde remote origin, nunca se imprime).
+- QA: (1) unit tests del parser con bun — 6 casos PASS (specs multi-línea, 1 línea con ":" no activa, bullets "- ", null, texto normal); (2) regresión en producción real (demo/vibrante -> Lentes Retro renderiza rama legacy sin errores JS); (3) QA visual del branch nuevo con CSS real de producción (markup inyectado en página viva, estilos computados verificados: rounded 14px, borde gray-100, bg gray-50/60, divisores 1px via border-block-end — Tailwind v4 usa propiedades lógicas), screenshot download/qa-especificaciones.png. Los checks lucide no salen en el mock inyectado (artefacto del stroke SVG manual) pero en el componente real es <Check style={{color: store.colors.primary}} /> — patrón ya usado en la misma vista.
+- HALLAZGO DE ACCESO: Supabase ya NO es alcanzable desde el sandbox — db.*.supabase.co resuelve solo AAAA (sin IPv6 aquí) y el pooler aws-0-* rechaza ambos refs conocidos (bsshjfawtlcfshnmaawf del HANDOFF y pkppcravmaymeberzvfg de INSTRUCCIONES) con "tenant not found" en todas las regiones. Los scripts scripts/qa-specs-ficha.mjs (create/cleanup) quedan listos para cuando haya acceso; el QA de datos reales quedó sustituido por QA de CSS real.
+
+Stage Summary:
+- En producción 4d76d1f: especificaciones SIN campo nuevo en BD — el vendedor las escribe en la descripción y la ficha técnica se arma sola en el detalle del producto, con tip en el formulario.
+- deploy-wait.mjs restaurado en scripts/. QA visual: download/qa-especificaciones.png.
+- Pendiente para próximas tareas: recuperar acceso a BD (Vercel env pull o credenciales nuevas del dueño) para QA de datos y migraciones futuras.
