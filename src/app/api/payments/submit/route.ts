@@ -3,7 +3,7 @@ import { NextRequest } from 'next/server'
 import { authenticateRequest } from '@/lib/auth'
 import { validateBody, paymentSubmitSchema } from '@/lib/validations'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
-import { sendPaymentSubmittedEmail } from '@/lib/email'
+import { sendPaymentSubmittedEmail, sendAdminPaymentAlertEmail } from '@/lib/email'
 import { serializeDecimals, decimalToNumber } from '@/lib/utils'
 
 // POST /api/payments/submit — Submit manual payment (Yape/Transfer voucher)
@@ -153,10 +153,22 @@ export async function POST(request: NextRequest) {
     }
 
     // Send payment submitted confirmation email (non-blocking)
-    const user = await db.user.findUnique({ where: { id: auth.user.userId }, select: { name: true, email: true } })
+    const [user, store] = await Promise.all([
+      db.user.findUnique({ where: { id: auth.user.userId }, select: { name: true, email: true } }),
+      db.store.findUnique({ where: { id: targetStoreId }, select: { name: true } }),
+    ])
     if (user) {
       sendPaymentSubmittedEmail(user.name, user.email, plan.name, Number(plan.price), externalRef).catch(() => {})
     }
+
+    // Alertar al dueño por correo personal: hay un comprobante por aprobar (no bloquea)
+    sendAdminPaymentAlertEmail({
+      storeName: store?.name || 'Una tienda',
+      ownerName: user?.name || 'Cliente',
+      planName: plan.name,
+      amount: Number(plan.price),
+      reference: externalRef,
+    }).catch(() => {})
 
     return apiSuccess(serializeDecimals({
       success: true,

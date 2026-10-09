@@ -25,11 +25,7 @@ function passwordResetTemplate(name: string, resetUrl: string) {
     html: `
       <div style="max-width: 480px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
         <div style="text-align: center; padding: 32px 0 24px;">
-          <div style="display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; background: #7C3AED; border-radius: 12px;">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-            </svg>
-          </div>
+          <img src="${APP_URL}/logo-email.png" width="48" height="48" alt="Kyllari" style="border-radius: 12px;" />
           <h1 style="margin: 16px 0 8px; font-size: 20px; font-weight: 700; color: #1f2937;">Kyllari</h1>
         </div>
 
@@ -72,11 +68,7 @@ function welcomeTemplate(name: string, loginUrl: string) {
     html: `
       <div style="max-width: 480px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
         <div style="text-align: center; padding: 32px 0 24px;">
-          <div style="display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; background: #7C3AED; border-radius: 12px;">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-            </svg>
-          </div>
+          <img src="${APP_URL}/logo-email.png" width="48" height="48" alt="Kyllari" style="border-radius: 12px;" />
           <h1 style="margin: 16px 0 8px; font-size: 20px; font-weight: 700; color: #1f2937;">Kyllari</h1>
         </div>
 
@@ -183,11 +175,6 @@ function subscriptionTemplate(
       themeBg: '#ecfdf5',
       themeBorder: '#a7f3d0',
       themeColor: '#059669',
-      themeIcon: `
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="20 6 9 17 4 12"/>
-        </svg>
-      `,
       heading: '¡Tu suscripción está activa!',
       message: `Tu plan <strong>${planName}</strong> (S/${planPrice}/mes) está activo. Ya puedes disfrutar de todos los beneficios.`,
       extraHtml: `
@@ -210,13 +197,6 @@ function subscriptionTemplate(
       themeBg: '#fff7ed',
       themeBorder: '#fed7aa',
       themeColor: '#ea580c',
-      themeIcon: `
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="15" y1="9" x2="9" y2="15"/>
-          <line x1="9" y1="9" x2="15" y2="15"/>
-        </svg>
-      `,
       heading: 'Suscripción cancelada',
       message: `Tu plan <strong>${planName}</strong> ha sido cancelado. Tu cuenta vuelve al plan Gratuito.`,
       extraHtml: `
@@ -236,13 +216,6 @@ function subscriptionTemplate(
       themeBg: '#eff6ff',
       themeBorder: '#bfdbfe',
       themeColor: '#2563eb',
-      themeIcon: `
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="8" x2="12" y2="12"/>
-          <line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-      `,
       heading: 'Cambio de plan',
       message: `Tu cuenta ha cambiado al plan <strong>${planName}</strong>. Revisa los límites de tu nuevo plan.`,
       extraHtml: `
@@ -266,11 +239,7 @@ function subscriptionTemplate(
     html: `
       <div style="max-width: 480px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
         <div style="text-align: center; padding: 32px 0 24px;">
-          <div style="display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; background: #7C3AED; border-radius: 12px;">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-            </svg>
-          </div>
+          <img src="${APP_URL}/logo-email.png" width="48" height="48" alt="Kyllari" style="border-radius: 12px;" />
           <h1 style="margin: 16px 0 8px; font-size: 20px; font-weight: 700; color: #1f2937;">Kyllari</h1>
         </div>
 
@@ -280,7 +249,6 @@ function subscriptionTemplate(
           </h2>
 
           <div style="display: flex; align-items: center; gap: 10px; background: ${c.themeBg}; border: 1px solid ${c.themeBorder}; border-radius: 8px; padding: 14px 16px; margin: 0 0 20px;">
-            ${c.themeIcon}
             <span style="font-size: 15px; font-weight: 600; color: ${c.themeColor};">${c.heading}</span>
           </div>
 
@@ -358,11 +326,7 @@ export async function sendPaymentSubmittedEmail(
       html: `
         <div style="max-width: 480px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
           <div style="text-align: center; padding: 32px 0 24px;">
-            <div style="display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; background: #7C3AED; border-radius: 12px;">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-              </svg>
-            </div>
+            <img src="${APP_URL}/logo-email.png" width="48" height="48" alt="Kyllari" style="border-radius: 12px;" />
             <h1 style="margin: 16px 0 8px; font-size: 20px; font-weight: 700; color: #1f2937;">Kyllari</h1>
           </div>
 
@@ -372,10 +336,6 @@ export async function sendPaymentSubmittedEmail(
             </h2>
 
             <div style="display: flex; align-items: center; gap: 10px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 14px 16px; margin: 0 0 20px;">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                <polyline points="22 4 12 14.01 9 11.01"/>
-              </svg>
               <span style="font-size: 15px; font-weight: 600; color: #16a34a;">Comprobante recibido</span>
             </div>
 
@@ -433,11 +393,7 @@ export async function sendPaymentRejectedEmail(
       html: `
         <div style="max-width: 480px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
           <div style="text-align: center; padding: 32px 0 24px;">
-            <div style="display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; background: #7C3AED; border-radius: 12px;">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-              </svg>
-            </div>
+            <img src="${APP_URL}/logo-email.png" width="48" height="48" alt="Kyllari" style="border-radius: 12px;" />
             <h1 style="margin: 16px 0 8px; font-size: 20px; font-weight: 700; color: #1f2937;">Kyllari</h1>
           </div>
 
@@ -447,11 +403,6 @@ export async function sendPaymentRejectedEmail(
             </h2>
 
             <div style="display: flex; align-items: center; gap: 10px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 14px 16px; margin: 0 0 20px;">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="15" y1="9" x2="9" y2="15"/>
-                <line x1="9" y1="9" x2="15" y2="15"/>
-              </svg>
               <span style="font-size: 15px; font-weight: 600; color: #dc2626;">Pago no verificado</span>
             </div>
 
@@ -488,5 +439,103 @@ export async function sendPaymentRejectedEmail(
     console.log(`[EMAIL] Payment rejected email sent to ${userEmail}, id: ${data?.id}`)
   } catch (err) {
     console.error('[EMAIL] Payment rejected email failed (non-blocking):', err)
+  }
+}
+
+// ── Admin Payment Alert (aviso al dueño cuando llega un comprobante) ──
+const ADMIN_NOTIFY_EMAIL = process.env.ADMIN_EMAIL || 'kioanthony@gmail.com'
+
+export async function sendAdminPaymentAlertEmail(params: {
+  storeName: string
+  ownerName: string
+  planName: string
+  amount: number
+  reference?: string
+}): Promise<void> {
+  try {
+    const resend = getResend()
+
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: ADMIN_NOTIFY_EMAIL,
+      subject: `Nuevo pago por aprobar: ${params.storeName} (${params.planName})`,
+      html: `
+        <div style="max-width:480px;margin:0 auto;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+          <div style="text-align:center;padding:32px 0 16px;">
+            <img src="${APP_URL}/logo-email.png" width="48" height="48" alt="Kyllari" style="border-radius:12px;" />
+            <h1 style="margin:16px 0 8px;font-size:20px;font-weight:700;color:#1f2937;">Kyllari</h1>
+          </div>
+          <div style="background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:32px;">
+            <h2 style="margin:0 0 12px;font-size:18px;font-weight:600;color:#1f2937;">Hay un pago esperando tu aprobación</h2>
+            <p style="margin:0 0 20px;font-size:15px;color:#4b5563;line-height:1.6;">
+              Un cliente envió su comprobante. Apruébalo o recházalo desde tu panel de administración.
+            </p>
+            <div style="background:#f9fafb;border-radius:8px;padding:16px;margin:0 0 20px;">
+              <p style="margin:0 0 6px;font-size:14px;color:#374151;"><strong>Tienda:</strong> ${params.storeName}</p>
+              <p style="margin:0 0 6px;font-size:14px;color:#374151;"><strong>Cliente:</strong> ${params.ownerName}</p>
+              <p style="margin:0 0 6px;font-size:14px;color:#374151;"><strong>Plan:</strong> ${params.planName}</p>
+              <p style="margin:0 0 6px;font-size:14px;color:#374151;"><strong>Monto:</strong> S/${params.amount.toFixed(2)}</p>
+              ${params.reference ? `<p style="margin:0;font-size:14px;color:#374151;"><strong>Referencia:</strong> ${params.reference}</p>` : ''}
+            </div>
+            <div style="text-align:center;margin:24px 0 0;">
+              <a href="${APP_URL}/admin"
+                 style="display:inline-block;background:#7C3AED;color:#ffffff;text-decoration:none;padding:12px 32px;border-radius:8px;font-weight:600;font-size:15px;">
+                Abrir panel de administración
+              </a>
+            </div>
+          </div>
+          <div style="text-align:center;padding:24px 0;font-size:12px;color:#9ca3af;">Enviado por Kyllari · Crea tu tienda online en minutos</div>
+        </div>
+      `,
+    })
+
+    if (error) {
+      console.error('[EMAIL] Admin payment alert error:', error)
+      return
+    }
+    console.log(`[EMAIL] Admin payment alert sent for ${params.storeName}, id: ${data?.id}`)
+  } catch (err) {
+    console.error('[EMAIL] Admin payment alert failed (non-blocking):', err)
+  }
+}
+
+// ── Password Changed Confirmation ──
+export async function sendPasswordChangedEmail(name: string, email: string): Promise<void> {
+  try {
+    const resend = getResend()
+
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: email,
+      subject: 'Tu contraseña fue cambiada - Kyllari',
+      html: `
+        <div style="max-width:480px;margin:0 auto;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+          <div style="text-align:center;padding:32px 0 16px;">
+            <img src="${APP_URL}/logo-email.png" width="48" height="48" alt="Kyllari" style="border-radius:12px;" />
+            <h1 style="margin:16px 0 8px;font-size:20px;font-weight:700;color:#1f2937;">Kyllari</h1>
+          </div>
+          <div style="background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:32px;">
+            <h2 style="margin:0 0 12px;font-size:18px;font-weight:600;color:#1f2937;">Hola, ${name}</h2>
+            <p style="margin:0 0 16px;font-size:15px;color:#4b5563;line-height:1.6;">
+              Tu contraseña fue cambiada correctamente desde la configuración de tu cuenta. Ya puedes usar tu nueva contraseña para entrar.
+            </p>
+            <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:14px 16px;margin:0 0 20px;">
+              <p style="margin:0;font-size:14px;color:#ea580c;">
+                <strong>¿No fuiste tú?</strong> Alguien pudo entrar a tu cuenta. Cambia tu contraseña de nuevo desde la página de acceso y contáctanos de inmediato.
+              </p>
+            </div>
+          </div>
+          <div style="text-align:center;padding:24px 0;font-size:12px;color:#9ca3af;">Enviado por Kyllari · Crea tu tienda online en minutos</div>
+        </div>
+      `,
+    })
+
+    if (error) {
+      console.error('[EMAIL] Password changed email error:', error)
+      return
+    }
+    console.log(`[EMAIL] Password changed email sent to ${email}, id: ${data?.id}`)
+  } catch (err) {
+    console.error('[EMAIL] Password changed email failed (non-blocking):', err)
   }
 }

@@ -31,7 +31,7 @@ const ownerNavItems: NavItem[] = [
   { href: '/dashboard/categories', label: 'Categorías', icon: FolderOpen },
   { href: '/dashboard/template', label: 'Plantillas', icon: Palette },
   { href: '/dashboard/landing', label: 'Landing IA', icon: Sparkles },
-  { href: '/dashboard/employees', label: 'Empleados', icon: Users, premium: true },
+  { href: '/dashboard/employees', label: 'Equipo', icon: Users, premium: true },
   { href: '/dashboard/plan', label: 'Mi Plan', icon: CreditCard },
   { href: '/dashboard/settings', label: 'Configuración', icon: Settings },
 ]
@@ -139,7 +139,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
               <Icon className="w-5 h-5" />
               <span className="flex-1">{item.label}</span>
               {item.premium && (
-                <span className="text-[9px] font-bold bg-violet-500/30 text-violet-100 rounded-full px-1.5 py-0.5">PRO</span>
+                <span className="text-[9px] font-bold bg-violet-500/30 text-violet-100 rounded-full px-1.5 py-0.5">PREMIUM</span>
               )}
             </Link>
           )

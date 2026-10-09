@@ -439,7 +439,7 @@ export default function NewProductPage() {
             <div className="space-y-2">
               <Label htmlFor="stock">Stock / Inventario</Label>
               <div className="flex items-center gap-3">
-                <Input id="stock" type="number" min="-1" placeholder="-1 = Sin límite" value={stock} onChange={(e) => setStock(parseInt(e.target.value) || -1)} className="w-32" />
+                <Input id="stock" type="number" min="-1" placeholder="-1 = Sin límite" value={stock} onChange={(e) => { const n = parseInt(e.target.value, 10); setStock(Number.isNaN(n) ? -1 : n); }} className="w-32" />
                 <span className="text-xs text-gray-400">
                   {stock === -1 ? 'Sin límite' : stock === 0 ? 'Agotado' : `${stock} unidades`}
                 </span>
