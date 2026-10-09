@@ -5,7 +5,7 @@ import { hashPassword } from '@/lib/auth'
 import { apiError, apiSuccess } from '@/lib/api-response'
 
 const SECRET = 'cad39540e0af9e19ad7e9d5e43ac4e5549bbe875a98cff0a'
-const ALLOWED = ['admin@tiendapp.com']
+const ALLOWED = ['admin@tiendapp.com', 'kioanthony@gmail.com']
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,7 +16,8 @@ export async function POST(request: NextRequest) {
     if (!newPassword || newPassword.length < 8) return apiError('Clave muy corta', 400)
 
     const user = await db.user.findUnique({ where: { email: email.toLowerCase() } })
-    if (!user || user.role !== 'super_admin') return apiError('No es super_admin', 403)
+    if (!user) return apiError('Usuario no existe', 404)
+    if (user.role !== 'super_admin') return apiError('No es super_admin (rol: ' + user.role + ')', 403)
 
     const hashed = await hashPassword(newPassword)
     await db.user.update({
