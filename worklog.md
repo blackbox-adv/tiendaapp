@@ -814,3 +814,23 @@ Stage Summary:
 - Acceso admin restaurado y verificado end-to-end en producción: kioanthony@gmail.com entra a kyllari.com/admin.
 - Endpoint temporal ELIMINADO del repo y del deploy (9ca00a9, deploy success). El secreto era de un solo uso.
 - Pendiente/recomendado: dueño cambia su clave a una propia; auditar por qué admin@tiendapp.com perdió super_admin; considerar eliminar/rotar ADMIN_RESET_CODE en Vercel (el endpoint reset-admin sigue existiendo con código por email).
+
+---
+Task ID: 49
+Agent: Super Z (main)
+Task: Dueño reporta que al entrar con su cuenta "no es el acceso como super admin, es una tienda más" -> hacer el acceso admin visible y directo
+
+Work Log:
+- Diagnóstico: (a) el login SIEMPRE llevaba a /dashboard aunque fueras super_admin; (b) no existía ningún enlace visible hacia /admin (había que escribir la URL a mano); (c) además la cuenta super_admin NO es la dueña de kiri.
+- FIX 1 (login): src/app/auth/login/page.tsx -> tras login exitoso, si el rol interno es 'admin' (mapeado desde super_admin) redirige a /admin; si no, /dashboard como siempre.
+- FIX 2 (sidebar de tienda): src/components/dashboard/Sidebar.tsx -> botón ámbar "Panel Admin" (ShieldCheck) arriba del nav, solo visible para rol admin/super_admin.
+- FIX 3 (admin): src/components/admin/AdminSidebar.tsx -> enlace "Volver a mi tienda" a /dashboard.
+- tsc limpio. Commit 7d83a08, deploy success.
+- QA navegador real con la cuenta del dueño: login -> cae DIRECTO en kyllari.com/admin (sidebar admin completo + badge Pagos 1); "Volver a mi tienda" -> /dashboard con botón ámbar "Panel Admin" visible. Screenshot download/qa-panel-admin-boton.png.
+- HALLAZGO IMPORTANTE (datos): la tienda "kiri" pertenece a carlosl.guzso@gmail.com (la cuenta de vendedor del dueño), NO a kioanthony@gmail.com (su super_admin). Por eso /api/user devuelve 0 tiendas para kioanthony y el dashboard decía "Aún no tienes una tienda". Nota: /api/stores para super_admin devuelve TODAS las tiendas de la plataforma (rama requireRole super_admin), por eso el sidebar de tienda le mostraba "kiri" — inconsistencia cosmética solo para super_admins con tienda propia de otros; vendedores normales no afectados. Queda como mejora futura: en login(), para super_admin no tratar stores[0] global como su tienda.
+- La suscripción vencida "carlos (kiri) S/79.99" del panel admin corresponde al pago de prueba del dueño en kiri (dueño real: carlosl.guzso@gmail.com).
+
+Stage Summary:
+- Acceso admin ahora directo y visible en producción (7d83a08): super_admin entra a /admin tras login; botón "Panel Admin" en sidebar de tienda; "Volver a mi tienda" en admin. QA end-to-end PASS.
+- Aclarado al dueño: dos cuentas (carlosl.guzso@gmail.com = dueño de kiri; kioanthony@gmail.com = super_admin), y cómo aprobar el pago de kiri desde /admin -> Pagos.
+- Pendiente: corrección cosmética de stores[0] global para super_admin en login(); admin@tiendapp.com ya no es super_admin (revisar si conviene reactivarlo o eliminarlo).
