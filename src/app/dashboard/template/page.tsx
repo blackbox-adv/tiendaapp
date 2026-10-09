@@ -501,6 +501,13 @@ export default function TemplatePage() {
                   </Badge>
                 </div>
                 <p className="text-gray-500 text-sm mb-3">{tmpl.desc}</p>
+                {isRestricted && (
+                  <p className="text-[11px] text-violet-600 leading-snug -mt-2 mb-3">
+                    {tmpl.plan === 'pro'
+                      ? 'Con Pro: buscador de productos y hasta 50 productos.'
+                      : 'Con Premium: diseño exclusivo de tu rubro, buscador y productos ilimitados.'}
+                  </p>
+                )}
                 <div className="flex items-center gap-2">
                   <Link
                     href={`/demo/${tmpl.demoSlug}`}

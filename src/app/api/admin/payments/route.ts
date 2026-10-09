@@ -35,7 +35,39 @@ export async function GET(request: Request) {
       db.payment.count({ where }),
     ])
 
-    return apiSuccess(serializeDecimals({ payments, total, page, limit }), 200, request)
+    // Guard anti doble pago: plan activo actual de cada cliente + cuántos
+    // comprobantes pendientes tiene (para detectar pagos duplicados al aprobar)
+    const userIds = [...new Set(payments.map((p) => p.userId))]
+    const [activeSubs, pendingGrouped] = await Promise.all([
+      userIds.length > 0
+        ? db.subscription.findMany({
+            where: { userId: { in: userIds }, status: 'active' },
+            include: { plan: { select: { name: true } } },
+            orderBy: { createdAt: 'desc' },
+          })
+        : Promise.resolve([]),
+      userIds.length > 0
+        ? db.payment.groupBy({
+            by: ['userId'],
+            where: { userId: { in: userIds }, status: 'pending' },
+            _count: { _all: true },
+          })
+        : Promise.resolve([] as Array<{ userId: string; _count: { _all: number } }>),
+    ])
+    const activePlanByUser = new Map<string, string>()
+    for (const sub of activeSubs) {
+      if (!activePlanByUser.has(sub.userId)) activePlanByUser.set(sub.userId, sub.plan?.name || '—')
+    }
+    const pendingByUser = new Map<string, number>()
+    for (const row of pendingGrouped) pendingByUser.set(row.userId, row._count._all)
+
+    const enriched = payments.map((p) => ({
+      ...p,
+      currentUserPlan: activePlanByUser.get(p.userId) || null,
+      userPendingPayments: pendingByUser.get(p.userId) || 0,
+    }))
+
+    return apiSuccess(serializeDecimals({ payments: enriched, total, page, limit }), 200, request)
   } catch (error: unknown) {
     console.error('[ADMIN/PAYMENTS] GET error:', error instanceof Error ? error.message : 'Error al obtener pagos')
     return apiError('Error al obtener pagos', 500, undefined, request)

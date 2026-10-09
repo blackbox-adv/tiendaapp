@@ -22,6 +22,8 @@ interface PaymentRecord {
   createdAt: string
   user: { id: string; name: string; email: string; role: string } | null
   plan: { id: string; name: string; price: number; type: string } | null
+  currentUserPlan?: string | null
+  userPendingPayments?: number
 }
 
 export function AdminPaymentsPage() {
@@ -212,6 +214,16 @@ export function AdminPaymentsPage() {
                         {payment.user?.name || 'Usuario desconocido'}
                       </p>
                       <p className="text-xs text-gray-500 truncate">{payment.user?.email}</p>
+                      {payment.currentUserPlan && (
+                        <p className="text-[11px] text-gray-400 truncate mt-0.5">
+                          Plan actual: <span className="font-medium text-gray-600">{payment.currentUserPlan}</span>
+                        </p>
+                      )}
+                      {payment.status === 'pending' && payment.plan?.name && payment.currentUserPlan && payment.currentUserPlan !== payment.plan.name && (
+                        <p className="text-[11px] text-amber-600 font-medium mt-0.5">
+                          Cambio de plan: {payment.currentUserPlan} → {payment.plan.name}
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -245,6 +257,11 @@ export function AdminPaymentsPage() {
 
                   {/* Status & Actions */}
                   <div className="flex items-center gap-3 flex-shrink-0">
+                    {payment.status === 'pending' && (payment.userPendingPayments ?? 0) > 1 && (
+                      <Badge className="bg-red-100 text-red-700 border-0">
+                        Duplicado: {payment.userPendingPayments} comprobantes pendientes
+                      </Badge>
+                    )}
                     <Badge className={statusColors[payment.status] || 'bg-gray-100 text-gray-700'}>
                       {statusLabels[payment.status] || payment.status}
                     </Badge>

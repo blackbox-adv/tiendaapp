@@ -572,6 +572,13 @@ export default function OnboardingPage() {
                         </Badge>
                       </div>
                       <p className="text-gray-500 text-sm">{tmpl.desc}</p>
+                      {isRestricted && (
+                        <p className="text-[11px] text-violet-600 leading-snug mt-1">
+                          {tmpl.plan === 'pro'
+                            ? 'Con Pro: buscador de productos y hasta 50 productos.'
+                            : 'Con Premium: diseño exclusivo de tu rubro, buscador y productos ilimitados.'}
+                        </p>
+                      )}
                       <Link
                         href={`/demo/${tmpl.demoSlug}`}
                         target="_blank"
