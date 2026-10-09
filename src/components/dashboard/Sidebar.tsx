@@ -7,7 +7,7 @@ import { useAppStore } from '@/lib/store'
 import {
   LayoutDashboard, Package, Settings, Palette, CreditCard,
   LogOut, ExternalLink, Store, Menu, X, QrCode, Megaphone, FolderOpen, ShoppingCart, Sparkles,
-  MessageCircle, Users,
+  MessageCircle, Users, ShieldCheck,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -111,6 +111,17 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-1">
+        {/* Acceso directo al panel de administración (solo super_admin) */}
+        {(currentUser.role === 'admin' || currentUser.role === 'super_admin') && (
+          <Link
+            href="/admin"
+            onClick={onClose}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold mb-2 bg-amber-400/10 text-amber-300 border border-amber-400/20 hover:bg-amber-400/20 transition-all"
+          >
+            <ShieldCheck className="w-5 h-5" />
+            <span className="flex-1">Panel Admin</span>
+          </Link>
+        )}
         {navItems.map((item) => {
           const Icon = item.icon
           const active = isActive(item.href)
