@@ -175,10 +175,21 @@ export default function EditProductPage() {
       reader.onloadend = () => setCoverPreview(reader.result as string);
       reader.readAsDataURL(file);
       toast.success('Fondo quitado', { description: 'Guarda los cambios para aplicarla.' });
-    } catch {
-      toast.error('No se pudo quitar el fondo', {
-        description: 'Revisa tu conexión (el modelo se descarga una sola vez) e inténtalo de nuevo.',
-      });
+    } catch (err) {
+      // Mostrar la CAUSA real: conexión (descarga del modelo), navegador sin
+      // soporte WASM/canvas, o el detalle técnico si lo hay.
+      const raw = err instanceof Error ? err.message : '';
+      const m = raw.toLowerCase();
+      let description = 'Revisa tu conexión e inténtalo de nuevo.';
+      if (m.includes('fetch') || m.includes('network') || m.includes('load failed') || m.includes('importing a module') || m.includes('import')) {
+        description = 'No se pudo descargar el modelo de IA (~45 MB, se descarga una sola vez). Conéctate a WiFi y reintenta.';
+      } else if (m.includes('bitmap') || m.includes('canvas') || m.includes('wasm') || m.includes('webassembly') || m.includes('worker')) {
+        description = 'Tu navegador no es compatible con esta función. Ábrelo en Chrome actualizado.';
+      } else if (raw) {
+        description = raw;
+      }
+      toast.error('No se pudo quitar el fondo', { description, duration: 10000 });
+      console.error('[BG-REMOVE]', err);
     } finally {
       setRemovingBg(false);
       setBgStatus('');
