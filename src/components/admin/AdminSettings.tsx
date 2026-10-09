@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAppStore } from '@/lib/store'
-import { Settings, Save, Info } from 'lucide-react'
+import { Settings, Save, Info, Send, CheckCircle2, XCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -21,6 +21,13 @@ export function AdminSettings() {
   const [contactPhone, setContactPhone] = useState(platformSettings.contactPhone)
 
   const [saving, setSaving] = useState(false)
+
+  const [testEmail, setTestEmail] = useState('kioanthony@gmail.com')
+  const [sendingTest, setSendingTest] = useState(false)
+  const [testResult, setTestResult] = useState<
+    | { ok: boolean; message?: string; hint?: string; resendError?: { message: string } }
+    | null
+  >(null)
 
   // Fetch plans for the dropdown
   const [plans, setPlans] = useState<Array<{ id: string; name: string; price: number }>>([])
@@ -60,6 +67,34 @@ export function AdminSettings() {
       toast.error('Error de conexión', { description: 'No se pudo conectar al servidor.' })
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleTestEmail = async () => {
+    setSendingTest(true)
+    setTestResult(null)
+    try {
+      const token = localStorage.getItem('tiendapp_token')
+      const res = await fetch('/api/admin/test-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ to: testEmail }),
+      })
+      const data = await res.json().catch(() => null)
+      if (!data) {
+        setTestResult({ ok: false, hint: 'No se pudo conectar con el servidor.' })
+      } else if (data.error) {
+        setTestResult({ ok: false, hint: data.error })
+      } else {
+        setTestResult(data)
+      }
+    } catch {
+      setTestResult({ ok: false, hint: 'No se pudo conectar con el servidor.' })
+    } finally {
+      setSendingTest(false)
     }
   }
 
@@ -155,6 +190,69 @@ export function AdminSettings() {
               onCheckedChange={setRegistrationsEnabled}
             />
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Email test */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Correos (Resend)</CardTitle>
+          <CardDescription>
+            Comprueba que los correos automáticos (bienvenida al registrarse, pago recibido, cambio de clave) se están enviando de verdad.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>Enviar correo de prueba a</Label>
+            <div className="flex gap-2">
+              <Input
+                type="email"
+                value={testEmail}
+                onChange={(e) => setTestEmail(e.target.value)}
+                placeholder="tucorreo@gmail.com"
+              />
+              <Button
+                onClick={handleTestEmail}
+                disabled={sendingTest || !testEmail}
+                className="bg-violet-600 hover:bg-violet-700 text-white gap-2 whitespace-nowrap"
+              >
+                <Send className="w-4 h-4" />
+                {sendingTest ? 'Enviando...' : 'Probar'}
+              </Button>
+            </div>
+          </div>
+
+          {testResult && (
+            <div
+              className={`rounded-md border p-3 text-sm ${
+                testResult.ok
+                  ? 'border-green-200 bg-green-50 text-green-800'
+                  : 'border-red-200 bg-red-50 text-red-800'
+              }`}
+            >
+              <div className="flex gap-2">
+                {testResult.ok ? (
+                  <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                ) : (
+                  <XCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                )}
+                <div className="space-y-1">
+                  <p className="font-medium">
+                    {testResult.ok ? 'Correo enviado' : 'El correo NO se pudo enviar'}
+                  </p>
+                  {testResult.ok && testResult.message && <p>{testResult.message}</p>}
+                  {!testResult.ok && testResult.hint && <p>{testResult.hint}</p>}
+                  {!testResult.ok && testResult.resendError?.message && (
+                    <p className="text-xs opacity-70">Detalle técnico: {testResult.resendError.message}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          <p className="text-xs text-gray-400">
+            Si el envío falla, aquí verás el motivo exacto que devuelve Resend (clave inválida, dominio sin verificar, límite alcanzado, etc.).
+          </p>
         </CardContent>
       </Card>
 
