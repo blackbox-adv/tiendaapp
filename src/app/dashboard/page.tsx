@@ -26,6 +26,10 @@ import {
   AlertTriangle,
   FileSpreadsheet,
   Download,
+  QrCode,
+  MessageCircle,
+  Copy,
+  Check,
 } from 'lucide-react';
 
 interface StoreData {
@@ -36,6 +40,7 @@ interface StoreData {
   template: string;
   logo: string | null;
   category?: string;
+  colors?: { primary?: string; secondary?: string };
   _count?: {
     products: number;
     categories: number;
@@ -58,6 +63,7 @@ export default function DashboardPage() {
   const [error, setError] = useState('');
   const [exporting, setExporting] = useState(false);
   const [loadingDemo, setLoadingDemo] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
   const [analytics, setAnalytics] = useState<{
     products: { total: number; active: number; outOfStock: number };
     orders: { total: number; totalRevenue: number; byStatus: Record<string, number> };
@@ -198,6 +204,34 @@ export default function DashboardPage() {
     );
   }
 
+  const storeUrl = typeof window !== 'undefined'
+    ? `${window.location.origin}/store/${store.slug}`
+    : `https://kyllari.com/store/${store.slug}`;
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(storeUrl);
+    setCopiedLink(true);
+    toast.success('Enlace copiado', { description: 'Pégalo en WhatsApp, Instagram o donde quieras.' });
+    setTimeout(() => setCopiedLink(false), 2000);
+  };
+
+  const handleDownloadQR = async () => {
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(storeUrl)}&bgcolor=ffffff&color=${(store.colors?.primary || '#7C3AED').replace('#', '')}`;
+    try {
+      const response = await fetch(qrUrl);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `qr-${store.slug}.png`;
+      link.click();
+      URL.revokeObjectURL(url);
+      toast.success('QR descargado', { description: 'Imprímelo y compártelo con tus clientes.' });
+    } catch {
+      window.open(qrUrl, '_blank');
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -235,6 +269,51 @@ export default function DashboardPage() {
                 Ver tienda
               </Button>
             </Link>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Comparte tu tienda: enlace + WhatsApp + QR */}
+      <Card className="border border-dashed border-violet-300 bg-gradient-to-br from-violet-50/80 to-white">
+        <CardContent className="p-5">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+            <div className="flex-shrink-0 p-2.5 bg-white rounded-xl border border-gray-100 shadow-sm">
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(storeUrl)}`}
+                alt={`QR de ${store.name}`}
+                className="w-24 h-24"
+              />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-gray-900 text-sm flex items-center gap-2">
+                <QrCode className="w-4 h-4 text-violet-600" />
+                Comparte tu tienda
+              </p>
+              <p className="text-xs text-gray-500 mt-1 mb-3">
+                Envía este enlace o QR a tus clientes por WhatsApp, Instagram o Facebook. Cada visita queda registrada.
+              </p>
+              <p className="text-[11px] text-gray-400 truncate mb-3">{storeUrl}</p>
+              <div className="flex flex-wrap gap-2">
+                <Button size="sm" variant="outline" onClick={handleCopyLink} className="text-xs h-8 gap-1.5">
+                  {copiedLink ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}
+                  {copiedLink ? '¡Copiado!' : 'Copiar enlace'}
+                </Button>
+                <a
+                  href={`https://wa.me/?text=${encodeURIComponent(`Mira mi tienda online: ${storeUrl}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button size="sm" className="bg-[#25D366] hover:bg-[#1fb457] text-white text-xs h-8 gap-1.5">
+                    <MessageCircle className="w-3 h-3" />
+                    Compartir por WhatsApp
+                  </Button>
+                </a>
+                <Button size="sm" variant="outline" onClick={handleDownloadQR} className="text-xs h-8 gap-1.5">
+                  <Download className="w-3 h-3" />
+                  Descargar QR
+                </Button>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
