@@ -1,17 +1,24 @@
 /**
  * Quita-fondos 100% en el navegador (gratis, sin costo por foto, sin servidor).
  *
- * - Modelo: briaai/RMBG-1.4 (versión cuantizada q8, ~45 MB) vía transformers.js.
- * - La librería se importa dinámicamente desde CDN solo cuando el usuario pulsa
- *   "Quitar fondo": no añade un solo byte al bundle de la app.
- * - El modelo se descarga UNA sola vez y queda en caché del navegador.
+ * - Modelo: briaai/RMBG-1.4 (versión cuantizada q8, ~44 MB) vía transformers.js.
+ * - TODO se sirve desde el MISMO ORIGEN (kyllari.com): la librería en /js/transformers/
+ *   y el modelo en /models/. Así la CSP del sitio (script-src/connect-src 'self') lo
+ *   permite sin excepciones, y no dependemos de CDNs externos (jsdelivr/HuggingFace)
+ *   que pueden fallar o estar bloqueados en la red del comerciante.
+ * - La librería se importa dinámicamente solo cuando el usuario pulsa "Quitar fondo":
+ *   no añade un solo byte al bundle de la app.
+ * - El modelo se descarga UNA sola vez y queda en caché del navegador (Cache API de
+ *   transformers.js + HTTP cache immutable). El runtime WASM (~21 MB) usa HTTP cache.
  * - Todo corre en el dispositivo del vendedor: sus fotos no viajan a ningún servicio.
  */
 
 export type BgRemoveStage = 'download' | 'process'
 export type BgRemoveProgress = (stage: BgRemoveStage, pct?: number) => void
 
-const TRANSFORMERS_URL = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1'
+// Archivos servidos desde /public (mismo origen, ver public/js/transformers/ y public/models/).
+const TRANSFORMERS_URL = '/js/transformers/transformers.min.js'
+const ORT_WASM_PATH = '/js/transformers/'
 const MODEL_ID = 'briaai/RMBG-1.4'
 const MAX_SIDE = 1200 // lado máximo de la imagen resultante (peso de subida)
 
@@ -24,7 +31,11 @@ async function getEngine(onProgress?: BgRemoveProgress) {
       const mod = await import(
         /* webpackIgnore: true */ /* turbopackIgnore: true */ TRANSFORMERS_URL
       )
-      mod.env.allowLocalModels = false
+      // Modelo local (mismo origen): /models/briaai/RMBG-1.4/...
+      mod.env.allowLocalModels = true
+      mod.env.allowRemoteModels = false // sin fallback a HuggingFace: la CSP lo bloquearía
+      // Runtime WASM de onnxruntime-web también local (por defecto apuntaría a jsdelivr).
+      mod.env.backends.onnx.wasm.wasmPaths = ORT_WASM_PATH
 
       const model = await mod.AutoModel.from_pretrained(MODEL_ID, {
         config: { model_type: 'custom' },
@@ -93,7 +104,8 @@ function canvasToBlob(canvas: HTMLCanvasElement, type = 'image/png'): Promise<Bl
 
 /**
  * Quita el fondo de una imagen (Blob/File) y devuelve un PNG con fondo transparente.
- * onProgress: 'download' = descargando el modelo (primera vez), 'process' = inferencia.
+ * onProgress: 'download' = descargando el modelo (primera vez, ~65 MB en total),
+ * 'process' = inferencia.
  */
 export async function removeImageBackground(
   source: Blob,

@@ -285,7 +285,9 @@ export const config = {
     '/api/ab/event',
     '/api/ab/stats',
     '/api/store-announcement',
-    // Page routes (for security headers)
-    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)',
+    // Page routes (for security headers). Excluye activos estáticos grandes del
+    // quita-fondos (modelo ONNX + runtime WASM): no necesitan headers de seguridad
+    // y así evitamos invocar el middleware en cada descarga de ~65 MB.
+    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|models/|js/transformers/).*)',
   ],
 }

@@ -17,6 +17,22 @@ const nextConfig: NextConfig = {
     "*.space.z.ai",
     "*.space.chatglm.site",
   ],
+  async headers() {
+    return [
+      {
+        // Modelo del quita-fondos (44 MB): cacheable un día con revalidación ETag.
+        // transformers.js además lo cachea en Cache API, así que solo baja 1 vez.
+        source: "/models/:path*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=86400" }],
+      },
+      {
+        // Librería transformers.js + runtime WASM de onnxruntime: inmutables.
+        // Si algún día se actualiza la versión, renombrar la carpeta con versión.
+        source: "/js/transformers/:path*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {
