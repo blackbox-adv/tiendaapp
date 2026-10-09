@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { useAppStore } from '@/lib/store'
-import { LayoutDashboard, Store, Users, CreditCard, Settings, LogOut, Zap, Banknote, Menu, X, Bell } from 'lucide-react'
+import { LayoutDashboard, Store, Users, CreditCard, Settings, LogOut, Zap, Banknote, Menu, X, Bell, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import type { PageRoute } from '@/lib/types'
@@ -88,6 +89,18 @@ export function AdminSidebar() {
           )
         })}
       </nav>
+
+      {/* Back to store dashboard */}
+      <Separator className="bg-white/10" />
+      <div className="px-3 py-3">
+        <Link
+          href="/dashboard"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-violet-200 hover:text-white hover:bg-white/10 transition-all"
+        >
+          <ExternalLink className="w-4 h-4" />
+          <span>Volver a mi tienda</span>
+        </Link>
+      </div>
 
       {/* Logout */}
       <Separator className="bg-white/10" />

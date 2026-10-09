@@ -29,7 +29,9 @@ export default function LoginPage() {
       if (!success) {
         setError('Email o contraseña incorrectos');
       } else {
-        router.push('/dashboard');
+        // super_admin entra directo al panel de administración
+        const role = useAppStore.getState().currentUser?.role;
+        router.push(role === 'admin' ? '/admin' : '/dashboard');
         router.refresh();
       }
     } catch {
