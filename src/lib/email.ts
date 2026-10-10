@@ -16,12 +16,12 @@ function getResend(): Resend {
 }
 
 // Remitente configurable vía EMAIL_FROM (Vercel → Environment Variables).
-// Fallback = dominio actualmente verificado en Resend (no rompe nada).
-// Cuando kyllari.com esté verificado en Resend, definir:
-//   EMAIL_FROM = "Kyllari <hola@kyllari.com>"
-// así el dominio de envío coincide con el de links/imágenes (kyllari.com)
-// y desaparecen las advertencias de entregabilidad del panel de Resend.
-export const FROM_EMAIL = process.env.EMAIL_FROM?.trim() || 'Kyllari <noreply@blackboxperu.com>'
+// kyllari.com YA ESTÁ VERIFICADO en Resend (DKIM/SPF/MX OK) → el remitente
+// sale de kyllari.com: dominio de envío = dominio de links/imágenes
+// (alineación completa → mejor bandeja de entrada). Usamos hola@ en vez de
+// noreply@ (Resend penaliza remitentes no-responibles). Pendiente opcional:
+// registro DMARC en el DNS de kyllari.com (monitorización).
+export const FROM_EMAIL = process.env.EMAIL_FROM?.trim() || 'Kyllari <hola@kyllari.com>'
 
 // ── Envío con versión texto plano ──
 // Los filtros de spam (Gmail/Outlook) penalizan emails solo-HTML. Derivamos
