@@ -118,6 +118,9 @@ export async function generateMetadata({ params }: { params: Promise<{ template:
   return {
     title: `Demo: ${meta.name} | Kyllari`,
     description: meta.description,
+    // noindex: son demos internas de plantillas (contenido de demostración, no
+    // de negocio). Indexarlas diluiría el SEO del sitio con páginas thin.
+    robots: { index: false, follow: true },
     // Canonical propia: sin esto heredan canonical "/" del layout raíz y Google
     // trata las demos como duplicados de la home (no posicionan).
     alternates: { canonical: `/demo/${template}` },

@@ -8,7 +8,6 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { CookieConsent } from "@/components/CookieConsent";
 import { CartProvider } from "@/lib/cart-context";
 import { getPlatformContact } from "@/lib/platform-settings";
-import { PLAN_PRICES } from "@/lib/plans";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,18 +29,22 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
+  // SEO: "tienda online" es la keyword principal (mayor volumen), "catálogo digital"
+  // la secundaria (menor competencia). Foco Perú primero; LatAm queda como visión
+  // en /about, no como promesa del hero.
   title: {
-    default: "Kyllari | Crea tu catálogo online y vende por WhatsApp — Latinoamérica",
+    default: "Kyllari | Tienda online gratis y pedidos por WhatsApp — Perú",
     template: "%s | Kyllari",
   },
-  description: "Crea tu catálogo online en 5 minutos y recibe pedidos por WhatsApp. Tus métodos de pago locales (Yape, Plin, Mercado Pago y más), tus opciones de envío y plantillas por rubro. Gratis, sin tarjeta y sin comisión por venta.",
+  description: "Crea tu tienda online o catálogo digital en 5 minutos y recibe pedidos por WhatsApp. Cobra con Yape, Plin o como prefieras. Hecho en Perú: gratis, sin tarjeta y sin comisión por venta.",
   keywords: [
-    "tienda online gratis", "crear catálogo online", "vender por WhatsApp",
-    "catálogo digital WhatsApp", "tienda online para bodega", "carta digital para restaurante",
-    "catálogo virtual ropa", "Kyllari", "tienda virtual gratis",
-    "vender por internet", "emprendimiento", "catálogo para emprendedores", "mostrar mis productos online", "carta digital QR",
-    "tienda online Perú", "tienda online México", "vender por WhatsApp Colombia",
-    "catálogo digital Argentina", "tienda online Chile", "e-commerce Latinoamérica",
+    "tienda online gratis", "tienda online Perú", "crear tienda online",
+    "crear catálogo online", "catálogo digital Perú", "catálogo digital WhatsApp",
+    "vender por WhatsApp", "vender por WhatsApp Perú", "vender por internet Perú",
+    "catálogo virtual", "catálogo virtual ropa", "tienda virtual gratis",
+    "tienda online para bodega", "carta digital para restaurante", "carta digital QR",
+    "catálogo para emprendedores", "mostrar mis productos online",
+    "cómo vender mis productos por WhatsApp", "Kyllari",
   ],
   authors: [{ name: "Kyllari" }],
   creator: "Kyllari",
@@ -51,8 +54,8 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   openGraph: {
-    title: "Kyllari | Crea tu catálogo online y vende por WhatsApp",
-    description: "Tu tienda con pedidos por WhatsApp, los métodos de pago de tu país y tus opciones de envío. Lista en 5 minutos, gratis y sin comisión por venta.",
+    title: "Kyllari | Tienda online gratis y pedidos por WhatsApp",
+    description: "Tu tienda online o catálogo con pedidos por WhatsApp y Yape, Plin incluidos. Lista en 5 minutos, gratis y sin comisión por venta.",
     url: APP_URL,
     siteName: "Kyllari",
     images: [
@@ -60,7 +63,7 @@ export const metadata: Metadata = {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Kyllari - Crea tu tienda online en Latinoamérica",
+        alt: "Kyllari - Crea tu tienda online en Perú",
       },
     ],
     locale: "es_LA",
@@ -68,8 +71,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Kyllari | Crea tu catálogo online y vende por WhatsApp",
-    description: "Tu tienda con pedidos por WhatsApp y los métodos de pago de tu país. Gratis, sin comisión por venta.",
+    title: "Kyllari | Tienda online gratis y pedidos por WhatsApp",
+    description: "Tu tienda con pedidos por WhatsApp y Yape, Plin incluidos. Gratis, sin comisión por venta.",
     images: ["/og-image.png"],
   },
   robots: {
@@ -121,7 +124,7 @@ export default async function RootLayout({
                 name: 'Kyllari',
                 url: APP_URL,
                 logo: `${APP_URL}/logo.svg`,
-                description: 'La plataforma para crear tiendas online sin conocimientos técnicos en toda Latinoamérica. WhatsApp integrado, plantillas profesionales, tus métodos de pago locales y tus opciones de envío.',
+                description: 'Plataforma peruana para crear tiendas online y catálogos digitales sin conocimientos técnicos. Pedidos por WhatsApp, métodos de pago locales (Yape, Plin) y plantillas por rubro.',
                 email: contact.contactEmail,
                 telephone: contact.contactPhone,
                 address: {
@@ -147,73 +150,24 @@ export default async function RootLayout({
                 name: 'Kyllari',
                 applicationCategory: 'BusinessApplication',
                 operatingSystem: 'Web',
-                description: 'Crea tu catálogo online en 5 minutos y recibe pedidos por WhatsApp. Con los métodos de pago de tu país, tus opciones de envío y plantillas por rubro.',
+                description: 'Crea tu tienda online o catálogo digital en 5 minutos y recibe pedidos por WhatsApp. Cobra con Yape, Plin o como prefieras, con plantillas por rubro.',
                 offers: {
                   '@type': 'Offer',
                   price: '0',
                   priceCurrency: 'PEN',
                   description: 'Plan gratis para siempre. Plan Pro y Premium disponibles.',
                 },
-                aggregateRating: {
-                  '@type': 'AggregateRating',
-                  ratingValue: '4.8',
-                  ratingCount: '127',
-                },
+                // NOTA SEO: sin aggregateRating — las reseñas inventadas violan las
+                // políticas de datos estructurados de Google (riesgo de penalización
+                // manual). Se agrega solo cuando haya reseñas reales de usuarios.
               }),
             }}
           />
-          {/* FAQ JSON-LD for rich snippets */}
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify({
-                '@context': 'https://schema.org',
-                '@type': 'FAQPage',
-                mainEntity: [
-                  {
-                    '@type': 'Question',
-                    name: 'Cómo crear una tienda online gratis con Kyllari?',
-                    acceptedAnswer: {
-                      '@type': 'Answer',
-                      text: 'Regístrate gratis en Kyllari, completa el asistente de configuración, elige tu plantilla favorita y agrega tus productos. En menos de 5 minutos tu tienda estará lista para recibir pedidos vía WhatsApp.',
-                    },
-                  },
-                  {
-                    '@type': 'Question',
-                    name: 'Cuánto cuesta Kyllari?',
-                    acceptedAnswer: {
-                      '@type': 'Answer',
-                      text: `Kyllari tiene un plan gratuito con hasta 5 productos. El plan Pro cuesta S/${PLAN_PRICES.pro?.toFixed(2)}/mes con hasta 20 productos y buscador, y el plan Premium cuesta S/${PLAN_PRICES.premium?.toFixed(2)}/mes con hasta 100 productos, filtros avanzados y funciones premium.`,
-                    },
-                  },
-                  {
-                    '@type': 'Question',
-                    name: 'Necesito conocimientos técnicos para usar Kyllari?',
-                    acceptedAnswer: {
-                      '@type': 'Answer',
-                      text: 'No. Kyllari está diseñada para emprendedores sin conocimientos técnicos. Solo necesitas llenar formularios simples, elegir una plantilla y agregar tus productos. Todo se configura de forma visual e intuitiva.',
-                    },
-                  },
-                  {
-                    '@type': 'Question',
-                    name: 'Puedo integrar WhatsApp con mi tienda online?',
-                    acceptedAnswer: {
-                      '@type': 'Answer',
-                      text: 'Sí. Kyllari integra WhatsApp directamente en tu tienda. Tus clientes pueden contactarte y realizar pedidos con un solo clic desde cualquier producto de tu catálogo.',
-                    },
-                  },
-                  {
-                    '@type': 'Question',
-                    name: 'Qué métodos de pago acepta Kyllari?',
-                    acceptedAnswer: {
-                      '@type': 'Answer',
-                      text: 'Para pagar la suscripción de Kyllari puedes usar Yape, Plin, Mercado Pago, transferencia bancaria, tarjeta de crédito o débito. Además, en tu tienda puedes mostrar los métodos de pago que uses en tu país (Yape, Plin, Mercado Pago, Nequi, Sinpe Móvil y más) y tus opciones de envío.',
-                    },
-                  },
-                ],
-              }),
-            }}
-          />
+          {/* NOTA SEO: el FAQPage JSON-LD vive en src/components/landing/FAQ.tsx,
+              generado desde la MISMA lista de preguntas visibles (FAQ_ITEMS).
+              Estar aquí (layout global) lo inyectaba en TODAS las páginas,
+              incluyendo las de tiendas, donde esas preguntas no existen:
+              violación de las políticas de datos estructurados de Google. */}
           {/* Cookie Consent Banner */}
           <CookieConsent />
           {children}

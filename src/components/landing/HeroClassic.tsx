@@ -30,7 +30,7 @@ export function HeroClassic() {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 backdrop-blur-sm text-white/90 text-sm font-medium mb-8">
             <Sparkles className="w-4 h-4" />
-            Para emprendedores de toda Latinoamérica 🌎
+            Hecho en Perú para emprendedores 🇵🇪
           </div>
 
           {/* Heading */}

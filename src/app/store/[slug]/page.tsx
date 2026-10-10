@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { StorePublicClient } from './StorePublicClient'
 import { serializeDecimals } from '@/lib/utils'
+import { isDemoStore } from '@/lib/demo-stores'
 
 // force-dynamic: ISR (revalidate) + notFound() devuelve 200 en vez de 404 (soft-404, mal SEO).
 // Con dynamic, las tiendas inactivas/borradas dan 404 real, el catálogo siempre está fresco
@@ -59,6 +60,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return {
       title,
       description,
+      // Tiendas demo: noindex para que Google no las publique como resultados
+      // de la marca (canibalización SEO). Los visitantes siguen entrando igual.
+      ...(isDemoStore(slug) ? { robots: { index: false, follow: true } } : {}),
       openGraph: {
         title,
         description,

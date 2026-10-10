@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowRight, MessageCircle, Pizza, Shirt, Smartphone, Store } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
@@ -8,6 +9,9 @@ import { supportWhatsappUrl } from '@/lib/support'
 // Tiendas demo reales que existen en la plataforma (slugs de producción).
 // Al entrar, el visitante puede tocar el botón de WhatsApp y vivir el flujo
 // completo de pedido: así se demuestra el producto sin testimonios inventados.
+// ⚠️ SEO: toda tienda demo aquí listada DEBE estar también en
+// src/lib/demo-stores.ts (DEMO_STORE_SLUGS) para llevar noindex y quedar
+// fuera del sitemap (evita canibalizar la marca Kyllari en Google).
 const REAL_STORES = [
   {
     slug: 'pizzeria-napoli',
@@ -42,6 +46,20 @@ export function Testimonials() {
   const navigate = useAppStore((s) => s.navigate)
   const waHref = supportWhatsappUrl('Hola! Quiero saber si Kyllari funciona para mi negocio')
 
+  // Prueba social HONESTA: contador real de tiendas activas creadas por
+  // usuarios (sin contar las demos). Solo se muestra si es > 0 — nunca
+  // inflamos números. Cuando sean 5, 20, 100 tiendas, el badge aparece solo.
+  const [realStores, setRealStores] = useState<number | null>(null)
+  useEffect(() => {
+    fetch('/api/public/stats')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        const n = d?.data?.activeRealStores ?? d?.activeRealStores
+        if (typeof n === 'number') setRealStores(n)
+      })
+      .catch(() => {})
+  }, [])
+
   return (
     <section id="testimonials" className="py-20 sm:py-28 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -61,6 +79,12 @@ export function Testimonials() {
             Elige un producto, toca el botón verde y mira cómo llega el pedido por
             WhatsApp — así de fácil le compra la gente a tus clientes.
           </p>
+          {realStores !== null && realStores > 0 && (
+            <div className="inline-flex items-center gap-2 mt-5 px-4 py-2 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-semibold">
+              <Store className="w-4 h-4 text-emerald-600" />
+              Ya son {realStores} {realStores === 1 ? 'tienda' : 'tiendas'} vendiendo con Kyllari
+            </div>
+          )}
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
@@ -118,7 +142,7 @@ export function Testimonials() {
           <div className="relative">
             <div className="inline-flex items-center gap-2 bg-white/10 text-white text-sm font-medium px-4 py-1.5 rounded-full mb-5">
               <Store className="w-4 h-4 text-[#E29B77]" />
-              Hecho en Latinoamérica · Sin tarjeta · Sin comisión por venta
+              Hecho en Perú · Sin tarjeta · Sin comisión por venta
             </div>
             <h3 className="font-display text-2xl sm:text-3xl font-bold text-white mb-3">
               ¿Dudas que funcione para tu negocio?

@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { ProductPublicClient } from './ProductPublicClient'
 import { serializeDecimals } from '@/lib/utils'
+import { isDemoStore } from '@/lib/demo-stores'
 
 // force-dynamic: ISR (revalidate) + notFound() devuelve 200 en vez de 404 (soft-404, mal SEO).
 export const dynamic = 'force-dynamic'
@@ -54,6 +55,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return {
       title,
       description,
+      // Productos de tiendas demo: noindex (misma razón que la tienda).
+      ...(isDemoStore(slug) ? { robots: { index: false, follow: true } } : {}),
       openGraph: {
         title,
         description,
