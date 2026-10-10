@@ -1,6 +1,7 @@
 import { APP_URL } from '@/lib/env'
 import type { MetadataRoute } from 'next'
 import { db } from '@/lib/db'
+import { DEMO_STORE_SLUGS } from '@/lib/demo-stores'
 
 // Revalidar cada hora para que las tiendas nuevas/desactivadas
 // se reflejen en el sitemap sin necesitar un redeploy.
@@ -26,12 +27,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.9,
     },
-    {
-      url: `${baseUrl}/auth/login`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
+    // /auth/login fuera del sitemap: página utilitaria sin valor para buscadores.
     {
       url: `${baseUrl}/gamarra`,
       lastModified: new Date(),
@@ -68,7 +64,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let storePages: MetadataRoute.Sitemap = []
   try {
     const stores = await db.store.findMany({
-      where: { isActive: true },
+      // Las tiendas demo (pizzeria-napoli, boutique-elegance, techstore-peru) NO
+      // van al sitemap: canibalizan la marca Kyllari en Google. Llevan noindex
+      // vía generateMetadata (ver src/lib/demo-stores.ts).
+      where: { isActive: true, slug: { notIn: [...DEMO_STORE_SLUGS] } },
       select: { slug: true, updatedAt: true },
     })
 

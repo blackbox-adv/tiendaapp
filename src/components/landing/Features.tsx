@@ -115,7 +115,7 @@ export function Features() {
             Todo lo que necesitas para vender online
           </h2>
           <p className="text-lg text-stone-500 max-w-2xl mx-auto">
-            Hecho para emprendedores de Latinoamérica. Sin código, sin comisiones por venta y sin
+            Hecho en Perú para emprendedores. Sin código, sin comisiones por venta y sin
             complicaciones. Tú te enfocas en vender, nosotros en la tecnología.
           </p>
         </motion.div>

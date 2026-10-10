@@ -66,7 +66,7 @@ export function Footer() {
               <span className="text-xl font-bold font-display text-stone-900">Kyllari</span>
             </button>
             <p className="text-sm text-gray-500 leading-relaxed mb-4">
-              La plataforma para crear tiendas online de forma rápida y sencilla en toda Latinoamérica.
+              La plataforma peruana para crear tu tienda online o catálogo digital en minutos y vender por WhatsApp.
             </p>
             <div className="flex gap-3">
               {/* Redes que sí usan los emprendedores */}

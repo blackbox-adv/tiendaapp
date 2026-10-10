@@ -47,8 +47,25 @@ export function FAQ() {
   const waHref = supportWhatsappUrl('Hola! Tengo una duda sobre Kyllari')
   const [openIndex, setOpenIndex] = useState<number | null>(0)
 
+  // FAQPage JSON-LD generado desde la MISMA lista que se renderiza visible.
+  // Así el marcado estructurado siempre coincide con el contenido real de la
+  // página (política de datos estructurados de Google) y no puede desincronizarse.
+  const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: FAQ_ITEMS.map((item) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: { '@type': 'Answer', text: item.answer },
+    })),
+  }
+
   return (
     <section id="faq" className="py-20 sm:py-28 bg-terra-cream">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

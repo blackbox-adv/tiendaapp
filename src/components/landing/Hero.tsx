@@ -33,20 +33,22 @@ export function Hero() {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/70 backdrop-blur-sm border border-[#BC5A38]/25 text-stone-800 text-sm font-medium mb-6">
               <Zap className="w-4 h-4 text-[#BC5A38]" />
-              Para emprendedores de toda Latinoamérica 🌎
+              Hecho en Perú para emprendedores 🇵🇪
             </div>
 
-            {/* Heading editorial serif — mismo copy SEO, nueva piel */}
+            {/* Heading editorial serif — keyword principal "tienda online" en H1,
+                "catálogo digital" entra en el subtítulo (ambas familias SEO) */}
             <h1 className="font-display text-4xl sm:text-5xl lg:text-[3.5rem] font-black text-stone-900 leading-[1.08] mb-6 tracking-tight">
-              Crea tu catálogo online y{' '}
+              Crea tu tienda online y{' '}
               <span className="accent-serif">recibe pedidos por WhatsApp</span>
             </h1>
 
             {/* Subtitle */}
             <p className="text-lg text-stone-600 max-w-xl mx-auto lg:mx-0 mb-8 leading-relaxed">
-              Deja de perder pedidos entre chats y fotos sueltas. Tu tienda con{' '}
-              <strong className="text-stone-900">botón de WhatsApp</strong>, los{' '}
-              <strong className="text-stone-900">métodos de pago de tu país</strong> y packs con descuento.
+              Tu catálogo digital con{' '}
+              <strong className="text-stone-900">botón de WhatsApp</strong>: deja de perder
+              pedidos entre chats y fotos sueltas. Cobra con{' '}
+              <strong className="text-stone-900">Yape, Plin o como prefieras</strong>.
               Lista en 5 minutos, sin comisión por venta.
             </p>
 
@@ -159,7 +161,7 @@ export function Hero() {
               </div>
               <div>
                 <p className="text-xs font-bold text-stone-900 leading-tight">Pago recibido</p>
-                <p className="text-[11px] font-semibold text-[#BC5A38] leading-tight">$45.90 vía Yape</p>
+                <p className="text-[11px] font-semibold text-[#BC5A38] leading-tight">S/ 45.90 vía Yape</p>
               </div>
             </motion.div>
 
@@ -171,7 +173,7 @@ export function Hero() {
               className="absolute left-2 sm:left-8 top-[6%] bg-stone-900 text-white rounded-full shadow-xl px-4 py-2 flex items-center gap-1.5"
             >
               <Bell className="w-3.5 h-3.5 text-[#E8A87C]" />
-              <span className="text-xs font-bold">Tu venta de hoy: $128.50</span>
+              <span className="text-xs font-bold">Tu venta de hoy: S/ 128.50</span>
             </motion.div>
           </motion.div>
         </div>
