@@ -15,7 +15,44 @@ function getResend(): Resend {
   return resendInstance
 }
 
-const FROM_EMAIL = 'Kyllari <noreply@blackboxperu.com>'
+// Remitente configurable vía EMAIL_FROM (Vercel → Environment Variables).
+// Fallback = dominio actualmente verificado en Resend (no rompe nada).
+// Cuando kyllari.com esté verificado en Resend, definir:
+//   EMAIL_FROM = "Kyllari <hola@kyllari.com>"
+// así el dominio de envío coincide con el de links/imágenes (kyllari.com)
+// y desaparecen las advertencias de entregabilidad del panel de Resend.
+export const FROM_EMAIL = process.env.EMAIL_FROM?.trim() || 'Kyllari <noreply@blackboxperu.com>'
+
+// ── Envío con versión texto plano ──
+// Los filtros de spam (Gmail/Outlook) penalizan emails solo-HTML. Derivamos
+// un text/plain del mismo HTML para mejorar la entregabilidad.
+function htmlToText(html: string): string {
+  return html
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/(p|div|h[1-6]|tr)>/gi, '\n')
+    .replace(/<li[^>]*>/gi, '  • ')
+    .replace(
+      /<a\s[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi,
+      (_m: string, href: string, txt: string) => `${txt.replace(/<[^>]+>/g, '')} -> ${href}`
+    )
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;|&apos;/gi, "'")
+    .replace(/&amp;/gi, '&')
+    .replace(/[ \t]{2,}/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+}
+
+async function sendEmail(params: { from: string; to: string; subject: string; html: string }) {
+  const resend = getResend()
+  return resend.emails.send({ ...params, text: htmlToText(params.html) })
+}
 
 // ── Email Templates ──
 
@@ -115,10 +152,9 @@ function welcomeTemplate(name: string, loginUrl: string) {
 
 export async function sendPasswordResetEmail(name: string, email: string, token: string) {
   try {
-    const resend = getResend()
     const template = passwordResetTemplate(name, `${APP_URL}/reset-password?token=${token}`)
 
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await sendEmail({
       from: FROM_EMAIL,
       to: email,
       subject: template.subject,
@@ -140,10 +176,9 @@ export async function sendPasswordResetEmail(name: string, email: string, token:
 
 export async function sendWelcomeEmail(name: string, email: string) {
   try {
-    const resend = getResend()
     const template = welcomeTemplate(name, APP_URL)
 
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await sendEmail({
       from: FROM_EMAIL,
       to: email,
       subject: template.subject,
@@ -287,10 +322,9 @@ export async function sendSubscriptionEmail(
   action: 'activated' | 'cancelled' | 'downgraded'
 ): Promise<void> {
   try {
-    const resend = getResend()
     const template = subscriptionTemplate(userName, planName, planPrice, action)
 
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await sendEmail({
       from: FROM_EMAIL,
       to: userEmail,
       subject: template.subject,
@@ -317,9 +351,7 @@ export async function sendPaymentSubmittedEmail(
   externalRef: string
 ): Promise<void> {
   try {
-    const resend = getResend()
-
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await sendEmail({
       from: FROM_EMAIL,
       to: userEmail,
       subject: 'Comprobante de pago recibido - Kyllari',
@@ -384,9 +416,7 @@ export async function sendPaymentRejectedEmail(
   reason?: string
 ): Promise<void> {
   try {
-    const resend = getResend()
-
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await sendEmail({
       from: FROM_EMAIL,
       to: userEmail,
       subject: 'Comprobante de pago no verificado - Kyllari',
@@ -453,9 +483,7 @@ export async function sendAdminPaymentAlertEmail(params: {
   reference?: string
 }): Promise<void> {
   try {
-    const resend = getResend()
-
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await sendEmail({
       from: FROM_EMAIL,
       to: ADMIN_NOTIFY_EMAIL,
       subject: `Nuevo pago por aprobar: ${params.storeName} (${params.planName})`,
@@ -502,9 +530,7 @@ export async function sendAdminPaymentAlertEmail(params: {
 // ── Password Changed Confirmation ──
 export async function sendPasswordChangedEmail(name: string, email: string): Promise<void> {
   try {
-    const resend = getResend()
-
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await sendEmail({
       from: FROM_EMAIL,
       to: email,
       subject: 'Tu contraseña fue cambiada - Kyllari',

@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { authenticateRequest } from '@/lib/auth'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 import { APP_URL } from '@/lib/env'
+import { FROM_EMAIL } from '@/lib/email'
 
 // POST /api/admin/test-email - Envía un correo de prueba y devuelve el motivo
 // EXACTO si Resend lo rechaza (super_admin only).
@@ -20,7 +21,7 @@ interface TestEmailResult {
 function buildHint(rawMessage: string): string {
   const m = (rawMessage || '').toLowerCase()
   if (m.includes('testing emails') || m.includes('not verified') || m.includes('verify your domain') || m.includes('ownership')) {
-    return 'Resend rechazó el envío: el dominio de envío (blackboxperu.com) NO está verificado dentro de tu cuenta de Resend. Mientras no se verifique, Resend solo deja enviar correos al email con el que creaste la cuenta de Resend. Solución: entra a resend.com → Domains → agrega blackboxperu.com → agrega los registros DNS que muestra → dale Verify.'
+    return 'Resend rechazó el envío: el dominio del remitente (FROM, ver variable EMAIL_FROM en Vercel) NO está verificado en tu cuenta de Resend. Mientras no se verifique, Resend solo deja enviar al email con el que creaste la cuenta. Solución: resend.com → Domains → agrega el dominio del remitente → copia los registros DNS que muestra hacia tu DNS → espera Verify. Después define EMAIL_FROM en Vercel y vuelve a desplegar.'
   }
   if (m.includes('api key') || m.includes('unauthorized') || m.includes('invalid') || m.includes('forbidden')) {
     return 'La API key de Resend es inválida o fue revocada. Genera una nueva en resend.com → API Keys y actualiza RESEND_API_KEY en Vercel (Settings → Environment Variables) y vuelve a desplegar.'
@@ -71,7 +72,7 @@ export async function POST(request: NextRequest) {
     const resend = new Resend(apiKey)
 
     const { data, error } = await resend.emails.send({
-      from: 'Kyllari <noreply@blackboxperu.com>',
+      from: FROM_EMAIL,
       to,
       subject: 'Correo de prueba - Kyllari',
       html: `

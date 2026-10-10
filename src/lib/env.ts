@@ -34,6 +34,12 @@ const ENV_CONFIG: EnvVarConfig[] = [
     validator: (v) => v.startsWith('re_'),
   },
   {
+    name: 'EMAIL_FROM',
+    required: false,
+    description: 'Remitente de emails, ej: Kyllari <hola@kyllari.com>. Definir solo cuando el dominio este verificado en Resend',
+    validator: (v) => v.includes('@'),
+  },
+  {
     name: 'SUPABASE_URL',
     required: true,
     description: 'URL del proyecto Supabase para Storage y autenticacion',
