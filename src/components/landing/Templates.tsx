@@ -208,7 +208,7 @@ const templates: Template[] = [
     plan: 'premium',
     planLabel: 'Premium',
     description: 'Editorial tipo revista: foto grande, minimal y precios sofisticados.',
-    bestFor: ['Ropa', 'Gamarra', 'Accesorios'],
+    bestFor: ['Ropa', 'Moda', 'Accesorios'],
     tags: ['moda'],
     isNew: true,
     icon: Shirt,

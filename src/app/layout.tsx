@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     "tienda online gratis", "crear catálogo online", "vender por WhatsApp",
     "catálogo digital WhatsApp", "tienda online para bodega", "carta digital para restaurante",
     "catálogo virtual ropa", "Kyllari", "tienda virtual gratis",
-    "vender por internet", "emprendimiento", "catálogo para Gamarra", "carta digital QR",
+    "vender por internet", "emprendimiento", "catálogo para emprendedores", "mostrar mis productos online", "carta digital QR",
     "tienda online Perú", "tienda online México", "vender por WhatsApp Colombia",
     "catálogo digital Argentina", "tienda online Chile", "e-commerce Latinoamérica",
   ],
