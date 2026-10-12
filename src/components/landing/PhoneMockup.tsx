@@ -18,7 +18,7 @@ export function PhoneMockup() {
       {/* Pantalla: tienda demo real de bodega */}
       <div className="aspect-[9/16] bg-white overflow-hidden relative">
         <Image
-          src="/templates/bodega-preview.png"
+          src="/templates/bodega-preview.webp"
           alt="Tienda online de bodega creada con Kyllari con pedidos por WhatsApp"
           width={300}
           height={533}

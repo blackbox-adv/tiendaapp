@@ -166,7 +166,7 @@ export async function sendPasswordResetEmail(name: string, email: string, token:
       return null
     }
 
-    console.log(`[EMAIL] Password reset sent to ${email}, id: ${data?.id}`)
+    console.log(`[EMAIL] Password reset sent, id: ${data?.id}`)
     return data
   } catch (err) {
     console.error('[EMAIL] Password reset failed:', err)
@@ -190,7 +190,7 @@ export async function sendWelcomeEmail(name: string, email: string) {
       return // Don't throw - registration should succeed even if email fails
     }
 
-    console.log(`[EMAIL] Welcome email sent to ${email}, id: ${data?.id}`)
+    console.log(`[EMAIL] Welcome email sent, id: ${data?.id}`)
   } catch (err) {
     console.error('[EMAIL] Welcome email failed (non-blocking):', err)
   }
@@ -336,7 +336,7 @@ export async function sendSubscriptionEmail(
       return
     }
 
-    console.log(`[EMAIL] Subscription email (${action}) sent to ${userEmail}, id: ${data?.id}`)
+    console.log(`[EMAIL] Subscription email (${action}) sent, id: ${data?.id}`)
   } catch (err) {
     console.error(`[EMAIL] Subscription email (${action}) failed (non-blocking):`, err)
   }
@@ -402,7 +402,7 @@ export async function sendPaymentSubmittedEmail(
       return
     }
 
-    console.log(`[EMAIL] Payment submitted email sent to ${userEmail}, id: ${data?.id}`)
+    console.log(`[EMAIL] Payment submitted email sent, id: ${data?.id}`)
   } catch (err) {
     console.error('[EMAIL] Payment submitted email failed (non-blocking):', err)
   }
@@ -466,7 +466,7 @@ export async function sendPaymentRejectedEmail(
       return
     }
 
-    console.log(`[EMAIL] Payment rejected email sent to ${userEmail}, id: ${data?.id}`)
+    console.log(`[EMAIL] Payment rejected email sent, id: ${data?.id}`)
   } catch (err) {
     console.error('[EMAIL] Payment rejected email failed (non-blocking):', err)
   }
@@ -560,7 +560,7 @@ export async function sendPasswordChangedEmail(name: string, email: string): Pro
       console.error('[EMAIL] Password changed email error:', error)
       return
     }
-    console.log(`[EMAIL] Password changed email sent to ${email}, id: ${data?.id}`)
+    console.log(`[EMAIL] Password changed email sent, id: ${data?.id}`)
   } catch (err) {
     console.error('[EMAIL] Password changed email failed (non-blocking):', err)
   }

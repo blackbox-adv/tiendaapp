@@ -416,7 +416,7 @@ export function Templates() {
                 <a href={`/demo/${tpl.id}`} className="group block" aria-label={`Ver demo de la tienda ${tpl.name}`}>
                   <div className={`relative rounded-2xl overflow-hidden bg-gray-100 shadow-sm group-hover:shadow-xl transition-shadow duration-300 ${pinAspects[i % pinAspects.length]}`}>
                     <Image
-                      src={`/templates/${tpl.id}-preview.png`}
+                      src={`/templates/${tpl.id}-preview.webp`}
                       alt={`Tienda de ejemplo con la plantilla ${tpl.name} de Kyllari`}
                       fill
                       sizes="(max-width: 768px) 50vw, (max-width: 1280px) 33vw, 25vw"

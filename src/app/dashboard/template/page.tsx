@@ -475,7 +475,7 @@ export default function TemplatePage() {
               >
                 {/* Captura real del diseño (el degradado queda de respaldo si la imagen falla) */}
                 <img
-                  src={`/templates/${tmpl.id}-preview.png`}
+                  src={`/templates/${tmpl.id}-preview.webp`}
                   alt={`Vista previa plantilla ${tmpl.name}`}
                   className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.04]"
                   loading="lazy"
