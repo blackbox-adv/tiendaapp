@@ -122,6 +122,17 @@ export function middleware(request: NextRequest) {
     }
   }
 
+  // Rate limit: Orders público (max 10 por minuto por IP — anti spam/fraude)
+  if (pathname === '/api/orders' && method === 'POST') {
+    const key = getRateLimitKey(request, 'orders')
+    if (isRateLimited(key, 10, 60 * 1000)) {
+      return NextResponse.json(
+        { error: 'Demasiados pedidos. Intenta de nuevo en 1 minuto.', code: 'RATE_LIMITED' },
+        { status: 429, headers: corsHeaders(request) }
+      )
+    }
+  }
+
   // Rate limit: Payment webhook (max 30 requests per minute per IP)
   if (pathname === '/api/payments' && method === 'PUT') {
     const key = getRateLimitKey(request, 'webhook')
@@ -273,6 +284,8 @@ export const config = {
     '/api/whatsapp',
     '/api/seed',
     '/api/stores','/api/stores/visit','/api/store-products','/api/health',
+    '/api/orders',
+    '/api/categories',
     '/api/settings',
     '/api/subscriptions',
     '/api/download-zip',

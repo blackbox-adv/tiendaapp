@@ -129,12 +129,16 @@ export async function PUT(request: Request) {
 
     // ── Approve action ──
     // FIXED: Wrap in transaction to ensure atomicity
+    // Buscar la suscripcion MAS RECIENTE de la tienda sin importar el estado:
+    // si el sub anterior esta past_due/expired, hay que REACTIVAR esa fila
+    // (antes solo buscaba status='active' y creaba duplicados que dejaban la
+    // fila vencida huerfana para siempre -> alerta eterna en /admin)
     const existingSubscription = await db.subscription.findFirst({
       where: {
         userId: payment.userId,
         storeId: payment.storeId,
-        status: 'active',
       },
+      orderBy: { createdAt: 'desc' },
     })
 
     // Calculate nextBillingDate: 30 days from now for paid plans
