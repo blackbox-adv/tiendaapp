@@ -126,7 +126,7 @@ export function Footer() {
               © {new Date().getFullYear()} Kyllari. Todos los derechos reservados. Hecho con 🧡 en Perú.
             </p>
             <p className="text-xs text-stone-400">
-              Kyllari SAC · RUC 2060XXXXXXX · Av. Javier Prado, Lima, Perú
+              Hermanos Guzso SAC · RUC 20609467381 · Lima, Perú
             </p>
           </div>
         </div>
