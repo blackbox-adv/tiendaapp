@@ -525,7 +525,7 @@ export default function OnboardingPage() {
                 return (
                   <Card
                     key={tmpl.id}
-                    className={`relative cursor-pointer transition-all hover:shadow-md ${
+                    className={`group relative cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
                       isSelected
                         ? 'ring-2 ring-violet-600 shadow-md'
                         : 'border-0 shadow-sm'
@@ -541,17 +541,27 @@ export default function OnboardingPage() {
                       setSelectedTemplate(tmpl.id);
                     }}
                   >
-                    <div className={`h-40 bg-gradient-to-br ${tmpl.color} relative rounded-t-lg overflow-hidden`}>
+                    {/* Portada completa tipo catálogo/revista */}
+                    <div className={`aspect-[3/4] bg-gradient-to-br ${tmpl.color} relative rounded-t-lg overflow-hidden`}>
                       {/* Captura real del diseño (el degradado queda de respaldo si la imagen falla) */}
                       <img
                         src={`/templates/${tmpl.id}-preview.png`}
                         alt={`Vista previa plantilla ${tmpl.name}`}
-                        className="absolute inset-0 w-full h-full object-cover object-top"
+                        className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.04]"
                         loading="lazy"
                         onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
                       />
+                      {/* Profundidad sutil de portada impresa */}
+                      <div className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
                       {isRestricted && (
-                        <div className="absolute inset-0 bg-black/30 rounded-t-lg" />
+                        <div className="absolute inset-0 bg-white/45 backdrop-blur-[1.5px] flex flex-col items-center justify-center gap-2">
+                          <div className="w-11 h-11 rounded-full bg-gray-900/85 flex items-center justify-center shadow-lg">
+                            <Lock className="w-5 h-5 text-white" />
+                          </div>
+                          <span className="text-xs font-bold text-gray-800 bg-white/95 rounded-full px-3 py-1 shadow">
+                            Premium
+                          </span>
+                        </div>
                       )}
                       {isSelected && (
                         <div className="absolute top-2 right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center">

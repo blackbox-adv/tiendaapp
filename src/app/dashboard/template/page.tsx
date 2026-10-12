@@ -463,19 +463,26 @@ export default function TemplatePage() {
           return (
             <Card
               key={tmpl.id}
-              className={`relative border-0 shadow-sm hover:shadow-md transition-shadow ${
+              className={`group relative border-0 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ${
                 isCurrent ? 'ring-2 ring-violet-600' : ''
               }`}
             >
-              <div className={`h-40 bg-gradient-to-br ${tmpl.color} relative rounded-t-lg overflow-hidden`}>
+              {/* Portada completa tipo catálogo/revista: se ve TODO el diseño */}
+              <div
+                className={`aspect-[3/4] bg-gradient-to-br ${tmpl.color} relative rounded-t-lg overflow-hidden cursor-pointer`}
+                onClick={() => window.open(`/demo/${tmpl.demoSlug}`, '_blank')}
+                title="Ver la tienda completa"
+              >
                 {/* Captura real del diseño (el degradado queda de respaldo si la imagen falla) */}
                 <img
                   src={`/templates/${tmpl.id}-preview.png`}
                   alt={`Vista previa plantilla ${tmpl.name}`}
-                  className="absolute inset-0 w-full h-full object-cover object-top"
+                  className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.04]"
                   loading="lazy"
                   onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
                 />
+                {/* Profundidad sutil de portada impresa */}
+                <div className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
                 {isCurrent && (
                   <Badge className="absolute top-2 right-2 bg-white text-violet-700">
                     <Check className="w-3 h-3 mr-1" />
@@ -488,8 +495,13 @@ export default function TemplatePage() {
                   </Badge>
                 )}
                 {isRestricted && (
-                  <div className="absolute top-2 left-2">
-                    <Lock className="w-4 h-4 text-white/80" />
+                  <div className="absolute inset-0 bg-white/45 backdrop-blur-[1.5px] flex flex-col items-center justify-center gap-2 pointer-events-none">
+                    <div className="w-11 h-11 rounded-full bg-gray-900/85 flex items-center justify-center shadow-lg">
+                      <Lock className="w-5 h-5 text-white" />
+                    </div>
+                    <span className="text-xs font-bold text-gray-800 bg-white/95 rounded-full px-3 py-1 shadow">
+                      Plan {planLabels[tmpl.plan].text}
+                    </span>
                   </div>
                 )}
               </div>
