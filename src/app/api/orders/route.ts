@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import { db } from '@/lib/db'
 import { authenticateRequest } from '@/lib/auth'
 import { apiError, apiSuccess } from '@/lib/api-response'
-import { serializeDecimals } from '@/lib/utils'
+import { serializeDecimals, decimalToNumber } from '@/lib/utils'
 
 // ── GET /api/orders — List orders for a store (auth required, store ownership) ──
 export async function GET(request: NextRequest) {
@@ -77,17 +77,18 @@ export async function POST(request: NextRequest) {
     if (!items || !Array.isArray(items) || items.length === 0) {
       return apiError('items es requerido y debe tener al menos un producto', 400, undefined, request)
     }
+    if (items.length > 50) {
+      return apiError('Demasiados productos en un solo pedido (max 50)', 400, undefined, request)
+    }
 
-    // Validate each item
+    // Validar forma minima: los precios y nombres NO se toman del cliente
+    // (se verifican contra la BD abajo) — evita pedidos falsos con montos arbitrarios
     for (const item of items) {
-      if (!item.productId || !item.name || item.price == null || !item.quantity) {
-        return apiError('Cada item debe tener productId, name, price y quantity', 400, undefined, request)
+      if (!item.productId || typeof item.productId !== 'string') {
+        return apiError('Cada item debe tener un productId valido', 400, undefined, request)
       }
       if (typeof item.quantity !== 'number' || item.quantity <= 0) {
         return apiError('La cantidad debe ser un número mayor a 0', 400, undefined, request)
-      }
-      if (typeof item.price !== 'number' || item.price < 0) {
-        return apiError('El precio debe ser un número mayor o igual a 0', 400, undefined, request)
       }
     }
 
@@ -103,8 +104,32 @@ export async function POST(request: NextRequest) {
       return apiError('Esta tienda no está disponible', 400, undefined, request)
     }
 
-    // Calculate total amount from items
-    const totalAmount = items.reduce(
+    // ── ANTI-FRAUDE: precios SIEMPRE desde la BD ──
+    const productIds = [...new Set(items.map((item: { productId: string }) => item.productId))]
+    const dbProducts = await db.storeProduct.findMany({
+      where: { id: { in: productIds }, storeId, isActive: true },
+      select: { id: true, name: true, price: true, imageUrl: true },
+    })
+    const productById = new Map(dbProducts.map((p) => [p.id, p]))
+
+    const serverItems: Array<{ productId: string; name: string; price: number; quantity: number; imageUrl: string }> = []
+    for (const item of items) {
+      const p = productById.get(item.productId)
+      if (!p) {
+        return apiError('Un producto del pedido ya no está disponible', 400, undefined, request)
+      }
+      const qty = Math.min(999, Math.max(1, Math.floor(item.quantity)))
+      serverItems.push({
+        productId: p.id,
+        name: p.name,
+        price: decimalToNumber(p.price),
+        quantity: qty,
+        imageUrl: p.imageUrl || '',
+      })
+    }
+
+    // Calculate total amount from BD prices
+    const totalAmount = serverItems.reduce(
       (sum: number, item: { price: number; quantity: number }) => sum + item.price * item.quantity,
       0
     )
@@ -117,9 +142,9 @@ export async function POST(request: NextRequest) {
     const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase()
     const orderNumber = `ORD-${dateStr}-${randomSuffix}`
 
-    // Build WhatsApp message
-    const itemsText = items
-      .map((item: { name: string; quantity: number; price: number }) => {
+    // Build WhatsApp message (datos verificados contra BD)
+    const itemsText = serverItems
+      .map((item) => {
         const subtotal = item.price * item.quantity
         return `- ${item.name} x${item.quantity} (S/ ${subtotal.toFixed(2)})`
       })
@@ -149,13 +174,7 @@ export async function POST(request: NextRequest) {
         customerPhone: customerPhone.trim(),
         customerEmail: customerEmail?.trim() || null,
         totalAmount,
-        items: items.map((item: { productId: string; name: string; price: number; quantity: number; imageUrl?: string }) => ({
-          productId: item.productId,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-          imageUrl: item.imageUrl || '',
-        })),
+        items: serverItems,
         whatsappMessage,
         notes: notes?.trim() || null,
         storeId,

@@ -9,8 +9,11 @@ export async function GET(request: NextRequest) {
   const auth = await authenticateRequest(request)
   if (auth.error) return apiError(auth.error, auth.status, undefined, request)
   if (!auth.user) return apiError('No autenticado', 401, undefined, request)
-  // Allow any authenticated user to run column migrations (safe — only adds missing columns)
-  // Keep super_admin requirement for FK constraints in POST
+  // HARDENED: solo super_admin (antes cualquier usuario autenticado podia
+  // ejecutar ALTER TABLE — DDL es DDL aunque sea "solo agrega columnas")
+  if (!requireRole(auth.user, ['super_admin'])) {
+    return apiError('Solo administradores', 403, undefined, request)
+  }
   const results: { table: string; column: string; action: string; success: boolean; error?: string }[] = []
 
   // All columns that might be missing from older schema versions
@@ -238,6 +241,14 @@ export async function GET(request: NextRequest) {
 
 // POST /api/setup-db - Add foreign key constraints and test DB operations
 export async function POST(request: NextRequest) {
+  // HARDENED: antes NO tenia NINGUN auth — cualquiera podia ejecutar DDL
+  // (agregar FKs, dropear constraints) contra la BD de produccion
+  const auth = await authenticateRequest(request)
+  if (auth.error) return apiError(auth.error, auth.status, undefined, request)
+  if (!auth.user) return apiError('No autenticado', 401, undefined, request)
+  if (!requireRole(auth.user, ['super_admin'])) {
+    return apiError('Solo administradores', 403, undefined, request)
+  }
   const results: { action: string; success: boolean; error?: string }[] = []
 
   // Add foreign key constraints
