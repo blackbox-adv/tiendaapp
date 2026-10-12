@@ -1160,7 +1160,7 @@ export function DemoTemplateClient({ template }: { template: string }) {
                 aria-label={`Ver demo de la plantilla ${t.name}`}
               >
                 <Image
-                  src={`/templates/${t.id}-preview.png`}
+                  src={`/templates/${t.id}-preview.webp`}
                   alt={`Tienda de ejemplo con la plantilla ${t.name} de Kyllari`}
                   width={300}
                   height={400}

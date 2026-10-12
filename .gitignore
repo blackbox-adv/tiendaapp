@@ -15,3 +15,10 @@ skills/
 # DB local de desarrollo y artefactos de build
 prisma/*.db
 tsconfig.tsbuildinfo
+
+# Credenciales QA locales (nunca en el repo)
+scripts/mail-login.json
+scripts/mailtm.token
+
+# Entregables temporales fuera de la app
+download/

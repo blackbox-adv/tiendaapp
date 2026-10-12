@@ -200,13 +200,6 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // Rate limit: Store visit endpoint (max 5 per minute per IP)
-  if (pathname === '/api/stores/visit' && method === 'POST') {
-    const key = getRateLimitKey(request, 'visit')
-    if (isRateLimited(key, 5, 60 * 1000)) {
-      return NextResponse.json({ error: 'Demasiadas solicitudes.', code: 'RATE_LIMITED' }, { status: 429, headers: corsHeaders(request) })
-    }
-  }
   // Rate limit: Store creation (max 5 per minute per IP)
   if (pathname === '/api/stores' && method === 'POST') {
     const key = getRateLimitKey(request, 'store-create')
@@ -283,12 +276,11 @@ export const config = {
     '/api/payments/submit',
     '/api/whatsapp',
     '/api/seed',
-    '/api/stores','/api/stores/visit','/api/store-products','/api/health',
+    '/api/stores','/api/store-products','/api/health',
     '/api/orders',
     '/api/categories',
     '/api/settings',
     '/api/subscriptions',
-    '/api/download-zip',
     '/api/plans',
     '/api/upload',
     '/api/admin/payments',

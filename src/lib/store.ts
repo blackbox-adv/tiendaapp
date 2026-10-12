@@ -1,6 +1,5 @@
 import { create } from 'zustand'
 import type { PageRoute, User, Store, Product, ShippingOption, OtherPayment, SizeGuide } from './types'
-import { PLANS, MOCK_USERS, MOCK_STORES, MOCK_PRODUCTS, CATEGORIES } from './mock-data'
 
 // ── Schema transformation helpers (API → Frontend) ──
 
