@@ -139,6 +139,28 @@ export async function POST(request: NextRequest) {
 
     const existing = existingRows[0]
 
+    // Bloqueo de downgrade anticipado: un cliente con plan pago vigente NO puede
+    // pasar a Free por su cuenta hasta que termine el ciclo que ya pagó.
+    // La baja a Free se aplica en su renovación (o el super_admin puede forzarla).
+    if (plan.type === 'free' && existing && !requireRole(auth.user, ['super_admin'])) {
+      const curRows = await db.$queryRawUnsafe(`
+        SELECT p.type as "planType", p.name as "planName", sub."nextBillingDate"
+        FROM "Subscription" sub JOIN "Plan" p ON p.id = sub."planId"
+        WHERE sub.id = $1
+      `, existing.id) as Array<Record<string, unknown>>
+      const cur = curRows[0]
+      const nb = cur?.nextBillingDate ? new Date(String(cur.nextBillingDate)) : null
+      if (cur && cur.planType !== 'free' && nb && nb.getTime() > Date.now()) {
+        const label = nb.toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' })
+        return apiError(
+          `Tu plan ${cur.planName} está activo hasta el ${label}. Podrás cambiar al plan Gratis cuando termine tu ciclo pagado.`,
+          403,
+          undefined,
+          request
+        )
+      }
+    }
+
     // Calculate nextBillingDate based on billing cycle for paid plans
     const nextBillingDate = plan.type !== 'free'
       ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // Default 30 days

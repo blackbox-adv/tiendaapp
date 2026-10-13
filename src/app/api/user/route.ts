@@ -150,7 +150,7 @@ export async function GET(request: NextRequest) {
 
     // 3) Get active subscription with plan info using raw SQL
     const subRows = await db.$queryRawUnsafe(`
-      SELECT sub.id, sub.status, sub."planId",
+      SELECT sub.id, sub.status, sub."planId", sub."nextBillingDate"::text as "nextBillingDate",
         p.id as "planId", p.name as "planName", p.type as "planType",
         p.price::text as "planPrice", p."maxProducts", p.features
       FROM "Subscription" sub
@@ -162,6 +162,7 @@ export async function GET(request: NextRequest) {
     const subscriptions = subRows.map((s) => ({
       id: s.id,
       status: s.status,
+      nextBillingDate: s.nextBillingDate,
       plan: {
         id: s.planId,
         name: s.planName,
