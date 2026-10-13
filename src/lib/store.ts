@@ -63,6 +63,8 @@ function transformApiUser(apiUser: Record<string, unknown>): User {
   // Preferimos el tipo (free/pro/premium) igual que transformApiStore.
   const latestPlan = latestSub?.plan as Record<string, unknown> | undefined
   const planId = (latestPlan?.type as string) || 'free'
+  // Fin del ciclo pagado (para bloquear el downgrade a Free hasta la renovación)
+  const planRenewalDate = (latestSub?.nextBillingDate as string) || null
 
   const apiRole = apiUser.role as string
 
@@ -76,6 +78,7 @@ function transformApiUser(apiUser: Record<string, unknown>): User {
     storeId: storeId as string | null,
     isActive: (apiUser.isActive as boolean) ?? true,
     createdAt: (apiUser.createdAt as string) || new Date().toISOString(),
+    planRenewalDate,
   }
 }
 

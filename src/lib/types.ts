@@ -36,6 +36,8 @@ export interface User {
   storeId: string | null
   isActive: boolean
   createdAt: string
+  // Fecha en que termina el ciclo pagado del plan actual (null si es Free o desconocido)
+  planRenewalDate?: string | null
 }
 
 // Opción de envío que la tienda ofrece (ej: "Delivery en Lima", S/10, 24h)

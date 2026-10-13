@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAppStore } from '@/lib/store'
 import { toast } from 'sonner'
-import { Check, Crown, Zap, Gift, Building2, QrCode, Loader2 } from 'lucide-react'
+import { Check, Crown, Zap, Gift, Building2, QrCode, Loader2, Lock } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
@@ -151,6 +151,20 @@ export function PlanManager() {
   const storeProducts = currentStore
     ? products.filter((p) => p.storeId === currentStore.id).length
     : 0
+
+  // ── Bloqueo de downgrade anticipado a Free ──
+  // Si el cliente tiene un plan pago vigente, no puede pasar a Gratis hasta
+  // que termine el ciclo que ya pagó (la baja se aplica en su renovación).
+  const paidCycleEnd = currentUser?.planRenewalDate ? new Date(currentUser.planRenewalDate) : null
+  const freeDowngradeLocked = Boolean(
+    currentPlan &&
+      currentPlan.type !== 'free' &&
+      paidCycleEnd &&
+      paidCycleEnd.getTime() > Date.now()
+  )
+  const paidCycleEndLabel = paidCycleEnd
+    ? paidCycleEnd.toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' })
+    : ''
 
   // ── Plan change handler ──
 
@@ -458,11 +472,24 @@ export function PlanManager() {
                   <td />
                   {plans.map((plan) => {
                     const isCurrent = isPlanCurrent(plan, currentPlanId)
+                    const isLockedFree = plan.type === 'free' && freeDowngradeLocked
                     return (
                       <td key={plan.id} className="py-4 px-4 text-center">
                         {isCurrent ? (
                           <div className="text-sm font-semibold text-violet-600 bg-violet-50 py-2 rounded-lg">
                             Plan actual
+                          </div>
+                        ) : isLockedFree ? (
+                          <div
+                            className="text-xs font-medium text-gray-500 bg-gray-50 border border-gray-200 py-2 px-2 rounded-lg flex flex-col items-center gap-0.5 cursor-not-allowed"
+                            title={`Tu plan ${currentPlan?.name} está activo hasta el ${paidCycleEndLabel}`}
+                          >
+                            <span className="flex items-center gap-1">
+                              <Lock className="w-3.5 h-3.5" /> Bloqueado
+                            </span>
+                            <span className="text-[10px] leading-tight text-gray-400">
+                              hasta el {paidCycleEndLabel}
+                            </span>
                           </div>
                         ) : (
                           <Button
@@ -491,6 +518,18 @@ export function PlanManager() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Nota de bloqueo: baja a Free solo al terminar el ciclo pagado */}
+      {freeDowngradeLocked && (
+        <p className="text-xs text-gray-400 flex items-start gap-1.5 -mt-2 px-1">
+          <Lock className="w-3 h-3 mt-0.5 shrink-0" />
+          <span>
+            Tu plan {currentPlan?.name} está activo hasta el {paidCycleEndLabel}. Podrás
+            cambiar al plan Gratis cuando termine tu ciclo pagado — así aprovechas todos
+            los días que ya pagaste.
+          </span>
+        </p>
+      )}
 
       {/* ── Payment Dialog ── */}
       <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
