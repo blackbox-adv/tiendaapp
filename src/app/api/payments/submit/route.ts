@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
       return apiError(validation.error, 400, undefined, request)
     }
 
-    const { planId, storeId, externalRef, paymentMethod } = validation.data
+    const { planId, storeId, externalRef, paymentMethod, receiptUrl } = validation.data
 
     // Get the plan
     const plan = await db.plan.findUnique({ where: { id: planId } })
@@ -66,6 +66,8 @@ export async function POST(request: NextRequest) {
         data: {
           externalRef: externalRef,
           paymentMethod: paymentMethod || 'yape',
+          // Si el cliente adjunta foto, se registra; si no, se conserva la que hubiera
+          ...(receiptUrl ? { receiptUrl } : {}),
           createdAt: new Date(), // Refresh timestamp
         },
       })
@@ -122,6 +124,7 @@ export async function POST(request: NextRequest) {
         status: 'pending',
         paymentMethod: paymentMethod || 'yape',
         externalRef: externalRef,
+        receiptUrl: receiptUrl || null,
         userId: auth.user.userId,
         storeId: targetStoreId,
         planId,

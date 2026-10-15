@@ -236,6 +236,14 @@ export const paymentSubmitSchema = z.object({
     .enum(['yape', 'plin', 'bank_transfer'])
     .optional()
     .default('yape'),
+  // Foto del comprobante (subida previamente via /api/upload, carpeta receipts)
+  receiptUrl: z
+    .string()
+    .max(500, 'URL del comprobante invalida')
+    .refine((v) => v === '' || v.startsWith('https://'), {
+      message: 'URL del comprobante invalida',
+    })
+    .optional(),
 })
 
 // ── Admin setup schema ──

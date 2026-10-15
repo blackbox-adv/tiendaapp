@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAppStore } from '@/lib/store'
 import { toast } from 'sonner'
-import { Check, Crown, Zap, Gift, Building2, QrCode, Loader2, Lock } from 'lucide-react'
+import { Check, Crown, Zap, Gift, Building2, QrCode, Loader2, Lock, Camera, X } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
@@ -111,6 +111,11 @@ export function PlanManager() {
   const [voucherNumber, setVoucherNumber] = useState('')
   const [creatingIntent, setCreatingIntent] = useState(false)
   const [submittingPayment, setSubmittingPayment] = useState(false)
+
+  // Comprobante (foto): se sube antes a /api/upload y la URL viaja con el pago
+  const [receiptUploading, setReceiptUploading] = useState(false)
+  const [receiptUrl, setReceiptUrl] = useState('')
+  const [receiptPreview, setReceiptPreview] = useState('')
 
   // ── Fetch plans from API ──
 
@@ -234,6 +239,8 @@ export function PlanManager() {
         setSelectedPlan(plan)
         setPaymentIntent(data.paymentIntent)
         setVoucherNumber('')
+        setReceiptUrl('')
+        setReceiptPreview('')
         setPaymentDialogOpen(true)
       } catch {
         toast.error('Error de conexión al iniciar el pago')
@@ -243,6 +250,48 @@ export function PlanManager() {
     },
     [currentUser, currentStore, changePlan],
   )
+
+  // ── Subir foto del comprobante ──
+
+  const handleReceiptFile = useCallback(async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      toast.error('Solo se permiten imágenes (JPG, PNG, WebP)')
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('La imagen no puede superar 5MB')
+      return
+    }
+    try {
+      setReceiptUploading(true)
+      const token = getToken()
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('folder', 'receipts')
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        toast.error(data.error || 'Error al subir la imagen')
+        return
+      }
+      const data = await res.json()
+      if (data.url) {
+        setReceiptUrl(data.url)
+        setReceiptPreview(data.url)
+        toast.success('Comprobante adjuntado')
+      } else {
+        toast.error('No se recibió la URL de la imagen')
+      }
+    } catch {
+      toast.error('Error de conexión al subir la imagen')
+    } finally {
+      setReceiptUploading(false)
+    }
+  }, [])
 
   // ── Confirm payment (submit voucher) ──
 
@@ -267,6 +316,7 @@ export function PlanManager() {
           storeId: currentStore.id,
           externalRef: voucherNumber.trim(),
           paymentMethod: 'yape',
+          ...(receiptUrl ? { receiptUrl } : {}),
         }),
       })
 
@@ -626,6 +676,67 @@ export function PlanManager() {
                   Ingresa el número de operación o código de transacción que
                   aparece en tu comprobante.
                 </p>
+              </div>
+
+              {/* Foto del comprobante (opcional, recomendado) */}
+              <div className="space-y-2">
+                <Label>Foto del comprobante</Label>
+                {receiptPreview ? (
+                  <div className="relative rounded-xl border border-gray-200 overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={receiptPreview}
+                      alt="Comprobante de pago"
+                      className="w-full max-h-48 object-contain bg-gray-50"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setReceiptUrl('')
+                        setReceiptPreview('')
+                      }}
+                      className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80"
+                      aria-label="Quitar comprobante"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <label
+                    htmlFor="receipt-upload"
+                    className={`flex flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-gray-200 py-6 cursor-pointer hover:border-violet-300 hover:bg-violet-50/50 transition-colors ${
+                      receiptUploading ? 'pointer-events-none opacity-60' : ''
+                    }`}
+                  >
+                    {receiptUploading ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin text-violet-600" />
+                        <span className="text-xs text-gray-500">Subiendo...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Camera className="w-5 h-5 text-violet-600" />
+                        <span className="text-sm font-medium text-gray-700">
+                          Adjuntar captura o foto del pago
+                        </span>
+                        <span className="text-xs text-gray-400">
+                          Opcional, pero acelera la verificación · JPG, PNG · máx. 5MB
+                        </span>
+                      </>
+                    )}
+                  </label>
+                )}
+                <input
+                  id="receipt-upload"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) handleReceiptFile(file)
+                    e.target.value = ''
+                  }}
+                />
               </div>
 
               {/* Confirm button */}
