@@ -17,6 +17,7 @@ interface PaymentRecord {
   status: string
   paymentMethod: string | null
   externalRef: string | null
+  receiptUrl: string | null
   verifiedAt: string | null
   notes: string | null
   createdAt: string
@@ -240,6 +241,30 @@ export function AdminPaymentsPage() {
                     <div>
                       <p className="text-xs text-gray-500">Operación</p>
                       <p className="text-sm font-mono text-gray-700">{payment.externalRef || '-'}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Comprobante</p>
+                      {payment.receiptUrl ? (
+                        <a
+                          href={payment.receiptUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Ver comprobante en grande"
+                          className="block w-14 h-14 rounded-lg overflow-hidden border border-gray-200 hover:ring-2 hover:ring-violet-300 transition-all"
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={payment.receiptUrl}
+                            alt="Comprobante de pago"
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                        </a>
+                      ) : (
+                        <p className="text-xs text-gray-400 italic">
+                          {payment.status === 'pending' ? 'sin foto' : '—'}
+                        </p>
+                      )}
                     </div>
                     <div>
                       <p className="text-xs text-gray-500">Método</p>
