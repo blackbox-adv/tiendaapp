@@ -177,6 +177,10 @@ export const createProductSchema = z.object({
     .default(''),
   color: z.string().max(50).optional().nullable(),
   stock: z.number().int().min(-1, 'Stock -1 = sin límite, 0+ = unidades disponibles').max(999999).optional().default(-1),
+  // Venta por bulto (opcional): ej. cajón x12 a S/108 además de la unidad a S/10
+  unitLabel: z.string().max(30, 'Etiqueta del bulto muy larga (max 30 caracteres)').trim().optional().nullable(),
+  unitsPerPack: z.number().int('Unidades por bulto debe ser un numero entero').min(2, 'El bulto debe traer al menos 2 unidades').max(100000).optional().nullable(),
+  packPrice: z.number().positive('El precio del bulto debe ser positivo').max(999999, 'Precio maximo es S/999,999').optional().nullable(),
   isActive: z.boolean().optional().default(true),
   featured: z.boolean().optional().default(false),
   rating: z

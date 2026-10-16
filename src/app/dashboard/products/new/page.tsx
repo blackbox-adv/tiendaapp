@@ -50,6 +50,12 @@ export default function NewProductPage() {
   const [featured, setFeatured] = useState(false);
   const [isActive, setIsActive] = useState(true);
 
+  // Venta por bulto (opcional): ej. unidad S/10 + cajón x12 S/108
+  const [sellPack, setSellPack] = useState(false);
+  const [unitLabel, setUnitLabel] = useState('');
+  const [unitsPerPack, setUnitsPerPack] = useState('');
+  const [packPrice, setPackPrice] = useState('');
+
   // Cover image
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
@@ -180,11 +186,35 @@ export default function NewProductPage() {
     setGalleryPreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
+  // Vista previa en vivo del selector de bulto que verá el cliente
+  const packPreview = (() => {
+    if (!sellPack) return null;
+    const n = parseInt(unitsPerPack, 10);
+    const p = parseFloat(packPrice);
+    const u = parseFloat(price);
+    if (!n || n < 2 || !p || p <= 0 || !u || u <= 0) return null;
+    const perUnit = p / n;
+    const pct = perUnit < u ? Math.round((1 - perUnit / u) * 100) : 0;
+    return { n, p, perUnit, pct };
+  })();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentStore) {
       setError('No tienes una tienda configurada');
       return;
+    }
+    if (sellPack) {
+      const n = parseInt(unitsPerPack, 10);
+      const p = parseFloat(packPrice);
+      if (!unitLabel.trim() || !n || n < 2 || !p || p <= 0) {
+        setError('Completa los datos del bulto: nombre, unidades que trae (mínimo 2) y precio.');
+        return;
+      }
+      if (p <= parseFloat(price)) {
+        setError('El precio del bulto debe ser mayor al precio por unidad.');
+        return;
+      }
     }
     // Defensa: si llegamos aquí con la tienda temporal del wizard (id `store-<timestamp>`),
     // re-sincronizar para obtener el store real de la API antes de crear productos.
@@ -252,6 +282,9 @@ export default function NewProductPage() {
           category: category || '',
           color: color || null,
           stock,
+          unitLabel: sellPack && unitLabel.trim() ? unitLabel.trim() : null,
+          unitsPerPack: sellPack && parseInt(unitsPerPack, 10) >= 2 ? parseInt(unitsPerPack, 10) : null,
+          packPrice: sellPack && parseFloat(packPrice) > 0 ? parseFloat(packPrice) : null,
           isActive,
           featured,
           rating: 0, // las calificaciones las ponen los clientes, no el dueño
@@ -420,6 +453,41 @@ export default function NewProductPage() {
                 <Input id="originalPrice" type="number" step="0.01" min="0" placeholder="0.00 (opcional)" value={originalPrice} onChange={(e) => setOriginalPrice(e.target.value)} />
                 <p className="text-[11px] text-gray-400">Se mostrará como descuento</p>
               </div>
+            </div>
+
+            {/* Venta por bulto (opcional) */}
+            <div className="space-y-3 p-4 rounded-xl border border-gray-100 bg-gray-50/60">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <Label>Vender por bulto (opcional)</Label>
+                  <p className="text-[11px] text-gray-400 mt-0.5">Ej: la unidad a S/10 y también el cajón de 12 a S/108. Ideal para venta por mayor.</p>
+                </div>
+                <Switch checked={sellPack} onCheckedChange={setSellPack} />
+              </div>
+              {sellPack && (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="unitLabel" className="text-xs">¿Cómo se llama el bulto?</Label>
+                      <Input id="unitLabel" placeholder="cajón, docena, pack" value={unitLabel} onChange={(e) => setUnitLabel(e.target.value)} maxLength={30} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="unitsPerPack" className="text-xs">Unidades que trae</Label>
+                      <Input id="unitsPerPack" type="number" min="2" placeholder="12" value={unitsPerPack} onChange={(e) => setUnitsPerPack(e.target.value)} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="packPrice" className="text-xs">Precio del bulto (S/)</Label>
+                      <Input id="packPrice" type="number" step="0.01" min="0" placeholder="108.00" value={packPrice} onChange={(e) => setPackPrice(e.target.value)} />
+                    </div>
+                  </div>
+                  {packPreview && (
+                    <p className="text-[11px] text-gray-400 leading-relaxed">
+                      Tu cliente podrá elegir con un clic: <span className="font-medium text-gray-600">Unidad S/{parseFloat(price).toFixed(2)}</span> o <span className="font-medium text-gray-600">{unitLabel.trim() || 'bulto'} x{packPreview.n} — S/{packPreview.p.toFixed(2)}</span>
+                      {packPreview.pct > 0 ? <> <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-green-100 text-green-700 font-semibold">equivale a S/{packPreview.perUnit.toFixed(2)} c/u · ahorra {packPreview.pct}%</span></> : null}
+                    </p>
+                  )}
+                </>
+              )}
             </div>
 
             {/* Category & Color */}

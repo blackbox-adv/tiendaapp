@@ -46,6 +46,8 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
   const [showZoom, setShowZoom] = useState(false)
   const [shareCopied, setShareCopied] = useState(false)
   const [quantity, setQuantity] = useState(1)
+  // Presentación de compra: por unidad o por bulto (cajón/docena/pack) si el producto lo permite
+  const [purchaseMode, setPurchaseMode] = useState<'unit' | 'pack'>('unit')
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [addedToOrder, setAddedToOrder] = useState(false)
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false)
@@ -264,6 +266,22 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
   const product = displayProduct
   const store = displayStore
 
+  // ── Venta por bulto (cajón/docena/pack) ──
+  const unitPriceNum = Number(product.price)
+  const packPriceNum = Number(product.packPrice || 0)
+  const unitsPerPackNum = Number(product.unitsPerPack || 0)
+  const hasPack = !!(
+    product.packPrice && packPriceNum > 0 &&
+    product.unitsPerPack && unitsPerPackNum >= 2 &&
+    product.unitLabel
+  )
+  const isPackMode = purchaseMode === 'pack' && hasPack
+  const perUnitInPack = hasPack ? packPriceNum / unitsPerPackNum : 0
+  const packSavingsPct = hasPack && unitPriceNum > 0 && perUnitInPack < unitPriceNum
+    ? Math.round((1 - perUnitInPack / unitPriceNum) * 100)
+    : 0
+  const packUnitLabel = (product.unitLabel || 'bulto').toLowerCase()
+
   const handleAddToOrder = () => {
     if (!store || product.stock === 0) return
     addToCart(
@@ -300,19 +318,28 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
     (p) => p.storeId === store.id && p.isActive && p.categoryId === product.categoryId && p.id !== product.id
   ).slice(0, 4)
 
-  const totalPrice = Number(product.price) * quantity
+  const totalPrice = isPackMode ? packPriceNum * quantity : unitPriceNum * quantity
 
   const openWhatsApp = async () => {
+    // Mensaje con la presentación elegida: por bulto incluye etiqueta, contenido y total
+    const packMessage = isPackMode
+      ? `Hola ${store.name}!\n\n` +
+        `Me interesa ${quantity} ${packUnitLabel}${quantity > 1 ? 's' : ''} (${unitsPerPackNum} unidades c/u):\n` +
+        `${product.name}\n` +
+        `S/${packPriceNum.toFixed(2)} por ${packUnitLabel}${quantity > 1 ? `\nTotal: S/${totalPrice.toFixed(2)}` : ''}\n\n` +
+        `${typeof window !== 'undefined' ? window.location.href : ''}\n\n` +
+        `¿Tienen disponibilidad?`
+      : null
+
     try {
       const res = await fetch('/api/whatsapp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          storeId: store.id,
-          productName: product.name,
-          productPrice: product.price,
-          quantity,
-        }),
+        body: JSON.stringify(
+          isPackMode
+            ? { storeId: store.id, customerMessage: packMessage }
+            : { storeId: store.id, productName: product.name, productPrice: product.price, quantity }
+        ),
       })
       const data = await res.json()
       if (data.whatsappUrl) {
@@ -322,8 +349,12 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
     } catch {
       // Fallback
     }
+    if (packMessage) {
+      window.open(`https://wa.me/${store.whatsappNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(packMessage)}`, '_blank')
+      return
+    }
     const qtyText = quantity > 1 ? `${quantity} unidades` : 'el producto'
-    const totalText = quantity > 1 ? `\nTotal: S/${totalPrice.toFixed(2)}` : `\nPrecio: S/${Number(product.price).toFixed(2)}`
+    const totalText = quantity > 1 ? `\nTotal: S/${totalPrice.toFixed(2)}` : `\nPrecio: S/${unitPriceNum.toFixed(2)}`
     const msg = encodeURIComponent(
       `Hola! Me interesa ${qtyText} de: ${product.name}${totalText}\nLo vi en tu tienda en Kyllari.`
     )
@@ -571,86 +602,110 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
               )}
             </div>
 
-            {/* Price */}
+            {/* Price (por unidad o por bulto según la presentación elegida) */}
             <div className="mt-6 p-5 rounded-2xl" style={{ backgroundColor: store.colors.primary + '08' }}>
               <div className="flex items-center gap-3 flex-wrap">
                 <span
                   className="text-3xl md:text-4xl font-bold tracking-tight"
                   style={{ color: store.colors.primary }}
                 >
-                  {quantity > 1 ? `S/${totalPrice.toFixed(2)}` : `S/${Number(product.price).toFixed(2)}`}
+                  {isPackMode
+                    ? quantity > 1
+                      ? `S/${totalPrice.toFixed(2)}`
+                      : `S/${packPriceNum.toFixed(2)}`
+                    : quantity > 1
+                      ? `S/${totalPrice.toFixed(2)}`
+                      : `S/${unitPriceNum.toFixed(2)}`}
                 </span>
-                {quantity > 1 && (
-                  <span className="text-sm text-gray-400 font-normal">
-                    S/{Number(product.price).toFixed(2)} c/u
-                  </span>
-                )}
-                {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
+                {isPackMode ? (
+                  quantity > 1 && (
+                    <span className="text-sm text-gray-400 font-normal">
+                      S/{packPriceNum.toFixed(2)} por {packUnitLabel}
+                    </span>
+                  )
+                ) : (
                   <>
-                    <span className="text-lg text-gray-400 line-through">
-                      S/{Number(product.originalPrice).toFixed(2)}
-                    </span>
-                    <span className="bg-red-100 text-red-600 text-sm font-medium px-2.5 py-0.5 rounded-full">
-                      -{Math.round((1 - Number(product.price) / Number(product.originalPrice)) * 100)}%
-                    </span>
+                    {quantity > 1 && (
+                      <span className="text-sm text-gray-400 font-normal">
+                        S/{unitPriceNum.toFixed(2)} c/u
+                      </span>
+                    )}
+                    {product.originalPrice && Number(product.originalPrice) > unitPriceNum && (
+                      <>
+                        <span className="text-lg text-gray-400 line-through">
+                          S/{Number(product.originalPrice).toFixed(2)}
+                        </span>
+                        <span className="bg-red-100 text-red-600 text-sm font-medium px-2.5 py-0.5 rounded-full">
+                          -{Math.round((1 - unitPriceNum / Number(product.originalPrice)) * 100)}%
+                        </span>
+                      </>
+                    )}
                   </>
                 )}
               </div>
-              {quantity > 1 && (
+              {isPackMode ? (
                 <p className="text-sm mt-2 font-medium" style={{ color: store.colors.primary }}>
-                  Total por {quantity} unidades: S/{totalPrice.toFixed(2)}
+                  {packUnitLabel.charAt(0).toUpperCase() + packUnitLabel.slice(1)} de {unitsPerPackNum} unidades · equivale a S/{perUnitInPack.toFixed(2)} c/u
+                  {packSavingsPct > 0 ? ` · ahorras ${packSavingsPct}%` : ''}
                 </p>
-              )}
-              {savings > 0 && (
-                <p className="text-sm mt-2 font-medium" style={{ color: store.colors.primary }}>
-                  Ahorras S/{(Number(savings) * quantity).toFixed(2)} con este precio especial
-                </p>
+              ) : (
+                <>
+                  {quantity > 1 && (
+                    <p className="text-sm mt-2 font-medium" style={{ color: store.colors.primary }}>
+                      Total por {quantity} unidades: S/{totalPrice.toFixed(2)}
+                    </p>
+                  )}
+                  {savings > 0 && (
+                    <p className="text-sm mt-2 font-medium" style={{ color: store.colors.primary }}>
+                      Ahorras S/{(Number(savings) * quantity).toFixed(2)} con este precio especial
+                    </p>
+                  )}
+                </>
               )}
             </div>
 
-            {/* Description + Especificaciones (ficha tecnica automatica) */}
-            {(() => {
-              const { intro, specs } = parseProductSpecs(product.description)
-              if (specs.length === 0) {
-                return (
-                  <div className="mt-6">
-                    <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">
-                      Descripcion del producto
-                    </h2>
-                    <div className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
-                      {product.description || 'Este producto no tiene una descripcion detallada todavia. Contacta al vendedor por WhatsApp para mas informacion.'}
-                    </div>
-                  </div>
-                )
-              }
-              return (
-                <div className="mt-6 space-y-5">
-                  {intro && (
-                    <div>
-                      <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">
-                        Descripcion
-                      </h2>
-                      <div className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">{intro}</div>
-                    </div>
+            {/* Selector de presentación: por unidad o por bulto (venta por mayor) */}
+            {hasPack && (
+              <div className="mt-4 grid grid-cols-2 gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setPurchaseMode('unit')}
+                  className="relative p-3 rounded-xl border-2 text-left transition-all"
+                  style={
+                    !isPackMode
+                      ? { borderColor: store.colors.primary, backgroundColor: store.colors.primary + '0D' }
+                      : { borderColor: '#e5e7eb' }
+                  }
+                >
+                  <span className="block text-[10px] font-semibold uppercase tracking-wider text-gray-400">Por unidad</span>
+                  <span className="block text-base font-bold text-gray-900">S/{unitPriceNum.toFixed(2)}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPurchaseMode('pack')}
+                  className="relative p-3 rounded-xl border-2 text-left transition-all"
+                  style={
+                    isPackMode
+                      ? { borderColor: store.colors.primary, backgroundColor: store.colors.primary + '0D' }
+                      : { borderColor: '#e5e7eb' }
+                  }
+                >
+                  <span className="block text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+                    {packUnitLabel} x{unitsPerPackNum}
+                  </span>
+                  <span className="block text-base font-bold text-gray-900">S/{packPriceNum.toFixed(2)}</span>
+                  {packSavingsPct > 0 && (
+                    <span className="absolute top-2 right-2 text-[10px] font-bold bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full">
+                      -{packSavingsPct}%
+                    </span>
                   )}
-                  <div>
-                    <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">
-                      Especificaciones
-                    </h2>
-                    <ul className="rounded-xl border border-gray-100 bg-gray-50/60 divide-y divide-gray-100 overflow-hidden">
-                      {specs.map((s, i) => (
-                        <li key={`${s.label}-${i}`} className="flex items-start gap-2.5 px-3.5 py-2.5 text-sm">
-                          <Check className="w-4 h-4 mt-0.5 shrink-0" style={{ color: store.colors.primary }} />
-                          <span className="text-gray-500 leading-snug">
-                            <span className="font-semibold text-gray-800">{s.label}:</span> {s.value}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              )
-            })()}
+                </button>
+              </div>
+            )}
+
+            {/* Nota: la descripción y las especificaciones se muestran en la sección
+                "Detalles del producto" más abajo, a todo lo ancho (estilo catálogo
+                premium tipo Amazon). Junto a la foto solo queda el bloque de compra. */}
 
             {/* Features / Benefits - conditional based on store settings */}
             {(() => {
@@ -694,7 +749,7 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
             {/* Quantity Selector */}
             <div className="mt-6">
               <label className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3 block">
-                Cantidad
+                {isPackMode ? `Cantidad de ${packUnitLabel}s` : 'Cantidad'}
               </label>
               <div className="flex items-center gap-0">
                 <button
@@ -757,29 +812,37 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
                     onClick={openWhatsApp}
                   >
                     <MessageCircle className="w-5 h-5" />
-                    Comprar por WhatsApp
+                    {isPackMode ? `Comprar por WhatsApp (${packUnitLabel})` : 'Comprar por WhatsApp'}
                   </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full gap-3 rounded-2xl py-5 text-sm font-bold transition-colors"
-                    style={{
-                      borderColor: addedToOrder ? '#16a34a' : store.colors.primary + '60',
-                      color: addedToOrder ? '#16a34a' : store.colors.primary,
-                      backgroundColor: addedToOrder ? '#f0fdf4' : 'transparent',
-                    }}
-                    onClick={handleAddToOrder}
-                  >
-                    {addedToOrder ? <Check className="w-5 h-5" /> : <ShoppingBag className="w-5 h-5" />}
-                    {addedToOrder ? 'Agregado al pedido' : 'Agregar al pedido'}
-                  </Button>
-                  {totalItems > 0 && !addedToOrder && (
-                    <p className="text-xs text-center text-violet-600 font-medium">
-                      Llevas {totalItems} producto{totalItems > 1 ? 's' : ''} en tu pedido
+                  {isPackMode ? (
+                    <p className="text-xs text-center text-gray-400">
+                      La compra por {packUnitLabel} se coordina directo por WhatsApp — te confirmamos stock y total
                     </p>
+                  ) : (
+                    <>
+                      <Button
+                        variant="outline"
+                        className="w-full gap-3 rounded-2xl py-5 text-sm font-bold transition-colors"
+                        style={{
+                          borderColor: addedToOrder ? '#16a34a' : store.colors.primary + '60',
+                          color: addedToOrder ? '#16a34a' : store.colors.primary,
+                          backgroundColor: addedToOrder ? '#f0fdf4' : 'transparent',
+                        }}
+                        onClick={handleAddToOrder}
+                      >
+                        {addedToOrder ? <Check className="w-5 h-5" /> : <ShoppingBag className="w-5 h-5" />}
+                        {addedToOrder ? 'Agregado al pedido' : 'Agregar al pedido'}
+                      </Button>
+                      {totalItems > 0 && !addedToOrder && (
+                        <p className="text-xs text-center text-violet-600 font-medium">
+                          Llevas {totalItems} producto{totalItems > 1 ? 's' : ''} en tu pedido
+                        </p>
+                      )}
+                      <p className="text-xs text-center text-gray-400">
+                        ¿Varios productos? Agregalos al pedido y envíalos todos juntos por WhatsApp
+                      </p>
+                    </>
                   )}
-                  <p className="text-xs text-center text-gray-400">
-                    ¿Varios productos? Agregalos al pedido y envíalos todos juntos por WhatsApp
-                  </p>
                 </>
               )}
               {/* Stock indicator */}
@@ -928,7 +991,11 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
                               S/{totalPrice.toFixed(2)}
                             </p>
                             <p className="text-xs text-gray-400 mt-1">
-                              {quantity > 1 ? `${quantity}x ${product.name}` : `por ${product.name}`}
+                              {isPackMode
+                                ? `${quantity}x ${packUnitLabel} de ${product.name}`
+                                : quantity > 1
+                                  ? `${quantity}x ${product.name}`
+                                  : `por ${product.name}`}
                             </p>
                           </div>
 
@@ -959,7 +1026,9 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
                             className="w-full text-white gap-3 rounded-2xl py-5 text-sm font-bold shadow-lg hover:opacity-90 transition-opacity"
                             style={{ backgroundColor: '#25D366' }}
                             onClick={() => {
-                              const qtyText = quantity > 1 ? ` (${quantity} unidades)` : ''
+                              const qtyText = isPackMode
+                                ? ` (${quantity} ${packUnitLabel}${quantity > 1 ? 's' : ''} de ${unitsPerPackNum} unidades)`
+                                : quantity > 1 ? ` (${quantity} unidades)` : ''
                               const msg = encodeURIComponent(
                                 `Hola! Acabo de realizar el pago por Yape/Plin de S/${totalPrice.toFixed(2)} por: ${product.name}${qtyText}\nPor favor confirmar mi pedido.`
                               )
@@ -999,6 +1068,79 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
             </div>
           </div>
         </div>
+
+        {/* Detalles del producto: descripción, ficha técnica y galería a todo lo ancho
+            (estilo catálogo premium tipo Amazon — junto a la foto solo queda el bloque de compra) */}
+        {(() => {
+          const { intro, specs } = parseProductSpecs(product.description)
+          const detailImages = [product.imageUrl, ...(product.images || [])].filter(Boolean)
+          const hasText = !!(intro && intro.trim()) || specs.length > 0
+          const hasGallery = detailImages.length > 1
+          if (!hasText && !hasGallery) return null
+          return (
+            <div className="mt-16">
+              <h2 className="text-xl font-bold text-gray-900 mb-6">Detalles del producto</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+                {hasText && (
+                  <div>
+                    {intro && intro.trim() && (
+                      <div>
+                        <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">
+                          Descripción
+                        </h3>
+                        <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">{intro}</p>
+                      </div>
+                    )}
+                    {specs.length > 0 && (
+                      <div className={intro && intro.trim() ? 'mt-6' : ''}>
+                        <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">
+                          Especificaciones
+                        </h3>
+                        <ul className="rounded-xl border border-gray-100 bg-gray-50/60 divide-y divide-gray-100 overflow-hidden">
+                          {specs.map((s, i) => (
+                            <li key={`${s.label}-${i}`} className="flex items-start gap-2.5 px-3.5 py-2.5 text-sm">
+                              <Check className="w-4 h-4 mt-0.5 shrink-0" style={{ color: store.colors.primary }} />
+                              <span className="text-gray-500 leading-snug">
+                                <span className="font-semibold text-gray-800">{s.label}:</span> {s.value}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {hasGallery && (
+                  <div className={hasText ? '' : 'md:col-span-2'}>
+                    <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">
+                      Galería <span className="text-gray-400 font-medium normal-case tracking-normal">({detailImages.length} fotos)</span>
+                    </h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {detailImages.map((img, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => { setSelectedImageIndex(idx); setShowZoom(true) }}
+                          className="group aspect-square rounded-xl overflow-hidden border border-gray-100 bg-gray-50 cursor-zoom-in"
+                        >
+                          <img
+                            src={img}
+                            alt={`${product.name} - foto ${idx + 1}`}
+                            loading="lazy"
+                            decoding="async"
+                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+                            onError={(e) => {
+                              ;(e.target as HTMLImageElement).src = imgFallback
+                            }}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )
+        })()}
 
         {/* Related Products */}
         {relatedProducts.length > 0 && (

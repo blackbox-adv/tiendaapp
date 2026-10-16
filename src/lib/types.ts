@@ -115,6 +115,9 @@ export interface Product {
   images: string[]      // Array of additional image URLs for gallery
   color: string | null  // Product color variant
   stock?: number        // -1 = unlimited, 0 = out of stock, >0 = available units (default: -1)
+  unitLabel?: string | null   // venta por bulto: "cajón", "docena", "pack" (opcional)
+  unitsPerPack?: number | null  // cuántas unidades trae el bulto (>=2)
+  packPrice?: number | null   // precio del bulto completo
   isActive: boolean
   featured: boolean
   rating: number
