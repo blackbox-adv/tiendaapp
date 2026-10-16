@@ -237,6 +237,27 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // Add pack-selling columns to StoreProduct if missing (venta por unidad/cajón/docena)
+  const packColumns = [
+    { name: 'unitLabel', sql: `ALTER TABLE "StoreProduct" ADD COLUMN IF NOT EXISTS "unitLabel" TEXT` },
+    { name: 'unitsPerPack', sql: `ALTER TABLE "StoreProduct" ADD COLUMN IF NOT EXISTS "unitsPerPack" INTEGER` },
+    { name: 'packPrice', sql: `ALTER TABLE "StoreProduct" ADD COLUMN IF NOT EXISTS "packPrice" DECIMAL(10,2)` },
+  ]
+
+  for (const col of packColumns) {
+    try {
+      await db.$executeRawUnsafe(col.sql)
+      results.push({ table: 'StoreProduct', action: `added_column_${col.name}`, success: true })
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err)
+      if (errMsg.includes('already exists') || errMsg.includes('duplicate')) {
+        results.push({ table: 'StoreProduct', action: `column_${col.name}_already_exists`, success: true })
+      } else {
+        results.push({ table: 'StoreProduct', action: `add_column_${col.name}`, success: false, error: errMsg.substring(0, 200) })
+      }
+    }
+  }
+
   // Add foreign keys separately (they depend on tables existing)
   const foreignKeys = [
     `DO $$ BEGIN ALTER TABLE "Store" ADD CONSTRAINT "Store_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE; EXCEPTION WHEN OTHERS THEN IF SQLSTATE != '42710' THEN RAISE; END IF; END $$;`,
