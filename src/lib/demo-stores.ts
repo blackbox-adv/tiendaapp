@@ -9,7 +9,7 @@
 //
 // Si agregas una tienda demo nueva aquí, los enlaces del home siguen
 // funcionando igual (noindex NO bloquea el acceso de visitantes).
-export const DEMO_STORE_SLUGS = ['pizzeria-napoli', 'boutique-elegance', 'techstore-peru'] as const
+export const DEMO_STORE_SLUGS = ['pizzeria-napoli', 'boutique-elegance', 'techstore-peru', 'el-importador'] as const
 
 export function isDemoStore(slug: string): boolean {
   return (DEMO_STORE_SLUGS as readonly string[]).includes(slug)
