@@ -30,6 +30,7 @@ export async function GET(request: NextRequest) {
               'price', p.price, 'originalPrice', p."originalPrice",
               'imageUrl', p."imageUrl", 'images', p.images,
               'category', p.category, 'color', p.color, 'stock', p.stock,
+              'unitLabel', p."unitLabel", 'unitsPerPack', p."unitsPerPack", 'packPrice', p."packPrice",
               'isActive', p."isActive", 'featured', p.featured,
               'rating', p.rating, 'storeId', p."storeId", 'createdAt', p."createdAt"
             )
