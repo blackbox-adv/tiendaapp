@@ -36,6 +36,9 @@ export async function GET(request: NextRequest) {
         images: true,
         category: true,
         color: true,
+        unitLabel: true,
+        unitsPerPack: true,
+        packPrice: true,
         isActive: true,
         featured: true,
         rating: true,
@@ -66,7 +69,7 @@ export async function POST(request: NextRequest) {
       return apiError(validation.error, 400, undefined, request)
     }
 
-    const { storeId, name, description, price, originalPrice, imageUrl, images, category, color, isActive, featured, rating } =
+    const { storeId, name, description, price, originalPrice, imageUrl, images, category, color, isActive, featured, rating, unitLabel, unitsPerPack, packPrice } =
       validation.data
 
     // Check ownership FIRST — use simple query to avoid PgBouncer timeout with Prisma include
@@ -125,8 +128,8 @@ export async function POST(request: NextRequest) {
 
       // Use raw SQL to avoid PgBouncer binary format issues (22P03 error)
       await tx.$executeRawUnsafe(`
-        INSERT INTO "StoreProduct" ("id", "storeId", "name", "description", "price", "originalPrice", "imageUrl", "images", "category", "color", "stock", "isActive", "featured", "rating", "createdAt", "updatedAt")
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9, $10, $11, $12, $13, $14, NOW(), NOW())
+        INSERT INTO "StoreProduct" ("id", "storeId", "name", "description", "price", "originalPrice", "imageUrl", "images", "category", "color", "stock", "unitLabel", "unitsPerPack", "packPrice", "isActive", "featured", "rating", "createdAt", "updatedAt")
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9, $10, $11, $12, $13, $14, $15, $16, $17, NOW(), NOW())
       `,
         productId,
         storeId,
@@ -139,6 +142,9 @@ export async function POST(request: NextRequest) {
         sanitizedCategory,
         color || null,
         validation.data.stock !== undefined ? validation.data.stock : -1,
+        unitLabel || null,
+        unitsPerPack != null ? Number(unitsPerPack) : null,
+        packPrice != null ? parseFloat(packPrice.toString()) : null,
         isActive !== undefined ? isActive : true,
         featured === true,
         rating ? parseFloat(rating.toString()) : 0,
@@ -235,6 +241,15 @@ export async function PUT(request: NextRequest) {
       data.originalPrice = data.originalPrice ? parseFloat(data.originalPrice.toString()) : null
     }
     if (data.rating !== undefined) data.rating = parseFloat(data.rating.toString())
+    if (data.packPrice !== undefined) {
+      data.packPrice = data.packPrice ? parseFloat(data.packPrice.toString()) : null
+    }
+    if (data.unitsPerPack !== undefined && data.unitsPerPack !== null) {
+      data.unitsPerPack = Number(data.unitsPerPack)
+    }
+    if (data.unitLabel !== undefined && typeof data.unitLabel === 'string') {
+      data.unitLabel = data.unitLabel.trim() || null
+    }
 
     // Use raw SQL UPDATE to avoid PgBouncer binary format issues with DECIMAL
     const setClauses: string[] = []
@@ -272,6 +287,9 @@ export async function PUT(request: NextRequest) {
     addField('category', data.category)
     addField('color', data.color)
     addField('stock', data.stock)
+    addField('unitLabel', data.unitLabel)
+    addField('unitsPerPack', data.unitsPerPack)
+    addField('packPrice', data.packPrice)
     addField('isActive', data.isActive)
     addField('featured', data.featured)
     addField('rating', data.rating)

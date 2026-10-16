@@ -1,6 +1,6 @@
 'use client'
 
-import { Truck, ShieldCheck, RotateCcw } from 'lucide-react'
+import { Truck, ShieldCheck, RotateCcw, Package } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import type { Product, Store } from '@/lib/types'
 
@@ -47,6 +47,12 @@ export function ProductBadges({ product, primaryColor = '#7C3AED', store }: Prod
       {product.originalPrice && Number(product.price) < Number(product.originalPrice) && (
         <Badge className="bg-red-500 text-white text-[10px] font-bold border-0 rounded-md px-2 py-0.5 shadow-md">
           -{Math.round(((Number(product.originalPrice) - Number(product.price)) / Number(product.originalPrice)) * 100)}%
+        </Badge>
+      )}
+      {!!product.packPrice && !!product.unitsPerPack && Number(product.unitsPerPack) >= 2 && (
+        <Badge className="bg-white/90 backdrop-blur-sm text-gray-700 text-[9px] font-semibold border-0 rounded-md px-1.5 py-0.5 shadow-sm flex items-center gap-1">
+          <Package className="w-2.5 h-2.5" style={{ color: primaryColor }} />
+          {product.unitLabel ? `${product.unitLabel} x${product.unitsPerPack}` : `x${product.unitsPerPack}`}
         </Badge>
       )}
       {activeStoreFeatures.map((f) => (
