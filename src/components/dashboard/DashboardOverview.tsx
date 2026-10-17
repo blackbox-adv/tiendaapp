@@ -303,6 +303,16 @@ function AnalyticsCharts({ storeProducts }: { storeProducts: Array<{ categoryId:
 export function DashboardOverview() {
   const { currentUser, currentStore, products, navigate } = useAppStore()
 
+  // Fetch plan info from API — hooks SIEMPRE al inicio, antes de cualquier
+  // early return (si estaban después del skeleton, React crasheaba al pasar
+  // de skeleton → datos: "Rendered more hooks than during the previous render")
+  const [apiPlans, setApiPlans] = useState<Array<{ id: string; name: string; price: number; maxProducts: number; type: string }>>([])
+  useEffect(() => {
+    fetch('/api/plans').then(r => r.ok ? r.json() : []).then(data => {
+      if (Array.isArray(data)) setApiPlans(data)
+    }).catch(() => {})
+  }, [])
+
   if (!currentUser || !currentStore) {
     return (
       <div className="space-y-6 animate-fadeIn">
@@ -365,13 +375,6 @@ export function DashboardOverview() {
   const storeProducts = products.filter((p) => p.storeId === currentStore.id && p.isActive)
   const recentProducts = storeProducts.slice(-4)
 
-  // Fetch plan info from API
-  const [apiPlans, setApiPlans] = useState<Array<{ id: string; name: string; price: number; maxProducts: number; type: string }>>([])
-  useEffect(() => {
-    fetch('/api/plans').then(r => r.ok ? r.json() : []).then(data => {
-      if (Array.isArray(data)) setApiPlans(data)
-    }).catch(() => {})
-  }, [])
   const currentPlan = apiPlans.find(p => p.id === currentUser.planId || p.type === currentUser.planId) || null
 
   const inventoryValue = storeProducts.reduce((sum, p) => sum + p.price, 0)

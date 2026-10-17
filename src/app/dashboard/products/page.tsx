@@ -34,7 +34,7 @@ export default function ProductsPage() {
       setLoading(false);
     }
     init();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);  
 
   const handleDelete = async (productId: string) => {
     if (!confirm('¿Estás seguro de eliminar este producto?')) return;

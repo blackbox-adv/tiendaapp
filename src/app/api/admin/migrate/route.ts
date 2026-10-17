@@ -237,6 +237,27 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // Add announcement columns to Store if missing (franja de anuncio de la tienda).
+  // Idempotente: si ya existen en producción, quedan como "already_exists".
+  const announcementColumns = [
+    { name: 'announcementText', sql: `ALTER TABLE "Store" ADD COLUMN IF NOT EXISTS "announcementText" TEXT` },
+    { name: 'announcementLink', sql: `ALTER TABLE "Store" ADD COLUMN IF NOT EXISTS "announcementLink" TEXT` },
+  ]
+
+  for (const col of announcementColumns) {
+    try {
+      await db.$executeRawUnsafe(col.sql)
+      results.push({ table: 'Store', action: `added_column_${col.name}`, success: true })
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err)
+      if (errMsg.includes('already exists') || errMsg.includes('duplicate')) {
+        results.push({ table: 'Store', action: `column_${col.name}_already_exists`, success: true })
+      } else {
+        results.push({ table: 'Store', action: `add_column_${col.name}`, success: false, error: errMsg.substring(0, 200) })
+      }
+    }
+  }
+
   // Add pack-selling columns to StoreProduct if missing (venta por unidad/cajón/docena)
   const packColumns = [
     { name: 'unitLabel', sql: `ALTER TABLE "StoreProduct" ADD COLUMN IF NOT EXISTS "unitLabel" TEXT` },

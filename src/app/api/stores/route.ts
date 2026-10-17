@@ -6,6 +6,7 @@ import { checkTemplatePermission } from '@/lib/plan-gating'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 import { sanitizeBasic, sanitizeHtml } from '@/lib/sanitize'
 import { serializeDecimals } from '@/lib/utils'
+import { countStoreVisit } from '@/lib/visit-counter'
 
 // GET /api/stores - Public (store browsing by slug) or admin-only (list all)
 export async function GET(request: NextRequest) {
@@ -58,13 +59,14 @@ export async function GET(request: NextRequest) {
         return apiError('Tienda no encontrada', 404, undefined, request)
       }
 
-      // Increment visit count (fire-and-forget, don't block response)
-      db.store
-        .update({
+      // Increment visit count (fire-and-forget + acelerón anti-contención)
+      countStoreVisit(
+        () => db.store.update({
           where: { id: store.id },
           data: { visitCount: { increment: 1 } },
-        })
-        .catch(() => {})
+        }),
+        `store-api:${store.id}`
+      )
 
       return apiSuccess(serializeDecimals(store), 200, request)
     }
@@ -368,14 +370,9 @@ export async function POST(request: NextRequest) {
     const errMessage = error instanceof Error ? error.message : String(error)
     const errName = error instanceof Error ? error.constructor.name : typeof error
     console.error('[STORES] POST error:', errMessage, { name: errName, code: errCode, meta: JSON.stringify(errMeta) })
-    // Always include error details for debugging
-    const details = { 
-      errorType: errName, 
-      errorMessage: errMessage.substring(0, 200),
-      prismaCode: errCode || 'N/A', 
-      prismaMeta: JSON.stringify(errMeta || '').substring(0, 300) 
-    }
-    return apiError('Error creando tienda', 500, details, request)
+    // Detalles técnicos SOLO en logs del servidor (antes se devolvían al cliente
+    // exponiendo tablas/columnas internas de la BD)
+    return apiError('Error creando tienda', 500, undefined, request)
   }
 }
 

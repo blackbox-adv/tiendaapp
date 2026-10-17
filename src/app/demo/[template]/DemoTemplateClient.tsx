@@ -1019,6 +1019,17 @@ export function DemoTemplateClient({ template }: { template: string }) {
   const products = demoProducts[template] || []
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null)
 
+  // Initialize Zustand on mount — hook ANTES del early return (reglas de React:
+  // el useEffect condicional tras "if (!store) return null" viola el orden de hooks)
+  useEffect(() => {
+    if (!store) return
+    useAppStore.setState({
+      stores: [store],
+      products: products,
+      currentStore: store,
+    })
+  }, [])
+
   if (!store) return null
 
   const planId = templatePlanId[template] || 'free'
@@ -1040,11 +1051,6 @@ export function DemoTemplateClient({ template }: { template: string }) {
       currentStore: store,
     })
   }
-
-  // Initialize Zustand on mount (useEffect instead of render-time mutation)
-  useEffect(() => {
-    setStoreData()
-  }, [])
 
   // Handle product click from templates
   const handleProductClick = (productId: string) => {

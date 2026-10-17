@@ -27,6 +27,17 @@ import { LoginPage } from '@/components/auth/LoginPage'
 import { RegisterPage } from '@/components/auth/RegisterPage'
 import { ResetPasswordPage } from '@/components/auth/ResetPasswordPage'
 
+// Admin (SPA): imports estáticos — antes eran require() dentro del render
+// (anti-patrón: rompe el análisis de bundle y el lint no-require-imports)
+import { AdminSidebar } from '@/components/admin/AdminSidebar'
+import { AdminOverview } from '@/components/admin/AdminOverview'
+import { AdminStores } from '@/components/admin/AdminStores'
+import { AdminUsers } from '@/components/admin/AdminUsers'
+import { AdminPlans } from '@/components/admin/AdminPlans'
+import { AdminPaymentsPage } from '@/components/admin/AdminPaymentsPage'
+import { AdminSettings } from '@/components/admin/AdminSettings'
+import { AdminNotificationsPage } from '@/components/admin/AdminNotificationsPage'
+
 // Info
 import { AboutPage } from '@/components/info/AboutPage'
 import { ContactPage } from '@/components/info/ContactPage'
@@ -140,7 +151,7 @@ export default function AppRouter() {
     if (handler) {
       handler()
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [])  
 
   // Redirect dashboard routes to Next.js pages
   useEffect(() => {
@@ -297,14 +308,6 @@ export default function AppRouter() {
       case 'admin-notifications': {
         // Admin pages are still handled by Zustand SPA for now
         // TODO: Migrate admin to Next.js App Router pages
-        const AdminSidebar = require('@/components/admin/AdminSidebar').AdminSidebar
-        const AdminOverview = require('@/components/admin/AdminOverview').AdminOverview
-        const AdminStores = require('@/components/admin/AdminStores').AdminStores
-        const AdminUsers = require('@/components/admin/AdminUsers').AdminUsers
-        const AdminPlans = require('@/components/admin/AdminPlans').AdminPlans
-        const AdminPaymentsPage = require('@/components/admin/AdminPaymentsPage').AdminPaymentsPage
-        const AdminSettings = require('@/components/admin/AdminSettings').AdminSettings
-        const AdminNotificationsPage = require('@/components/admin/AdminNotificationsPage').AdminNotificationsPage
 
         const adminContent = () => {
           switch (route.page) {

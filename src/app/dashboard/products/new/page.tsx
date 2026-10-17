@@ -78,7 +78,7 @@ export default function NewProductPage() {
       return;
     }
     Promise.resolve(syncFromAPI()).finally(() => setStoreResolved(true));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   const uploadImage = async (file: File): Promise<string | null> => {

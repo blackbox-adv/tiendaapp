@@ -5,6 +5,7 @@ import type { Metadata } from 'next'
 import { StorePublicClient } from './StorePublicClient'
 import { serializeDecimals } from '@/lib/utils'
 import { isDemoStore } from '@/lib/demo-stores'
+import { countStoreVisit } from '@/lib/visit-counter'
 
 // force-dynamic: ISR (revalidate) + notFound() devuelve 200 en vez de 404 (soft-404, mal SEO).
 // Con dynamic, las tiendas inactivas/borradas dan 404 real, el catálogo siempre está fresco
@@ -105,14 +106,17 @@ export default async function StorePage({ params }: Props) {
       },
     }) as unknown as Record<string, unknown> | null
 
-    // Increment visit count (fire-and-forget, non-blocking)
-    if (store && store.id) {
-      db.store
-        .update({
-          where: { id: store.id as string },
+    // Increment visit count — fire-and-forget + acelerón anti-contención
+    // (ver src/lib/visit-counter.ts)
+    const storeId = store?.id as string | undefined
+    if (storeId) {
+      countStoreVisit(
+        () => db.store.update({
+          where: { id: storeId },
           data: { visitCount: { increment: 1 } },
-        })
-        .catch(() => {})
+        }),
+        `store:${storeId}`
+      )
     }
 
     if (store && store.isActive !== false) {
@@ -127,35 +131,30 @@ export default async function StorePage({ params }: Props) {
   }
 
   // Plan activo de la tienda (para gating de funciones premium en la tienda
-  // pública, ej: packs/combos solo Pro-Premium). SQL crudo, tolerante a fallos.
-  let planType: string | null = null
-  try {
-    const planRows = await db.$queryRawUnsafe(
-      `SELECT pl.type FROM "Subscription" sub
-       JOIN "Plan" pl ON pl.id = sub."planId"
-       WHERE sub."storeId" = $1 AND sub.status = 'active'
-       ORDER BY sub."createdAt" DESC LIMIT 1`,
-      store.id as string
-    ) as Array<{ type?: string }>
-    planType = planRows?.[0]?.type ?? null
-  } catch {
-    // sin plan detectable → 'free' (más seguro para el negocio)
-  }
-
-  // Franja de anuncio: columnas nuevas leídas con SQL crudo para no
-  // depender del esquema de Prisma (si aún no existen → null, sin romper).
-  let announcementText: string | null = null
-  let announcementLink: string | null = null
-  try {
-    const rows = await db.$queryRawUnsafe(
-      `SELECT "announcementText", "announcementLink" FROM "Store" WHERE id = $1 LIMIT 1`,
-      store.id as string
-    ) as Array<{ announcementText?: string | null; announcementLink?: string | null }>
-    announcementText = rows?.[0]?.announcementText ?? null
-    announcementLink = rows?.[0]?.announcementLink ?? null
-  } catch {
-    // migración pendiente: sin aviso
-  }
+  // pública, ej: packs/combos solo Pro-Premium) y franja de anuncio: son
+  // independientes entre sí → se piden EN PARALELO (antes eran ~2 RTT en serie).
+  // SQL crudo, tolerante a fallos cada uno por separado.
+  const [planRows, announcementRows] = await Promise.all([
+    db
+      .$queryRawUnsafe(
+        `SELECT pl.type FROM "Subscription" sub
+         JOIN "Plan" pl ON pl.id = sub."planId"
+         WHERE sub."storeId" = $1 AND sub.status = 'active'
+         ORDER BY sub."createdAt" DESC LIMIT 1`,
+        store.id as string
+      )
+      .catch(() => [] as Array<{ type?: string }>),
+    db
+      .$queryRawUnsafe(
+        `SELECT "announcementText", "announcementLink" FROM "Store" WHERE id = $1 LIMIT 1`,
+        store.id as string
+      )
+      .catch(() => [] as Array<{ announcementText?: string | null; announcementLink?: string | null }>),
+  ])
+  let planType: string | null = (planRows as Array<{ type?: string }>)?.[0]?.type ?? null
+  if (!planType) planType = null // sin plan detectable → null (la tienda pública lo trata como free)
+  const announcementText = (announcementRows as Array<{ announcementText?: string | null }>)?.[0]?.announcementText ?? null
+  const announcementLink = (announcementRows as Array<{ announcementLink?: string | null }>)?.[0]?.announcementLink ?? null
 
   return (
     <>

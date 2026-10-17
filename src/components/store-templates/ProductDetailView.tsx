@@ -90,6 +90,16 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
   const [apiProduct, setApiProduct] = useState<Product | null>(null)
   const [apiProducts, setApiProducts] = useState<Product[]>([])
 
+  // En visitas directas (Google, WhatsApp) el skeleton arrancaba en true y se
+  // quedaba pegado hasta terminar un fetch redundante, aunque el servidor ya
+  // hubiera pasado store+producto por props (el padre puebla Zustand justo
+  // después de montar). En cuanto los datos están en Zustand, se quita el skeleton.
+  useEffect(() => {
+    if (zustandStore && zustandProduct) {
+      setApiLoading(false)
+    }
+  }, [zustandStore, zustandProduct])
+
   useEffect(() => {
     if (zustandStore && zustandProduct) return
     const fetchFromApi = async () => {
@@ -157,6 +167,7 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
                 imageUrl: (p.imageUrl as string) || '',
                 images: Array.isArray(p.images) ? (p.images as string[]) : [],
                 color: (p.color as string) || null,
+                stock: typeof p.stock === 'number' ? p.stock : undefined,
                 unitLabel: (p.unitLabel as string | null) ?? null,
                 unitsPerPack: p.unitsPerPack != null ? toNum(p.unitsPerPack) || null : null,
                 packPrice: p.packPrice != null ? toNum(p.packPrice) || null : null,
@@ -177,7 +188,21 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
       }
       setApiLoading(false)
     }
-    fetchFromApi()
+    // Pequeño aplazamiento: en la página pública los efectos del HIJO corren
+    // ANTES que los del PADRE (que puebla Zustand). Al re-chequear en el
+    // siguiente macrotask evitamos un fetch redundante a /api/stores?slug=
+    // (query pesada) en cada visita directa a una ficha.
+    const t = setTimeout(() => {
+      const state = useAppStore.getState()
+      if (
+        state.stores.some((s) => s.slug === slug && s.isActive) &&
+        state.products.some((p) => p.id === productId && p.isActive)
+      ) {
+        return // el padre ya trajo los datos por SSR: no hace falta el fetch
+      }
+      fetchFromApi()
+    }, 0)
+    return () => clearTimeout(t)
   }, [slug, productId, zustandStore, zustandProduct])
 
   const displayStore = zustandStore || apiStore

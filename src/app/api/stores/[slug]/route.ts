@@ -5,6 +5,8 @@ import { apiError, apiSuccess } from '@/lib/api-response';
 import { serializeDecimals } from '@/lib/utils';
 import { checkTemplatePermission, getUserPlanType } from '@/lib/plan-gating';
 import { sweepIfNeeded } from '@/lib/billing-sweep';
+import { sanitizeUrl } from '@/lib/sanitize';
+import { countStoreVisit } from '@/lib/visit-counter';
 
 export async function GET(
   request: NextRequest,
@@ -20,7 +22,13 @@ export async function GET(
     const store = await db.store.findUnique({
       where: { slug },
       include: {
-        products: true,
+        // Solo productos activos y con tope: antes incluía TODO (incluidos
+        // borradores = fuga de datos) y sin límite (payload ilimitado).
+        products: {
+          where: { isActive: true },
+          orderBy: { createdAt: 'desc' },
+          take: 200,
+        },
         categories: true,
         _count: {
           select: { products: true, categories: true },
@@ -32,8 +40,11 @@ export async function GET(
       return NextResponse.json({ error: 'Store not found' }, { status: 404 });
     }
 
-    // Increment visit count (fire-and-forget)
-    db.store.update({ where: { slug }, data: { visitCount: { increment: 1 } } }).catch(() => {});
+    // Increment visit count (fire-and-forget + acelerón anti-contención)
+    countStoreVisit(
+      () => db.store.update({ where: { slug }, data: { visitCount: { increment: 1 } } }),
+      `store-by-slug:${slug}`
+    );
 
     const payload = serializeDecimals(store) as typeof store & { shippingOptions?: Array<{ payFirst?: boolean }> };
 
@@ -93,6 +104,31 @@ export async function PUT(
     }
 
     const updateData: Record<string, unknown> = {};
+
+    // ── Sanitizado ligero del body libre (el otro PUT /api/stores valida con zod;
+    // este acepta body crudo). Acota longitudes y limpia URLs de imágenes. ──
+    const TEXT_LIMITS: Record<string, number> = {
+      name: 80, description: 2000, category: 40, whatsappNumber: 24,
+      primaryColor: 40, secondaryColor: 40,
+      popupTitle: 90, popupButtonText: 40, popupProductId: 64,
+    };
+    for (const [field, max] of Object.entries(TEXT_LIMITS)) {
+      if (typeof body[field] === 'string') {
+        // sin caracteres de control, con tope de longitud
+        body[field] = (body[field] as string).replace(/[\u0000-\u001f\u007f]/g, '').slice(0, max);
+      }
+    }
+    for (const urlField of ['logo', 'bannerUrl', 'yapeQrUrl', 'plinQrUrl', 'popupCustomImage']) {
+      if (typeof body[urlField] === 'string' && body[urlField]) {
+        const clean = sanitizeUrl(body[urlField] as string);
+        if (!clean) {
+          delete body[urlField]; // URL inválida: se ignora, no rompe el guardado
+        } else {
+          body[urlField] = clean.slice(0, 500);
+        }
+      }
+    }
+
     // otherPayments/shippingOptions ya quedaron saneados arriba (excluidos del loop para no sobrescribir)
     const allowedFields = ['name', 'description', 'template', 'primaryColor', 'secondaryColor', 'category', 'logo', 'bannerUrl', 'whatsappNumber', 'hasShipping', 'hasSecurePayment', 'hasReturns', 'popupEnabled', 'popupType', 'popupProductId', 'popupCustomImage', 'popupTitle', 'popupButtonText', 'yapeQrUrl', 'plinQrUrl', 'yapeNumber', 'plinNumber'];
 

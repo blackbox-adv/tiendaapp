@@ -11,6 +11,10 @@ import { serializeDecimals, slugify } from '@/lib/utils'
 import { getUserPlanType } from '@/lib/plan-gating'
 import { generateLandingCopy, isGeminiConfigured, GeminiError } from '@/lib/ai/gemini'
 
+// Gemini puede tardar hasta 25s (timeout interno); sin este explícito, un
+// cambio de plan de Vercel al default de 10s cortaría la generación a medias.
+export const maxDuration = 60
+
 interface GenerateBody {
   storeId?: string
   productName?: string

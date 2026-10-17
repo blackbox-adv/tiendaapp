@@ -302,6 +302,14 @@ export async function PUT(request: NextRequest) {
       return apiError('Solo puedes cancelar tu suscripción. Contacta soporte para otros cambios.', 403, undefined, request)
     }
 
+    // 🔒 CRÍTICO: solo soporte (super_admin) puede cambiar el plan de una suscripción.
+    // Sin este guard, un cliente podía enviar {"id": <su sub>, "planId": <premium>}
+    // SIN "status": el guard de arriba se saltaba (status undefined) y el planId
+    // se aplicaba igual → plan Premium gratis (los ids de plan son públicos vía GET /api/plans).
+    if (!requireRole(auth.user, ['super_admin']) && planId) {
+      return apiError('Solo soporte puede cambiar tu plan. Escríbenos por WhatsApp para actualizarlo.', 403, undefined, request)
+    }
+
     // Build update SQL
     const updates: string[] = []
     const params: unknown[] = []

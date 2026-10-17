@@ -101,34 +101,41 @@ export default async function ProductPage({ params }: Props) {
     if (product && product.store) {
       store = product.store as Record<string, unknown>
 
-      // Fetch plan type for this store via the latest subscription
-      try {
-        const latestSub = await db.subscription.findFirst({
-          where: { storeId: store.id as string, status: 'active' },
-          orderBy: { createdAt: 'desc' },
-          include: { plan: { select: { type: true } } },
-        })
-        if (latestSub?.plan?.type) {
-          store = { ...store, planType: latestSub.plan.type }
-        }
-      } catch {
-        // Subscription lookup failed, default to 'free'
+      // SEO: la misma ficha era servible bajo CUALQUIER slug de tienda
+      // (/store/lo-que-sea/product/xyz) → contenido duplicado en Google.
+      // Si el slug de la URL no coincide con el de la tienda real, 404.
+      if ((store.slug as string) !== slug) {
+        notFound()
       }
 
-      // Fetch related products (same store, same category, different product)
-      if (product.isActive) {
-        const allRelated = await db.storeProduct.findMany({
-          where: {
-            storeId: store.id as string,
-            category: (product.category as string) || '',
-            isActive: true,
-            id: { not: id },
-          },
-          take: 4,
-          orderBy: { createdAt: 'desc' },
-        })
-        relatedProducts = allRelated as unknown as Record<string, unknown>[]
+      // Plan activo + productos relacionados: independientes → EN PARALELO
+      const [latestSub, allRelated] = await Promise.all([
+        db.subscription
+          .findFirst({
+            where: { storeId: store.id as string, status: 'active' },
+            orderBy: { createdAt: 'desc' },
+            include: { plan: { select: { type: true } } },
+          })
+          .catch(() => null),
+        product.isActive
+          ? db.storeProduct
+              .findMany({
+                where: {
+                  storeId: store.id as string,
+                  category: (product.category as string) || '',
+                  isActive: true,
+                  id: { not: id },
+                },
+                take: 4,
+                orderBy: { createdAt: 'desc' },
+              })
+              .catch(() => [])
+          : Promise.resolve([]),
+      ])
+      if (latestSub?.plan?.type) {
+        store = { ...store, planType: latestSub.plan.type }
       }
+      relatedProducts = allRelated as unknown as Record<string, unknown>[]
     }
   } catch {
     // DB not available
@@ -149,7 +156,9 @@ export default async function ProductPage({ params }: Props) {
                 id: product.id as string,
                 name: product.name as string,
                 description: (product.description as string) || '',
-                price: product.price as number,
+                // Decimal de Prisma → number (si pasa como objeto/string, JSON.stringify
+                // lo emitía como string y Google ignoraba el precio)
+                price: Number(product.price),
                 imageUrl: (product.imageUrl as string) || '',
                 createdAt: (product.createdAt as string) || undefined,
               },

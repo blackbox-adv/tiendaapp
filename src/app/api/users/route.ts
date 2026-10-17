@@ -21,8 +21,11 @@ export async function GET(request: NextRequest) {
 
   try {
     const { searchParams } = new URL(request.url)
-    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
-    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '50', 10)))
+    // parseInt puede dar NaN (Math.max(1, NaN) = NaN → "LIMIT NaN" → 500)
+    const pageRaw = parseInt(searchParams.get('page') || '1', 10)
+    const limitRaw = parseInt(searchParams.get('limit') || '50', 10)
+    const page = Math.max(1, Number.isFinite(pageRaw) ? pageRaw : 1)
+    const limit = Math.min(100, Math.max(1, Number.isFinite(limitRaw) ? limitRaw : 50))
     const skip = (page - 1) * limit
 
     // Use raw SQL without parameters for PgBouncer compatibility
@@ -111,6 +114,16 @@ export async function POST(request: NextRequest) {
     }
     const { email, password, name, phone } = validation.data
 
+    // Registros abiertos/cerrados: control del dueño en /admin (PlatformSetting).
+    // Antes solo se desactivaba el botón en el frontend — un POST directo creaba
+    // cuentas igual. Si la lectura del setting falla, se permite el registro.
+    try {
+      const setting = await db.platformSetting.findUnique({ where: { key: 'registrationsEnabled' } })
+      if (setting && setting.value === 'false') {
+        return apiError('Los registros están temporalmente cerrados. Escríbenos por WhatsApp para crear tu cuenta.', 403, undefined, request)
+      }
+    } catch { /* setting no disponible: se permite el registro */ }
+
     // Check duplicate
     const existing = await db.user.findUnique({ where: { email: email.toLowerCase() } })
     if (existing) {
@@ -139,7 +152,8 @@ export async function POST(request: NextRequest) {
     auditLog({ action: 'REGISTER', userId: user.id, userEmail: user.email, ip: getClientIp(request), details: { name }, success: true, statusCode: 201 })
 
     // Send welcome email (non-blocking - registration succeeds even if email fails)
-    sendWelcomeEmail(user.name, user.email)
+    // .catch(): sin él, una rechazada era una unhandled rejection en serverless
+    sendWelcomeEmail(user.name, user.email).catch(() => {})
 
     return apiSuccess(safeUser, 201, request)
   } catch (error: unknown) {
@@ -147,17 +161,16 @@ export async function POST(request: NextRequest) {
     const errCode = error && typeof error === 'object' && 'code' in error ? (error as { code: string }).code : undefined
     const errMeta = error && typeof error === 'object' && 'meta' in error ? (error as { meta: unknown }).meta : undefined
 
-    console.error('[USERS] POST error:', errMsg, { code: errCode, meta: errMeta })
+    console.error('[USERS] POST error:', errMsg, { code: errCode, meta: JSON.stringify(errMeta || '').substring(0, 300) })
 
     // Handle Prisma unique constraint violation (P2002)
     if (errCode === 'P2002') {
       return apiError('Este email ya esta registrado. Intenta iniciar sesion con tu cuenta existente.', 409, undefined, request)
     }
 
-    // Include Prisma error code and meta for debugging (safe to expose - no user data)
-    const details = errCode ? { prismaCode: errCode, hint: JSON.stringify(errMeta || '').substring(0, 200) } : undefined
-
-    return apiError('Error creando usuario. Intenta de nuevo o contacta soporte.', 500, details, request)
+    // Detalles de Prisma SOLO en el log del servidor (antes iban al cliente y
+    // exponían nombres de tablas/columnas internas)
+    return apiError('Error creando usuario. Intenta de nuevo o contacta soporte.', 500, undefined, request)
   }
 }
 
@@ -192,7 +205,16 @@ export async function PUT(request: NextRequest) {
     // Build update data
     const updateData: Record<string, unknown> = { ...data }
 
-    // Hash password if provided
+    // 🔒 Cambio de contraseña: solo super_admin puede resetear contraseñas por
+    // esta vía. Los usuarios cambian la SUYA por /api/auth/change-password, que
+    // exige la contraseña actual e invalida las demás sesiones (tokenVersion).
+    // Antes: cualquier token robado podía reescribir la contraseña y quedarse
+    // con la cuenta para siempre.
+    if (password && !requireRole(auth.user, ['super_admin'])) {
+      return apiError('Para cambiar tu contraseña usa "Cambiar contraseña" en Configuración.', 403, undefined, request)
+    }
+
+    // Hash password if provided (solo llega aquí si es super_admin)
     if (password) {
       updateData.password = await hashPassword(password)
     }

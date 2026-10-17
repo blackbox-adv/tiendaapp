@@ -46,7 +46,7 @@ export function ChatWidget({ storeSlug, storeName }: { storeSlug: string; storeN
         setNameSaved(true)
       }
     } catch { /* localStorage bloqueado: sesión efímera */ }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [storeSlug])
 
   const poll = useCallback(async (tid: string) => {

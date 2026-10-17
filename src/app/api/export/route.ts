@@ -38,8 +38,13 @@ function limaDateParts(date: Date): { dateStr: string; timeStr: string } {
 
 function csvEscape(value: unknown): string {
   const s = value === null || value === undefined ? '' : String(value)
-  if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"'
-  return s
+  // Anti formula-injection (OWASP): los datos del cliente (nombre, teléfono,
+  // notas) llegan al CSV. Si una celda empieza por = + - @ o tab, Excel/
+  // LibreOffice la interpretan como fórmula (=CMD(...), =HYPERLINK(...)).
+  // El apóstrofe inicial fuerza tratamiento como texto.
+  const safe = /^[=+\-@\t\r]/.test(s) ? `'${s}` : s
+  if (/[",\n\r]/.test(safe)) return '"' + safe.replace(/"/g, '""') + '"'
+  return safe
 }
 
 function toCsv(rows: unknown[][]): string {

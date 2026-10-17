@@ -252,7 +252,7 @@ export function AdminPaymentsPage() {
                           title="Ver comprobante en grande"
                           className="block w-14 h-14 rounded-lg overflow-hidden border border-gray-200 hover:ring-2 hover:ring-violet-300 transition-all"
                         >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          { }
                           <img
                             src={payment.receiptUrl}
                             alt="Comprobante de pago"

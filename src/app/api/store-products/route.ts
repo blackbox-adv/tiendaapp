@@ -26,6 +26,8 @@ export async function GET(request: NextRequest) {
     const products = await db.storeProduct.findMany({
       where: { storeId, isActive: true },
       orderBy: { createdAt: 'desc' },
+      // Tope defensivo (payload acotado); param ?limit para el dashboard
+      take: Math.min(1000, Math.max(1, parseInt(searchParams.get('limit') || '1000', 10) || 1000)),
       select: {
         id: true,
         name: true,
@@ -186,13 +188,8 @@ export async function POST(request: NextRequest) {
     const errMessage = error instanceof Error ? error.message : String(error)
     const errName = error instanceof Error ? error.constructor.name : typeof error
     console.error('[PRODUCTS] POST error:', errMessage, { name: errName, code: errCode, meta: JSON.stringify(errMeta) })
-    const details = {
-      errorType: errName,
-      errorMessage: errMessage.substring(0, 300),
-      prismaCode: errCode || 'N/A',
-      prismaMeta: JSON.stringify(errMeta || '').substring(0, 300)
-    }
-    return apiError('Error creando producto', 500, details, request)
+    // Detalles técnicos SOLO en logs del servidor (antes iban al cliente)
+    return apiError('Error creando producto', 500, undefined, request)
   }
 }
 

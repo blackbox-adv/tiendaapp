@@ -144,8 +144,17 @@ export async function runBillingSweep(): Promise<SweepResult> {
 
 // Ejecución perezosa segura para rutas calientes:
 // 1 query del guard; si hay trabajo, aplica transiciones. Nunca lanza.
+// Acelerón por instancia: el guard corre como máximo 1 vez por minuto — las
+// transiciones de facturación no son sensibles al segundo y así las rutas
+// públicas (tienda, ficha) dejan de golpear la BD con el guard en cada request.
+const SWEEP_THROTTLE_MS = 60_000
+let lastSweepCheckAt = 0
+
 export async function sweepIfNeeded(): Promise<void> {
   try {
+    const now = Date.now()
+    if (now - lastSweepCheckAt < SWEEP_THROTTLE_MS) return
+    lastSweepCheckAt = now
     if (await hasBillingWork()) {
       await runBillingSweep()
     }

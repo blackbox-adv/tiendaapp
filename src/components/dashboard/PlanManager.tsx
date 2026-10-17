@@ -683,7 +683,7 @@ export function PlanManager() {
                 <Label>Foto del comprobante</Label>
                 {receiptPreview ? (
                   <div className="relative rounded-xl border border-gray-200 overflow-hidden">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    { }
                     <img
                       src={receiptPreview}
                       alt="Comprobante de pago"
