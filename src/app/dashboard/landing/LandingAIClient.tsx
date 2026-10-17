@@ -352,7 +352,7 @@ export default function LandingAIClient() {
               <div className="mt-3 flex flex-wrap gap-2">
                 {photos.map((p, i) => (
                   <div key={i} className="relative">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    { }
                     <img src={p} alt={`foto ${i + 1}`} className="h-16 w-16 rounded-lg object-cover" />
                     <button
                       onClick={() => setPhotos(photos.filter((_, j) => j !== i))}

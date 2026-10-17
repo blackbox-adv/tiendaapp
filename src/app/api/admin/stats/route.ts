@@ -118,6 +118,7 @@ export async function GET(request: Request) {
     const message = error instanceof Error ? error.message : 'Error fetching stats'
     console.error('[ADMIN STATS]', message)
     if (error instanceof Error && error.stack) console.error('[ADMIN STATS] stack:', error.stack)
-    return NextResponse.json({ error: message }, { status: 500 })
+    // Mensaje genérico al cliente; el detalle queda solo en logs del servidor
+    return NextResponse.json({ error: 'Error obteniendo estadísticas' }, { status: 500 })
   }
 }

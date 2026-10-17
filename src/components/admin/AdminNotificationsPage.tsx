@@ -103,7 +103,7 @@ export function AdminNotificationsPage() {
   useEffect(() => {
     fetchNotifications()
     fetchUsers()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [])  
 
   const handleSend = async () => {
     if (!title.trim() || !message.trim()) {

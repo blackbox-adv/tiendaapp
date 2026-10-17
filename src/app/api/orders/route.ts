@@ -49,6 +49,10 @@ export async function GET(request: NextRequest) {
     const orders = await db.storeOrder.findMany({
       where,
       orderBy: { createdAt: 'desc' },
+      // Tope defensivo: el dashboard baja el listado completo. Con años de uso
+      // una tienda puede acumular decenas de miles — sin tope el payload y la
+      // memoria crecen sin control. 1000 recientes es más que suficiente hoy.
+      take: Math.min(1000, Math.max(1, parseInt(searchParams.get('limit') || '1000', 10) || 1000)),
     })
 
     return apiSuccess(serializeDecimals(orders), 200, request)
@@ -79,6 +83,22 @@ export async function POST(request: NextRequest) {
     }
     if (items.length > 50) {
       return apiError('Demasiados productos en un solo pedido (max 50)', 400, undefined, request)
+    }
+
+    // Tope de longitud en endpoint PÚBLICO: sin esto un atacante puede guardar
+    // strings de megas en StoreOrder/whatsappMessage (bloat de BD).
+    const nameStr = String(customerName).trim()
+    const phoneStr = String(customerPhone).trim()
+    const emailStr = typeof customerEmail === 'string' ? customerEmail.trim().slice(0, 120) : ''
+    const notesStr = typeof notes === 'string' ? notes.trim().slice(0, 500) : ''
+    if (nameStr.length > 100) {
+      return apiError('El nombre es demasiado largo (máx 100 caracteres)', 400, undefined, request)
+    }
+    if (phoneStr.length > 20) {
+      return apiError('El teléfono es demasiado largo (máx 20 caracteres)', 400, undefined, request)
+    }
+    if (emailStr && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(emailStr)) {
+      return apiError('El email no es válido', 400, undefined, request)
     }
 
     // Validar forma minima: los precios y nombres NO se toman del cliente
@@ -134,13 +154,13 @@ export async function POST(request: NextRequest) {
       0
     )
 
-    // Generate a readable order number: ORD-YYYYMMDD-XXXX
+    // Generate a readable order number: ORD-YYYYMMDD-XXXX (con reintento si colisiona)
     const now = new Date()
     const dateStr = now.getFullYear().toString() +
       (now.getMonth() + 1).toString().padStart(2, '0') +
       now.getDate().toString().padStart(2, '0')
-    const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase()
-    const orderNumber = `ORD-${dateStr}-${randomSuffix}`
+    const makeOrderNumber = () =>
+      `ORD-${dateStr}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`
 
     // Build WhatsApp message (datos verificados contra BD)
     const itemsText = serverItems
@@ -150,36 +170,52 @@ export async function POST(request: NextRequest) {
       })
       .join('\n')
 
-    const whatsappMessage = [
-      `Pedido ${orderNumber}`,
-      `Cliente: ${customerName}`,
-      `Teléfono: ${customerPhone}`,
-      customerEmail ? `Email: ${customerEmail}` : null,
-      '',
-      'Productos:',
-      itemsText,
-      '',
-      `Total: S/ ${totalAmount.toFixed(2)}`,
-      notes ? `\nNotas: ${notes}` : null,
-    ]
-      .filter(Boolean)
-      .join('\n')
+    const buildWhatsappMessage = (orderNumber: string) =>
+      [
+        `Pedido ${orderNumber}`,
+        `Cliente: ${nameStr}`,
+        `Teléfono: ${phoneStr}`,
+        emailStr ? `Email: ${emailStr}` : null,
+        '',
+        'Productos:',
+        itemsText,
+        '',
+        `Total: S/ ${totalAmount.toFixed(2)}`,
+        notesStr ? `\nNotas: ${notesStr}` : null,
+      ]
+        .filter(Boolean)
+        .join('\n')
 
-    // Create the order
-    const order = await db.storeOrder.create({
-      data: {
-        orderNumber,
-        status: 'pending',
-        customerName: customerName.trim(),
-        customerPhone: customerPhone.trim(),
-        customerEmail: customerEmail?.trim() || null,
-        totalAmount,
-        items: serverItems,
-        whatsappMessage,
-        notes: notes?.trim() || null,
-        storeId,
-      },
-    })
+    // Create the order — reintenta con nuevo sufijo si el orderNumber del día
+    // colisiona (36^4 combinaciones/día: raro, pero un 500 para el comprador
+    // es un pedido perdido, así que lo tratamos)
+    type CreatedOrder = Awaited<ReturnType<typeof db.storeOrder.create>>
+    let order: CreatedOrder | null = null
+    for (let attempt = 0; attempt < 3 && !order; attempt++) {
+      const orderNumber = makeOrderNumber()
+      try {
+        order = await db.storeOrder.create({
+          data: {
+            orderNumber,
+            status: 'pending',
+            customerName: nameStr,
+            customerPhone: phoneStr,
+            customerEmail: emailStr || null,
+            totalAmount,
+            items: serverItems,
+            whatsappMessage: buildWhatsappMessage(orderNumber),
+            notes: notesStr || null,
+            storeId,
+          },
+        })
+      } catch (createError) {
+        const code = createError && typeof createError === 'object' && 'code' in createError
+          ? (createError as { code: string }).code
+          : undefined
+        if (code === 'P2002' && attempt < 2) continue // colisión de número: reintenta
+        throw createError
+      }
+    }
 
     return apiSuccess(serializeDecimals(order), 201, request)
   } catch (error) {

@@ -63,6 +63,7 @@ function transformProduct(p: Record<string, unknown>): Product {
     imageUrl: (p.imageUrl as string) || '',
     images: Array.isArray(p.images) ? (p.images as string[]) : [],
     color: (p.color as string) || null,
+    stock: typeof p.stock === 'number' ? p.stock : undefined,
     unitLabel: (p.unitLabel as string | null) ?? null,
     unitsPerPack: p.unitsPerPack != null ? (toNum(p.unitsPerPack) || null) : null,
     packPrice: p.packPrice != null ? (toNum(p.packPrice) || null) : null,
@@ -98,5 +99,8 @@ export function ProductPublicClient({ store, product, relatedProducts }: Product
     })
   }, [store, product, relatedProducts])
 
-  return <ProductDetailView slug={store.slug as string} productId={product.id as string} />
+  // key={product.id}: al navegar entre productos relacionados la instancia se
+  // recrea y estados como purchaseMode/quantity/selectedImageIndex/showZoom no
+  // quedan "stale" del producto anterior
+  return <ProductDetailView key={product.id as string} slug={store.slug as string} productId={product.id as string} />
 }

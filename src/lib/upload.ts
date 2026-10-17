@@ -55,12 +55,17 @@ async function ensureBucketExists(supabase: ReturnType<typeof createClient<any>>
 export async function uploadFile(file: File, folder?: string): Promise<{ url: string }> {
   const supabase = getSupabaseClient();
 
+  // 🔒 Whitelist del folder: viene del formData del cliente. Sin validación,
+  // "../../x" alcanzaba al path.join del fallback local (path traversal) y a
+  // la object key de Supabase.
+  const safeFolder = folder && /^[a-zA-Z0-9_-]{1,40}$/.test(folder) ? folder : undefined;
+
   if (supabase) {
     // Ensure bucket exists before uploading
     const bucketReady = await ensureBucketExists(supabase);
 
     if (bucketReady) {
-      const fileName = `${folder ? folder + '/' : ''}${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+      const fileName = `${safeFolder ? safeFolder + '/' : ''}${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
       const { data, error } = await supabase.storage
         .from(BUCKET_NAME)
         .upload(fileName, file, {
@@ -82,11 +87,12 @@ export async function uploadFile(file: File, folder?: string): Promise<{ url: st
   }
 
   // Fallback: save to local filesystem
-  return uploadToLocal(file, folder);
+  return uploadToLocal(file, safeFolder);
 }
 
 async function uploadToLocal(file: File, folder?: string): Promise<{ url: string }> {
   const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+  // folder ya viene validado por uploadFile (whitelist alfanumérica)
   const subDir = folder ? folder : '';
   const uploadsDir = path.join(process.cwd(), 'public', 'uploads', subDir);
 

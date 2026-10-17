@@ -93,6 +93,11 @@ model Store {
   // Guía de tallas por tienda (Pro/Premium): {enabled, type, rows:[{size,a,b,c}], note}
   sizeGuide        Json     @default("{}")
 
+  // Franja de anuncio (banner) de la tienda pública — columnas verificadas
+  // en producción (antes solo se tocaban con SQL crudo = drift del schema)
+  announcementText String?
+  announcementLink String?
+
   isDemo         Boolean  @default(false)
   isActive       Boolean  @default(true)
   visitCount     Int      @default(0)

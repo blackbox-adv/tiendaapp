@@ -84,6 +84,9 @@ const PLAN_ACCESS: Record<string, TemplateItem['requiredPlan'][]> = {
 export function TemplateGallery() {
   const { currentStore, currentUser, navigate, updateStoreSettings } = useAppStore()
 
+  // Hooks SIEMPRE antes de cualquier early return (reglas de React)
+  const [changingTemplate, setChangingTemplate] = useState<string | null>(null)
+
   const userPlanId = currentUser?.planId || 'free'
   const allowedPlans = PLAN_ACCESS[userPlanId] || PLAN_ACCESS.free
 
@@ -107,8 +110,6 @@ export function TemplateGallery() {
       </div>
     )
   }
-
-  const [changingTemplate, setChangingTemplate] = useState<string | null>(null)
 
   const handleSelect = async (templateId: TemplateId) => {
     setChangingTemplate(templateId)

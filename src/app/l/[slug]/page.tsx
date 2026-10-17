@@ -72,8 +72,9 @@ export default async function LandingPublicPage(
   const landing = await getLanding(slug).catch(() => null)
   if (!landing) notFound()
 
-  // Contador de vistas (best-effort: si falla, la página igual se muestra)
-  await db.landingPage.update({
+  // Contador de vistas (best-effort: si falla, la página igual se muestra).
+  // SIN await: no bloquea el render — la update corrige en segundo plano.
+  db.landingPage.update({
     where: { id: landing.id },
     data: { views: { increment: 1 } },
   }).catch(() => null)
@@ -95,7 +96,7 @@ export default async function LandingPublicPage(
         {/* Foto principal */}
         {photos[0] && (
           <div className="relative w-full bg-neutral-100">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
+            { }
             <img
               src={photos[0]}
               alt={landing.title}
@@ -116,7 +117,7 @@ export default async function LandingPublicPage(
           {/* Tienda */}
           <div className="flex items-center gap-2 text-sm text-neutral-500">
             {landing.store.logo && (
-              // eslint-disable-next-line @next/next/no-img-element
+               
               <img src={landing.store.logo} alt={landing.store.name} className="h-6 w-6 rounded-full object-cover" />
             )}
             <span>
@@ -183,7 +184,7 @@ export default async function LandingPublicPage(
           {photos.length > 1 && (
             <div className="grid grid-cols-3 gap-2">
               {photos.slice(1).map((p, i) => (
-                // eslint-disable-next-line @next/next/no-img-element
+                 
                 <img
                   key={i}
                   src={p}

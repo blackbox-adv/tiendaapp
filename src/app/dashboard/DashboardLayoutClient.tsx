@@ -34,7 +34,7 @@ export default function DashboardLayoutClient({
     } else {
       setAuthResolved(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   // Redirect (en efecto, nunca en render) cuando no hay sesión posible
