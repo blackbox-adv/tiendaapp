@@ -101,13 +101,6 @@ export default async function ProductPage({ params }: Props) {
     if (product && product.store) {
       store = product.store as Record<string, unknown>
 
-      // SEO: la misma ficha era servible bajo CUALQUIER slug de tienda
-      // (/store/lo-que-sea/product/xyz) → contenido duplicado en Google.
-      // Si el slug de la URL no coincide con el de la tienda real, 404.
-      if ((store.slug as string) !== slug) {
-        notFound()
-      }
-
       // Plan activo + productos relacionados: independientes → EN PARALELO
       const [latestSub, allRelated] = await Promise.all([
         db.subscription
@@ -139,6 +132,14 @@ export default async function ProductPage({ params }: Props) {
     }
   } catch {
     // DB not available
+  }
+
+  // SEO: la misma ficha era servible bajo CUALQUIER slug de tienda
+  // (/store/lo-que-sea/product/xyz) → contenido duplicado en Google.
+  // FUERA del try/catch de arriba: notFound() lanza y un catch vacío lo
+  // tragaría (lección de este deploy: el 404 se volvía 200).
+  if (product && store && (store.slug as string) !== slug) {
+    notFound()
   }
 
   if (!product || !store || !(product.isActive as boolean)) {
