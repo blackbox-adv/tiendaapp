@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { useAppStore } from '@/lib/store'
-import { Zap, Mail, Phone, MapPin, ArrowRight } from 'lucide-react'
+import { Mail, Phone, MapPin, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { supportWhatsappUrl } from '@/lib/support'
@@ -59,10 +59,9 @@ export function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand */}
           <div>
-            <button onClick={() => navigate({ page: 'landing' })} className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-[#BC5A38] flex items-center justify-center">
-                <Zap className="w-5 h-5 text-white" />
-              </div>
+            <button onClick={() => navigate({ page: 'landing' })} className="flex items-center gap-2.5 mb-4" aria-label="Kyllari - inicio">
+              {/* Isotipo oficial de la marca (badge violeta luna+bolsa) */}
+              <img src="/logo.svg" alt="Logo Kyllari" width={32} height={32} className="w-8 h-8" />
               <span className="text-xl font-bold font-display text-stone-900">Kyllari</span>
             </button>
             <p className="text-sm text-gray-500 leading-relaxed mb-4">

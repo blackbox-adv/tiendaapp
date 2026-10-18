@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useAppStore } from '@/lib/store'
-import { Zap, Menu, X } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { WhatsAppIcon } from './WhatsAppIcon'
 
@@ -40,10 +40,9 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <button onClick={() => navigate({ page: 'landing' })} className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-lg bg-[#BC5A38] flex items-center justify-center group-hover:bg-[#A84C2D] transition-colors">
-              <Zap className="w-5 h-5 text-white" />
-            </div>
+          <button onClick={() => navigate({ page: 'landing' })} className="flex items-center gap-2.5 group" aria-label="Kyllari - inicio">
+            {/* Isotipo oficial de la marca (badge violeta luna+bolsa) */}
+            <img src="/logo.svg" alt="Logo Kyllari" width={32} height={32} className="w-8 h-8 transition-transform duration-200 group-hover:scale-110" />
             <span className="text-xl font-bold font-display text-stone-900">Kyllari</span>
           </button>
 
