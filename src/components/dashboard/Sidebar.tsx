@@ -7,7 +7,7 @@ import { useAppStore } from '@/lib/store'
 import {
   LayoutDashboard, Package, Settings, Palette, CreditCard,
   LogOut, ExternalLink, Store, Menu, X, QrCode, Megaphone, FolderOpen, ShoppingCart, Sparkles,
-  MessageCircle, Users, ShieldCheck,
+  MessageCircle, Users, ShieldCheck, FileSpreadsheet,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -26,6 +26,7 @@ interface NavItem {
 const ownerNavItems: NavItem[] = [
   { href: '/dashboard', label: 'Panel', icon: LayoutDashboard },
   { href: '/dashboard/products', label: 'Productos', icon: Package },
+  { href: '/dashboard/import', label: 'Importar Excel', icon: FileSpreadsheet },
   { href: '/dashboard/orders', label: 'Pedidos', icon: ShoppingCart },
   { href: '/dashboard/chats', label: 'Chats', icon: MessageCircle, premium: true },
   { href: '/dashboard/categories', label: 'Categorías', icon: FolderOpen },

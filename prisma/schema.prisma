@@ -113,6 +113,7 @@ model Store {
   subscriptions Subscription[]
   payments     Payment[]
   landingPages  LandingPage[]
+  importMapping StoreImportMapping?
 
   @@index([ownerId])                              // Owner's stores lookup
   @@index([isActive])                             // Active stores filter
@@ -141,6 +142,10 @@ model StoreProduct {
   isActive      Boolean  @default(true)
   featured      Boolean  @default(false)
   rating        Decimal  @default(0) @db.Decimal(2,1) // FIXED: Float → Decimal with 1 decimal
+  // Código del producto en el Excel del dueño (SKU, o clave normalizada del nombre
+  // si su Excel no trae código). Es la llave con la que el importador de Excel
+  // encuentra el producto para actualizarlo en re-imports (Fase 1).
+  externalCode  String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -150,8 +155,28 @@ model StoreProduct {
   @@index([storeId])                              // Products by store
   @@index([storeId, isActive])                    // Active products per store
   @@index([storeId, featured(sort: Desc)])        // Featured products per store
+  @@index([storeId, externalCode])                // Importador Excel: match por SKU/clave
   @@index([createdAt(sort: Desc)])                // Newest products
   @@index([category])                             // Products by category
+}
+
+// Mapeo de columnas del importador de Excel (una fila por tienda).
+// Guarda a qué campo de Kyllari corresponde cada columna de SU Excel
+// (ej. {"sheetName":"Hoja1","name":"Descripción Art.","price":"PVP"}),
+// para que las siguientes importaciones sean de UN click. Las columnas
+// no mapeadas del Excel del usuario se IGNORAN: su archivo nunca cambia.
+model StoreImportMapping {
+  id            String    @id @default(cuid())
+  storeId       String    @unique
+  store         Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  mapping       Json                                // campo Kyllari -> nombre de columna en su Excel
+  missingAction String    @default("keep")          // keep | deactivate (productos ausentes al re-importar)
+  lastFileName  String?                             // nombre del último archivo importado
+  lastImportAt  DateTime?                           // última importación (para "actualizado hace 2 días")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([storeId])
 }
 
 model Subscription {
