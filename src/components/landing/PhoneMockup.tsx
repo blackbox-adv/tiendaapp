@@ -5,15 +5,15 @@ import { WhatsAppIcon } from './WhatsAppIcon'
 
 /**
  * Mockup de celular con chat de WhatsApp simulado (SOLO PRESENTACIONAL).
- * Concepto del Diseño 3 adaptado a la paleta terracota: el visitante ve
+ * Concepto del Diseño 3 adaptado a la paleta violeta Kyllari: el visitante ve
  * exactamente dónde ocurre la venta — el chat de WhatsApp con una
  * conversación real de pedido. Sin lógica, sin eventos, sin links.
  */
 export function PhoneMockup() {
   return (
-    <div className="relative w-[270px] sm:w-[300px] rounded-[2.5rem] border-[10px] border-stone-900 bg-stone-900 shadow-2xl shadow-stone-900/30 overflow-hidden">
+    <div className="relative w-[270px] sm:w-[300px] rounded-[2.5rem] border-[10px] border-[#17142E] bg-[#17142E] shadow-2xl shadow-[#17142E]/30 overflow-hidden">
       {/* Notch */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-stone-900 rounded-b-2xl z-20" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-[#17142E] rounded-b-2xl z-20" />
 
       {/* Pantalla: tienda demo real de bodega */}
       <div className="aspect-[9/16] bg-white overflow-hidden relative">

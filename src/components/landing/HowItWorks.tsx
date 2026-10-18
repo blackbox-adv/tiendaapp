@@ -44,10 +44,10 @@ export function HowItWorks() {
           <span className="text-sm font-semibold text-[#4F46E5] uppercase tracking-wider">
             ¿Cómo funciona?
           </span>
-          <h2 className="font-display text-3xl sm:text-4xl font-bold text-stone-900 mt-3 mb-4">
+          <h2 className="font-display text-3xl sm:text-4xl font-bold text-[#17142E] mt-3 mb-4">
             De cero a vendiendo en 3 pasos
           </h2>
-          <p className="text-lg text-stone-500 max-w-2xl mx-auto">
+          <p className="text-lg text-[#5D5A7E] max-w-2xl mx-auto">
             Sin programar, sin contratos y sin comisiones por venta. Así de fácil es empezar.
           </p>
         </motion.div>
@@ -69,13 +69,13 @@ export function HowItWorks() {
                 <div className="w-16 h-16 rounded-2xl bg-[#ECEAFE] flex items-center justify-center">
                   <step.icon className="w-8 h-8 text-[#4F46E5]" />
                 </div>
-                <span className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-stone-900 text-white text-xs font-bold flex items-center justify-center shadow-md">
+                <span className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-[#4F46E5] text-white text-xs font-bold flex items-center justify-center shadow-md">
                   {step.step}
                 </span>
               </div>
 
-              <h3 className="font-display text-lg font-bold text-stone-900 mb-2">{step.title}</h3>
-              <p className="text-sm text-stone-500 leading-relaxed mb-4">{step.description}</p>
+              <h3 className="font-display text-lg font-bold text-[#17142E] mb-2">{step.title}</h3>
+              <p className="text-sm text-[#5D5A7E] leading-relaxed mb-4">{step.description}</p>
 
               <span className="inline-block px-3 py-1 rounded-full bg-[#ECEAFE] text-[#4F46E5] text-xs font-semibold">
                 {step.highlight}

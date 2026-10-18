@@ -3,55 +3,63 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useAppStore } from '@/lib/store'
-import { ArrowLeft, Mail, Phone, MapPin, Clock, Send, MessageCircle } from 'lucide-react'
+import { ArrowLeft, Mail, MapPin, Clock, Send } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
 
+// Contacto SIN WhatsApp (decisión del dueño: no hay un número público para la web).
+// El formulario envía el mensaje por email vía /api/contact (Resend → correo del
+// administrador, con reply_to del visitante para responder en 1 clic).
 export function ContactPage() {
   const navigate = useAppStore((s) => s.navigate)
   const contactEmail = useAppStore((s) => s.platformSettings.contactEmail)
-  const contactPhone = useAppStore((s) => s.platformSettings.contactPhone)
 
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [subject, setSubject] = useState('')
   const [message, setMessage] = useState('')
+  const [sending, setSending] = useState(false)
   const [sent, setSent] = useState(false)
+  const [error, setError] = useState('')
 
-  // Extract digits only for WhatsApp link (remove +, spaces, dashes)
-  const whatsappDigits = contactPhone.replace(/[^0-9]/g, '')
-  // Format phone for display: +51 999 888 777
-  const phoneDisplay = contactPhone.startsWith('+51') && contactPhone.length >= 12
-    ? `${contactPhone.slice(0, 3)} ${contactPhone.slice(3, 6)} ${contactPhone.slice(6, 9)} ${contactPhone.slice(9)}`
-    : contactPhone
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!name.trim() || !email.trim() || !subject.trim() || !message.trim()) {
-      setSent(false)
+      setError('Completa todos los campos obligatorios.')
       return
     }
 
-    // Send via WhatsApp to Kyllari support
-    const whatsappMsg = encodeURIComponent(
-      `Hola Kyllari! Nuevo mensaje de contacto:\n\n` +
-      `Nombre: ${name}\n` +
-      `Email: ${email}\n` +
-      `Asunto: ${subject}\n` +
-      `Mensaje: ${message}`
-    )
-    window.open(`https://wa.me/${whatsappDigits}?text=${whatsappMsg}`, '_blank')
-
-    setSent(true)
-    setName('')
-    setEmail('')
-    setSubject('')
-    setMessage('')
-    setTimeout(() => setSent(false), 8000)
+    setSending(true)
+    setError('')
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, subject, message }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => null)
+        throw new Error(data?.error || 'No pudimos enviar tu mensaje.')
+      }
+      setSent(true)
+      setName('')
+      setEmail('')
+      setSubject('')
+      setMessage('')
+      setTimeout(() => setSent(false), 10000)
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : `No pudimos enviar tu mensaje. Escríbenos directo a ${contactEmail}.`
+      )
+    } finally {
+      setSending(false)
+    }
   }
 
   return (
@@ -81,14 +89,9 @@ export function ContactPage() {
                   <Mail className="w-5 h-5 text-violet-600 mt-0.5" />
                   <div>
                     <p className="text-sm font-medium text-gray-900">Email</p>
-                    <p className="text-sm text-gray-500">{contactEmail}</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Phone className="w-5 h-5 text-violet-600 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">Teléfono</p>
-                    <p className="text-sm text-gray-500">{phoneDisplay}</p>
+                    <a href={`mailto:${contactEmail}`} className="text-sm text-gray-500 hover:text-violet-600 transition-colors">
+                      {contactEmail}
+                    </a>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -107,18 +110,6 @@ export function ContactPage() {
                 </div>
               </div>
             </div>
-
-            <div className="p-6 rounded-xl bg-green-50 border border-green-100">
-              <div className="flex items-center gap-3 mb-3">
-                <MessageCircle className="w-5 h-5 text-green-600" />
-                <h3 className="text-sm font-bold text-gray-900">¿Prefieres WhatsApp?</h3>
-              </div>
-              <p className="text-sm text-gray-500 mb-3">Escríbenos directamente por WhatsApp para una respuesta rápida.</p>
-              <Button className="w-full bg-green-500 hover:bg-green-600 text-white gap-2" onClick={() => window.open(`https://wa.me/${whatsappDigits}?text=Hola, necesito ayuda con Kyllari`, '_blank')}>
-                <MessageCircle className="w-4 h-4" />
-                Escribir por WhatsApp
-              </Button>
-            </div>
           </motion.div>
 
           {/* Contact Form */}
@@ -127,11 +118,16 @@ export function ContactPage() {
               <CardContent className="pt-6">
                 <h2 className="text-lg font-bold text-gray-900 mb-4">Envianos un mensaje</h2>
                 <p className="text-sm text-gray-400 mb-4">
-                  Al enviar, se abrira WhatsApp con tu mensaje para una respuesta rapida.
+                  Te responderemos al correo que indiques, normalmente en menos de 24 horas.
                 </p>
                 {sent && (
                   <div className="p-3 rounded-lg bg-green-50 border border-green-200 text-green-600 text-sm mb-4">
-                    WhatsApp abierto con tu mensaje. Te responderemos lo antes posible.
+                    Mensaje enviado. Te responderemos pronto a tu correo.
+                  </div>
+                )}
+                {error && (
+                  <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm mb-4">
+                    {error}
                   </div>
                 )}
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -153,9 +149,9 @@ export function ContactPage() {
                     <Label>Mensaje *</Label>
                     <Textarea placeholder="Describe tu consulta..." rows={5} value={message} onChange={(e) => setMessage(e.target.value)} required />
                   </div>
-                  <Button type="submit" className="w-full bg-violet-600 hover:bg-violet-700 text-white gap-2">
+                  <Button type="submit" disabled={sending} className="w-full bg-violet-600 hover:bg-violet-700 text-white gap-2 disabled:opacity-60">
                     <Send className="w-4 h-4" />
-                    Enviar por WhatsApp
+                    {sending ? 'Enviando...' : 'Enviar mensaje'}
                   </Button>
                 </form>
               </CardContent>

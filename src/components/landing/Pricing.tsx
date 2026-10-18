@@ -58,10 +58,10 @@ export function Pricing() {
           className="text-center mb-16"
         >
           <span className="text-sm font-semibold text-[#4F46E5] uppercase tracking-wider">Precios</span>
-          <h2 className="font-display text-3xl sm:text-4xl font-bold text-stone-900 mt-3 mb-4">
+          <h2 className="font-display text-3xl sm:text-4xl font-bold text-[#17142E] mt-3 mb-4">
             Planes que se adaptan a ti
           </h2>
-          <p className="text-lg text-stone-500 max-w-2xl mx-auto">
+          <p className="text-lg text-[#5D5A7E] max-w-2xl mx-auto">
             Comienza gratis y escala tu plan según crece tu negocio. Sin contratos ni sorpresas.
           </p>
         </motion.div>
@@ -93,7 +93,7 @@ export function Pricing() {
                   transition={{ duration: 0.6, delay: i * 0.15, ease: "easeOut" }}
                   className={`relative rounded-2xl p-8 flex flex-col ${
                     plan.popular
-                      ? 'bg-stone-900 text-white shadow-2xl shadow-stone-900/30 scale-105 z-10 border-2 border-[#4F46E5]'
+                      ? 'bg-[#1E1B4B] text-white shadow-2xl shadow-[#1E1B4B]/40 scale-105 z-10 border-2 border-[#4F46E5]'
                       : 'bg-white border border-[#E4E2F2] hover:border-[#4F46E5]/40 hover:shadow-lg'
                   }`}
                 >
@@ -106,26 +106,26 @@ export function Pricing() {
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${
                     plan.popular ? 'bg-[#4F46E5]/20' : 'bg-[#ECEAFE]'
                   }`}>
-                    <Icon className={`w-6 h-6 ${plan.popular ? 'text-[#E29B77]' : 'text-[#4F46E5]'}`} />
+                    <Icon className={`w-6 h-6 ${plan.popular ? 'text-[#A5B4FC]' : 'text-[#4F46E5]'}`} />
                   </div>
 
-                  <h3 className={`font-display text-xl font-bold mb-1 ${plan.popular ? 'text-white' : 'text-stone-900'}`}>
+                  <h3 className={`font-display text-xl font-bold mb-1 ${plan.popular ? 'text-white' : 'text-[#17142E]'}`}>
                     {plan.name}
                   </h3>
-                  <p className={`text-sm mb-4 ${plan.popular ? 'text-stone-300' : 'text-stone-500'}`}>
+                  <p className={`text-sm mb-4 ${plan.popular ? 'text-white/70' : 'text-[#5D5A7E]'}`}>
                     {plan.description}
                   </p>
 
                   <div className="mb-2">
-                    <span className={`text-4xl font-extrabold font-display ${plan.popular ? 'text-white' : 'text-stone-900'}`}>
+                    <span className={`text-4xl font-extrabold font-display ${plan.popular ? 'text-white' : 'text-[#17142E]'}`}>
                       {plan.price === 0 ? 'Gratis' : `S/${plan.price.toFixed(2)}`}
                     </span>
                     {plan.price > 0 && (
-                      <span className={`text-sm ${plan.popular ? 'text-stone-400' : 'text-stone-400'}`}>/mes</span>
+                      <span className={`text-sm ${plan.popular ? 'text-white/60' : 'text-[#8B88AD]'}`}>/mes</span>
                     )}
                   </div>
                   {plan.price > 0 && (
-                    <p className={`text-xs mb-4 ${plan.popular ? 'text-[#E29B77]' : 'text-stone-400'}`}>
+                    <p className={`text-xs mb-4 ${plan.popular ? 'text-[#A5B4FC]' : 'text-[#8B88AD]'}`}>
                       ≈ US$ {Math.round(plan.price / 3.7)} · pagas en la moneda de tu país
                     </p>
                   )}
@@ -133,8 +133,8 @@ export function Pricing() {
                   <ul className="space-y-3 mb-8 flex-1">
                     {plan.features.map((feature: string) => (
                       <li key={feature} className="flex items-start gap-3">
-                        <Check className={`w-5 h-5 mt-0.5 flex-shrink-0 ${plan.popular ? 'text-[#E29B77]' : 'text-[#4F46E5]'}`} />
-                        <span className={`text-sm ${plan.popular ? 'text-stone-200' : 'text-stone-600'}`}>
+                        <Check className={`w-5 h-5 mt-0.5 flex-shrink-0 ${plan.popular ? 'text-[#A5B4FC]' : 'text-[#4F46E5]'}`} />
+                        <span className={`text-sm ${plan.popular ? 'text-white/85' : 'text-[#5D5A7E]'}`}>
                           {feature}
                         </span>
                       </li>
@@ -154,15 +154,15 @@ export function Pricing() {
                     }}
                     className={`w-full py-3 rounded-full font-semibold ${
                       plan.popular
-                        ? 'bg-white text-stone-900 hover:bg-[#ECEAFE]'
-                        : 'bg-stone-900 text-white hover:bg-[#4F46E5]'
+                        ? 'bg-white text-[#17142E] hover:bg-[#ECEAFE]'
+                        : 'bg-[#17142E] text-white hover:bg-[#4F46E5]'
                     }`}
                   >
                     {plan.type === 'free' && 'Crear mi tienda gratis'}
                     {plan.type === 'pro' && 'Empezar con Pro'}
                     {plan.type === 'premium' && 'Empezar con Premium'}
                   </Button>
-                  <p className={`text-xs text-center mt-3 ${plan.popular ? 'text-stone-400' : 'text-stone-400'}`}>
+                  <p className={`text-xs text-center mt-3 ${plan.popular ? 'text-white/50' : 'text-[#8B88AD]'}`}>
                     {plan.price === 0
                       ? 'Sin tarjeta · Sin compromiso'
                       : 'Yape, Plin, Mercado Pago o transferencia'}

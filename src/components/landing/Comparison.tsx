@@ -31,10 +31,10 @@ export function Comparison() {
           <span className="text-sm font-semibold text-[#4F46E5] uppercase tracking-wider">
             La diferencia
           </span>
-          <h2 className="font-display text-3xl sm:text-4xl font-bold text-stone-900 mt-3 mb-4">
+          <h2 className="font-display text-3xl sm:text-4xl font-bold text-[#17142E] mt-3 mb-4">
             ¿No es lo mismo que usar WhatsApp Business solo?
           </h2>
-          <p className="text-lg text-stone-500 max-w-2xl mx-auto">
+          <p className="text-lg text-[#5D5A7E] max-w-2xl mx-auto">
             WhatsApp Business es tu canal de atención. Kyllari es tu tienda que lo
             alimenta con pedidos ordenados. Se complementan — mira la diferencia:
           </p>
@@ -48,18 +48,18 @@ export function Comparison() {
           className="bg-white rounded-3xl shadow-xl border border-[#E4E2F2] overflow-hidden"
         >
           {/* Header */}
-          <div className="grid grid-cols-[1fr_auto_auto] sm:grid-cols-[1fr_180px_180px] border-b border-[#E4E2F2] bg-[#FAF6EF]">
-            <div className="px-4 sm:px-6 py-4 text-sm font-semibold text-stone-400 uppercase tracking-wide">
+          <div className="grid grid-cols-[1fr_auto_auto] sm:grid-cols-[1fr_180px_180px] border-b border-[#E4E2F2] bg-[#FAFAFF]">
+            <div className="px-4 sm:px-6 py-4 text-sm font-semibold text-[#8B88AD] uppercase tracking-wide">
               Función
             </div>
             <div className="px-4 py-4 text-center">
               <div className="w-10 h-10 mx-auto rounded-xl bg-emerald-50 flex items-center justify-center mb-1">
                 <span className="text-emerald-600 font-bold text-lg">W</span>
               </div>
-              <p className="text-xs sm:text-sm font-semibold text-stone-600">WhatsApp solo</p>
+              <p className="text-xs sm:text-sm font-semibold text-[#5D5A7E]">WhatsApp solo</p>
             </div>
             <div className="px-4 py-4 text-center bg-[#ECEAFE]/70">
-              <div className="w-10 h-10 mx-auto rounded-xl bg-stone-900 flex items-center justify-center mb-1">
+              <div className="w-10 h-10 mx-auto rounded-xl bg-[#17142E] flex items-center justify-center mb-1">
                 <span className="text-white font-bold text-lg">T</span>
               </div>
               <p className="text-xs sm:text-sm font-bold text-[#4F46E5]">Con Kyllari</p>
@@ -71,10 +71,10 @@ export function Comparison() {
             <div
               key={row.label}
               className={`grid grid-cols-[1fr_auto_auto] sm:grid-cols-[1fr_180px_180px] items-center ${
-                i < ROWS.length - 1 ? 'border-b border-[#F0E9DC]' : ''
+                i < ROWS.length - 1 ? 'border-b border-[#E4E2F2]' : ''
               }`}
             >
-              <div className="px-4 sm:px-6 py-3.5 text-sm text-stone-700 font-medium">
+              <div className="px-4 sm:px-6 py-3.5 text-sm text-[#5D5A7E] font-medium">
                 {row.label}
               </div>
               <div className="px-4 py-3.5 flex justify-center">
@@ -83,8 +83,8 @@ export function Comparison() {
                     <Check className="w-4 h-4 text-emerald-500" />
                   </div>
                 ) : (
-                  <div className="w-7 h-7 rounded-full bg-[#FAF6EF] flex items-center justify-center">
-                    <X className="w-4 h-4 text-stone-300" />
+                  <div className="w-7 h-7 rounded-full bg-[#FAFAFF] flex items-center justify-center">
+                    <X className="w-4 h-4 text-[#C9C6E8]" />
                   </div>
                 )}
               </div>
@@ -97,8 +97,8 @@ export function Comparison() {
           ))}
 
           {/* Footer CTA */}
-          <div className="px-4 sm:px-6 py-5 bg-[#FAF6EF] flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-sm font-semibold text-stone-800 text-center sm:text-left">
+          <div className="px-4 sm:px-6 py-5 bg-[#FAFAFF] flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-sm font-semibold text-[#17142E] text-center sm:text-left">
               Todo esto en el plan gratis. Tu primer pedido pagado paga meses de Pro.
             </p>
             <Button

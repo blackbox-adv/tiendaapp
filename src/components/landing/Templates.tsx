@@ -343,7 +343,7 @@ export function Templates() {
   const visible = rubro === 'todos' ? templates : templates.filter((t) => t.tags.includes(rubro))
 
   return (
-    <section id="templates" className="py-20 sm:py-28 bg-[#FAF7F2]">
+    <section id="templates" className="py-20 sm:py-28 bg-[#FAFAFF]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
@@ -356,25 +356,25 @@ export function Templates() {
           <span className="text-sm font-semibold text-[#4F46E5] uppercase tracking-wider">
             Galería de diseños
           </span>
-          <h2 className="font-display text-3xl sm:text-5xl font-bold text-stone-900 mt-3 mb-4">
+          <h2 className="font-display text-3xl sm:text-5xl font-bold text-[#17142E] mt-3 mb-4">
             Catálogos que se ven <span className="italic text-[#4F46E5]">de revista</span>
           </h2>
-          <p className="text-lg text-stone-500 max-w-2xl mx-auto mb-7">
+          <p className="text-lg text-[#5D5A7E] max-w-2xl mx-auto mb-7">
             {templates.length} diseños listos para tu rubro, al nivel de los grandes catálogos.
             Toca cualquiera y recorre una tienda real con WhatsApp y Yape.
           </p>
 
           {/* Filtros por rubro */}
           <div className="flex flex-wrap items-center justify-center gap-2 mb-5">
-            <LayoutGrid className="w-4 h-4 text-stone-400 mr-1 hidden sm:block" />
+            <LayoutGrid className="w-4 h-4 text-[#8B88AD] mr-1 hidden sm:block" />
             {rubroFilters.map((f) => (
               <button
                 key={f.id}
                 onClick={() => setRubro(f.id)}
                 className={`px-4 py-2 rounded-full text-sm font-semibold border transition-all duration-200 ${
                   rubro === f.id
-                    ? 'bg-stone-900 text-white border-stone-900 shadow-md'
-                    : 'bg-white text-stone-600 border-[#E4E2F2] hover:border-[#4F46E5] hover:text-[#4F46E5]'
+                    ? 'bg-[#4F46E5] text-white border-[#4F46E5] shadow-md'
+                    : 'bg-white text-[#5D5A7E] border-[#E4E2F2] hover:border-[#4F46E5] hover:text-[#4F46E5]'
                 }`}
               >
                 {f.label}
@@ -423,7 +423,7 @@ export function Templates() {
                       className="object-cover object-top group-hover:scale-[1.03] transition-transform duration-500"
                     />
                     {tpl.featured && (
-                      <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold bg-stone-900/85 backdrop-blur-sm text-white shadow-md">
+                      <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#17142E]/85 backdrop-blur-sm text-white shadow-md">
                         El favorito para tiendas de ropa
                       </div>
                     )}
@@ -453,12 +453,12 @@ export function Templates() {
 
         {/* CTA final */}
         <div className="text-center mt-12">
-          <p className="text-stone-500 mb-4 text-sm">
+          <p className="text-[#5D5A7E] mb-4 text-sm">
             Todos los diseños incluyen carrito, pedidos por WhatsApp, Yape/Plin y envíos. Cada mes sumamos un diseño nuevo.
           </p>
           <button
             onClick={() => navigate({ page: 'register' })}
-            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#4F46E5] text-white font-bold hover:bg-[#a84b2d] transition-colors shadow-lg"
+            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#4F46E5] text-white font-bold hover:bg-[#4338CA] transition-colors shadow-lg"
           >
             Crear mi tienda gratis
             <ArrowRight className="w-4 h-4" />

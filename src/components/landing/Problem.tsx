@@ -36,15 +36,15 @@ export function Problem() {
           transition={{ duration: 0.6, ease: 'easeOut' }}
           className="text-center mb-14"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FBEAE4] border border-[#4F46E5]/20 text-[#4F46E5] text-sm font-semibold mb-5">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#ECEAFE] border border-[#4F46E5]/20 text-[#4F46E5] text-sm font-semibold mb-5">
             <WhatsAppIcon className="w-4 h-4" />
             Vendes por WhatsApp... pero a duras penas
           </div>
-          <h2 className="font-display text-3xl sm:text-4xl font-bold text-stone-900 mb-4">
+          <h2 className="font-display text-3xl sm:text-4xl font-bold text-[#17142E] mb-4">
             WhatsApp te trae clientes,{' '}
             <span className="accent-serif">pero te desorganiza las ventas</span>
           </h2>
-          <p className="text-lg text-stone-500 max-w-2xl mx-auto">
+          <p className="text-lg text-[#5D5A7E] max-w-2xl mx-auto">
             Es la mejor herramienta para vender y la peor para administrar. Si te pasa
             alguna de estas, tu negocio está perdiendo dinero todos los días:
           </p>
@@ -58,15 +58,15 @@ export function Problem() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.6, delay: i * 0.12, ease: 'easeOut' }}
-              className="relative bg-[#FAF6EF] rounded-2xl p-6 border border-[#E4E2F2] hover:border-[#4F46E5]/40 hover:bg-[#ECEAFE]/50 transition-all duration-300"
+              className="relative bg-[#FAFAFF] rounded-2xl p-6 border border-[#E4E2F2] hover:border-[#4F46E5]/40 hover:bg-[#ECEAFE]/50 transition-all duration-300"
             >
               <div className="w-12 h-12 rounded-xl bg-[#ECEAFE] flex items-center justify-center mb-5">
                 <pain.icon className="w-6 h-6 text-[#4F46E5]" />
               </div>
-              <h3 className="font-display text-lg font-bold text-stone-900 mb-2 italic">
+              <h3 className="font-display text-lg font-bold text-[#17142E] mb-2 italic">
                 {pain.quote}
               </h3>
-              <p className="text-sm text-stone-500 leading-relaxed">{pain.description}</p>
+              <p className="text-sm text-[#5D5A7E] leading-relaxed">{pain.description}</p>
             </motion.div>
           ))}
         </div>
@@ -77,7 +77,7 @@ export function Problem() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="text-center text-lg sm:text-xl font-semibold font-display text-stone-900 mt-12"
+          className="text-center text-lg sm:text-xl font-semibold font-display text-[#17142E] mt-12"
         >
           Con Kyllari, mismos clientes, mismos WhatsApp —{' '}
           <span className="accent-serif">pero con una tienda que vende sola.</span>

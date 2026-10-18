@@ -126,7 +126,7 @@ export default async function RootLayout({
                 logo: `${APP_URL}/logo.svg`,
                 description: 'Plataforma peruana para crear tiendas online y catálogos digitales sin conocimientos técnicos. Pedidos por WhatsApp, métodos de pago locales (Yape, Plin) y plantillas por rubro.',
                 email: contact.contactEmail,
-                telephone: contact.contactPhone,
+                // SIN telephone: la web no publica número de soporte (decisión del dueño)
                 address: {
                   '@type': 'PostalAddress',
                   addressLocality: 'Lima',

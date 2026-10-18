@@ -77,10 +77,10 @@ export function FAQ() {
           <span className="text-sm font-semibold text-[#4F46E5] uppercase tracking-wider">
             Preguntas frecuentes
           </span>
-          <h2 className="font-display text-3xl sm:text-4xl font-bold text-stone-900 mt-3 mb-4">
+          <h2 className="font-display text-3xl sm:text-4xl font-bold text-[#17142E] mt-3 mb-4">
             Resolvemos tus dudas
           </h2>
-          <p className="text-lg text-stone-500 max-w-2xl mx-auto">
+          <p className="text-lg text-[#5D5A7E] max-w-2xl mx-auto">
             Lo que más preguntan los emprendedores antes de crear su tienda.
           </p>
         </motion.div>
@@ -106,7 +106,7 @@ export function FAQ() {
                   className="w-full flex items-center justify-between gap-4 p-5 text-left"
                   aria-expanded={isOpen}
                 >
-                  <span className="font-semibold text-stone-900 text-base sm:text-lg">
+                  <span className="font-semibold text-[#17142E] text-base sm:text-lg">
                     {item.question}
                   </span>
                   <ChevronDown
@@ -124,7 +124,7 @@ export function FAQ() {
                       transition={{ duration: 0.3, ease: 'easeInOut' }}
                       className="overflow-hidden"
                     >
-                      <p className="px-5 pb-5 text-stone-600 leading-relaxed text-sm sm:text-base">
+                      <p className="px-5 pb-5 text-[#5D5A7E] leading-relaxed text-sm sm:text-base">
                         {item.answer}
                       </p>
                     </motion.div>
@@ -140,7 +140,7 @@ export function FAQ() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="text-center text-sm text-stone-500 mt-8"
+          className="text-center text-sm text-[#5D5A7E] mt-8"
         >
           ¿Tienes otra duda?{' '}
           <a

@@ -71,10 +71,10 @@ export function Testimonials() {
           className="text-center mb-16"
         >
           <span className="text-sm font-semibold text-[#4F46E5] uppercase tracking-wider">Tiendas reales</span>
-          <h2 className="font-display text-3xl sm:text-4xl font-bold text-stone-900 mt-3 mb-4">
+          <h2 className="font-display text-3xl sm:text-4xl font-bold text-[#17142E] mt-3 mb-4">
             Entra a estas tiendas y pruébalo tú mismo
           </h2>
-          <p className="text-lg text-stone-500 max-w-2xl mx-auto">
+          <p className="text-lg text-[#5D5A7E] max-w-2xl mx-auto">
             Nada de capturas de pantalla: estas tiendas están funcionando ahora mismo.
             Elige un producto, toca el botón verde y mira cómo llega el pedido por
             WhatsApp — así de fácil le compra la gente a tus clientes.
@@ -100,20 +100,20 @@ export function Testimonials() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
                 transition={{ duration: 0.5, delay: i * 0.15, ease: "easeOut" }}
-                className="group bg-[#FAF6EF] rounded-2xl p-6 border border-[#E4E2F2] hover:shadow-xl hover:border-[#4F46E5]/40 hover:-translate-y-1 transition-all duration-300 flex flex-col"
+                className="group bg-[#FAFAFF] rounded-2xl p-6 border border-[#E4E2F2] hover:shadow-xl hover:border-[#4F46E5]/40 hover:-translate-y-1 transition-all duration-300 flex flex-col"
               >
                 <div className="flex items-center justify-between mb-5">
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${store.accent}`}>
                     <Icon className="w-6 h-6" />
                   </div>
-                  <span className="text-xs font-medium text-stone-500 bg-white border border-[#E4E2F2] px-2.5 py-1 rounded-full">
+                  <span className="text-xs font-medium text-[#5D5A7E] bg-white border border-[#E4E2F2] px-2.5 py-1 rounded-full">
                     {store.template}
                   </span>
                 </div>
 
-                <h3 className="font-display font-semibold text-stone-900 text-lg">{store.name}</h3>
+                <h3 className="font-display font-semibold text-[#17142E] text-lg">{store.name}</h3>
                 <p className="text-xs text-[#4F46E5] font-medium mb-3">{store.industry}</p>
-                <p className="text-sm text-stone-600 leading-relaxed flex-1">{store.description}</p>
+                <p className="text-sm text-[#5D5A7E] leading-relaxed flex-1">{store.description}</p>
 
                 <div className="mt-5 pt-4 border-t border-[#E4E2F2] flex items-center justify-between">
                   <span className="text-sm font-semibold text-[#4F46E5] group-hover:text-[#4338CA]">
@@ -141,13 +141,13 @@ export function Testimonials() {
 
           <div className="relative">
             <div className="inline-flex items-center gap-2 bg-white/10 text-white text-sm font-medium px-4 py-1.5 rounded-full mb-5">
-              <Store className="w-4 h-4 text-[#E29B77]" />
+              <Store className="w-4 h-4 text-[#A5B4FC]" />
               Hecho en Perú · Sin tarjeta · Sin comisión por venta
             </div>
             <h3 className="font-display text-2xl sm:text-3xl font-bold text-white mb-3">
               ¿Dudas que funcione para tu negocio?
             </h3>
-            <p className="text-stone-300 max-w-2xl mx-auto mb-8">
+            <p className="text-white/75 max-w-2xl mx-auto mb-8">
               Crea tu tienda gratis en minutos, sube tus productos y comparte tu catálogo
               por WhatsApp hoy mismo. Si necesitas ayuda para configurarla, escríbenos:
               te respondemos en minutos.
@@ -155,7 +155,7 @@ export function Testimonials() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <button
                 onClick={() => navigate({ page: 'register' })}
-                className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-emerald-500 to-green-500 text-white font-semibold rounded-full hover:from-emerald-400 hover:to-green-400 shadow-lg hover:shadow-xl transition-all duration-300"
+                className="w-full sm:w-auto px-8 py-3.5 bg-[#4F46E5] text-white font-semibold rounded-full hover:bg-[#4338CA] shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 Crear mi tienda gratis
               </button>

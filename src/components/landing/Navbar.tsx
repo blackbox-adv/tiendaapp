@@ -42,21 +42,21 @@ export function Navbar() {
           <button onClick={() => navigate({ page: 'landing' })} className="flex items-center gap-2.5 group" aria-label="Kyllari - inicio">
             {/* Isotipo oficial de la marca (badge violeta luna+bolsa) */}
             <img src="/logo.svg" alt="Logo Kyllari" width={32} height={32} className="w-8 h-8 transition-transform duration-200 group-hover:scale-110" />
-            <span className="text-xl font-bold font-display text-stone-900">Kyllari</span>
+            <span className="text-xl font-bold font-display text-[#17142E]">Kyllari</span>
           </button>
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-8">
-            <button onClick={() => handleNav('#templates')} className="text-sm font-medium text-stone-600 hover:text-[#4F46E5] transition-colors">
+            <button onClick={() => handleNav('#templates')} className="text-sm font-medium text-[#5D5A7E] hover:text-[#4F46E5] transition-colors">
               Demos
             </button>
-            <button onClick={() => handleNav('#features')} className="text-sm font-medium text-stone-600 hover:text-[#4F46E5] transition-colors">
+            <button onClick={() => handleNav('#features')} className="text-sm font-medium text-[#5D5A7E] hover:text-[#4F46E5] transition-colors">
               Funciones
             </button>
-            <button onClick={() => handleNav('#comparativa')} className="text-sm font-medium text-stone-600 hover:text-[#4F46E5] transition-colors">
+            <button onClick={() => handleNav('#comparativa')} className="text-sm font-medium text-[#5D5A7E] hover:text-[#4F46E5] transition-colors">
               ¿Por qué Kyllari?
             </button>
-            <button onClick={() => handleNav('#pricing')} className="text-sm font-medium text-stone-600 hover:text-[#4F46E5] transition-colors">
+            <button onClick={() => handleNav('#pricing')} className="text-sm font-medium text-[#5D5A7E] hover:text-[#4F46E5] transition-colors">
               Precios
             </button>
           </div>
@@ -66,16 +66,16 @@ export function Navbar() {
             {currentUser ? (
               <Button
                 onClick={() => navigate(currentUser.role === 'admin' ? { page: 'admin' } : { page: 'dashboard' })}
-                className="bg-stone-900 hover:bg-[#4F46E5] text-white"
+                className="bg-[#4F46E5] hover:bg-[#4338CA] text-white"
               >
                 Mi Panel
               </Button>
             ) : isSyncing ? (
               // Restaurando sesión — esqueleto neutro para no ofrecer "Crear mi tienda" a quien ya tiene cuenta
-              <div className="w-28 h-9 rounded-md bg-stone-200/80 animate-pulse" />
+              <div className="w-28 h-9 rounded-md bg-[#ECEAFE] animate-pulse" />
             ) : (
               <>
-                <Button variant="outline" onClick={() => navigate({ page: 'login' })} className="border-stone-300 text-stone-700 hover:bg-white hover:text-[#4F46E5] hover:border-[#4F46E5]/40">
+                <Button variant="outline" onClick={() => navigate({ page: 'login' })} className="border-[#E4E2F2] text-[#17142E] hover:bg-white hover:text-[#4F46E5] hover:border-[#4F46E5]/40">
                   Iniciar sesión
                 </Button>
                 <Button onClick={() => navigate({ page: 'register' })} className="bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold">
@@ -91,13 +91,13 @@ export function Navbar() {
               <Button
                 size="sm"
                 onClick={() => navigate(currentUser.role === 'admin' ? { page: 'admin' } : { page: 'dashboard' })}
-                className="h-9 px-3.5 bg-stone-900 hover:bg-[#4F46E5] text-white text-sm font-semibold"
+                className="h-9 px-3.5 bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm font-semibold"
               >
                 Mi Panel
               </Button>
             )}
             <button className="p-2 -mr-2" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Abrir menú">
-              {mobileOpen ? <X className="w-6 h-6 text-stone-700" /> : <Menu className="w-6 h-6 text-stone-700" />}
+              {mobileOpen ? <X className="w-6 h-6 text-[#17142E]" /> : <Menu className="w-6 h-6 text-[#17142E]" />}
             </button>
           </div>
         </div>
@@ -112,21 +112,21 @@ export function Navbar() {
           className="md:hidden bg-[#FFFFFF]/95 backdrop-blur-lg border-t border-[#E4E2F2]"
         >
           <div className="px-4 py-4 space-y-3">
-            <button onClick={() => handleNav('#templates')} className="block w-full text-left text-sm font-medium text-stone-600 hover:text-[#4F46E5] py-2">
+            <button onClick={() => handleNav('#templates')} className="block w-full text-left text-sm font-medium text-[#5D5A7E] hover:text-[#4F46E5] py-2">
               Demos
             </button>
-            <button onClick={() => handleNav('#features')} className="block w-full text-left text-sm font-medium text-stone-600 hover:text-[#4F46E5] py-2">
+            <button onClick={() => handleNav('#features')} className="block w-full text-left text-sm font-medium text-[#5D5A7E] hover:text-[#4F46E5] py-2">
               Funciones
             </button>
-            <button onClick={() => handleNav('#comparativa')} className="block w-full text-left text-sm font-medium text-stone-600 hover:text-[#4F46E5] py-2">
+            <button onClick={() => handleNav('#comparativa')} className="block w-full text-left text-sm font-medium text-[#5D5A7E] hover:text-[#4F46E5] py-2">
               ¿Por qué Kyllari?
             </button>
-            <button onClick={() => handleNav('#pricing')} className="block w-full text-left text-sm font-medium text-stone-600 hover:text-[#4F46E5] py-2">
+            <button onClick={() => handleNav('#pricing')} className="block w-full text-left text-sm font-medium text-[#5D5A7E] hover:text-[#4F46E5] py-2">
               Precios
             </button>
             <div className="pt-3 border-t border-[#E4E2F2] space-y-2">
               {currentUser ? (
-                <Button onClick={() => { navigate(currentUser.role === 'admin' ? { page: 'admin' } : { page: 'dashboard' }); setMobileOpen(false) }} className="w-full bg-stone-900 hover:bg-[#4F46E5] text-white">
+                <Button onClick={() => { navigate(currentUser.role === 'admin' ? { page: 'admin' } : { page: 'dashboard' }); setMobileOpen(false) }} className="w-full bg-[#4F46E5] hover:bg-[#4338CA] text-white">
                   Mi Panel
                 </Button>
               ) : (

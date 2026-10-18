@@ -111,10 +111,10 @@ export function Features() {
           <span className="text-sm font-semibold text-[#4F46E5] uppercase tracking-wider">
             Beneficios
           </span>
-          <h2 className="font-display text-3xl sm:text-4xl font-bold text-stone-900 mt-3 mb-4">
+          <h2 className="font-display text-3xl sm:text-4xl font-bold text-[#17142E] mt-3 mb-4">
             Todo lo que necesitas para vender online
           </h2>
-          <p className="text-lg text-stone-500 max-w-2xl mx-auto">
+          <p className="text-lg text-[#5D5A7E] max-w-2xl mx-auto">
             Hecho en Perú para emprendedores. Sin código, sin comisiones por venta y sin
             complicaciones. Tú te enfocas en vender, nosotros en la tecnología.
           </p>
@@ -131,13 +131,13 @@ export function Features() {
             <motion.div
               key={feature.title}
               variants={item}
-              className="group p-6 rounded-2xl border border-[#E4E2F2] bg-[#FAF6EF] hover:border-[#4F46E5]/40 hover:shadow-lg hover:shadow-[#4F46E5]/10 transition-all duration-300"
+              className="group p-6 rounded-2xl border border-[#E4E2F2] bg-[#FAFAFF] hover:border-[#4F46E5]/40 hover:shadow-lg hover:shadow-[#4F46E5]/10 transition-all duration-300"
             >
               <div className="w-12 h-12 rounded-xl bg-[#ECEAFE] flex items-center justify-center mb-4 group-hover:bg-[#4F46E5] transition-colors duration-300">
                 <feature.icon className="w-6 h-6 text-[#4F46E5] group-hover:text-white transition-colors duration-300" />
               </div>
-              <h3 className="font-display text-lg font-semibold text-stone-900 mb-2">{feature.title}</h3>
-              <p className="text-stone-500 text-sm leading-relaxed">{feature.description}</p>
+              <h3 className="font-display text-lg font-semibold text-[#17142E] mb-2">{feature.title}</h3>
+              <p className="text-[#5D5A7E] text-sm leading-relaxed">{feature.description}</p>
             </motion.div>
           ))}
         </motion.div>

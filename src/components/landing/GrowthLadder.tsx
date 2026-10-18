@@ -52,8 +52,8 @@ const LEVELS: Level[] = [
     description:
       'Packs con descuento, tu catálogo en Excel o Sheets, reportes de ventas, Landing IA y hasta 3 tiendas con 26 diseños profesionales según tu rubro: ropa, joyería, café, restaurante y más. Todo para vivir de tu negocio.',
     badge: 'Pro S/29.99 · Premium S/79.99',
-    badgeClass: 'bg-[#4F46E5]/20 text-[#E29B77] border-[#4F46E5]/40',
-    iconClass: 'text-[#E29B77] bg-[#E29B77]/10 border-[#E29B77]/30',
+    badgeClass: 'bg-[#4F46E5]/20 text-[#A5B4FC] border-[#4F46E5]/40',
+    iconClass: 'text-[#A5B4FC] bg-[#A5B4FC]/10 border-[#A5B4FC]/30',
     cta: { label: 'Ver planes', action: 'scroll' as const },
   },
 ]
@@ -64,7 +64,7 @@ export function GrowthLadder() {
   return (
     <section id="escala" className="relative py-20 sm:py-28 bg-terra-ink overflow-hidden">
       <div className="absolute top-0 right-0 w-96 h-96 bg-[#4F46E5] rounded-full filter blur-3xl opacity-15" />
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#8A4A2F] rounded-full filter blur-3xl opacity-15" />
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#22D3EE] rounded-full filter blur-3xl opacity-15" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
@@ -74,14 +74,14 @@ export function GrowthLadder() {
           transition={{ duration: 0.6, ease: 'easeOut' }}
           className="text-center mb-16"
         >
-          <span className="text-sm font-semibold text-[#E29B77] uppercase tracking-wider">
+          <span className="text-sm font-semibold text-[#A5B4FC] uppercase tracking-wider">
             Tu negocio crece, Kyllari crece contigo
           </span>
           <h2 className="font-display text-3xl sm:text-4xl font-bold text-white mt-3 mb-4">
             Empieza gratis. <span className="accent-serif">Vende.</span> Escala cuando
             lo necesites.
           </h2>
-          <p className="text-lg text-stone-300/80 max-w-2xl mx-auto">
+          <p className="text-lg text-white/80 max-w-2xl mx-auto">
             No necesitas pagar para empezar. Necesitas pagar cuando tu negocio ya está
             volando — y ahí estamos nosotros.
           </p>
@@ -110,11 +110,11 @@ export function GrowthLadder() {
                 <lvl.icon className="w-7 h-7" />
               </div>
 
-              <p className="text-xs font-semibold uppercase tracking-widest text-stone-400 mb-1">
+              <p className="text-xs font-semibold uppercase tracking-widest text-white/60 mb-1">
                 {lvl.level}
               </p>
               <h3 className="font-display text-xl font-bold text-white mb-3">{lvl.title}</h3>
-              <p className="text-sm text-stone-300/70 leading-relaxed mb-5 flex-1">
+              <p className="text-sm text-white/70 leading-relaxed mb-5 flex-1">
                 {lvl.description}
               </p>
 
@@ -132,7 +132,7 @@ export function GrowthLadder() {
                   className={`w-full font-bold rounded-full ${
                     i === 0
                       ? 'bg-[#4F46E5] hover:bg-[#4338CA] text-white shadow-[#4F46E5]/25'
-                      : 'bg-white text-stone-900 hover:bg-[#ECEAFE]'
+                      : 'bg-white text-[#17142E] hover:bg-[#ECEAFE]'
                   }`}
                 >
                   {lvl.cta.label}

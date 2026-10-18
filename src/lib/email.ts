@@ -49,7 +49,7 @@ function htmlToText(html: string): string {
     .trim()
 }
 
-async function sendEmail(params: { from: string; to: string; subject: string; html: string }) {
+async function sendEmail(params: { from: string; to: string; subject: string; html: string; replyTo?: string }) {
   const resend = getResend()
   return resend.emails.send({ ...params, text: htmlToText(params.html) })
 }
@@ -564,4 +564,48 @@ export async function sendPasswordChangedEmail(name: string, email: string): Pro
   } catch (err) {
     console.error('[EMAIL] Password changed email failed (non-blocking):', err)
   }
+}
+
+// ── Contacto web (formulario de /contact) ──
+// Sin WhatsApp de soporte (decisión del dueño): el formulario envía un email
+// al administrador con reply_to = correo del visitante para responder 1-clic.
+// SÍ lanza error si Resend falla: la API responde 500 y el formulario muestra
+// el email directo como plan B (el mensaje nunca se pierde en silencio).
+export async function sendContactEmail(params: {
+  name: string
+  email: string
+  subject: string
+  message: string
+}): Promise<void> {
+  const { data, error } = await sendEmail({
+    from: FROM_EMAIL,
+    to: ADMIN_NOTIFY_EMAIL,
+    replyTo: params.email,
+    subject: `[Contacto web] ${params.subject} — ${params.name}`,
+    html: `
+      <div style="max-width:480px;margin:0 auto;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+        <div style="text-align:center;padding:32px 0 16px;">
+          <img src="${APP_URL}/logo-email.png" width="48" height="48" alt="Kyllari" style="border-radius:12px;" />
+          <h1 style="margin:16px 0 8px;font-size:20px;font-weight:700;color:#1f2937;">Kyllari</h1>
+        </div>
+        <div style="background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:32px;">
+          <h2 style="margin:0 0 12px;font-size:18px;font-weight:600;color:#1f2937;">Nuevo mensaje desde la web</h2>
+          <div style="background:#f9fafb;border-radius:8px;padding:16px;margin:0 0 20px;">
+            <p style="margin:0 0 6px;font-size:14px;color:#374151;"><strong>Nombre:</strong> ${params.name}</p>
+            <p style="margin:0 0 6px;font-size:14px;color:#374151;"><strong>Email:</strong> ${params.email}</p>
+            <p style="margin:0 0 6px;font-size:14px;color:#374151;"><strong>Asunto:</strong> ${params.subject}</p>
+          </div>
+          <p style="margin:0 0 8px;font-size:14px;color:#374151;"><strong>Mensaje:</strong></p>
+          <p style="margin:0;font-size:14px;color:#4b5563;line-height:1.6;white-space:pre-wrap;">${params.message}</p>
+        </div>
+        <div style="text-align:center;padding:24px 0;font-size:12px;color:#9ca3af;">Enviado por Kyllari · Crea tu tienda online en minutos</div>
+      </div>
+    `,
+  })
+
+  if (error) {
+    console.error('[EMAIL] Contact email error:', error)
+    throw new Error('No se pudo enviar el mensaje de contacto')
+  }
+  console.log(`[EMAIL] Contact email sent from ${params.email}, id: ${data?.id}`)
 }
