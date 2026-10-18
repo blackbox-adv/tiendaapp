@@ -14,12 +14,13 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAppStore } from '@/lib/store';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
   FileSpreadsheet, Upload, CheckCircle2, AlertTriangle, Loader2,
-  RefreshCw, Trash2, ArrowLeft, Sparkles, Info,
+  RefreshCw, Trash2, ArrowLeft, Sparkles, Info, Crown,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -48,8 +49,12 @@ function authHeaders(): Record<string, string> {
 }
 
 export function ExcelImport() {
-  const { currentStore, syncFromAPI } = useAppStore();
+  const { currentStore, currentUser, syncFromAPI } = useAppStore();
   const storeId = currentStore?.id;
+
+  // Gating de plan: importador exclusivo Premium (super_admin = 'admin' siempre puede entrar a demostrar)
+  const planId = (currentUser?.planId as string) || 'free';
+  const planLocked = planId !== 'premium' && currentUser?.role !== 'admin';
 
   const [phase, setPhase] = useState<'loading' | 'noMapping' | 'mapping' | 'ready' | 'result'>('loading');
   const [saved, setSaved] = useState<SavedMapping | null>(null);
@@ -222,6 +227,39 @@ export function ExcelImport() {
       )}
     </div>
   );
+
+  // ===== Estado bloqueado por plan =====
+  if (planLocked) {
+    return (
+      <div className="max-w-lg mx-auto p-4 sm:p-6">
+        <Card className="border-violet-200 overflow-hidden">
+          <div className="h-1.5 bg-gradient-to-r from-violet-600 to-violet-400" />
+          <CardContent className="p-6 sm:p-8 text-center space-y-4">
+            <div className="mx-auto w-14 h-14 rounded-2xl bg-violet-600 text-white flex items-center justify-center shadow-lg shadow-violet-600/30">
+              <Crown className="w-7 h-7" />
+            </div>
+            <Badge className="bg-violet-600 text-white hover:bg-violet-600">PREMIUM</Badge>
+            <h2 className="text-xl font-bold text-[#17142E]">Importador de Excel</h2>
+            <p className="text-sm text-[#5D5A7E]">
+              Sube el Excel que ya usas en tu negocio y tu tienda se actualiza sola:
+              crea los productos nuevos y actualiza precios y stock en 1 click.
+            </p>
+            <ul className="text-sm text-left text-[#5D5A7E] space-y-2.5 mx-auto max-w-sm">
+              <li className="flex gap-2.5"><CheckCircle2 className="w-4 h-4 text-violet-600 shrink-0 mt-0.5" /> Tu Excel es el jefe: las columnas de más se ignoran</li>
+              <li className="flex gap-2.5"><CheckCircle2 className="w-4 h-4 text-violet-600 shrink-0 mt-0.5" /> Mapeo guiado una sola vez, luego es 1 click</li>
+              <li className="flex gap-2.5"><CheckCircle2 className="w-4 h-4 text-violet-600 shrink-0 mt-0.5" /> Productos ilimitados con el plan Premium</li>
+            </ul>
+            <Link href="/dashboard/plan" className="block">
+              <Button className="w-full bg-violet-600 hover:bg-violet-700 text-white">
+                <Sparkles className="w-4 h-4 mr-2" /> Ver planes y actualizar
+              </Button>
+            </Link>
+            <p className="text-xs text-[#5D5A7E]">Disponible en el plan Premium (S/79.99/mes)</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // ===== Estados de pantalla =====
   if (phase === 'loading') {

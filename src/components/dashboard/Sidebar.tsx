@@ -26,7 +26,7 @@ interface NavItem {
 const ownerNavItems: NavItem[] = [
   { href: '/dashboard', label: 'Panel', icon: LayoutDashboard },
   { href: '/dashboard/products', label: 'Productos', icon: Package },
-  { href: '/dashboard/import', label: 'Importar Excel', icon: FileSpreadsheet },
+  { href: '/dashboard/import', label: 'Importar Excel', icon: FileSpreadsheet, premium: true },
   { href: '/dashboard/orders', label: 'Pedidos', icon: ShoppingCart },
   { href: '/dashboard/chats', label: 'Chats', icon: MessageCircle, premium: true },
   { href: '/dashboard/categories', label: 'Categorías', icon: FolderOpen },

@@ -92,6 +92,11 @@ export const PLAN_BY_TYPE: Record<string, CanonicalPlan> = Object.fromEntries(
   CANONICAL_PLANS.map((p) => [p.type, p])
 )
 
+// Planes con acceso al Importador de Excel (subir el Excel propio y actualizar
+// la tienda en 1 click). Para abrirlo a otros planes (p. ej. 'pro'), agregar
+// el type aquí — API y UI leen de esta lista.
+export const EXCEL_IMPORTER_PLANS: readonly string[] = ['premium'];
+
 // Precios canónicos (para JSON-LD, badges, marketing)
 export const PLAN_PRICES: Record<string, number> = Object.fromEntries(
   CANONICAL_PLANS.map((p) => [p.type, p.price])
