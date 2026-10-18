@@ -90,8 +90,9 @@ export const metadata: Metadata = {
     // google: "REPLACE_WITH_REAL_GOOGLE_VERIFICATION_CODE",
   },
   icons: {
-    icon: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
+    // ?v=2 rompe el cache de favicons del navegador (logo nuevo Kyllari)
+    icon: "/favicon.ico?v=2",
+    apple: "/apple-touch-icon.png?v=2",
   },
 };
 
