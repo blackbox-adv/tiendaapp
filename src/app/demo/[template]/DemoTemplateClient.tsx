@@ -261,7 +261,7 @@ const demoStores: Record<string, Store> = {
     logo: '👗',
     categoryId: 'ropa',
     planId: 'premium',
-    colors: { primary: '#A9744F', secondary: '#1C1917' },
+    colors: { primary: '#A9744F', secondary: '#17142E' },
     whatsappNumber: '+51999990011',
     template: 'boutique',
     bannerUrl: '/demo-assets/boutique-hero.jpg',

@@ -36,7 +36,7 @@ export function Problem() {
           transition={{ duration: 0.6, ease: 'easeOut' }}
           className="text-center mb-14"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FBEAE4] border border-[#BC5A38]/20 text-[#BC5A38] text-sm font-semibold mb-5">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FBEAE4] border border-[#4F46E5]/20 text-[#4F46E5] text-sm font-semibold mb-5">
             <WhatsAppIcon className="w-4 h-4" />
             Vendes por WhatsApp... pero a duras penas
           </div>
@@ -58,10 +58,10 @@ export function Problem() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.6, delay: i * 0.12, ease: 'easeOut' }}
-              className="relative bg-[#FAF6EF] rounded-2xl p-6 border border-[#E5DCCB] hover:border-[#BC5A38]/40 hover:bg-[#F6E7DE]/50 transition-all duration-300"
+              className="relative bg-[#FAF6EF] rounded-2xl p-6 border border-[#E4E2F2] hover:border-[#4F46E5]/40 hover:bg-[#ECEAFE]/50 transition-all duration-300"
             >
-              <div className="w-12 h-12 rounded-xl bg-[#F6E7DE] flex items-center justify-center mb-5">
-                <pain.icon className="w-6 h-6 text-[#BC5A38]" />
+              <div className="w-12 h-12 rounded-xl bg-[#ECEAFE] flex items-center justify-center mb-5">
+                <pain.icon className="w-6 h-6 text-[#4F46E5]" />
               </div>
               <h3 className="font-display text-lg font-bold text-stone-900 mb-2 italic">
                 {pain.quote}

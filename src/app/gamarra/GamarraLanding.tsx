@@ -57,7 +57,7 @@ export function GamarraLanding({ faq }: { faq: FaqItem[] }) {
   return (
     <div className="min-h-screen bg-terra-cream text-stone-900">
       {/* ===== Header minimal ===== */}
-      <header className="sticky top-0 z-40 bg-terra-cream/90 backdrop-blur border-b border-[#BC5A38]/15">
+      <header className="sticky top-0 z-40 bg-terra-cream/90 backdrop-blur border-b border-[#4F46E5]/15">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <a href="/" className="flex items-center gap-2 font-display font-black text-xl tracking-tight">
             <span className="w-8 h-8 rounded-lg bg-terra text-white flex items-center justify-center">
@@ -81,15 +81,15 @@ export function GamarraLanding({ faq }: { faq: FaqItem[] }) {
 
       {/* ===== Hero ===== */}
       <section className="relative overflow-hidden">
-        <div className="absolute top-16 -left-24 w-96 h-96 rounded-full filter blur-3xl opacity-30 bg-[#EAD9C9]" />
-        <div className="absolute bottom-10 -right-24 w-[28rem] h-[28rem] rounded-full filter blur-3xl opacity-40 bg-[#F0DED2]" />
+        <div className="absolute top-16 -left-24 w-96 h-96 rounded-full filter blur-3xl opacity-30 bg-[#E4E1FA]" />
+        <div className="absolute bottom-10 -right-24 w-[28rem] h-[28rem] rounded-full filter blur-3xl opacity-40 bg-[#D8D4F7]" />
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-16 sm:pt-20 lg:pt-24 lg:pb-20 text-center">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: 'easeOut' }}
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/70 backdrop-blur-sm border border-[#BC5A38]/25 text-stone-800 text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/70 backdrop-blur-sm border border-[#4F46E5]/25 text-stone-800 text-sm font-medium mb-6">
               <MapPin className="w-4 h-4 text-terra" />
               Especial para comerciantes de Gamarra y emprendedores
             </div>
@@ -146,13 +146,13 @@ export function GamarraLanding({ faq }: { faq: FaqItem[] }) {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.12 }}
-                className="bg-white rounded-2xl p-7 border border-[#BC5A38]/10 shadow-sm"
+                className="bg-white rounded-2xl p-7 border border-[#4F46E5]/10 shadow-sm"
               >
                 <div className="flex items-center gap-3 mb-4">
                   <span className="w-11 h-11 rounded-xl bg-terra text-white flex items-center justify-center shrink-0">
                     <s.icon className="w-5 h-5" />
                   </span>
-                  <span className="font-display font-black text-3xl text-[#BC5A38]/25">0{i + 1}</span>
+                  <span className="font-display font-black text-3xl text-[#4F46E5]/25">0{i + 1}</span>
                 </div>
                 <h3 className="font-bold text-lg mb-2">{s.title}</h3>
                 <p className="text-stone-600 text-sm leading-relaxed">{s.text}</p>
@@ -179,7 +179,7 @@ export function GamarraLanding({ faq }: { faq: FaqItem[] }) {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="flex gap-4 bg-white/70 rounded-2xl p-6 border border-[#BC5A38]/10"
+                className="flex gap-4 bg-white/70 rounded-2xl p-6 border border-[#4F46E5]/10"
               >
                 <span className="w-11 h-11 rounded-xl bg-terra-soft text-terra flex items-center justify-center shrink-0">
                   <b.icon className="w-5 h-5" />
@@ -207,7 +207,7 @@ export function GamarraLanding({ faq }: { faq: FaqItem[] }) {
               'WhatsApp sigue siendo el canal donde cierras: solo que ahora llega el pedido con el producto exacto, no un "hola, qué tienes".',
             ].map((t) => (
               <div key={t} className="flex gap-4 items-start">
-                <span className="w-7 h-7 rounded-full bg-[#BC5A38] text-white flex items-center justify-center shrink-0 mt-0.5">
+                <span className="w-7 h-7 rounded-full bg-[#4F46E5] text-white flex items-center justify-center shrink-0 mt-0.5">
                   <Check className="w-4 h-4" />
                 </span>
                 <p className="text-lg text-stone-200 leading-relaxed">{t}</p>
@@ -225,7 +225,7 @@ export function GamarraLanding({ faq }: { faq: FaqItem[] }) {
           </h2>
           <div className="space-y-4">
             {faq.map((f) => (
-              <details key={f.q} className="group bg-white rounded-2xl border border-[#BC5A38]/10 p-6 open:shadow-md transition-shadow">
+              <details key={f.q} className="group bg-white rounded-2xl border border-[#4F46E5]/10 p-6 open:shadow-md transition-shadow">
                 <summary className="font-bold cursor-pointer list-none flex items-center justify-between gap-4">
                   {f.q}
                   <span className="text-terra text-xl leading-none group-open:rotate-45 transition-transform">+</span>
@@ -257,7 +257,7 @@ export function GamarraLanding({ faq }: { faq: FaqItem[] }) {
       </section>
 
       {/* ===== Footer minimal ===== */}
-      <footer className="py-10 border-t border-[#BC5A38]/15">
+      <footer className="py-10 border-t border-[#4F46E5]/15">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-stone-500">
           <p>© {new Date().getFullYear()} Kyllari · Crea tu tienda online en minutos</p>
           <nav className="flex items-center gap-5">

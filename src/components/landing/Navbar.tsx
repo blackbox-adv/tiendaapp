@@ -5,7 +5,6 @@ import { motion } from 'framer-motion'
 import { useAppStore } from '@/lib/store'
 import { Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { WhatsAppIcon } from './WhatsAppIcon'
 
 export function Navbar() {
   const navigate = useAppStore((s) => s.navigate)
@@ -33,8 +32,8 @@ export function Navbar() {
       transition={{ duration: 0.5, ease: "easeOut" }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? 'bg-[#F7F2EA]/90 backdrop-blur-lg shadow-lg border-b border-[#E5DCCB]'
-          : 'bg-[#F7F2EA]/70 backdrop-blur-md border-b border-transparent'
+          ? 'bg-[#FFFFFF]/90 backdrop-blur-lg shadow-lg border-b border-[#E4E2F2]'
+          : 'bg-[#FFFFFF]/70 backdrop-blur-md border-b border-transparent'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -48,16 +47,16 @@ export function Navbar() {
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-8">
-            <button onClick={() => handleNav('#templates')} className="text-sm font-medium text-stone-600 hover:text-[#BC5A38] transition-colors">
+            <button onClick={() => handleNav('#templates')} className="text-sm font-medium text-stone-600 hover:text-[#4F46E5] transition-colors">
               Demos
             </button>
-            <button onClick={() => handleNav('#features')} className="text-sm font-medium text-stone-600 hover:text-[#BC5A38] transition-colors">
+            <button onClick={() => handleNav('#features')} className="text-sm font-medium text-stone-600 hover:text-[#4F46E5] transition-colors">
               Funciones
             </button>
-            <button onClick={() => handleNav('#comparativa')} className="text-sm font-medium text-stone-600 hover:text-[#BC5A38] transition-colors">
+            <button onClick={() => handleNav('#comparativa')} className="text-sm font-medium text-stone-600 hover:text-[#4F46E5] transition-colors">
               ¿Por qué Kyllari?
             </button>
-            <button onClick={() => handleNav('#pricing')} className="text-sm font-medium text-stone-600 hover:text-[#BC5A38] transition-colors">
+            <button onClick={() => handleNav('#pricing')} className="text-sm font-medium text-stone-600 hover:text-[#4F46E5] transition-colors">
               Precios
             </button>
           </div>
@@ -67,7 +66,7 @@ export function Navbar() {
             {currentUser ? (
               <Button
                 onClick={() => navigate(currentUser.role === 'admin' ? { page: 'admin' } : { page: 'dashboard' })}
-                className="bg-stone-900 hover:bg-[#BC5A38] text-white"
+                className="bg-stone-900 hover:bg-[#4F46E5] text-white"
               >
                 Mi Panel
               </Button>
@@ -76,11 +75,10 @@ export function Navbar() {
               <div className="w-28 h-9 rounded-md bg-stone-200/80 animate-pulse" />
             ) : (
               <>
-                <Button variant="outline" onClick={() => navigate({ page: 'login' })} className="border-stone-300 text-stone-700 hover:bg-white hover:text-[#BC5A38] hover:border-[#BC5A38]/40">
+                <Button variant="outline" onClick={() => navigate({ page: 'login' })} className="border-stone-300 text-stone-700 hover:bg-white hover:text-[#4F46E5] hover:border-[#4F46E5]/40">
                   Iniciar sesión
                 </Button>
-                <Button onClick={() => navigate({ page: 'register' })} className="bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-white font-semibold">
-                  <WhatsAppIcon className="w-4 h-4 mr-1.5" />
+                <Button onClick={() => navigate({ page: 'register' })} className="bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold">
                   Crear mi tienda
                 </Button>
               </>
@@ -93,7 +91,7 @@ export function Navbar() {
               <Button
                 size="sm"
                 onClick={() => navigate(currentUser.role === 'admin' ? { page: 'admin' } : { page: 'dashboard' })}
-                className="h-9 px-3.5 bg-stone-900 hover:bg-[#BC5A38] text-white text-sm font-semibold"
+                className="h-9 px-3.5 bg-stone-900 hover:bg-[#4F46E5] text-white text-sm font-semibold"
               >
                 Mi Panel
               </Button>
@@ -111,33 +109,32 @@ export function Navbar() {
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
-          className="md:hidden bg-[#F7F2EA]/95 backdrop-blur-lg border-t border-[#E5DCCB]"
+          className="md:hidden bg-[#FFFFFF]/95 backdrop-blur-lg border-t border-[#E4E2F2]"
         >
           <div className="px-4 py-4 space-y-3">
-            <button onClick={() => handleNav('#templates')} className="block w-full text-left text-sm font-medium text-stone-600 hover:text-[#BC5A38] py-2">
+            <button onClick={() => handleNav('#templates')} className="block w-full text-left text-sm font-medium text-stone-600 hover:text-[#4F46E5] py-2">
               Demos
             </button>
-            <button onClick={() => handleNav('#features')} className="block w-full text-left text-sm font-medium text-stone-600 hover:text-[#BC5A38] py-2">
+            <button onClick={() => handleNav('#features')} className="block w-full text-left text-sm font-medium text-stone-600 hover:text-[#4F46E5] py-2">
               Funciones
             </button>
-            <button onClick={() => handleNav('#comparativa')} className="block w-full text-left text-sm font-medium text-stone-600 hover:text-[#BC5A38] py-2">
+            <button onClick={() => handleNav('#comparativa')} className="block w-full text-left text-sm font-medium text-stone-600 hover:text-[#4F46E5] py-2">
               ¿Por qué Kyllari?
             </button>
-            <button onClick={() => handleNav('#pricing')} className="block w-full text-left text-sm font-medium text-stone-600 hover:text-[#BC5A38] py-2">
+            <button onClick={() => handleNav('#pricing')} className="block w-full text-left text-sm font-medium text-stone-600 hover:text-[#4F46E5] py-2">
               Precios
             </button>
-            <div className="pt-3 border-t border-[#E5DCCB] space-y-2">
+            <div className="pt-3 border-t border-[#E4E2F2] space-y-2">
               {currentUser ? (
-                <Button onClick={() => { navigate(currentUser.role === 'admin' ? { page: 'admin' } : { page: 'dashboard' }); setMobileOpen(false) }} className="w-full bg-stone-900 hover:bg-[#BC5A38] text-white">
+                <Button onClick={() => { navigate(currentUser.role === 'admin' ? { page: 'admin' } : { page: 'dashboard' }); setMobileOpen(false) }} className="w-full bg-stone-900 hover:bg-[#4F46E5] text-white">
                   Mi Panel
                 </Button>
               ) : (
                 <>
-                  <Button variant="ghost" onClick={() => { navigate({ page: 'login' }); setMobileOpen(false) }} className="w-full text-[#BC5A38]">
+                  <Button variant="ghost" onClick={() => { navigate({ page: 'login' }); setMobileOpen(false) }} className="w-full text-[#4F46E5]">
                     Iniciar sesión
                   </Button>
-                  <Button onClick={() => { navigate({ page: 'register' }); setMobileOpen(false) }} className="w-full bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-white font-semibold">
-                    <WhatsAppIcon className="w-4 h-4 mr-1.5" />
+                  <Button onClick={() => { navigate({ page: 'register' }); setMobileOpen(false) }} className="w-full bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold">
                     Crear mi tienda
                   </Button>
                 </>

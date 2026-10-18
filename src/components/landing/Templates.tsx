@@ -353,11 +353,11 @@ export function Templates() {
           transition={{ duration: 0.6, ease: 'easeOut' }}
           className="text-center mb-10"
         >
-          <span className="text-sm font-semibold text-[#BC5A38] uppercase tracking-wider">
+          <span className="text-sm font-semibold text-[#4F46E5] uppercase tracking-wider">
             Galería de diseños
           </span>
           <h2 className="font-display text-3xl sm:text-5xl font-bold text-stone-900 mt-3 mb-4">
-            Catálogos que se ven <span className="italic text-[#BC5A38]">de revista</span>
+            Catálogos que se ven <span className="italic text-[#4F46E5]">de revista</span>
           </h2>
           <p className="text-lg text-stone-500 max-w-2xl mx-auto mb-7">
             {templates.length} diseños listos para tu rubro, al nivel de los grandes catálogos.
@@ -374,7 +374,7 @@ export function Templates() {
                 className={`px-4 py-2 rounded-full text-sm font-semibold border transition-all duration-200 ${
                   rubro === f.id
                     ? 'bg-stone-900 text-white border-stone-900 shadow-md'
-                    : 'bg-white text-stone-600 border-[#E5DCCB] hover:border-[#BC5A38] hover:text-[#BC5A38]'
+                    : 'bg-white text-stone-600 border-[#E4E2F2] hover:border-[#4F46E5] hover:text-[#4F46E5]'
                 }`}
               >
                 {f.label}
@@ -458,7 +458,7 @@ export function Templates() {
           </p>
           <button
             onClick={() => navigate({ page: 'register' })}
-            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#BC5A38] text-white font-bold hover:bg-[#a84b2d] transition-colors shadow-lg"
+            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#4F46E5] text-white font-bold hover:bg-[#a84b2d] transition-colors shadow-lg"
           >
             Crear mi tienda gratis
             <ArrowRight className="w-4 h-4" />

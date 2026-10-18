@@ -16,10 +16,10 @@ export function Hero() {
   return (
     <section className="relative overflow-hidden bg-terra-cream">
       {/* Textura decorativa: blobs terracota suaves sobre crema */}
-      <div className="absolute top-16 -left-24 w-96 h-96 rounded-full filter blur-3xl opacity-30 bg-[#EAD9C9]" />
-      <div className="absolute bottom-10 -right-24 w-[28rem] h-[28rem] rounded-full filter blur-3xl opacity-40 bg-[#F0DED2]" />
+      <div className="absolute top-16 -left-24 w-96 h-96 rounded-full filter blur-3xl opacity-30 bg-[#E4E1FA]" />
+      <div className="absolute bottom-10 -right-24 w-[28rem] h-[28rem] rounded-full filter blur-3xl opacity-40 bg-[#D8D4F7]" />
       {/* Aro decorativo terracota */}
-      <div className="absolute -top-10 right-[12%] w-40 h-40 rounded-full border-[10px] border-[#BC5A38]/10" />
+      <div className="absolute -top-10 right-[12%] w-40 h-40 rounded-full border-[10px] border-[#4F46E5]/10" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-20 sm:pt-32 lg:pt-36 lg:pb-28">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
@@ -30,10 +30,10 @@ export function Hero() {
             transition={{ duration: 0.8, ease: 'easeOut' }}
             className="text-center lg:text-left"
           >
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/70 backdrop-blur-sm border border-[#BC5A38]/25 text-stone-800 text-sm font-medium mb-6">
-              <Zap className="w-4 h-4 text-[#BC5A38]" />
-              Hecho en Perú para emprendedores 🇵🇪
+            {/* Badge — neutro de país: la marca no queda encerrada en un mercado */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-[#4F46E5]/25 text-stone-800 text-sm font-semibold mb-6">
+              <span className="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-[#4F46E5] to-[#00E5FF]" />
+              Para emprendedores de toda Latinoamérica
             </div>
 
             {/* Heading editorial serif — keyword principal "tienda online" en H1,
@@ -43,9 +43,9 @@ export function Hero() {
               <span className="accent-serif">recibe pedidos por WhatsApp</span>
             </h1>
 
-            {/* Subtitle */}
+            {/* Subtitle — abre con la pregunta del dueño (enganche) y conserva keywords SEO */}
             <p className="text-lg text-stone-600 max-w-xl mx-auto lg:mx-0 mb-8 leading-relaxed">
-              Tu catálogo digital con{' '}
+              ¿Quieres emprender? Tu catálogo digital con{' '}
               <strong className="text-stone-900">botón de WhatsApp</strong>: deja de perder
               pedidos entre chats y fotos sueltas. Cobra con{' '}
               <strong className="text-stone-900">Yape, Plin o como prefieras</strong>.
@@ -61,7 +61,7 @@ export function Hero() {
                     logAbEvent('cta_click')
                     navigate(currentUser!.role === 'admin' ? { page: 'admin' } : { page: 'dashboard' })
                   }}
-                  className="w-full sm:w-auto bg-stone-900 hover:bg-[#BC5A38] text-white font-bold px-8 py-6 text-lg rounded-full shadow-xl shadow-stone-900/20 hover:shadow-2xl hover:scale-[1.02] transition-all"
+                  className="w-full sm:w-auto bg-stone-900 hover:bg-[#4F46E5] text-white font-bold px-8 py-6 text-lg rounded-full shadow-xl shadow-stone-900/20 hover:shadow-2xl hover:scale-[1.02] transition-all"
                 >
                   Ir a mi panel
                 </Button>
@@ -72,9 +72,8 @@ export function Hero() {
                     logAbEvent('cta_click')
                     navigate({ page: 'register' })
                   }}
-                  className="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-white font-bold px-8 py-6 text-lg rounded-full shadow-xl shadow-emerald-900/20 hover:shadow-2xl hover:scale-[1.02] transition-all"
+                  className="w-full sm:w-auto bg-[#4F46E5] hover:bg-[#4338CA] text-white font-bold px-8 py-6 text-lg rounded-full shadow-xl shadow-[#4F46E5]/30 hover:shadow-2xl hover:scale-[1.02] transition-all"
                 >
-                  <WhatsAppIcon className="w-5 h-5 mr-2" />
                   Crear mi tienda gratis
                 </Button>
               )}
@@ -107,10 +106,10 @@ export function Hero() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.6 + i * 0.15, ease: 'easeOut' }}
-                  className="text-center lg:text-left rounded-2xl bg-white/80 border border-[#E5DCCB] px-3 py-4"
+                  className="text-center lg:text-left rounded-2xl bg-white/80 border border-[#E4E2F2] px-3 py-4"
                 >
                   <div className="flex items-center justify-center lg:justify-start mb-1">
-                    <stat.icon className="w-4 h-4 text-[#BC5A38]" />
+                    <stat.icon className="w-4 h-4 text-[#4F46E5]" />
                   </div>
                   <div className="text-2xl font-bold font-display text-stone-900">{stat.value}</div>
                   <div className="text-xs text-stone-500">{stat.label}</div>
@@ -127,7 +126,7 @@ export function Hero() {
             className="relative flex justify-center lg:justify-end"
           >
             {/* Glow cálido */}
-            <div className="absolute inset-0 bg-[#E8C9A8]/50 blur-3xl rounded-full scale-90" />
+            <div className="absolute inset-0 bg-[#DCD9F5]/50 blur-3xl rounded-full scale-90" />
 
             {/* Celular con chat de WhatsApp en vivo */}
             <PhoneMockup />
@@ -137,7 +136,7 @@ export function Hero() {
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.9 }}
-              className="absolute -left-2 sm:left-2 top-[14%] bg-white rounded-2xl shadow-xl border border-[#E5DCCB] p-3 flex items-center gap-2.5 max-w-[210px] animate-float-soft"
+              className="absolute -left-2 sm:left-2 top-[14%] bg-white rounded-2xl shadow-xl border border-[#E4E2F2] p-3 flex items-center gap-2.5 max-w-[210px] animate-float-soft"
             >
               <div className="w-9 h-9 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
                 <WhatsAppIcon className="w-5 h-5 text-emerald-600" />
@@ -153,15 +152,15 @@ export function Hero() {
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 1.2 }}
-              className="absolute right-2 sm:right-4 bottom-[30%] bg-white rounded-2xl shadow-xl border border-[#E5DCCB] p-3 flex items-center gap-2.5 max-w-[200px] animate-float-soft"
+              className="absolute right-2 sm:right-4 bottom-[30%] bg-white rounded-2xl shadow-xl border border-[#E4E2F2] p-3 flex items-center gap-2.5 max-w-[200px] animate-float-soft"
               style={{ animationDelay: '1.2s' }}
             >
-              <div className="w-9 h-9 rounded-full bg-[#F6E7DE] flex items-center justify-center shrink-0">
-                <Wallet className="w-5 h-5 text-[#BC5A38]" />
+              <div className="w-9 h-9 rounded-full bg-[#ECEAFE] flex items-center justify-center shrink-0">
+                <Wallet className="w-5 h-5 text-[#4F46E5]" />
               </div>
               <div>
                 <p className="text-xs font-bold text-stone-900 leading-tight">Pago recibido</p>
-                <p className="text-[11px] font-semibold text-[#BC5A38] leading-tight">S/ 45.90 vía Yape</p>
+                <p className="text-[11px] font-semibold text-[#4F46E5] leading-tight">S/ 45.90 vía Yape</p>
               </div>
             </motion.div>
 
@@ -172,7 +171,7 @@ export function Hero() {
               transition={{ duration: 0.6, delay: 1.5 }}
               className="absolute left-2 sm:left-8 top-[6%] bg-stone-900 text-white rounded-full shadow-xl px-4 py-2 flex items-center gap-1.5"
             >
-              <Bell className="w-3.5 h-3.5 text-[#E8A87C]" />
+              <Bell className="w-3.5 h-3.5 text-[#22D3EE]" />
               <span className="text-xs font-bold">Tu venta de hoy: S/ 128.50</span>
             </motion.div>
           </motion.div>
@@ -185,14 +184,14 @@ export function Hero() {
           transition={{ duration: 0.8, delay: 1.4 }}
           className="mt-16 lg:mt-20 flex flex-col items-center gap-4"
         >
-          <p className="text-sm text-[#BC5A38] uppercase tracking-widest font-semibold">
+          <p className="text-sm text-[#4F46E5] uppercase tracking-widest font-semibold">
             Funciona con lo que tú y tus clientes ya usan
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             {['WhatsApp', 'Yape', 'Plin', 'Mercado Pago', 'Efectivo', 'Transferencia'].map((tool) => (
               <span
                 key={tool}
-                className="px-4 py-2 rounded-full bg-white/80 border border-[#E5DCCB] text-stone-700 text-sm font-semibold"
+                className="px-4 py-2 rounded-full bg-white/80 border border-[#E4E2F2] text-stone-700 text-sm font-semibold"
               >
                 {tool === 'WhatsApp' && <WhatsAppIcon className="w-4 h-4 inline mr-1.5 -mt-0.5 text-emerald-500" />}
                 {tool}

@@ -28,7 +28,7 @@ export function Comparison() {
           transition={{ duration: 0.6, ease: 'easeOut' }}
           className="text-center mb-12"
         >
-          <span className="text-sm font-semibold text-[#BC5A38] uppercase tracking-wider">
+          <span className="text-sm font-semibold text-[#4F46E5] uppercase tracking-wider">
             La diferencia
           </span>
           <h2 className="font-display text-3xl sm:text-4xl font-bold text-stone-900 mt-3 mb-4">
@@ -45,10 +45,10 @@ export function Comparison() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.1 }}
           transition={{ duration: 0.7, ease: 'easeOut' }}
-          className="bg-white rounded-3xl shadow-xl border border-[#E5DCCB] overflow-hidden"
+          className="bg-white rounded-3xl shadow-xl border border-[#E4E2F2] overflow-hidden"
         >
           {/* Header */}
-          <div className="grid grid-cols-[1fr_auto_auto] sm:grid-cols-[1fr_180px_180px] border-b border-[#E5DCCB] bg-[#FAF6EF]">
+          <div className="grid grid-cols-[1fr_auto_auto] sm:grid-cols-[1fr_180px_180px] border-b border-[#E4E2F2] bg-[#FAF6EF]">
             <div className="px-4 sm:px-6 py-4 text-sm font-semibold text-stone-400 uppercase tracking-wide">
               Función
             </div>
@@ -58,11 +58,11 @@ export function Comparison() {
               </div>
               <p className="text-xs sm:text-sm font-semibold text-stone-600">WhatsApp solo</p>
             </div>
-            <div className="px-4 py-4 text-center bg-[#F6E7DE]/70">
+            <div className="px-4 py-4 text-center bg-[#ECEAFE]/70">
               <div className="w-10 h-10 mx-auto rounded-xl bg-stone-900 flex items-center justify-center mb-1">
                 <span className="text-white font-bold text-lg">T</span>
               </div>
-              <p className="text-xs sm:text-sm font-bold text-[#BC5A38]">Con Kyllari</p>
+              <p className="text-xs sm:text-sm font-bold text-[#4F46E5]">Con Kyllari</p>
             </div>
           </div>
 
@@ -88,8 +88,8 @@ export function Comparison() {
                   </div>
                 )}
               </div>
-              <div className="px-4 py-3.5 flex justify-center bg-[#F6E7DE]/50">
-                <div className="w-7 h-7 rounded-full bg-[#BC5A38] flex items-center justify-center">
+              <div className="px-4 py-3.5 flex justify-center bg-[#ECEAFE]/50">
+                <div className="w-7 h-7 rounded-full bg-[#4F46E5] flex items-center justify-center">
                   <Check className="w-4 h-4 text-white font-bold" />
                 </div>
               </div>
@@ -103,7 +103,7 @@ export function Comparison() {
             </p>
             <Button
               onClick={() => navigate({ page: 'register' })}
-              className="bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-white font-bold rounded-full shadow-lg shrink-0"
+              className="bg-[#4F46E5] hover:bg-[#4338CA] text-white font-bold rounded-full shadow-lg shadow-[#4F46E5]/25 shrink-0"
             >
               Empezar gratis
               <ArrowRight className="w-4 h-4 ml-1" />

@@ -57,7 +57,7 @@ export function Pricing() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="text-center mb-16"
         >
-          <span className="text-sm font-semibold text-[#BC5A38] uppercase tracking-wider">Precios</span>
+          <span className="text-sm font-semibold text-[#4F46E5] uppercase tracking-wider">Precios</span>
           <h2 className="font-display text-3xl sm:text-4xl font-bold text-stone-900 mt-3 mb-4">
             Planes que se adaptan a ti
           </h2>
@@ -69,7 +69,7 @@ export function Pricing() {
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {[1, 2, 3].map(i => (
-              <div key={i} className="rounded-2xl p-8 bg-white border border-[#E5DCCB] space-y-4">
+              <div key={i} className="rounded-2xl p-8 bg-white border border-[#E4E2F2] space-y-4">
                 <Skeleton className="h-8 w-24" />
                 <Skeleton className="h-4 w-48" />
                 <Skeleton className="h-10 w-20" />
@@ -93,20 +93,20 @@ export function Pricing() {
                   transition={{ duration: 0.6, delay: i * 0.15, ease: "easeOut" }}
                   className={`relative rounded-2xl p-8 flex flex-col ${
                     plan.popular
-                      ? 'bg-stone-900 text-white shadow-2xl shadow-stone-900/30 scale-105 z-10 border-2 border-[#BC5A38]'
-                      : 'bg-white border border-[#E5DCCB] hover:border-[#BC5A38]/40 hover:shadow-lg'
+                      ? 'bg-stone-900 text-white shadow-2xl shadow-stone-900/30 scale-105 z-10 border-2 border-[#4F46E5]'
+                      : 'bg-white border border-[#E4E2F2] hover:border-[#4F46E5]/40 hover:shadow-lg'
                   }`}
                 >
                   {plan.popular && (
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-[#BC5A38] text-white text-xs font-bold rounded-full">
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-[#4F46E5] text-white text-xs font-bold rounded-full">
                       MÁS ELEGIDO
                     </div>
                   )}
 
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${
-                    plan.popular ? 'bg-[#BC5A38]/20' : 'bg-[#F6E7DE]'
+                    plan.popular ? 'bg-[#4F46E5]/20' : 'bg-[#ECEAFE]'
                   }`}>
-                    <Icon className={`w-6 h-6 ${plan.popular ? 'text-[#E29B77]' : 'text-[#BC5A38]'}`} />
+                    <Icon className={`w-6 h-6 ${plan.popular ? 'text-[#E29B77]' : 'text-[#4F46E5]'}`} />
                   </div>
 
                   <h3 className={`font-display text-xl font-bold mb-1 ${plan.popular ? 'text-white' : 'text-stone-900'}`}>
@@ -133,7 +133,7 @@ export function Pricing() {
                   <ul className="space-y-3 mb-8 flex-1">
                     {plan.features.map((feature: string) => (
                       <li key={feature} className="flex items-start gap-3">
-                        <Check className={`w-5 h-5 mt-0.5 flex-shrink-0 ${plan.popular ? 'text-[#E29B77]' : 'text-[#BC5A38]'}`} />
+                        <Check className={`w-5 h-5 mt-0.5 flex-shrink-0 ${plan.popular ? 'text-[#E29B77]' : 'text-[#4F46E5]'}`} />
                         <span className={`text-sm ${plan.popular ? 'text-stone-200' : 'text-stone-600'}`}>
                           {feature}
                         </span>
@@ -154,8 +154,8 @@ export function Pricing() {
                     }}
                     className={`w-full py-3 rounded-full font-semibold ${
                       plan.popular
-                        ? 'bg-white text-stone-900 hover:bg-[#F6E7DE]'
-                        : 'bg-stone-900 text-white hover:bg-[#BC5A38]'
+                        ? 'bg-white text-stone-900 hover:bg-[#ECEAFE]'
+                        : 'bg-stone-900 text-white hover:bg-[#4F46E5]'
                     }`}
                   >
                     {plan.type === 'free' && 'Crear mi tienda gratis'}

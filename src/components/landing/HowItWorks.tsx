@@ -41,7 +41,7 @@ export function HowItWorks() {
           transition={{ duration: 0.6, ease: 'easeOut' }}
           className="text-center mb-16"
         >
-          <span className="text-sm font-semibold text-[#BC5A38] uppercase tracking-wider">
+          <span className="text-sm font-semibold text-[#4F46E5] uppercase tracking-wider">
             ¿Cómo funciona?
           </span>
           <h2 className="font-display text-3xl sm:text-4xl font-bold text-stone-900 mt-3 mb-4">
@@ -54,7 +54,7 @@ export function HowItWorks() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
           {/* Connecting line for desktop */}
-          <div className="hidden md:block absolute top-16 left-[16%] right-[16%] h-0.5 bg-gradient-to-r from-[#BC5A38]/20 via-[#BC5A38]/50 to-[#BC5A38]/20" />
+          <div className="hidden md:block absolute top-16 left-[16%] right-[16%] h-0.5 bg-gradient-to-r from-[#4F46E5]/20 via-[#4F46E5]/50 to-[#4F46E5]/20" />
 
           {STEPS.map((step, i) => (
             <motion.div
@@ -63,11 +63,11 @@ export function HowItWorks() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.6, delay: i * 0.15, ease: 'easeOut' }}
-              className="relative bg-white rounded-2xl p-7 border border-[#E5DCCB] shadow-sm hover:shadow-lg hover:border-[#BC5A38]/30 transition-all text-center"
+              className="relative bg-white rounded-2xl p-7 border border-[#E4E2F2] shadow-sm hover:shadow-lg hover:border-[#4F46E5]/30 transition-all text-center"
             >
               <div className="relative inline-flex items-center justify-center mb-5">
-                <div className="w-16 h-16 rounded-2xl bg-[#F6E7DE] flex items-center justify-center">
-                  <step.icon className="w-8 h-8 text-[#BC5A38]" />
+                <div className="w-16 h-16 rounded-2xl bg-[#ECEAFE] flex items-center justify-center">
+                  <step.icon className="w-8 h-8 text-[#4F46E5]" />
                 </div>
                 <span className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-stone-900 text-white text-xs font-bold flex items-center justify-center shadow-md">
                   {step.step}
@@ -77,7 +77,7 @@ export function HowItWorks() {
               <h3 className="font-display text-lg font-bold text-stone-900 mb-2">{step.title}</h3>
               <p className="text-sm text-stone-500 leading-relaxed mb-4">{step.description}</p>
 
-              <span className="inline-block px-3 py-1 rounded-full bg-[#F6E7DE] text-[#BC5A38] text-xs font-semibold">
+              <span className="inline-block px-3 py-1 rounded-full bg-[#ECEAFE] text-[#4F46E5] text-xs font-semibold">
                 {step.highlight}
               </span>
             </motion.div>

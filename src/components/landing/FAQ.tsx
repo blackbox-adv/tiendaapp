@@ -74,7 +74,7 @@ export function FAQ() {
           transition={{ duration: 0.6, ease: 'easeOut' }}
           className="text-center mb-12"
         >
-          <span className="text-sm font-semibold text-[#BC5A38] uppercase tracking-wider">
+          <span className="text-sm font-semibold text-[#4F46E5] uppercase tracking-wider">
             Preguntas frecuentes
           </span>
           <h2 className="font-display text-3xl sm:text-4xl font-bold text-stone-900 mt-3 mb-4">
@@ -97,8 +97,8 @@ export function FAQ() {
                 transition={{ duration: 0.4, delay: i * 0.05, ease: 'easeOut' }}
                 className={`rounded-2xl border transition-colors ${
                   isOpen
-                    ? 'border-[#BC5A38]/40 bg-white'
-                    : 'border-[#E5DCCB] bg-white/70 hover:border-[#BC5A38]/40'
+                    ? 'border-[#4F46E5]/40 bg-white'
+                    : 'border-[#E4E2F2] bg-white/70 hover:border-[#4F46E5]/40'
                 }`}
               >
                 <button
@@ -110,7 +110,7 @@ export function FAQ() {
                     {item.question}
                   </span>
                   <ChevronDown
-                    className={`w-5 h-5 text-[#BC5A38] flex-shrink-0 transition-transform duration-300 ${
+                    className={`w-5 h-5 text-[#4F46E5] flex-shrink-0 transition-transform duration-300 ${
                       isOpen ? 'rotate-180' : ''
                     }`}
                   />
@@ -147,7 +147,7 @@ export function FAQ() {
             href={waHref ?? '/contact'}
             target={waHref ? '_blank' : undefined}
             rel={waHref ? 'noopener noreferrer' : undefined}
-            className="text-[#BC5A38] font-medium hover:underline"
+            className="text-[#4F46E5] font-medium hover:underline"
           >
             {waHref ? 'Escríbenos por WhatsApp' : 'Contáctanos'}
           </a>{' '}

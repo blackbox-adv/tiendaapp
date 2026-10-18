@@ -26,9 +26,9 @@ export function Footer() {
   return (
     <footer className="bg-white">
       {/* CTA Banner */}
-      <section className="py-16 sm:py-20 bg-terra-ink relative overflow-hidden border-y border-[#BC5A38]/20">
+      <section className="py-16 sm:py-20 bg-terra-ink relative overflow-hidden border-y border-[#4F46E5]/20">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImEiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMS41IiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDUpIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2EpIi8+PC9zdmc+')] opacity-50" />
-        <div className="absolute -top-24 right-0 w-96 h-96 bg-[#BC5A38]/20 rounded-full blur-3xl" />
+        <div className="absolute -top-24 right-0 w-96 h-96 bg-[#4F46E5]/20 rounded-full blur-3xl" />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -45,7 +45,7 @@ export function Footer() {
             <Button
               size="lg"
               onClick={() => navigate({ page: 'register' })}
-              className="bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-white font-semibold px-8 py-6 text-lg rounded-full shadow-xl"
+              className="bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold px-8 py-6 text-lg rounded-full shadow-xl shadow-[#4F46E5]/30"
             >
               Comenzar gratis
               <ArrowRight className="ml-2 w-5 h-5" />
@@ -80,10 +80,10 @@ export function Footer() {
           <div>
             <h4 className="text-sm font-semibold text-stone-900 uppercase tracking-wider mb-4">Producto</h4>
             <ul className="space-y-3">
-              <li><button onClick={() => handleNav('#features')} className="text-sm text-stone-500 hover:text-[#BC5A38] transition-colors">Funciones</button></li>
-              <li><button onClick={() => handleNav('#pricing')} className="text-sm text-stone-500 hover:text-[#BC5A38] transition-colors">Precios</button></li>
-              <li><button onClick={() => handleNav('#templates')} className="text-sm text-stone-500 hover:text-[#BC5A38] transition-colors">Plantillas</button></li>
-              <li><button onClick={() => handleNav('#testimonials')} className="text-sm text-stone-500 hover:text-[#BC5A38] transition-colors">Tiendas reales</button></li>
+              <li><button onClick={() => handleNav('#features')} className="text-sm text-stone-500 hover:text-[#4F46E5] transition-colors">Funciones</button></li>
+              <li><button onClick={() => handleNav('#pricing')} className="text-sm text-stone-500 hover:text-[#4F46E5] transition-colors">Precios</button></li>
+              <li><button onClick={() => handleNav('#templates')} className="text-sm text-stone-500 hover:text-[#4F46E5] transition-colors">Plantillas</button></li>
+              <li><button onClick={() => handleNav('#testimonials')} className="text-sm text-stone-500 hover:text-[#4F46E5] transition-colors">Tiendas reales</button></li>
             </ul>
           </div>
 
@@ -91,10 +91,10 @@ export function Footer() {
           <div>
             <h4 className="text-sm font-semibold text-stone-900 uppercase tracking-wider mb-4">Empresa</h4>
             <ul className="space-y-3">
-              <li><Link href="/about" className="text-sm text-stone-500 hover:text-[#BC5A38] transition-colors">Sobre nosotros</Link></li>
-              <li><Link href="/contact" className="text-sm text-stone-500 hover:text-[#BC5A38] transition-colors">Contacto</Link></li>
-              <li><Link href="/terms" className="text-sm text-stone-500 hover:text-[#BC5A38] transition-colors">Términos y condiciones</Link></li>
-              <li><Link href="/privacy" className="text-sm text-stone-500 hover:text-[#BC5A38] transition-colors">Política de privacidad</Link></li>
+              <li><Link href="/about" className="text-sm text-stone-500 hover:text-[#4F46E5] transition-colors">Sobre nosotros</Link></li>
+              <li><Link href="/contact" className="text-sm text-stone-500 hover:text-[#4F46E5] transition-colors">Contacto</Link></li>
+              <li><Link href="/terms" className="text-sm text-stone-500 hover:text-[#4F46E5] transition-colors">Términos y condiciones</Link></li>
+              <li><Link href="/privacy" className="text-sm text-stone-500 hover:text-[#4F46E5] transition-colors">Política de privacidad</Link></li>
             </ul>
           </div>
 
@@ -103,15 +103,15 @@ export function Footer() {
             <h4 className="text-sm font-semibold text-stone-900 uppercase tracking-wider mb-4">Contacto</h4>
             <ul className="space-y-3">
               <li className="flex items-center gap-2 text-sm text-stone-500">
-                <Mail className="w-4 h-4 text-[#BC5A38]/70" />
+                <Mail className="w-4 h-4 text-[#4F46E5]/70" />
                 {contactEmail}
               </li>
               <li className="flex items-center gap-2 text-sm text-stone-500">
-                <Phone className="w-4 h-4 text-[#BC5A38]/70" />
+                <Phone className="w-4 h-4 text-[#4F46E5]/70" />
                 {phoneDisplay}
               </li>
               <li className="flex items-start gap-2 text-sm text-stone-500">
-                <MapPin className="w-4 h-4 text-[#BC5A38]/70 mt-0.5" />
+                <MapPin className="w-4 h-4 text-[#4F46E5]/70 mt-0.5" />
                 Lima, Perú
               </li>
             </ul>
@@ -119,7 +119,7 @@ export function Footer() {
         </div>
 
         {/* Copyright */}
-        <div className="mt-12 pt-8 border-t border-[#E5DCCB]">
+        <div className="mt-12 pt-8 border-t border-[#E4E2F2]">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
             <p className="text-sm text-stone-400">
               © {new Date().getFullYear()} Kyllari. Todos los derechos reservados. Hecho con 🧡 en Perú.

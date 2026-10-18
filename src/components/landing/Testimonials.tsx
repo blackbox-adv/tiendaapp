@@ -70,7 +70,7 @@ export function Testimonials() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="text-center mb-16"
         >
-          <span className="text-sm font-semibold text-[#BC5A38] uppercase tracking-wider">Tiendas reales</span>
+          <span className="text-sm font-semibold text-[#4F46E5] uppercase tracking-wider">Tiendas reales</span>
           <h2 className="font-display text-3xl sm:text-4xl font-bold text-stone-900 mt-3 mb-4">
             Entra a estas tiendas y pruébalo tú mismo
           </h2>
@@ -100,26 +100,26 @@ export function Testimonials() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
                 transition={{ duration: 0.5, delay: i * 0.15, ease: "easeOut" }}
-                className="group bg-[#FAF6EF] rounded-2xl p-6 border border-[#E5DCCB] hover:shadow-xl hover:border-[#BC5A38]/40 hover:-translate-y-1 transition-all duration-300 flex flex-col"
+                className="group bg-[#FAF6EF] rounded-2xl p-6 border border-[#E4E2F2] hover:shadow-xl hover:border-[#4F46E5]/40 hover:-translate-y-1 transition-all duration-300 flex flex-col"
               >
                 <div className="flex items-center justify-between mb-5">
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${store.accent}`}>
                     <Icon className="w-6 h-6" />
                   </div>
-                  <span className="text-xs font-medium text-stone-500 bg-white border border-[#E5DCCB] px-2.5 py-1 rounded-full">
+                  <span className="text-xs font-medium text-stone-500 bg-white border border-[#E4E2F2] px-2.5 py-1 rounded-full">
                     {store.template}
                   </span>
                 </div>
 
                 <h3 className="font-display font-semibold text-stone-900 text-lg">{store.name}</h3>
-                <p className="text-xs text-[#BC5A38] font-medium mb-3">{store.industry}</p>
+                <p className="text-xs text-[#4F46E5] font-medium mb-3">{store.industry}</p>
                 <p className="text-sm text-stone-600 leading-relaxed flex-1">{store.description}</p>
 
-                <div className="mt-5 pt-4 border-t border-[#E5DCCB] flex items-center justify-between">
-                  <span className="text-sm font-semibold text-[#BC5A38] group-hover:text-[#A84C2D]">
+                <div className="mt-5 pt-4 border-t border-[#E4E2F2] flex items-center justify-between">
+                  <span className="text-sm font-semibold text-[#4F46E5] group-hover:text-[#4338CA]">
                     Ver tienda en vivo
                   </span>
-                  <span className="w-8 h-8 rounded-full bg-[#F6E7DE] text-[#BC5A38] flex items-center justify-center group-hover:bg-[#BC5A38] group-hover:text-white transition-all duration-300">
+                  <span className="w-8 h-8 rounded-full bg-[#ECEAFE] text-[#4F46E5] flex items-center justify-center group-hover:bg-[#4F46E5] group-hover:text-white transition-all duration-300">
                     <ArrowRight className="w-4 h-4" />
                   </span>
                 </div>
@@ -134,10 +134,10 @@ export function Testimonials() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="rounded-3xl bg-terra-ink px-6 py-10 sm:px-12 sm:py-12 text-center relative overflow-hidden border border-[#BC5A38]/20"
+          className="rounded-3xl bg-terra-ink px-6 py-10 sm:px-12 sm:py-12 text-center relative overflow-hidden border border-[#4F46E5]/20"
         >
-          <div className="absolute -top-20 -right-20 w-64 h-64 bg-[#BC5A38]/20 rounded-full blur-3xl" />
-          <div className="absolute -bottom-24 -left-16 w-72 h-72 bg-[#E8A87C]/10 rounded-full blur-3xl" />
+          <div className="absolute -top-20 -right-20 w-64 h-64 bg-[#4F46E5]/20 rounded-full blur-3xl" />
+          <div className="absolute -bottom-24 -left-16 w-72 h-72 bg-[#22D3EE]/10 rounded-full blur-3xl" />
 
           <div className="relative">
             <div className="inline-flex items-center gap-2 bg-white/10 text-white text-sm font-medium px-4 py-1.5 rounded-full mb-5">

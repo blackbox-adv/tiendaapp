@@ -41,8 +41,8 @@ const LEVELS: Level[] = [
     description:
       '¿Lanzaste un producto nuevo? Describe qué es y para quién es, y la IA te escribe el copy completo: titular gancho, beneficios y llamado a la acción, montado en una página lista para compartir por WhatsApp y medir qué encanta.',
     badge: 'Plan Premium',
-    badgeClass: 'bg-[#E8A87C]/15 text-[#E8A87C] border-[#E8A87C]/30',
-    iconClass: 'text-[#E8A87C] bg-[#E8A87C]/10 border-[#E8A87C]/30',
+    badgeClass: 'bg-[#22D3EE]/15 text-[#22D3EE] border-[#22D3EE]/30',
+    iconClass: 'text-[#22D3EE] bg-[#22D3EE]/10 border-[#22D3EE]/30',
     cta: { label: 'Ver planes', action: 'scroll' as const },
   },
   {
@@ -52,7 +52,7 @@ const LEVELS: Level[] = [
     description:
       'Packs con descuento, tu catálogo en Excel o Sheets, reportes de ventas, Landing IA y hasta 3 tiendas con 26 diseños profesionales según tu rubro: ropa, joyería, café, restaurante y más. Todo para vivir de tu negocio.',
     badge: 'Pro S/29.99 · Premium S/79.99',
-    badgeClass: 'bg-[#BC5A38]/20 text-[#E29B77] border-[#BC5A38]/40',
+    badgeClass: 'bg-[#4F46E5]/20 text-[#E29B77] border-[#4F46E5]/40',
     iconClass: 'text-[#E29B77] bg-[#E29B77]/10 border-[#E29B77]/30',
     cta: { label: 'Ver planes', action: 'scroll' as const },
   },
@@ -63,7 +63,7 @@ export function GrowthLadder() {
 
   return (
     <section id="escala" className="relative py-20 sm:py-28 bg-terra-ink overflow-hidden">
-      <div className="absolute top-0 right-0 w-96 h-96 bg-[#BC5A38] rounded-full filter blur-3xl opacity-15" />
+      <div className="absolute top-0 right-0 w-96 h-96 bg-[#4F46E5] rounded-full filter blur-3xl opacity-15" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#8A4A2F] rounded-full filter blur-3xl opacity-15" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -97,12 +97,12 @@ export function GrowthLadder() {
               transition={{ duration: 0.7, delay: i * 0.15, ease: 'easeOut' }}
               className={`relative rounded-3xl p-7 border backdrop-blur-sm flex flex-col ${
                 i === 2
-                  ? 'bg-white/10 border-[#BC5A38]/50 shadow-2xl shadow-black/50 md:-translate-y-3'
+                  ? 'bg-white/10 border-[#4F46E5]/50 shadow-2xl shadow-black/50 md:-translate-y-3'
                   : 'bg-white/5 border-white/10'
               }`}
             >
               {/* Step number */}
-              <span className="absolute -top-3 left-6 px-3 py-1 rounded-full text-xs font-bold bg-[#BC5A38] text-white shadow-md">
+              <span className="absolute -top-3 left-6 px-3 py-1 rounded-full text-xs font-bold bg-[#4F46E5] text-white shadow-md">
                 PASO {i + 1}
               </span>
 
@@ -131,8 +131,8 @@ export function GrowthLadder() {
                   }
                   className={`w-full font-bold rounded-full ${
                     i === 0
-                      ? 'bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-white'
-                      : 'bg-white text-stone-900 hover:bg-[#F6E7DE]'
+                      ? 'bg-[#4F46E5] hover:bg-[#4338CA] text-white shadow-[#4F46E5]/25'
+                      : 'bg-white text-stone-900 hover:bg-[#ECEAFE]'
                   }`}
                 >
                   {lvl.cta.label}
