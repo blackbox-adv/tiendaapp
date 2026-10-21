@@ -169,7 +169,7 @@ export default async function StorePage({ params }: Props) {
               primaryColor: (store.primaryColor as string) || undefined,
               createdAt: (store.createdAt as string) || undefined,
             })
-          ),
+          ).replace(/</g, '\\u003c'),
         }}
       />
       <StorePublicClient

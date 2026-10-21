@@ -141,13 +141,24 @@ export function auditLog(entry: AuditEntry): void {
 }
 
 // ── Request IP Helper ──
+// 🔒 Hardening anti-spoofing: la PRIMERA entrada de x-forwarded-for la controla
+// el cliente (header falsificable) y permitia saltarse rate limits y envenenar
+// logs de auditoria. Orden de confianza:
+//   1. cf-connecting-ip  → seteado/reemplazado por Cloudflare (no falsificable)
+//   2. x-real-ip         → seteado por el edge confiable
+//   3. x-forwarded-for   → se usa la ULTIMA entrada (la añade el proxy de borde)
 export function getClientIp(request: Request): string {
+  const cf = request.headers.get('cf-connecting-ip')
+  if (cf) return cf.trim()
+  const realIp = request.headers.get('x-real-ip')
+  if (realIp) return realIp.trim()
   const forwarded = request.headers.get('x-forwarded-for')
   if (forwarded) {
-    return forwarded.split(',')[0]?.trim() || 'unknown'
+    const parts = forwarded.split(',').map((s) => s.trim()).filter(Boolean)
+    const last = parts[parts.length - 1]
+    if (last) return last
   }
-  const realIp = request.headers.get('x-real-ip')
-  return realIp || 'unknown'
+  return 'unknown'
 }
 
 // ── URL canónica de la app ──

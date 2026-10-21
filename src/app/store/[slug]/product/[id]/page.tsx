@@ -168,7 +168,7 @@ export default async function ProductPage({ params }: Props) {
                 slug: store.slug as string,
               }
             )
-          ),
+          ).replace(/</g, '\\u003c'),
         }}
       />
       <ProductPublicClient store={serializeDecimals(store)} product={serializeDecimals(product)} relatedProducts={serializeDecimals(relatedProducts)} />

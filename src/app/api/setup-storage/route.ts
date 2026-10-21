@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { authenticateRequest } from '@/lib/auth';
+import { authenticateRequest, requireRole } from '@/lib/auth';
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response';
 import { getSupabase } from '@/lib/supabase';
 
@@ -8,6 +8,10 @@ export async function POST(request: NextRequest) {
   const auth = await authenticateRequest(request);
   if (auth.error || !auth.user) {
     return apiError('No autorizado', 401, undefined, request);
+  }
+  // 🔒 Crear buckets es operacion de plataforma → solo super_admin
+  if (!requireRole(auth.user, ['super_admin'])) {
+    return apiError('Solo administradores', 403, undefined, request);
   }
 
   try {

@@ -1,13 +1,15 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { corsHeaders } from '@/lib/api-response'
+import { getClientIp } from '@/lib/env'
 
 // ── Simple in-memory rate limiter (per IP) ──
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
 
 function getRateLimitKey(request: NextRequest, prefix: string): string {
-  const forwarded = request.headers.get('x-forwarded-for')
-  const ip = forwarded?.split(',')[0]?.trim() || 'unknown'
+  // 🔒 IP robusta anti header-spoofing (misma lógica que getClientIp en lib/env.ts):
+  // la primera entrada de x-forwarded-for es controlada por el cliente.
+  const ip = getClientIp(request)
   return `${prefix}:${ip}`
 }
 
@@ -104,6 +106,18 @@ export function middleware(request: NextRequest) {
   if (pathname === '/api/auth' && method === 'POST') {
     const key = getRateLimitKey(request, 'login')
     if (isRateLimited(key, 10, 60 * 1000)) {
+      return NextResponse.json(
+        { error: 'Demasiados intentos. Intenta de nuevo en 1 minuto.', code: 'RATE_LIMITED' },
+        { status: 429, headers: corsHeaders(request) }
+      )
+    }
+  }
+
+  // Rate limit: cambio de contrasena (max 5 por minuto por IP — frena fuerza
+  // bruta del campo currentPassword si un token llegara a ser robado)
+  if (pathname === '/api/auth/change-password' && method === 'POST') {
+    const key = getRateLimitKey(request, 'change-password')
+    if (isRateLimited(key, 5, 60 * 1000)) {
       return NextResponse.json(
         { error: 'Demasiados intentos. Intenta de nuevo en 1 minuto.', code: 'RATE_LIMITED' },
         { status: 429, headers: corsHeaders(request) }
@@ -271,6 +285,7 @@ export const config = {
   matcher: [
     // API routes
     '/api/auth',
+    '/api/auth/change-password',
     '/api/users',
     '/api/payments',
     '/api/payments/submit',

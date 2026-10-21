@@ -5,6 +5,7 @@ import { validateBody, loginSchema } from '@/lib/validations'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 import { auditLog, getClientIp } from '@/lib/env'
 import { sendPasswordResetEmail } from '@/lib/email'
+import { createHash } from 'crypto'
 import { sweepIfNeeded } from '@/lib/billing-sweep'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -168,7 +169,8 @@ export async function PUT(request: Request) {
         return apiError('Email es requerido', 400, undefined, request)
       }
 
-      console.log('[AUTH] reset_request for:', email)
+      // Sin PII en logs: solo el hecho de que se pidio un reset (el detalle va al auditLog)
+      console.log('[AUTH] reset_request recibido')
 
       const clientIp = getClientIp(request)
       const user = await db.user.findUnique({ where: { email: email.toLowerCase() } })
@@ -180,12 +182,15 @@ export async function PUT(request: Request) {
 
       // Generate reset token (UUID)
       const resetToken = uuidv4()
+      // 🔒 Se guarda solo el HASH sha256 del token: si la BD se compromete, los
+      // tokens de reset no son usables. Al email solo va el token crudo (una vez).
+      const resetTokenHash = createHash('sha256').update(resetToken).digest('hex')
       const resetTokenExpires = new Date(Date.now() + 60 * 60 * 1000) // 1 hour
 
       console.log('[AUTH] saving reset token...')
       await db.user.update({
         where: { id: user.id },
-        data: { resetToken, resetTokenExpires },
+        data: { resetToken: resetTokenHash, resetTokenExpires },
       })
 
       // Send email
@@ -215,10 +220,11 @@ export async function PUT(request: Request) {
 
       const clientIp = getClientIp(request)
 
-      // Find user by reset token
+      // Find user by reset token — 🔒 se compara contra el HASH guardado
+      const tokenHash = createHash('sha256').update(token).digest('hex')
       const user = await db.user.findFirst({
         where: {
-          resetToken: token,
+          resetToken: tokenHash,
           resetTokenExpires: { gt: new Date() }, // Token not expired
         },
       })
