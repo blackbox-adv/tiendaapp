@@ -8,6 +8,14 @@ import { auditLog, getClientIp } from '@/lib/env'
 // ONLY works when NO users exist in the database (first-run setup)
 export async function POST(request: NextRequest) {
   try {
+    // SECURITY: Bloqueado en producción — el setup inicial (crear admin con
+    // credenciales del body) solo es seguro en primera ejecución local. Si la
+    // tabla User quedara vacía por un incidente, este endpoint permitiría a
+    // cualquiera crearse como super_admin.
+    if (process.env.NODE_ENV === 'production') {
+      return apiError('Setup endpoint is disabled in production', 403, undefined, request)
+    }
+
     // SECURITY: Only allow setup if no users exist yet
     const userCount = await db.user.count()
 
