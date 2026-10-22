@@ -278,8 +278,8 @@ export async function POST(request: NextRequest) {
             skipped++
           }
         } else {
-          // CREACIÓN: respeta el límite del plan
-          if (activeCount + 1 > maxProducts) {
+          // CREACIÓN: respeta el límite del plan (-1 = ilimitado, plan Premium)
+          if (maxProducts !== -1 && activeCount + 1 > maxProducts) {
             limitReached = true
             skipped++
             errors.push({ fila, motivo: `"${name}": no se creó, límite del plan alcanzado (${maxProducts} productos)` })
