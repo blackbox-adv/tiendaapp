@@ -99,7 +99,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 40, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.9, delay: 0.2, ease: 'easeOut' }}
-            className="relative flex justify-center lg:justify-end"
+            className="relative flex flex-col items-center gap-4 lg:block lg:justify-end"
           >
             {/* Glow cálido */}
             <div className="absolute inset-0 bg-[#DCD9F5]/50 blur-3xl rounded-full scale-90" />
@@ -107,12 +107,27 @@ export function Hero() {
             {/* Celular con chat de WhatsApp en vivo */}
             <PhoneMockup />
 
+            {/* En móvil las 3 tarjetas flotantes fluyen DEBAJO del celular (no se
+                montan unas sobre otras ni se salen de la pantalla); en escritorio
+                (lg+) vuelven a flotar absolutas como siempre. */}
+
+            {/* Floating badge: venta cerrada */}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 1.5 }}
+              className="relative lg:absolute lg:left-8 lg:top-[6%] bg-[#17142E] text-white rounded-full shadow-xl px-4 py-2 flex items-center gap-1.5"
+            >
+              <Bell className="w-3.5 h-3.5 text-[#22D3EE]" />
+              <span className="text-xs font-bold">Tu venta de hoy: S/ 128.50</span>
+            </motion.div>
+
             {/* Floating card: pedido WhatsApp */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.9 }}
-              className="absolute -left-2 sm:left-2 top-[14%] bg-white rounded-2xl shadow-xl border border-[#E4E2F2] p-3 flex items-center gap-2.5 max-w-[210px] animate-float-soft"
+              className="relative lg:absolute lg:-left-2 lg:top-[14%] bg-white rounded-2xl shadow-xl border border-[#E4E2F2] p-3 flex items-center gap-2.5 max-w-[210px] animate-float-soft"
             >
               <div className="w-9 h-9 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
                 <WhatsAppIcon className="w-5 h-5 text-emerald-600" />
@@ -128,7 +143,7 @@ export function Hero() {
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 1.2 }}
-              className="absolute right-2 sm:right-4 bottom-[30%] bg-white rounded-2xl shadow-xl border border-[#E4E2F2] p-3 flex items-center gap-2.5 max-w-[200px] animate-float-soft"
+              className="relative lg:absolute lg:right-4 lg:bottom-[30%] bg-white rounded-2xl shadow-xl border border-[#E4E2F2] p-3 flex items-center gap-2.5 max-w-[200px] animate-float-soft"
               style={{ animationDelay: '1.2s' }}
             >
               <div className="w-9 h-9 rounded-full bg-[#ECEAFE] flex items-center justify-center shrink-0">
@@ -138,17 +153,6 @@ export function Hero() {
                 <p className="text-xs font-bold text-[#17142E] leading-tight">Pago recibido</p>
                 <p className="text-[11px] font-semibold text-[#4F46E5] leading-tight">S/ 45.90 vía Yape</p>
               </div>
-            </motion.div>
-
-            {/* Floating badge: venta cerrada */}
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 1.5 }}
-              className="absolute left-2 sm:left-8 top-[6%] bg-[#17142E] text-white rounded-full shadow-xl px-4 py-2 flex items-center gap-1.5"
-            >
-              <Bell className="w-3.5 h-3.5 text-[#22D3EE]" />
-              <span className="text-xs font-bold">Tu venta de hoy: S/ 128.50</span>
             </motion.div>
           </motion.div>
         </div>

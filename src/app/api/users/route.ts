@@ -4,7 +4,7 @@ import { authenticateRequest, hashPassword, requireRole } from '@/lib/auth'
 import { validateBody, registerSchema, updateUserSchema } from '@/lib/validations'
 import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 import { auditLog, getClientIp } from '@/lib/env'
-import { sendWelcomeEmail } from '@/lib/email'
+import { sendWelcomeEmail, sendAdminNewUserAlertEmail } from '@/lib/email'
 import { serializeDecimals } from '@/lib/utils'
 
 // GET /api/users - List users (admin only)
@@ -154,6 +154,10 @@ export async function POST(request: NextRequest) {
     // Send welcome email (non-blocking - registration succeeds even if email fails)
     // .catch(): sin él, una rechazada era una unhandled rejection en serverless
     sendWelcomeEmail(user.name, user.email).catch(() => {})
+
+    // Aviso discreto al dueño (correo personal del admin): alguien se registró.
+    // El nuevo cliente no ve este correo — es solo interno. Nunca bloquea el registro.
+    sendAdminNewUserAlertEmail({ name: user.name, email: user.email, phone: user.phone }).catch(() => {})
 
     return apiSuccess(safeUser, 201, request)
   } catch (error: unknown) {

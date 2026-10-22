@@ -7,6 +7,7 @@ import { apiError, apiSuccess, handleCorsPreflight } from '@/lib/api-response'
 import { sanitizeBasic, sanitizeHtml } from '@/lib/sanitize'
 import { serializeDecimals } from '@/lib/utils'
 import { countStoreVisit } from '@/lib/visit-counter'
+import { sendAdminStoreAlertEmail } from '@/lib/email'
 
 // GET /api/stores - Public (store browsing by slug) or admin-only (list all)
 export async function GET(request: NextRequest) {
@@ -378,6 +379,16 @@ export async function POST(request: NextRequest) {
         },
       })
     })
+
+    // Aviso discreto al dueño de la plataforma: hay una tienda nueva publicada.
+    // Solo interno — el emprendedor no ve nada. Nunca bloquea la creación.
+    db.user.findUnique({ where: { id: auth.user.userId }, select: { email: true } })
+      .then((owner) => sendAdminStoreAlertEmail({
+        storeName: store.name,
+        slug: store.slug,
+        ownerEmail: owner?.email || 'desconocido',
+      }))
+      .catch(() => {})
 
     return apiSuccess(serializeDecimals(store), 201, request)
   } catch (error: unknown) {

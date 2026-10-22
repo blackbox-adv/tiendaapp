@@ -527,6 +527,105 @@ export async function sendAdminPaymentAlertEmail(params: {
   }
 }
 
+// ── Admin New User Alert (aviso al dueño cuando alguien crea cuenta) ──
+// Solo llega al correo personal del admin; el cliente nuevo no ve nada.
+export async function sendAdminNewUserAlertEmail(params: {
+  name: string
+  email: string
+  phone?: string | null
+}): Promise<void> {
+  try {
+    const { data, error } = await sendEmail({
+      from: FROM_EMAIL,
+      to: ADMIN_NOTIFY_EMAIL,
+      subject: `Nuevo registro: ${params.name} (${params.email})`,
+      html: `
+        <div style="max-width:480px;margin:0 auto;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+          <div style="text-align:center;padding:32px 0 16px;">
+            <img src="${APP_URL}/logo-email.png" width="48" height="48" alt="Kyllari" style="border-radius:12px;" />
+            <h1 style="margin:16px 0 8px;font-size:20px;font-weight:700;color:#1f2937;">Kyllari</h1>
+          </div>
+          <div style="background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:32px;">
+            <h2 style="margin:0 0 12px;font-size:18px;font-weight:600;color:#1f2937;">Alguien se acaba de registrar</h2>
+            <p style="margin:0 0 20px;font-size:15px;color:#4b5563;line-height:1.6;">
+              Una nueva cuenta fue creada. A&uacute;n no ha creado tienda ni ha pagado plan.
+            </p>
+            <div style="background:#f9fafb;border-radius:8px;padding:16px;margin:0 0 20px;">
+              <p style="margin:0 0 6px;font-size:14px;color:#374151;"><strong>Nombre:</strong> ${params.name}</p>
+              <p style="margin:0 0 6px;font-size:14px;color:#374151;"><strong>Correo:</strong> ${params.email}</p>
+              ${params.phone ? `<p style="margin:0;font-size:14px;color:#374151;"><strong>Tel&eacute;fono:</strong> ${params.phone}</p>` : ''}
+            </div>
+            <div style="text-align:center;margin:24px 0 0;">
+              <a href="${APP_URL}/admin"
+                 style="display:inline-block;background:#7C3AED;color:#ffffff;text-decoration:none;padding:12px 32px;border-radius:8px;font-weight:600;font-size:15px;">
+                Abrir panel de administraci&oacute;n
+              </a>
+            </div>
+          </div>
+          <div style="text-align:center;padding:24px 0;font-size:12px;color:#9ca3af;">Enviado por Kyllari &middot; Crea tu tienda online en minutos</div>
+        </div>
+      `,
+    })
+
+    if (error) {
+      console.error('[EMAIL] Admin new user alert error:', error)
+      return
+    }
+    console.log(`[EMAIL] Admin new user alert sent for ${params.email}, id: ${data?.id}`)
+  } catch (err) {
+    console.error('[EMAIL] Admin new user alert failed (non-blocking):', err)
+  }
+}
+
+// ── Admin New Store Alert (aviso al dueño cuando alguien crea su tienda) ──
+export async function sendAdminStoreAlertEmail(params: {
+  storeName: string
+  slug: string
+  ownerEmail: string
+}): Promise<void> {
+  try {
+    const { data, error } = await sendEmail({
+      from: FROM_EMAIL,
+      to: ADMIN_NOTIFY_EMAIL,
+      subject: `Nueva tienda creada: ${params.storeName}`,
+      html: `
+        <div style="max-width:480px;margin:0 auto;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+          <div style="text-align:center;padding:32px 0 16px;">
+            <img src="${APP_URL}/logo-email.png" width="48" height="48" alt="Kyllari" style="border-radius:12px;" />
+            <h1 style="margin:16px 0 8px;font-size:20px;font-weight:700;color:#1f2937;">Kyllari</h1>
+          </div>
+          <div style="background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:32px;">
+            <h2 style="margin:0 0 12px;font-size:18px;font-weight:600;color:#1f2937;">Una tienda nueva est&aacute; en l&iacute;nea</h2>
+            <p style="margin:0 0 20px;font-size:15px;color:#4b5563;line-height:1.6;">
+              Un emprendedor termin&oacute; de configurar su tienda y ya est&aacute; publicada.
+            </p>
+            <div style="background:#f9fafb;border-radius:8px;padding:16px;margin:0 0 20px;">
+              <p style="margin:0 0 6px;font-size:14px;color:#374151;"><strong>Tienda:</strong> ${params.storeName}</p>
+              <p style="margin:0 0 6px;font-size:14px;color:#374151;"><strong>Due&ntilde;o:</strong> ${params.ownerEmail}</p>
+              <p style="margin:0;font-size:14px;color:#374151;"><strong>Enlace:</strong> ${APP_URL}/store/${params.slug}</p>
+            </div>
+            <div style="text-align:center;margin:24px 0 0;">
+              <a href="${APP_URL}/store/${params.slug}"
+                 style="display:inline-block;background:#7C3AED;color:#ffffff;text-decoration:none;padding:12px 32px;border-radius:8px;font-weight:600;font-size:15px;">
+                Ver la tienda
+              </a>
+            </div>
+          </div>
+          <div style="text-align:center;padding:24px 0;font-size:12px;color:#9ca3af;">Enviado por Kyllari &middot; Crea tu tienda online en minutos</div>
+        </div>
+      `,
+    })
+
+    if (error) {
+      console.error('[EMAIL] Admin store alert error:', error)
+      return
+    }
+    console.log(`[EMAIL] Admin store alert sent for ${params.slug}, id: ${data?.id}`)
+  } catch (err) {
+    console.error('[EMAIL] Admin store alert failed (non-blocking):', err)
+  }
+}
+
 // ── Password Changed Confirmation ──
 export async function sendPasswordChangedEmail(name: string, email: string): Promise<void> {
   try {
