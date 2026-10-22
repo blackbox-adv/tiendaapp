@@ -134,6 +134,10 @@ model StoreProduct {
   color         String?
   stock         Int      @default(-1)           // -1 = unlimited/sin límite, 0 = agotado, >0 = unidades disponibles
 
+  // Variantes de color: ej. mismo reloj en Negro/Dorado, cada una con su stock.
+  // Si NO tiene variantes, el producto se comporta como siempre (color único).
+  variants      ProductVariant[]
+
   // Venta por bulto (opcional): ej. "cajón x12" a S/108 además de la unidad a S/10
   unitLabel     String?                             // etiqueta del bulto: cajón, docena, pack, bolsa
   unitsPerPack  Int?                                // cuántas unidades trae el bulto (>=2)
@@ -380,6 +384,9 @@ model ChatMessage {
   sender         String   @default("customer")          // customer | store
   authorName     String   @default("")                  // nombre mostrado
   authorWhatsapp String?                                 // para "continuar en WhatsApp" (derivar a vendedor)
+  authorPhone    String?                                 // teléfono del cliente (identificación + vincula pedidos)
+  type           String   @default("text")              // text | order (tarjeta de pedido dentro del chat)
+  meta           Json?                                  // datos de la tarjeta de pedido {orderId, orderNumber, items, totalAmount}
   body           String   @db.Text
   readByStore    Boolean  @default(false)
   readByCustomer Boolean  @default(false)
@@ -387,6 +394,26 @@ model ChatMessage {
 
   @@index([storeId, threadId, createdAt])                // hilo: carga rápida
   @@index([storeId, readByStore, createdAt])             // bandeja: no leídos
+}
+
+// ── Variantes de producto (colores) ──
+// Cada variante = un color del mismo producto, con stock propio y foto propia
+// (opcional). Precio opcional: si es null, hereda el precio del producto.
+// Compatibilidad total: productos sin variantes siguen funcionando igual.
+model ProductVariant {
+  id        String       @id @default(cuid())
+  productId String
+  product   StoreProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+  color     String                                    // nombre visible: "Negro", "Dorado"
+  hex       String?                                   // #1f2937 para la bolita de color
+  imageUrl  String?                                   // foto propia del color (opcional)
+  price     Decimal?     @db.Decimal(10,2)            // precio distinto por color (opcional)
+  stock     Int          @default(-1)                 // -1 = sin límite, 0 = agotado
+  isActive  Boolean      @default(true)
+  createdAt DateTime     @default(now())
+
+  @@index([productId])
+  @@index([productId, isActive])
 }
 
 // ── Empleados / vendedoras (Premium) ──

@@ -68,6 +68,31 @@ export async function GET(request: NextRequest) {
         `store-api:${store.id}`
       )
 
+      // Variantes de color por producto (cada color con su stock/foto/precio propio)
+      try {
+        const variantRows = await db.$queryRawUnsafe(`
+          SELECT v."productId", v.id, v.color, v.hex, v."imageUrl", v.price, v.stock
+          FROM "ProductVariant" v
+          JOIN "StoreProduct" p ON p.id = v."productId"
+          WHERE p."storeId" = $1 AND v."isActive" = true
+          ORDER BY v."createdAt" ASC
+        `, store.id) as Array<Record<string, unknown>>
+        const byProduct = new Map<string, Array<Record<string, unknown>>>()
+        for (const v of variantRows) {
+          const pid = String(v.productId)
+          const arr = byProduct.get(pid) || []
+          arr.push({ id: v.id, color: v.color, hex: v.hex, imageUrl: v.imageUrl, price: v.price, stock: Number(v.stock) })
+          byProduct.set(pid, arr)
+        }
+        const storeWithVariants = store as Record<string, unknown>
+        if (Array.isArray(storeWithVariants.products)) {
+          storeWithVariants.products = (storeWithVariants.products as Array<Record<string, unknown>>).map((p) => ({
+            ...p,
+            variants: byProduct.get(String(p.id)) || [],
+          }))
+        }
+      } catch { /* sin variantes: la tienda funciona exactamente igual */ }
+
       return apiSuccess(serializeDecimals(store), 200, request)
     }
 

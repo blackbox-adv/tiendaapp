@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { MessageCircle, X, Send, Loader2 } from 'lucide-react'
+import { MessageCircle, X, Send, Loader2, ShoppingBag } from 'lucide-react'
 
 // ============================================================
 // Chat interno cliente-tienda (Premium).
@@ -19,6 +19,8 @@ interface ChatMsg {
   sender: 'customer' | 'store'
   authorName: string
   authorWhatsapp: string | null
+  type?: string                    // 'text' | 'order' (tarjeta de pedido)
+  meta?: { orderNumber?: string; items?: Array<{ name: string; quantity: number; price: number }>; totalAmount?: number } | null
   body: string
   createdAt: string
 }
@@ -28,6 +30,8 @@ export function ChatWidget({ storeSlug, storeName }: { storeSlug: string; storeN
   const [threadId, setThreadId] = useState<string>('')
   const [name, setName] = useState('')
   const [nameSaved, setNameSaved] = useState(false)
+  const [phone, setPhone] = useState('')
+  const [phoneSaved, setPhoneSaved] = useState(false)
   const [messages, setMessages] = useState<ChatMsg[]>([])
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
@@ -44,6 +48,11 @@ export function ChatWidget({ storeSlug, storeName }: { storeSlug: string; storeN
       if (savedName) {
         setName(savedName)
         setNameSaved(true)
+      }
+      const savedPhone = localStorage.getItem('tiendapp_chat_phone')
+      if (savedPhone) {
+        setPhone(savedPhone)
+        setPhoneSaved(true)
       }
     } catch { /* localStorage bloqueado: sesión efímera */ }
      
@@ -72,21 +81,32 @@ export function ChatWidget({ storeSlug, storeName }: { storeSlug: string; storeN
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, open])
 
-  const saveName = () => {
+  const identityReady = nameSaved && phoneSaved
+
+  const saveIdentity = () => {
     const n = name.trim()
+    const digits = phone.replace(/\D/g, '')
     if (n.length < 2) {
       setError('Escribe tu nombre para empezar')
       return
     }
+    if (digits.length < 6 || digits.length > 15) {
+      setError('Escribe tu número de teléfono (ej: 999 888 777)')
+      return
+    }
     setError('')
     setNameSaved(true)
-    try { localStorage.setItem('tiendapp_chat_name', n) } catch { /* noop */ }
+    setPhoneSaved(true)
+    try {
+      localStorage.setItem('tiendapp_chat_name', n)
+      localStorage.setItem('tiendapp_chat_phone', digits)
+    } catch { /* noop */ }
   }
 
   const send = async () => {
     const text = input.trim()
     if (!text || sending) return
-    if (!nameSaved) { saveName(); return }
+    if (!identityReady) { saveIdentity(); return }
     setSending(true)
     setError('')
     try {
@@ -98,11 +118,15 @@ export function ChatWidget({ storeSlug, storeName }: { storeSlug: string; storeN
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ storeSlug, threadId: tid, name: name.trim(), body: text }),
+        body: JSON.stringify({ storeSlug, threadId: tid, name: name.trim(), phone: phone.replace(/\D/g, ''), body: text }),
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
         setError(data?.error || 'No se pudo enviar el mensaje')
+        // Si el servidor pide el teléfono de nuevo (cliente viejo), reaparece el formulario
+        if (typeof data?.error === 'string' && data.error.toLowerCase().includes('teléfono')) {
+          setPhoneSaved(false)
+        }
         return
       }
       const payload = data?.data || data
@@ -167,6 +191,32 @@ export function ChatWidget({ storeSlug, storeName }: { storeSlug: string; storeN
             )}
             {messages.map((m) => {
               const mine = m.sender === 'customer'
+              // Tarjeta de pedido: el cliente ve EN el chat lo que acaba de comprar
+              if (m.type === 'order') {
+                return (
+                  <div key={m.id} className="flex justify-start">
+                    <div className="max-w-[85%] rounded-2xl border-2 border-violet-200 bg-violet-50 px-3 py-2.5 text-sm">
+                      <p className="font-bold text-violet-900 flex items-center gap-1.5">
+                        <ShoppingBag className="w-4 h-4" />
+                        {m.meta?.orderNumber ? `Pedido ${m.meta.orderNumber}` : 'Nuevo pedido'}
+                      </p>
+                      {Array.isArray(m.meta?.items) && m.meta.items.length > 0 && (
+                        <div className="mt-1.5 space-y-0.5">
+                          {m.meta.items.map((it, idx) => (
+                            <p key={idx} className="text-xs text-stone-700">
+                              • {it.name} x{it.quantity}
+                            </p>
+                          ))}
+                        </div>
+                      )}
+                      {m.meta?.totalAmount != null && (
+                        <p className="mt-1.5 text-xs font-bold text-violet-900">Total: S/ {Number(m.meta.totalAmount).toFixed(2)}</p>
+                      )}
+                      <p className="text-[10px] mt-1 text-stone-400">{fmtTime(m.createdAt)}</p>
+                    </div>
+                  </div>
+                )
+              }
               return (
                 <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
                   <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${mine ? 'bg-emerald-600 text-white rounded-br-md' : 'bg-white border border-stone-200 text-stone-800 rounded-bl-md'}`}>
@@ -197,27 +247,36 @@ export function ChatWidget({ storeSlug, storeName }: { storeSlug: string; storeN
             <div ref={bottomRef} />
           </div>
 
-          {/* Nombre (una vez) */}
-          {!nameSaved && (
-            <div className="px-3 py-2 border-t border-stone-200 bg-white shrink-0">
+          {/* Identidad (una vez): nombre + teléfono — así la tienda sabe quién le habla */}
+          {!identityReady && (
+            <div className="px-3 py-2 border-t border-stone-200 bg-white shrink-0 space-y-2">
+              {error && <p className="text-xs text-red-600">{error}</p>}
               <div className="flex gap-2">
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') saveName() }}
                   placeholder="Tu nombre..."
                   maxLength={60}
                   className="flex-1 text-sm rounded-lg border border-stone-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 />
-                <button onClick={saveName} className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg px-3 text-sm font-medium transition-colors">
-                  Empezar
-                </button>
+                <input
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') saveIdentity() }}
+                  placeholder="Tu teléfono..."
+                  inputMode="tel"
+                  maxLength={20}
+                  className="w-28 sm:w-32 text-sm rounded-lg border border-stone-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                />
               </div>
+              <button onClick={saveIdentity} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg py-2 text-sm font-medium transition-colors">
+                Empezar a chatear
+              </button>
             </div>
           )}
 
           {/* Input */}
-          {nameSaved && (
+          {identityReady && (
             <div className="px-3 py-2 border-t border-stone-200 bg-white shrink-0">
               {error && <p className="text-xs text-red-600 mb-1.5">{error}</p>}
               <div className="flex gap-2">

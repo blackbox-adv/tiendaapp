@@ -3,13 +3,30 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from 'react'
 
 // ── Cart item type ──
+// key = identidad del ítem en el carrito: mismo producto puede convivir como
+// unidad, como bulto (cajón x12) y como variantes de color distintas.
 export interface CartItem {
+  key: string
   productId: string
   name: string
   price: number
   imageUrl: string
   quantity: number
   storeId: string
+  // Venta por bulto: el precio ya ES el del bulto completo (no por unidad)
+  isPack?: boolean
+  unitLabel?: string      // "cajón", "docena", "pack"...
+  unitsPerPack?: number   // unidades que trae el bulto (>=2)
+  // Variante de color elegida
+  variantId?: string
+  variantColor?: string
+}
+
+// Clave compuesta: producto + presentación (bulto) + variante (color)
+export function cartKey(productId: string, opts?: { isPack?: boolean; variantId?: string }): string {
+  if (opts?.isPack) return `${productId}::pack`
+  if (opts?.variantId) return `${productId}::v:${opts.variantId}`
+  return productId
 }
 
 // ── Product input for addToCart ──
@@ -19,14 +36,19 @@ export interface CartProductInput {
   price: number
   imageUrl: string
   storeId: string
+  isPack?: boolean
+  unitLabel?: string
+  unitsPerPack?: number
+  variantId?: string
+  variantColor?: string
 }
 
 // ── Cart context value ──
 interface CartContextValue {
   cartItems: CartItem[]
   addToCart: (product: CartProductInput, quantity?: number) => void
-  removeFromCart: (productId: string) => void
-  updateQuantity: (productId: string, quantity: number) => void
+  removeFromCart: (key: string) => void
+  updateQuantity: (key: string, quantity: number) => void
   clearCart: () => void
   totalAmount: number
   totalItems: number
@@ -44,15 +66,18 @@ function loadInitialCart(): CartItem[] {
     if (!raw) return []
     const parsed: unknown = JSON.parse(raw)
     if (!Array.isArray(parsed)) return []
-    return parsed.filter(
-      (item): item is CartItem =>
-        !!item &&
-        typeof item.productId === 'string' &&
-        typeof item.name === 'string' &&
-        typeof item.price === 'number' &&
-        typeof item.quantity === 'number' &&
-        typeof item.storeId === 'string'
-    )
+    return parsed
+      .filter(
+        (item): item is CartItem =>
+          !!item &&
+          typeof item.productId === 'string' &&
+          typeof item.name === 'string' &&
+          typeof item.price === 'number' &&
+          typeof item.quantity === 'number' &&
+          typeof item.storeId === 'string'
+      )
+      // Compatibilidad con carritos guardados antes de existir `key`
+      .map((item) => ({ ...item, key: typeof item.key === 'string' && item.key ? item.key : item.productId }))
   } catch {
     return []
   }
@@ -80,31 +105,32 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [cartItems, hydrated])
 
   const addToCart = useCallback((product: CartProductInput, quantity: number = 1) => {
+    const key = cartKey(product.productId, { isPack: product.isPack, variantId: product.variantId })
     setCartItems((prev) => {
-      const existing = prev.find((item) => item.productId === product.productId)
+      const existing = prev.find((item) => item.key === key)
       if (existing) {
         return prev.map((item) =>
-          item.productId === product.productId
-            ? { ...item, quantity: item.quantity + quantity }
+          item.key === key
+            ? { ...item, quantity: item.quantity + quantity, price: product.price }
             : item
         )
       }
-      return [...prev, { ...product, quantity }]
+      return [...prev, { ...product, key, quantity }]
     })
   }, [])
 
-  const removeFromCart = useCallback((productId: string) => {
-    setCartItems((prev) => prev.filter((item) => item.productId !== productId))
+  const removeFromCart = useCallback((key: string) => {
+    setCartItems((prev) => prev.filter((item) => item.key !== key))
   }, [])
 
-  const updateQuantity = useCallback((productId: string, quantity: number) => {
+  const updateQuantity = useCallback((key: string, quantity: number) => {
     if (quantity <= 0) {
-      setCartItems((prev) => prev.filter((item) => item.productId !== productId))
+      setCartItems((prev) => prev.filter((item) => item.key !== key))
       return
     }
     setCartItems((prev) =>
       prev.map((item) =>
-        item.productId === productId ? { ...item, quantity } : item
+        item.key === key ? { ...item, quantity } : item
       )
     )
   }, [])

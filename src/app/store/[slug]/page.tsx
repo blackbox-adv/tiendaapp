@@ -102,6 +102,9 @@ export default async function StorePage({ params }: Props) {
           where: { isActive: true },
           orderBy: { createdAt: 'desc' },
           take: 200, // Limit to prevent OOM with huge catalogs
+          include: {
+            variants: { where: { isActive: true }, orderBy: { createdAt: 'asc' } },
+          },
         },
       },
     }) as unknown as Record<string, unknown> | null

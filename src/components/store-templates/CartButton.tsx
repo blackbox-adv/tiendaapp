@@ -57,7 +57,12 @@ export function CartButton({ storeId, whatsappNumber, storeName, shippingOptions
     if (!whatsappNumber || storeCartItems.length === 0) return
 
     const itemsText = storeCartItems
-      .map((item) => `- ${item.name} x${item.quantity} (S/ ${(item.price * item.quantity).toFixed(2)})`)
+      .map((item) => {
+        const label = item.isPack && item.unitLabel
+          ? `${item.name} — ${item.unitLabel} x${item.unitsPerPack || '?'} x${item.quantity}`
+          : `${item.name}${item.variantColor ? ` (${item.variantColor})` : ''} x${item.quantity}`
+        return `- ${label} (S/ ${(item.price * item.quantity).toFixed(2)})`
+      })
       .join('\n')
 
     const message = [
@@ -104,6 +109,11 @@ export function CartButton({ storeId, whatsappNumber, storeName, shippingOptions
             price: item.price,
             quantity: item.quantity,
             imageUrl: item.imageUrl,
+            isPack: item.isPack || undefined,
+            unitLabel: item.unitLabel || undefined,
+            unitsPerPack: item.unitsPerPack || undefined,
+            variantId: item.variantId || undefined,
+            variantColor: item.variantColor || undefined,
           })),
           notes: [notes.trim() || null, shippingText ? `Envío: ${shippingText}` : null].filter(Boolean).join(' | ') || undefined,
         }),
@@ -118,7 +128,7 @@ export function CartButton({ storeId, whatsappNumber, storeName, shippingOptions
           orderNumber: data.orderNumber,
         })
         // Clear only this store's items from cart
-        storeCartItems.forEach((item) => removeFromCart(item.productId))
+        storeCartItems.forEach((item) => removeFromCart(item.key))
         setCheckoutStep('cart')
         setCustomerName('')
         setCustomerPhone('')
@@ -205,7 +215,7 @@ export function CartButton({ storeId, whatsappNumber, storeName, shippingOptions
                   <div className="space-y-3">
                     {storeCartItems.map((item) => (
                       <CartItemRow
-                        key={item.productId}
+                        key={item.key}
                         item={item}
                         onUpdateQuantity={updateQuantity}
                         onRemove={removeFromCart}
@@ -263,9 +273,12 @@ export function CartButton({ storeId, whatsappNumber, storeName, shippingOptions
                 <div className="bg-gray-50 rounded-lg p-3">
                   <p className="text-sm font-medium text-gray-600 mb-2">Resumen del pedido</p>
                   {storeCartItems.map((item) => (
-                    <div key={item.productId} className="flex justify-between text-sm py-1">
+                    <div key={item.key} className="flex justify-between text-sm py-1">
                       <span className="text-gray-700">
-                        {item.name} x{item.quantity}
+                        {item.name}
+                        {item.variantColor ? ` — ${item.variantColor}` : ''}
+                        {item.isPack && item.unitLabel ? ` (${item.unitLabel} x${item.unitsPerPack || '?'})` : ''}
+                        {' x'}{item.quantity}
                       </span>
                       <span className="font-medium">S/ {(item.price * item.quantity).toFixed(2)}</span>
                     </div>
@@ -455,9 +468,13 @@ function CartItemRow({
   onRemove,
 }: {
   item: CartItem
-  onUpdateQuantity: (productId: string, quantity: number) => void
-  onRemove: (productId: string) => void
+  onUpdateQuantity: (key: string, quantity: number) => void
+  onRemove: (key: string) => void
 }) {
+  const detailLabel = item.isPack && item.unitLabel
+    ? `S/ ${item.price.toFixed(2)} por ${item.unitLabel} de ${item.unitsPerPack || '?'} unidades`
+    : `S/ ${item.price.toFixed(2)} c/u${item.variantColor ? ` · ${item.variantColor}` : ''}`
+
   return (
     <div className="flex items-center gap-3 bg-gray-50 rounded-lg p-3">
       {/* Product image */}
@@ -475,14 +492,17 @@ function CartItemRow({
 
       {/* Product info */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-900 truncate">{item.name}</p>
-        <p className="text-sm text-gray-500">S/ {item.price.toFixed(2)} c/u</p>
+        <p className="text-sm font-medium text-gray-900 truncate">
+          {item.name}
+          {item.variantColor ? <span className="text-gray-500"> — {item.variantColor}</span> : null}
+        </p>
+        <p className="text-sm text-gray-500">{detailLabel}</p>
       </div>
 
       {/* Quantity controls */}
       <div className="flex items-center gap-1 flex-shrink-0">
         <button
-          onClick={() => onUpdateQuantity(item.productId, item.quantity - 1)}
+          onClick={() => onUpdateQuantity(item.key, item.quantity - 1)}
           className="w-7 h-7 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors"
           aria-label="Disminuir cantidad"
         >
@@ -490,7 +510,7 @@ function CartItemRow({
         </button>
         <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
         <button
-          onClick={() => onUpdateQuantity(item.productId, item.quantity + 1)}
+          onClick={() => onUpdateQuantity(item.key, item.quantity + 1)}
           className="w-7 h-7 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors"
           aria-label="Aumentar cantidad"
         >
@@ -504,7 +524,7 @@ function CartItemRow({
           S/ {(item.price * item.quantity).toFixed(2)}
         </p>
         <button
-          onClick={() => onRemove(item.productId)}
+          onClick={() => onRemove(item.key)}
           className="text-gray-400 hover:text-red-500 transition-colors mt-0.5"
           aria-label="Eliminar del carrito"
         >

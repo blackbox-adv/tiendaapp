@@ -113,6 +113,7 @@ export async function GET(request: NextRequest) {
         return {
           threadId: g.threadId,
           customerName: firstCustomer?.authorName || 'Cliente',
+          customerPhone: firstCustomer?.authorPhone || null,
           lastMessage: last?.body || '',
           lastSender: last?.sender || 'customer',
           lastAt: last?.createdAt || g._max.createdAt,

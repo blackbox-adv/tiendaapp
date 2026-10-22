@@ -32,6 +32,7 @@ import { useStoreCategories } from '@/lib/use-store-categories';
 import { compressImage } from '@/lib/image-compress';
 import { ColorPicker } from '@/components/dashboard/ColorPicker';
 import { removeImageBackground } from '@/lib/background-remover';
+import { VariantsEditor, type VariantRowInput } from '@/components/dashboard/VariantsEditor';
 
 export default function EditProductPage() {
   const router = useRouter();
@@ -78,6 +79,10 @@ export default function EditProductPage() {
   const [galleryUploading, setGalleryUploading] = useState(false);
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
+  // Variantes de color (opcional): varios colores con stock propio
+  const [hasVariants, setHasVariants] = useState(false);
+  const [variantRows, setVariantRows] = useState<VariantRowInput[]>([]);
+
   // Load product data
   useEffect(() => {
     async function fetchData() {
@@ -122,6 +127,20 @@ export default function EditProductPage() {
           setCoverPreview(product.imageUrl || null);
           setCurrentImageUrl(product.imageUrl || '');
           setExistingImages(Array.isArray(product.images) ? product.images : []);
+          // Variantes de color guardadas: cada color vuelve a su fila editable
+          const pv = (product as unknown as { variants?: Array<{ color: string; hex?: string | null; imageUrl?: string | null; price?: number | string | null; stock?: number | null }> }).variants;
+          if (Array.isArray(pv) && pv.length > 0) {
+            setHasVariants(true);
+            setVariantRows(pv.map((v) => ({
+              color: v.color || '',
+              hex: v.hex || '#9ca3af',
+              stock: v.stock === -1 || v.stock === undefined || v.stock === null ? '' : String(v.stock),
+              price: v.price != null ? String(v.price) : '',
+              imageUrl: v.imageUrl || '',
+              file: null,
+              preview: v.imageUrl || null,
+            })));
+          }
         }
       } catch {
         // ignore
@@ -336,6 +355,27 @@ export default function EditProductPage() {
       // Combine existing + new gallery images
       const allImages = [...existingImages, ...newImageUrls];
 
+      // Variantes de color: subir fotos propias (si las hay) y armar payload
+      let variantsPayload: Array<Record<string, unknown>> | undefined;
+      if (hasVariants) {
+        const cleanRows = variantRows.filter((r) => r.color.trim());
+        if (cleanRows.length === 0) {
+          setError('Agrega al menos un color con nombre (o apaga la opción de varios colores).');
+          setLoading(false);
+          return;
+        }
+        setCoverUploading(true);
+        const uploaded = await Promise.all(cleanRows.map(async (r) => ({
+          color: r.color.trim(),
+          hex: r.hex || null,
+          imageUrl: r.file ? await uploadImage(r.file) : (r.imageUrl || null),
+          price: r.price ? parseFloat(r.price) : null,
+          stock: r.stock === '' ? -1 : (Number.isFinite(parseInt(r.stock, 10)) ? parseInt(r.stock, 10) : -1),
+        })));
+        setCoverUploading(false);
+        variantsPayload = uploaded;
+      }
+
       // Update via /api/store-products PUT
       const updateToken = localStorage.getItem('tiendapp_token');
       const res = await fetch('/api/store-products', {
@@ -361,6 +401,9 @@ export default function EditProductPage() {
           isActive,
           featured,
           rating,
+          // El envío SIEMPRE incluye variants cuando el editor está encendido:
+          // la API reemplaza la lista completa (agregar/quitar colores funciona).
+          ...(hasVariants ? { variants: variantsPayload } : {}),
         }),
       });
 
@@ -589,10 +632,30 @@ export default function EditProductPage() {
                 </p>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="color">Color / Variante</Label>
-                <ColorPicker id="color" value={color} onChange={setColor} />
+                {!hasVariants && (
+                  <>
+                    <Label htmlFor="color">Color / Variante</Label>
+                    <ColorPicker id="color" value={color} onChange={setColor} />
+                  </>
+                )}
+                {hasVariants && (
+                  <>
+                    <Label>Color único</Label>
+                    <p className="text-[11px] text-gray-400">
+                      Los colores se definen abajo en “El producto tiene varios colores”.
+                    </p>
+                  </>
+                )}
               </div>
             </div>
+
+            {/* Variantes de color (opcional) */}
+            <VariantsEditor
+              enabled={hasVariants}
+              onEnabledChange={setHasVariants}
+              rows={variantRows}
+              onChange={setVariantRows}
+            />
 
             {/* Stock */}
             <div className="space-y-2">

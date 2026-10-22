@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import { db } from '@/lib/db'
 import { authenticateRequest } from '@/lib/auth'
 import { apiError, apiSuccess } from '@/lib/api-response'
-import { serializeDecimals, decimalToNumber } from '@/lib/utils'
+import { serializeDecimals } from '@/lib/utils'
 
 // ── GET /api/orders — List orders for a store (auth required, store ownership) ──
 export async function GET(request: NextRequest) {
@@ -110,6 +110,12 @@ export async function POST(request: NextRequest) {
       if (typeof item.quantity !== 'number' || item.quantity <= 0) {
         return apiError('La cantidad debe ser un número mayor a 0', 400, undefined, request)
       }
+      if (item.isPack !== undefined && typeof item.isPack !== 'boolean') {
+        return apiError('Formato de bulto invalido', 400, undefined, request)
+      }
+      if (item.variantId !== undefined && item.variantId !== null && typeof item.variantId !== 'string') {
+        return apiError('Formato de variante invalido', 400, undefined, request)
+      }
     }
 
     // Verify store exists and is active
@@ -128,21 +134,74 @@ export async function POST(request: NextRequest) {
     const productIds = [...new Set(items.map((item: { productId: string }) => item.productId))]
     const dbProducts = await db.storeProduct.findMany({
       where: { id: { in: productIds }, storeId, isActive: true },
-      select: { id: true, name: true, price: true, imageUrl: true },
+      select: { id: true, name: true, price: true, imageUrl: true, unitLabel: true, unitsPerPack: true, packPrice: true },
     })
     const productById = new Map(dbProducts.map((p) => [p.id, p]))
 
-    const serverItems: Array<{ productId: string; name: string; price: number; quantity: number; imageUrl: string }> = []
+    // Variantes pedidas: se validan contra la BD (pertenecen al producto y están activas)
+    const variantIds = [...new Set(items.map((item: { variantId?: string }) => item.variantId).filter((v: unknown): v is string => typeof v === 'string' && v.length > 0))]
+    const dbVariants = variantIds.length > 0
+      ? await db.productVariant.findMany({
+          where: { id: { in: variantIds }, productId: { in: productIds }, isActive: true },
+          select: { id: true, productId: true, color: true, imageUrl: true, price: true, stock: true },
+        })
+      : []
+    const variantById = new Map(dbVariants.map((v) => [v.id, v]))
+
+    const serverItems: Array<{ productId: string; name: string; price: number; quantity: number; imageUrl: string; isPack?: boolean; unitLabel?: string; unitsPerPack?: number; variantId?: string; variantColor?: string }> = []
     for (const item of items) {
       const p = productById.get(item.productId)
       if (!p) {
         return apiError('Un producto del pedido ya no está disponible', 400, undefined, request)
       }
       const qty = Math.min(999, Math.max(1, Math.floor(item.quantity)))
+
+      // Bulto (cajón/docena/pack): el precio válido es el del BULTO en la BD,
+      // nunca el que traiga el cliente. Nombre legible: "Producto (cajón x12)".
+      if (item.isPack === true) {
+        const packPriceNum = p.packPrice ? Number(p.packPrice) : 0
+        const units = p.unitsPerPack ? Number(p.unitsPerPack) : 0
+        if (!(p.packPrice && packPriceNum > 0 && units >= 2 && p.unitLabel)) {
+          return apiError('Un producto del pedido ya no se vende por bulto', 400, undefined, request)
+        }
+        serverItems.push({
+          productId: p.id,
+          name: `${p.name} (${p.unitLabel} x${units})`,
+          price: packPriceNum,
+          quantity: qty,
+          imageUrl: p.imageUrl || '',
+          isPack: true,
+          unitLabel: p.unitLabel,
+          unitsPerPack: units,
+        })
+        continue
+      }
+
+      // Variante de color: precio propio si lo tiene; si no, hereda el del producto
+      if (typeof item.variantId === 'string' && item.variantId) {
+        const v = variantById.get(item.variantId)
+        if (!v || v.productId !== item.productId) {
+          return apiError('Un color del pedido ya no está disponible', 400, undefined, request)
+        }
+        if (v.stock === 0) {
+          return apiError(`El color ${v.color} está agotado`, 400, undefined, request)
+        }
+        serverItems.push({
+          productId: p.id,
+          name: `${p.name} — ${v.color}`,
+          price: v.price != null && Number(v.price) > 0 ? Number(v.price) : Number(p.price),
+          quantity: qty,
+          imageUrl: v.imageUrl || p.imageUrl || '',
+          variantId: v.id,
+          variantColor: v.color,
+        })
+        continue
+      }
+
       serverItems.push({
         productId: p.id,
         name: p.name,
-        price: decimalToNumber(p.price),
+        price: Number(p.price),
         quantity: qty,
         imageUrl: p.imageUrl || '',
       })
@@ -217,9 +276,65 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Tarjeta del pedido dentro del chat del cliente (si tiene conversación abierta).
+    // Nunca rompe el pedido: postOrderCardToChat ya captura sus propios errores.
+    if (order) {
+      await postOrderCardToChat(
+        storeId,
+        store.name,
+        { id: order.id, orderNumber: order.orderNumber },
+        nameStr,
+        phoneStr,
+        serverItems,
+        totalAmount
+      )
+    }
+
     return apiSuccess(serializeDecimals(order), 201, request)
   } catch (error) {
     console.error('Create order error:', error)
     return apiError('Error al crear pedido', 500, undefined, request)
+  }
+}
+
+// ── Tarjeta del pedido dentro del chat (F1) ──
+// Si el cliente tiene una conversación abierta con la tienda (identificada por
+// su teléfono), el pedido aparece como tarjeta en ese chat: el vendedor que
+// atiende 10 conversaciones ve EN EL CHAT quién compró y qué, sin adivinar.
+// Fire-and-forget: un fallo aquí JAMÁS rompe el pedido ya creado.
+async function postOrderCardToChat(
+  storeId: string,
+  storeName: string,
+  order: { id: string; orderNumber: string },
+  customerName: string,
+  customerPhone: string,
+  items: Array<{ name: string; quantity: number; price: number }>,
+  totalAmount: number
+): Promise<void> {
+  try {
+    const phoneDigits = String(customerPhone).replace(/\D/g, '')
+    if (phoneDigits.length < 6) return
+    const tail = phoneDigits.slice(-9)
+    const lastMsg = await db.chatMessage.findFirst({
+      where: { storeId, sender: 'customer', authorPhone: { endsWith: tail } },
+      orderBy: { createdAt: 'desc' },
+      select: { threadId: true },
+    })
+    if (!lastMsg) return
+    const itemsText = items.map((i) => `${i.name} x${i.quantity}`).join(', ')
+    await db.chatMessage.create({
+      data: {
+        storeId,
+        threadId: lastMsg.threadId,
+        sender: 'store',
+        type: 'order',
+        authorName: storeName,
+        body: `Nuevo pedido ${order.orderNumber} de ${customerName}: ${itemsText}. Total S/ ${totalAmount.toFixed(2)}`,
+        meta: { orderId: order.id, orderNumber: order.orderNumber, customerName, totalAmount, items },
+        readByStore: true,
+      },
+    })
+  } catch (chatError) {
+    console.error('Order->Chat card error:', chatError)
   }
 }

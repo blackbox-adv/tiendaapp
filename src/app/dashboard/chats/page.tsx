@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { MessageCircle, Loader2, Send, ChevronLeft } from 'lucide-react'
+import { MessageCircle, Loader2, Send, ChevronLeft, ShoppingBag } from 'lucide-react'
 import { getAuthHeaders } from '@/lib/api'
 
 // ============================================================
@@ -13,6 +13,7 @@ import { getAuthHeaders } from '@/lib/api'
 interface Thread {
   threadId: string
   customerName: string
+  customerPhone?: string | null
   lastMessage: string
   lastSender: 'customer' | 'store'
   lastAt: string
@@ -26,6 +27,8 @@ interface Msg {
   sender: 'customer' | 'store'
   authorName: string
   authorWhatsapp: string | null
+  type?: string                                  // 'text' | 'order' (tarjeta de pedido)
+  meta?: { orderNumber?: string; items?: Array<{ name: string; quantity: number; price: number }>; totalAmount?: number } | null
   body: string
   createdAt: string
 }
@@ -159,7 +162,12 @@ export default function ChatsPage() {
                 className={`w-full text-left px-4 py-3 border-b border-stone-100 hover:bg-stone-50 transition-colors ${selected === t.threadId ? 'bg-violet-50' : ''}`}
               >
                 <div className="flex items-center justify-between gap-2">
-                  <p className="font-medium text-sm text-stone-900 truncate">{t.customerName}</p>
+                  <div className="min-w-0">
+                    <p className="font-medium text-sm text-stone-900 truncate">{t.customerName}</p>
+                    {t.customerPhone && (
+                      <p className="text-[10px] text-stone-400 truncate">{t.customerPhone}</p>
+                    )}
+                  </div>
                   {t.unread > 0 && (
                     <span className="bg-emerald-600 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shrink-0">
                       {t.unread}
@@ -182,11 +190,53 @@ export default function ChatsPage() {
                   <button onClick={() => setShowListOnMobile(true)} className="md:hidden p-1 hover:bg-stone-100 rounded" aria-label="Volver">
                     <ChevronLeft className="w-5 h-5" />
                   </button>
-                  <p className="font-semibold text-sm text-stone-900">{selectedThread?.customerName || 'Cliente'}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-sm text-stone-900 truncate">{selectedThread?.customerName || 'Cliente'}</p>
+                    {selectedThread?.customerPhone && (
+                      <p className="text-[11px] text-stone-400">{selectedThread.customerPhone}</p>
+                    )}
+                  </div>
+                  {selectedThread?.customerPhone && (
+                    <a
+                      href={`https://wa.me/${selectedThread.customerPhone.replace(/\D/g, '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-1 hover:bg-emerald-100 transition-colors"
+                    >
+                      <MessageCircle className="w-3 h-3" />
+                      WhatsApp
+                    </a>
+                  )}
                 </div>
                 <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2 bg-stone-50">
                   {messages.map((m) => {
                     const mine = m.sender === 'store'
+                    // Tarjeta de pedido: el vendedor ve EN la conversación quién compró y qué
+                    if (m.type === 'order') {
+                      return (
+                        <div key={m.id} className="flex justify-end">
+                          <div className="max-w-[80%] rounded-2xl border-2 border-violet-300 bg-violet-50 px-3 py-2.5 text-sm">
+                            <p className="font-bold text-violet-900 flex items-center gap-1.5">
+                              <ShoppingBag className="w-4 h-4" />
+                              {m.meta?.orderNumber ? `Pedido ${m.meta.orderNumber}` : 'Nuevo pedido'}
+                            </p>
+                            {Array.isArray(m.meta?.items) && m.meta.items.length > 0 && (
+                              <div className="mt-1.5 space-y-0.5">
+                                {m.meta.items.map((it, idx) => (
+                                  <p key={idx} className="text-xs text-stone-700">
+                                    • {it.name} x{it.quantity}
+                                  </p>
+                                ))}
+                              </div>
+                            )}
+                            {m.meta?.totalAmount != null && (
+                              <p className="mt-1.5 text-xs font-bold text-violet-900">Total: S/ {Number(m.meta.totalAmount).toFixed(2)}</p>
+                            )}
+                            <p className="text-[10px] mt-1 text-stone-400">{fmtTime(m.createdAt)}</p>
+                          </div>
+                        </div>
+                      )
+                    }
                     return (
                       <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
                         <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${mine ? 'bg-violet-600 text-white rounded-br-md' : 'bg-white border border-stone-200 rounded-bl-md'}`}>

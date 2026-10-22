@@ -48,6 +48,8 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
   const [quantity, setQuantity] = useState(1)
   // Presentación de compra: por unidad o por bulto (cajón/docena/pack) si el producto lo permite
   const [purchaseMode, setPurchaseMode] = useState<'unit' | 'pack'>('unit')
+  // Variante de color elegida (solo si el producto tiene variantes)
+  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null)
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [addedToOrder, setAddedToOrder] = useState(false)
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false)
@@ -175,6 +177,16 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
                 featured: (p.featured as boolean) ?? false,
                 rating: toNum(p.rating),
                 storeId: (p.storeId as string) || '',
+                variants: Array.isArray(p.variants)
+                  ? (p.variants as Array<Record<string, unknown>>).map((v) => ({
+                      id: (v.id as string) || '',
+                      color: (v.color as string) || '',
+                      hex: (v.hex as string) || null,
+                      imageUrl: (v.imageUrl as string) || null,
+                      price: v.price != null ? toNum(v.price) : null,
+                      stock: typeof v.stock === 'number' ? v.stock : -1,
+                    }))
+                  : [],
                 createdAt: (p.createdAt as string) || new Date().toISOString(),
               }))
               setApiProducts(mapped)
@@ -294,8 +306,22 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
   const product = displayProduct
   const store = displayStore
 
+  // ── Variantes de color: cada color con su precio/stock/foto propios ──
+  const productVariants = (Array.isArray(product.variants) ? product.variants : []).filter(
+    (v) => v && typeof v.color === 'string' && v.color.trim()
+  )
+  const hasVariants = productVariants.length > 0
+  const selectedVariant = hasVariants
+    ? productVariants.find((v) => v.id === selectedVariantId) || productVariants[0]
+    : null
+  // Si el color elegido tiene precio propio, ese es el precio por unidad
+  const variantPriceNum =
+    selectedVariant?.price != null && Number(selectedVariant.price) > 0
+      ? Number(selectedVariant.price)
+      : null
+
   // ── Venta por bulto (cajón/docena/pack) ──
-  const unitPriceNum = Number(product.price)
+  const unitPriceNum = variantPriceNum ?? Number(product.price)
   const packPriceNum = Number(product.packPrice || 0)
   const unitsPerPackNum = Number(product.unitsPerPack || 0)
   const hasPack = !!(
@@ -312,13 +338,22 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
 
   const handleAddToOrder = () => {
     if (!store || product.stock === 0) return
+    // Color agotado: bloquea (el stock de la variante manda)
+    if (selectedVariant && typeof selectedVariant.stock === 'number' && selectedVariant.stock === 0) return
     addToCart(
       {
         productId: product.id,
         name: product.name,
-        price: Number(product.price),
-        imageUrl: product.imageUrl || '',
+        // FIX: en modo bulto el precio ES el del bulto completo — antes se
+        // mandaba el precio por unidad y el cliente pagaba menos de lo mostrado
+        price: isPackMode ? packPriceNum : unitPriceNum,
+        imageUrl: (selectedVariant?.imageUrl as string) || product.imageUrl || '',
         storeId: store.id,
+        isPack: isPackMode || undefined,
+        unitLabel: isPackMode ? (product.unitLabel || 'bulto') : undefined,
+        unitsPerPack: isPackMode ? unitsPerPackNum : undefined,
+        variantId: selectedVariant?.id,
+        variantColor: selectedVariant?.color,
       },
       quantity
     )
@@ -523,9 +558,13 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
           {/* Product Image Gallery */}
           <div className="relative">
             {(() => {
-              // Build all images: primary imageUrl first, then images array
-              const allImages = [product.imageUrl, ...(product.images || [])].filter(Boolean)
-              const currentImage = allImages[selectedImageIndex] || product.imageUrl
+              // Build all images: foto del color elegido, luego la principal, luego galería
+              const allImages = [...new Set([
+                (selectedVariant?.imageUrl as string) || product.imageUrl,
+                product.imageUrl,
+                ...(product.images || []),
+              ].filter(Boolean))]
+              const currentImage = allImages[selectedImageIndex] || allImages[0] || product.imageUrl
               return (
                 <>
                   {/* Main Image */}
@@ -629,6 +668,41 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
                 </Badge>
               )}
             </div>
+
+            {/* Selector de color (variantes): cada color con su precio y stock propios */}
+            {hasVariants && (
+              <div className="mt-5">
+                <p className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-2.5">
+                  Color: <span className="text-gray-500 font-medium normal-case tracking-normal">{selectedVariant?.color}</span>
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {productVariants.map((v) => {
+                    const active = selectedVariant?.id === v.id
+                    const soldOut = v.stock === 0
+                    return (
+                      <button
+                        key={v.id}
+                        type="button"
+                        onClick={() => setSelectedVariantId(v.id)}
+                        disabled={soldOut}
+                        className={`flex items-center gap-2 px-3.5 py-2 rounded-xl border-2 text-sm font-medium transition-all ${
+                          soldOut
+                            ? 'opacity-40 cursor-not-allowed border-gray-200 text-gray-400'
+                            : active
+                              ? 'text-gray-900'
+                              : 'border-gray-200 text-gray-700 hover:border-gray-300'
+                        }`}
+                        style={active && !soldOut ? { borderColor: store.colors.primary, backgroundColor: store.colors.primary + '0D' } : undefined}
+                      >
+                        <span className="w-4 h-4 rounded-full border border-gray-300 shrink-0" style={{ backgroundColor: v.hex || '#9ca3af' }} />
+                        {v.color}
+                        {soldOut && <span className="text-[10px] font-semibold">(agotado)</span>}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Price (por unidad o por bulto según la presentación elegida) */}
             <div className="mt-6 p-5 rounded-2xl" style={{ backgroundColor: store.colors.primary + '08' }}>

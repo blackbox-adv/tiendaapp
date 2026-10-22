@@ -31,6 +31,7 @@ import { useStoreCategories } from '@/lib/use-store-categories';
 import { compressImage } from '@/lib/image-compress';
 import { ColorPicker } from '@/components/dashboard/ColorPicker';
 import { removeImageBackground } from '@/lib/background-remover';
+import { VariantsEditor, type VariantRowInput } from '@/components/dashboard/VariantsEditor';
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -55,6 +56,10 @@ export default function NewProductPage() {
   const [unitLabel, setUnitLabel] = useState('');
   const [unitsPerPack, setUnitsPerPack] = useState('');
   const [packPrice, setPackPrice] = useState('');
+
+  // Variantes de color (opcional): varios colores con stock propio
+  const [hasVariants, setHasVariants] = useState(false);
+  const [variantRows, setVariantRows] = useState<VariantRowInput[]>([]);
 
   // Cover image
   const [coverFile, setCoverFile] = useState<File | null>(null);
@@ -263,6 +268,27 @@ export default function NewProductPage() {
         }
       }
 
+      // Variantes de color: subir fotos propias (si las hay) y armar payload
+      let variantsPayload: Array<Record<string, unknown>> | undefined;
+      if (hasVariants) {
+        const cleanRows = variantRows.filter((r) => r.color.trim());
+        if (cleanRows.length === 0) {
+          setError('Agrega al menos un color con nombre (o apaga la opción de varios colores).');
+          setLoading(false);
+          return;
+        }
+        setCoverUploading(true);
+        const uploaded = await Promise.all(cleanRows.map(async (r) => ({
+          color: r.color.trim(),
+          hex: r.hex || null,
+          imageUrl: r.file ? await uploadImage(r.file) : (r.imageUrl || null),
+          price: r.price ? parseFloat(r.price) : null,
+          stock: r.stock === '' ? -1 : (Number.isFinite(parseInt(r.stock, 10)) ? parseInt(r.stock, 10) : -1),
+        })));
+        setCoverUploading(false);
+        variantsPayload = uploaded;
+      }
+
       // Create product via /api/store-products
       const authToken = localStorage.getItem('tiendapp_token');
       const res = await fetch('/api/store-products', {
@@ -288,6 +314,7 @@ export default function NewProductPage() {
           isActive,
           featured,
           rating: 0, // las calificaciones las ponen los clientes, no el dueño
+          variants: variantsPayload,
         }),
       });
 
@@ -509,10 +536,30 @@ export default function NewProductPage() {
                 </p>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="color">Color / Variante</Label>
-                <ColorPicker id="color" value={color} onChange={setColor} />
+                {!hasVariants && (
+                  <>
+                    <Label htmlFor="color">Color / Variante</Label>
+                    <ColorPicker id="color" value={color} onChange={setColor} />
+                  </>
+                )}
+                {hasVariants && (
+                  <Label>Color único</Label>
+                )}
+                {hasVariants && (
+                  <p className="text-[11px] text-gray-400">
+                    Los colores se definen abajo en “El producto tiene varios colores”.
+                  </p>
+                )}
               </div>
             </div>
+
+            {/* Variantes de color (opcional) */}
+            <VariantsEditor
+              enabled={hasVariants}
+              onEnabledChange={setHasVariants}
+              rows={variantRows}
+              onChange={setVariantRows}
+            />
 
             {/* Stock */}
             <div className="space-y-2">

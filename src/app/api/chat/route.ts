@@ -16,6 +16,13 @@ import { getUserPlanType } from '@/lib/plan-gating'
 const MAX_BODY = 1000
 const MAX_NAME = 60
 
+// Teléfono del cliente: se limpia a dígitos (6-15). Sirve para que el vendedor
+// sepa QUIÉN le habla y para conectar el pedido con la conversación (tarjeta).
+function cleanPhone(v: unknown): string {
+  if (typeof v !== 'string') return ''
+  return v.replace(/\D/g, '').slice(0, 15)
+}
+
 // Rate limit ligero en memoria (por instancia serverless; disuade abuso)
 const rateBuckets = new Map<string, number[]>()
 function rateLimited(key: string, limit = 20, windowMs = 60_000): boolean {
@@ -53,7 +60,11 @@ export async function POST(request: NextRequest) {
 
     const name = String((body as Record<string, unknown>).name || '').trim().slice(0, MAX_NAME)
     const text = String((body as Record<string, unknown>).body || '').trim()
+    const phone = cleanPhone((body as Record<string, unknown>).phone)
     if (name.length < 2) return apiError('Tu nombre es requerido', 400, undefined, request)
+    if (phone.length < 6 || phone.length > 15) {
+      return apiError('Tu número de teléfono es requerido (6 a 15 dígitos)', 400, undefined, request)
+    }
     if (!text || text.length > MAX_BODY) return apiError('Mensaje invalido (max 1000 caracteres)', 400, undefined, request)
 
     let threadId: string = typeof (body as Record<string, unknown>).threadId === 'string'
@@ -74,6 +85,7 @@ export async function POST(request: NextRequest) {
         threadId,
         sender: 'customer',
         authorName: name,
+        authorPhone: phone,
         body: text,
         readByCustomer: true,
       },
@@ -109,7 +121,7 @@ export async function GET(request: NextRequest) {
       take: 200,
       select: {
         id: true, threadId: true, sender: true, authorName: true,
-        authorWhatsapp: true, body: true, createdAt: true,
+        authorWhatsapp: true, type: true, meta: true, body: true, createdAt: true,
       },
     })
 

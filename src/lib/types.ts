@@ -118,6 +118,16 @@ export interface Product {
   unitLabel?: string | null   // venta por bulto: "cajón", "docena", "pack" (opcional)
   unitsPerPack?: number | null  // cuántas unidades trae el bulto (>=2)
   packPrice?: number | null   // precio del bulto completo
+  // Variantes de color: mismo producto en varios colores, cada uno con su
+  // stock (y foto/precio propios opcionales). Vacío = producto de color único.
+  variants?: Array<{
+    id: string
+    color: string
+    hex?: string | null
+    imageUrl?: string | null
+    price?: number | null
+    stock?: number
+  }>
   isActive: boolean
   featured: boolean
   rating: number

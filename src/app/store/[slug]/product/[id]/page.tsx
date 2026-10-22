@@ -95,6 +95,7 @@ export default async function ProductPage({ params }: Props) {
       where: { id },
       include: {
         store: true,
+        variants: { where: { isActive: true }, orderBy: { createdAt: 'asc' } },
       },
     }) as unknown as Record<string, unknown> | null
 

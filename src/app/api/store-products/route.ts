@@ -8,6 +8,40 @@ import { serializeDecimals } from '@/lib/utils'
 import { PLAN_BY_TYPE } from '@/lib/plans'
 import { revalidatePath } from 'next/cache'
 
+// ── Variantes de color: saneo y límites (máx 10 por producto) ──
+// Cada variante: { color, hex?, imageUrl?, price?, stock? } — se guarda con el
+// productId real dentro de la transacción (nunca se confía en el productId del cliente).
+interface SanitizedVariant { color: string; hex: string | null; imageUrl: string | null; price: number | null; stock: number }
+function sanitizeVariants(raw: unknown): SanitizedVariant[] | 'INVALID' {
+  if (raw === undefined || raw === null) return []
+  if (!Array.isArray(raw)) return 'INVALID'
+  if (raw.length > 10) return 'INVALID'
+  const out: SanitizedVariant[] = []
+  const seenColors = new Set<string>()
+  for (const v of raw) {
+    if (!v || typeof v !== 'object') return 'INVALID'
+    const rec = v as Record<string, unknown>
+    const color = typeof rec.color === 'string' ? rec.color.trim().slice(0, 40) : ''
+    if (!color) return 'INVALID'
+    const colorKey = color.toLowerCase()
+    if (seenColors.has(colorKey)) return 'INVALID' // colores duplicados
+    seenColors.add(colorKey)
+    const hexRaw = typeof rec.hex === 'string' ? rec.hex.trim() : ''
+    const hex = /^#[0-9a-fA-F]{6}$/.test(hexRaw) ? hexRaw : null
+    const imageRaw = typeof rec.imageUrl === 'string' ? sanitizeUrl(rec.imageUrl) : ''
+    const priceRaw = rec.price === null || rec.price === undefined || rec.price === '' ? null : Number(rec.price)
+    if (priceRaw !== null && (!Number.isFinite(priceRaw) || priceRaw < 0)) return 'INVALID'
+    let stock = -1
+    if (rec.stock !== undefined && rec.stock !== null && rec.stock !== '') {
+      const n = Math.floor(Number(rec.stock))
+      if (!Number.isFinite(n) || n < -1) return 'INVALID'
+      stock = n
+    }
+    out.push({ color, hex, imageUrl: imageRaw || null, price: priceRaw, stock })
+  }
+  return out
+}
+
 // GET /api/store-products - Public (product browsing)
 export async function GET(request: NextRequest) {
   try {
@@ -46,6 +80,10 @@ export async function GET(request: NextRequest) {
         rating: true,
         storeId: true,
         createdAt: true,
+        variants: {
+          where: { isActive: true },
+          orderBy: { createdAt: 'asc' },
+        },
       },
     })
 
@@ -104,6 +142,13 @@ export async function POST(request: NextRequest) {
       }
     } catch { /* use default */ }
 
+    // Variantes de color (opcional): saneadas ANTES de la transacción (fallar
+    // aquí es un 400 limpio; dentro de la tx contaminaría la respuesta)
+    const parsedVariants = sanitizeVariants((body as Record<string, unknown>)?.variants)
+    if (parsedVariants === 'INVALID') {
+      return apiError('Datos de colores invalidos (máximo 10, sin duplicados)', 400, undefined, request)
+    }
+
     // Use raw SQL for product creation to avoid PgBouncer binary format issues with Prisma
     const product = await db.$transaction(async (tx) => {
       const currentCount = await tx.storeProduct.count({ where: { storeId } })
@@ -123,7 +168,7 @@ export async function POST(request: NextRequest) {
       const { nanoid } = await import('nanoid')
       const productId = `prod-${nanoid(24)}`
 
-      // Sanitize images array
+    // Sanitiza imágenes array
       const sanitizedImages = Array.isArray(images) && images.length > 0
         ? JSON.stringify(images.map((url: string) => sanitizeUrl(url)).filter(Boolean))
         : '[]'
@@ -151,6 +196,13 @@ export async function POST(request: NextRequest) {
         featured === true,
         rating ? parseFloat(rating.toString()) : 0,
       )
+
+      // Variantes de color del producto (si el dueño las definió)
+      if (parsedVariants.length > 0) {
+        await tx.productVariant.createMany({
+          data: parsedVariants.map((v) => ({ ...v, productId })),
+        })
+      }
 
       // Fetch the created product
       return tx.storeProduct.findUnique({ where: { id: productId } })
@@ -295,9 +347,29 @@ export async function PUT(request: NextRequest) {
     // Add the WHERE parameter
     values.push(id)
 
-    await db.$executeRawUnsafe(`
-      UPDATE "StoreProduct" SET ${setClauses.join(', ')} WHERE id = $${paramIdx}
-    `, ...values)
+    // Variantes de color: reemplazo completo (el dueño edita la lista entera).
+    // Misma transacción que el UPDATE para no dejar el producto sin colores a medias.
+    if (sentKeys.has('variants')) {
+      const parsedVariants = sanitizeVariants((body as Record<string, unknown>)?.variants)
+      if (parsedVariants === 'INVALID') {
+        return apiError('Datos de colores invalidos (máximo 10, sin duplicados)', 400, undefined, request)
+      }
+      await db.$transaction(async (tx) => {
+        await tx.$executeRawUnsafe(`
+          UPDATE "StoreProduct" SET ${setClauses.join(', ')} WHERE id = $${paramIdx}
+        `, ...values)
+        await tx.productVariant.deleteMany({ where: { productId: id } })
+        if (parsedVariants.length > 0) {
+          await tx.productVariant.createMany({
+            data: parsedVariants.map((v) => ({ ...v, productId: id })),
+          })
+        }
+      })
+    } else {
+      await db.$executeRawUnsafe(`
+        UPDATE "StoreProduct" SET ${setClauses.join(', ')} WHERE id = $${paramIdx}
+      `, ...values)
+    }
 
     // Fetch the updated product
     const product = await db.storeProduct.findUnique({ where: { id } })

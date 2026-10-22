@@ -22,6 +22,7 @@ export async function GET(
             primaryColor: true, secondaryColor: true, whatsappNumber: true, template: true,
           },
         },
+        variants: { where: { isActive: true }, orderBy: { createdAt: 'asc' } },
       },
     })
 
