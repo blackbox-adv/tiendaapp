@@ -121,7 +121,7 @@ export function ZapasTemplate({ store, products, storeSlug, planId, onProductCli
                   <Footprints className="w-3.5 h-3.5" /> Drop nuevo cada semana
                 </span>
                 <h1 className="zp-display text-5xl md:text-6xl leading-[0.98] uppercase">
-                  Tus pies<br />mercen<br />
+                  Tus pies<br />merecen<br />
                   <span className="text-transparent" style={{ WebkitTextStroke: '2px #121216' }}>lo</span>{' '}
                   <span className="bg-[#FFD400] px-2 inline-block -rotate-1">mejor.</span>
                 </h1>

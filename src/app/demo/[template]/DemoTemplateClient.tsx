@@ -29,6 +29,8 @@ import { SushiTemplate } from '@/components/store-templates/SushiTemplate'
 import { CafeTemplate } from '@/components/store-templates/CafeTemplate'
 import { BarTemplate } from '@/components/store-templates/BarTemplate'
 import { PopTemplate } from '@/components/store-templates/PopTemplate'
+import { ZapasTemplate } from '@/components/store-templates/ZapasTemplate'
+import { FuerzaTemplate } from '@/components/store-templates/FuerzaTemplate'
 import { ProductDetailView } from '@/components/store-templates/ProductDetailView'
 import { ArrowLeft, Crown, Sparkles, Gem } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -1220,6 +1222,8 @@ export function DemoTemplateClient({ template }: { template: string }) {
       {template === 'cafe' && <CafeTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
       {template === 'bar' && <BarTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
       {template === 'pop' && <PopTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
+      {template === 'zapas' && <ZapasTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
+      {template === 'fuerza' && <FuerzaTemplate store={store} products={products} storeSlug={store.slug} planId={planId} onProductClick={handleProductClick} />}
 
       {/* Más tiendas distintas para explorar (estilo Pinterest, compacta) */}
       <section className="bg-stone-50 border-t border-stone-200/70 py-6 px-4">
