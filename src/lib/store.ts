@@ -261,7 +261,7 @@ interface AppState {
     storeCategory: string
     storeColors: { primary: string; secondary: string }
     storeWhatsapp: string
-    template: 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist' | 'bodega' | 'sabor' | 'moda'
+    template: 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist' | 'bodega' | 'sabor' | 'moda' | 'vitrina' | 'neon' | 'boutique' | 'editorial' | 'atelier' | 'terracota' | 'dulce' | 'calle' | 'aura' | 'teca' | 'volt' | 'grano' | 'flora' | 'mesa' | 'sushi' | 'cafe' | 'bar' | 'pop' | 'zapas' | 'fuerza'
   }
   platformSettings: {
     name: string

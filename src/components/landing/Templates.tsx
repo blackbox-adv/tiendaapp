@@ -3,12 +3,12 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Eye, Crown, ArrowRight, Search, Sparkles, Gem, Sun, Minimize2, ShoppingBasket, UtensilsCrossed, Shirt, BookOpen, Cpu, ShoppingBag, Newspaper, Flower2, Hand, Cake, Zap, Armchair, Dumbbell, Coffee, Flower, LayoutGrid, ChefHat, Fish, Croissant, Beer, Store } from 'lucide-react'
+import { Eye, Crown, ArrowRight, Search, Sparkles, Gem, Sun, Minimize2, ShoppingBasket, UtensilsCrossed, Shirt, BookOpen, Cpu, ShoppingBag, Newspaper, Flower2, Hand, Cake, Zap, Armchair, Dumbbell, Coffee, Flower, LayoutGrid, ChefHat, Fish, Croissant, Beer, Store, Footprints, Flame } from 'lucide-react'
 import { PLAN_PRICES } from '@/lib/plans'
 import { useAppStore } from '@/lib/store'
 
 type PlanType = 'free' | 'pro' | 'premium'
-type Rubro = 'todos' | 'moda' | 'belleza' | 'comida' | 'hogar' | 'tech' | 'general'
+type Rubro = 'todos' | 'moda' | 'belleza' | 'comida' | 'hogar' | 'tech' | 'deportes' | 'general'
 
 interface Template {
   id: string
@@ -121,9 +121,31 @@ const templates: Template[] = [
     planLabel: 'Premium',
     description: 'Deporte y fitness: azul marino y naranja eléctrico, stats de confianza y envío 24h protagonista.',
     bestFor: ['Gym', 'Deporte', 'Suplementos'],
-    tags: ['general'],
+    tags: ['deportes', 'general'],
     isNew: true,
     icon: Dumbbell,
+  },
+  {
+    id: 'zapas',
+    name: 'Zapas',
+    plan: 'premium',
+    planLabel: 'Premium',
+    description: 'Sneaker culture: blanco, tinta y amarillo drop. Tallas reales, originales y cambios sin costo.',
+    bestFor: ['Zapatillas', 'Streetwear', 'Accesorios'],
+    tags: ['deportes', 'moda'],
+    isNew: true,
+    icon: Footprints,
+  },
+  {
+    id: 'fuerza',
+    name: 'Fuerza',
+    plan: 'premium',
+    planLabel: 'Premium',
+    description: 'Gym y suplementos: carbón oscuro y turquesa eléctrico. Proteína sellada, combos y asesoría.',
+    bestFor: ['Suplementos', 'Proteínas', 'Gym'],
+    tags: ['deportes', 'general'],
+    isNew: true,
+    icon: Flame,
   },
   {
     id: 'grano',
@@ -316,6 +338,7 @@ const rubroFilters: { id: Rubro; label: string }[] = [
   { id: 'comida', label: 'Comida' },
   { id: 'hogar', label: 'Hogar y artesanal' },
   { id: 'tech', label: 'Tecnología' },
+  { id: 'deportes', label: 'Deporte y fitness' },
   { id: 'general', label: 'Cualquier rubro' },
 ]
 

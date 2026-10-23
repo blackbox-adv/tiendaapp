@@ -109,6 +109,14 @@ const templateMeta: Record<string, { name: string; description: string }> = {
     name: 'Pop',
     description: 'Demo de la plantilla Pop para e-commerce multi-rubro: ofertas, envíos rápidos y catálogo limpio - Kyllari',
   },
+  zapas: {
+    name: 'Zapas',
+    description: 'Demo de la plantilla Zapas para zapatillas y streetwear: blanco sneaker, amarillo drop y tallas reales - Kyllari',
+  },
+  fuerza: {
+    name: 'Fuerza',
+    description: 'Demo de la plantilla Fuerza para gym y suplementos: carbón oscuro, turquesa eléctrico y proteína sellada - Kyllari',
+  },
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ template: string }> }): Promise<Metadata> {

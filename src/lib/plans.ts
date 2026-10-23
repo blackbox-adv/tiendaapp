@@ -67,7 +67,7 @@ export const CANONICAL_PLANS: CanonicalPlan[] = [
     features: [
       'Productos ilimitados',
       'Hasta 3 tiendas',
-      'Las 26 plantillas (un diseño por rubro)',
+      'Las 28 plantillas (un diseño por rubro)',
       'Packs y combos con descuento',
       'Importa y exporta tu catálogo (Excel/Sheets)',
       'Reportes de ventas en Excel',

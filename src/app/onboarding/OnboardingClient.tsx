@@ -36,6 +36,7 @@ import {
   Zap,
   Armchair,
   Dumbbell,
+  Footprints,
   Coffee,
   Flower,
   ChefHat,
@@ -281,6 +282,24 @@ const templates = [
     icon: Store,
     plan: 'premium',
     demoSlug: 'pop',
+  },
+  {
+    id: 'zapas',
+    name: 'Zapas',
+    desc: 'Sneaker culture para zapatillas y streetwear',
+    color: 'from-[#121216] to-[#FFD400]',
+    icon: Footprints,
+    plan: 'premium',
+    demoSlug: 'zapas',
+  },
+  {
+    id: 'fuerza',
+    name: 'Fuerza',
+    desc: 'Gym y suplementos con energía pura',
+    color: 'from-[#0F1215] to-[#00E5C0]',
+    icon: Dumbbell,
+    plan: 'premium',
+    demoSlug: 'fuerza',
   },
 ];
 

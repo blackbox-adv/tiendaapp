@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAppStore } from '@/lib/store'
 // Plans and categories are now fetched from the API
-import { Zap, Crown, Gift, ArrowLeft, ArrowRight, Check, Store, Palette, LayoutTemplate, Upload, Sparkles, Sun, Minimize2, Eye } from 'lucide-react'
+import { Zap, Crown, Gift, ArrowLeft, ArrowRight, Check, Store, Palette, LayoutTemplate, Upload, Sparkles, Sun, Minimize2, Eye, Lock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -15,9 +15,45 @@ import { Badge } from '@/components/ui/badge'
 
 const iconMap: Record<string, React.ElementType> = { Gift, Zap, Crown }
 
+type TemplateId = 'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist' | 'bodega' | 'sabor' | 'moda' | 'vitrina' | 'neon' | 'boutique' | 'editorial' | 'atelier' | 'terracota' | 'dulce' | 'calle' | 'aura' | 'teca' | 'volt' | 'grano' | 'flora' | 'mesa' | 'sushi' | 'cafe' | 'bar' | 'pop' | 'zapas' | 'fuerza'
+
+// Las 28 plantillas de Kyllari (mismas entradas que /dashboard/template).
+// requiredPlan: 'free' = las 3 gratis; 'premium' = exclusivas Premium.
+const WIZARD_TEMPLATES: { id: TemplateId; name: string; desc: string; gradient: string; requiredPlan: 'free' | 'pro' | 'premium'; planLabel: string }[] = [
+  { id: 'moderna', name: 'Moderna', desc: 'Limpia y profesional, para cualquier rubro', gradient: 'from-violet-500 to-purple-700', requiredPlan: 'free', planLabel: '' },
+  { id: 'vibrante', name: 'Vibrante', desc: 'Llena de color y energía', gradient: 'from-rose-500 to-orange-500', requiredPlan: 'free', planLabel: '' },
+  { id: 'clasica', name: 'Clásica', desc: 'Cálida y confiable, estilo tradicional', gradient: 'from-amber-600 to-amber-900', requiredPlan: 'free', planLabel: '' },
+  { id: 'luxury', name: 'Luxury', desc: 'Oscuro con acabados dorados, alta gama', gradient: 'from-zinc-800 to-zinc-950', requiredPlan: 'premium', planLabel: 'Premium' },
+  { id: 'minimalist', name: 'Minimalista', desc: 'Estilo Apple: espacios amplios y precisos', gradient: 'from-stone-400 to-stone-700', requiredPlan: 'premium', planLabel: 'Premium' },
+  { id: 'bodega', name: 'Mercadito', desc: 'Energía de barrio para bodegas y abarrotes', gradient: 'from-red-600 to-amber-500', requiredPlan: 'premium', planLabel: 'Premium' },
+  { id: 'sabor', name: 'Sabores', desc: 'Carta digital para restaurantes y pollerías', gradient: 'from-orange-600 to-yellow-500', requiredPlan: 'premium', planLabel: 'Premium' },
+  { id: 'moda', name: 'Pasarela', desc: 'Editorial de moda para boutiques', gradient: 'from-zinc-900 to-pink-600', requiredPlan: 'premium', planLabel: 'Premium' },
+  { id: 'vitrina', name: 'Vitrina', desc: 'Lookbook para joyería, flores y belleza', gradient: 'from-[#96613D] to-[#C89B6D]', requiredPlan: 'premium', planLabel: 'Premium' },
+  { id: 'neon', name: 'Tech', desc: 'Blanca premium para celulares y electrónica', gradient: 'from-blue-500 to-indigo-600', requiredPlan: 'premium', planLabel: 'Premium' },
+  { id: 'boutique', name: 'Boutique', desc: 'Marca de moda: hero editorial y lookbook', gradient: 'from-[#17142E] to-[#7C3AED]', requiredPlan: 'premium', planLabel: 'Premium' },
+  { id: 'editorial', name: 'Editorial', desc: 'Catálogo de revista con índice numerado', gradient: 'from-[#1A1A1A] to-[#8B0000]', requiredPlan: 'premium', planLabel: 'Premium' },
+  { id: 'atelier', name: 'Atelier', desc: 'Moda femenina delicada, rosa empolvado', gradient: 'from-[#D4A5A5] to-[#8E5A6E]', requiredPlan: 'premium', planLabel: 'Premium' },
+  { id: 'terracota', name: 'Terracota', desc: 'Artesanal y cálida, hecho a mano', gradient: 'from-[#B85C38] to-[#E5A47F]', requiredPlan: 'premium', planLabel: 'Premium' },
+  { id: 'dulce', name: 'Dulce', desc: 'Pastelerías y postres, lila pastel', gradient: 'from-[#C9A7EB] to-[#9B7EDE]', requiredPlan: 'premium', planLabel: 'Premium' },
+  { id: 'calle', name: 'Calle', desc: 'Streetwear urbano, negro y lima ácido', gradient: 'from-[#111111] to-[#A3E635]', requiredPlan: 'premium', planLabel: 'Premium' },
+  { id: 'aura', name: 'Aura', desc: 'Joyería fina: champán y oro', gradient: 'from-[#C9B37E] to-[#7A5C2E]', requiredPlan: 'premium', planLabel: 'Premium' },
+  { id: 'teca', name: 'Teca', desc: 'Hogar y decoración, verde salvia', gradient: 'from-[#7C9070] to-[#4A5D43]', requiredPlan: 'premium', planLabel: 'Premium' },
+  { id: 'volt', name: 'Volt', desc: 'Deporte y fitness, azul marino y naranja', gradient: 'from-[#0E1A38] to-[#FF5A1F]', requiredPlan: 'premium', planLabel: 'Premium' },
+  { id: 'grano', name: 'Grano', desc: 'Cafeterías y panadería artesanal', gradient: 'from-[#6F4E37] to-[#C8A165]', requiredPlan: 'premium', planLabel: 'Premium' },
+  { id: 'flora', name: 'Flora', desc: 'Florerías y regalos, verde botánico', gradient: 'from-[#4A7C59] to-[#A8C686]', requiredPlan: 'premium', planLabel: 'Premium' },
+  { id: 'mesa', name: 'Mesa', desc: 'Restaurantes: menú del día y carta', gradient: 'from-[#8B3A3A] to-[#D9A566]', requiredPlan: 'premium', planLabel: 'Premium' },
+  { id: 'sushi', name: 'Nikkei', desc: 'Sushi bars: rojo japonés y barra de rolls', gradient: 'from-[#B3402A] to-[#1A1A1A]', requiredPlan: 'premium', planLabel: 'Premium' },
+  { id: 'cafe', name: 'Barista', desc: 'Cafeterías: lattes, frappés y postres', gradient: 'from-[#4B3621] to-[#D2B48C]', requiredPlan: 'premium', planLabel: 'Premium' },
+  { id: 'bar', name: 'Barra', desc: 'Bares: happy hour y tragos artesanales', gradient: 'from-[#1A1A2E] to-[#E94560]', requiredPlan: 'premium', planLabel: 'Premium' },
+  { id: 'pop', name: 'Pop', desc: 'E-commerce multi-rubro: ofertas y envío rápido', gradient: 'from-[#0E9384] to-[#F59E0B]', requiredPlan: 'premium', planLabel: 'Premium' },
+  { id: 'zapas', name: 'Zapas', desc: 'Sneaker culture para zapatillas y streetwear', gradient: 'from-[#121216] to-[#FFD400]', requiredPlan: 'premium', planLabel: 'Premium' },
+  { id: 'fuerza', name: 'Fuerza', desc: 'Gym y suplementos con energía pura', gradient: 'from-[#0F1215] to-[#00E5C0]', requiredPlan: 'premium', planLabel: 'Premium' },
+]
+
 export function StoreWizard() {
-  const { wizardStep, setWizardStep, wizardData, updateWizardData, completeWizard, navigate } = useAppStore()
-  const [selectedTemplate, setSelectedTemplate] = useState<'moderna' | 'vibrante' | 'clasica' | 'luxury' | 'minimalist' | 'bodega' | 'sabor' | 'moda'>(wizardData.template)
+  const { wizardStep, setWizardStep, wizardData, updateWizardData, completeWizard, navigate, currentUser } = useAppStore()
+  const userPlanId = (currentUser?.planId as string) || 'free'
+  const [selectedTemplate, setSelectedTemplate] = useState<TemplateId>(wizardData.template)
   const [uploadingLogo, setUploadingLogo] = useState(false)
 
   // Fetch plans from API
@@ -344,89 +380,80 @@ export function StoreWizard() {
                   <LayoutTemplate className="w-4 h-4 flex-shrink-0" />
                   <span>Elige cómo se verá tu tienda. <strong>Puedes cambiarla después</strong> desde Configuración en tu panel.</span>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {[
-                    { id: 'moderna' as const, name: 'Moderna', icon: Palette, desc: 'Diseño limpio y minimalista, perfecto para marcas sofisticadas.', color: '#7C3AED', gradient: 'from-violet-500 to-purple-600', requiredPlan: 'free' as const, planLabel: '' },
-                    { id: 'vibrante' as const, name: 'Vibrante', icon: Sparkles, desc: 'Colores vibrantes y dinámicos para tiendas con personalidad.', color: '#EC4899', gradient: 'from-pink-500 to-orange-400', requiredPlan: 'free' as const, planLabel: '' },
-                    { id: 'clasica' as const, name: 'Clásica', icon: Sun, desc: 'Elegancia atemporal con tonos cálidos para tiendas tradicionales.', color: '#D97706', gradient: 'from-amber-500 to-yellow-500', requiredPlan: 'free' as const, planLabel: '' },
-                    { id: 'luxury' as const, name: 'Luxury', icon: Crown, desc: 'Diseño de alta gama con tonos oscuros y acentos dorados para marcas premium.', color: '#c8a456', gradient: 'from-gray-900 via-gray-800 to-amber-900', requiredPlan: 'premium' as const, planLabel: 'Premium' },
-                    { id: 'minimalist' as const, name: 'Minimalist', icon: Minimize2, desc: 'Ultra limpio al estilo Apple. Espacios amplios, tipografía ligera y sin distracciones.', color: '#374151', gradient: 'from-gray-50 via-white to-gray-100', requiredPlan: 'premium' as const, planLabel: 'Premium' },
-                  ].map((tpl) => {
-                    const Icon = tpl.icon
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {WIZARD_TEMPLATES.map((tpl) => {
+                    const locked = tpl.requiredPlan !== 'free' && userPlanId !== 'premium' && userPlanId !== tpl.requiredPlan
                     return (
                       <Card
                         key={tpl.id}
-                        onClick={() => setSelectedTemplate(tpl.id)}
-                        className={`cursor-pointer transition-all ${
+                        onClick={() => {
+                          if (locked) {
+                            toast.error(`${tpl.name} es una plantilla ${tpl.planLabel}`, {
+                              description: 'Puedes actualizar tu plan en "Mi Plan" cuando quieras.',
+                              action: { label: 'Ver planes', onClick: () => navigate({ page: 'dashboard-plan' }) },
+                            })
+                            return
+                          }
+                          setSelectedTemplate(tpl.id)
+                        }}
+                        className={`cursor-pointer transition-all overflow-hidden ${
                           selectedTemplate === tpl.id
                             ? 'border-violet-500 ring-2 ring-violet-200 shadow-lg'
                             : 'border-gray-200 hover:border-violet-200'
                         }`}
                       >
-                        <CardContent className="p-5">
-                          <div className={`rounded-lg h-40 mb-3 flex items-center justify-center relative bg-gradient-to-br ${tpl.gradient}`}
+                        <div className={`relative aspect-[3/4] bg-gradient-to-br ${tpl.gradient}`}>
+                          {/* Captura real del diseño (el degradado queda de respaldo si la imagen falla) */}
+                          <img
+                            src={`/templates/${tpl.id}-preview.webp`}
+                            alt={`Vista previa plantilla ${tpl.name}`}
+                            className="absolute inset-0 w-full h-full object-cover object-top"
+                            loading="lazy"
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                          />
+                          {locked && (
+                            <div className="absolute inset-0 bg-white/45 backdrop-blur-[1.5px] flex flex-col items-center justify-center gap-2">
+                              <div className="w-10 h-10 rounded-full bg-gray-900/85 flex items-center justify-center shadow-lg">
+                                <Lock className="w-4 h-4 text-white" />
+                              </div>
+                              <span className="text-[10px] font-bold text-gray-800 bg-white/95 rounded-full px-2.5 py-1 shadow">{tpl.planLabel}</span>
+                            </div>
+                          )}
+                          {/* Ojito: ver la demo completa (todos pueden VER, el candado es para usar) */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              window.open(`/demo/${tpl.id}`, '_blank')
+                            }}
+                            className="absolute top-2 right-2 bg-white/90 rounded-full p-1.5 shadow hover:bg-white transition-colors"
+                            title="Ver tienda de ejemplo"
                           >
-                            <LayoutTemplate className="w-10 h-10 opacity-30" />
-                            {/* Premium badge */}
-                            {tpl.requiredPlan !== 'free' && (
-                              <div className="absolute top-2 left-2">
-                                <Badge
-                                  className="text-[10px] font-bold border-0 shadow-sm"
-                                  style={{
-                                    backgroundColor: tpl.requiredPlan === 'premium' ? '#c8a456' : '#8B5CF6',
-                                    color: tpl.requiredPlan === 'premium' ? '#1a1a2e' : '#fff',
-                                  }}
-                                >
-                                  {tpl.requiredPlan === 'premium' ? '✨ Premium' : '⭐ Pro'}
-                                </Badge>
-                              </div>
-                            )}
-                            {/* Preview eye overlay */}
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                window.open(`/demo/${tpl.id}`, '_blank')
-                              }}
-                              className="absolute inset-0 flex items-center justify-center bg-black/0 hover:bg-black/30 transition-all group"
-                            >
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white rounded-full p-3 shadow-lg">
-                                <Eye className="w-5 h-5 text-gray-700" />
-                              </div>
-                            </button>
-                          </div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <Icon className="w-4 h-4" style={{ color: tpl.color }} />
-                            <h3 className="font-bold text-gray-900">{tpl.name}</h3>
-                          </div>
-                          <p className="text-xs text-gray-500 mt-1">{tpl.desc}</p>
-                          <div className="flex items-center gap-2 mt-3">
-                            {selectedTemplate === tpl.id ? (
-                              <div className="flex-1 text-center text-xs font-semibold text-violet-600 bg-violet-50 py-1.5 rounded-lg">
-                                ✓ Seleccionada
-                              </div>
-                            ) : (
-                              <div className="flex-1 text-center text-xs font-medium text-gray-500 bg-gray-50 py-1.5 rounded-lg">
-                                Seleccionar
-                              </div>
-                            )}
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="text-xs gap-1 h-7"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                window.open(`/demo/${tpl.id}`, '_blank')
-                              }}
-                            >
-                              <Eye className="w-3 h-3" />
-                              Preview
-                            </Button>
-                          </div>
+                            <Eye className="w-3.5 h-3.5 text-gray-700" />
+                          </button>
+                          {selectedTemplate === tpl.id && (
+                            <div className="absolute top-2 left-2 bg-white rounded-full w-6 h-6 flex items-center justify-center shadow">
+                              <Check className="w-4 h-4 text-violet-600" />
+                            </div>
+                          )}
+                        </div>
+                        <CardContent className="p-3">
+                          <h3 className="font-bold text-gray-900 text-sm truncate">{tpl.name}</h3>
+                          <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-2 leading-snug">{tpl.desc}</p>
+                          {locked ? (
+                            <div className="flex items-center gap-1 text-[10px] font-bold text-violet-600 mt-2">
+                              <Lock className="w-3 h-3" /> Plan {tpl.planLabel}
+                            </div>
+                          ) : selectedTemplate === tpl.id ? (
+                            <div className="text-center text-xs font-semibold text-violet-600 bg-violet-50 py-1.5 rounded-lg mt-2">✓ Seleccionada</div>
+                          ) : (
+                            <div className="text-center text-xs font-medium text-gray-500 bg-gray-50 py-1.5 rounded-lg mt-2">Seleccionar</div>
+                          )}
                         </CardContent>
                       </Card>
                     )
                   })}
                 </div>
+                <p className="text-center text-gray-400 text-xs">Toca el ojito para recorrer la tienda de ejemplo de cualquier diseño.</p>
               </div>
             )}
           </motion.div>

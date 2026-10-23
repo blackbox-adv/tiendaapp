@@ -11,7 +11,7 @@ export const PREMIUM_TEMPLATES: string[] = [
   'luxury', 'minimalist', 'bodega', 'sabor', 'moda', 'vitrina', 'neon',
   'boutique', 'editorial', 'atelier', 'terracota', 'dulce', 'calle',
   'aura', 'teca', 'volt', 'grano', 'flora', 'mesa', 'sushi', 'cafe',
-  'bar', 'pop',
+  'bar', 'pop', 'zapas', 'fuerza',
 ]
 
 export const VALID_TEMPLATES: string[] = [...FREE_TEMPLATES, ...PREMIUM_TEMPLATES]
