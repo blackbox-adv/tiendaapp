@@ -1171,75 +1171,36 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
           </div>
         </div>
 
-        {/* Detalles del producto: descripción, ficha técnica y galería a todo lo ancho
-            (estilo catálogo premium tipo Amazon — junto a la foto solo queda el bloque de compra) */}
+        {/* Descripción extendida a todo lo ancho (estilo Mercado Libre: arriba queda
+            la foto principal con sus miniaturas justo debajo; aquí abajo solo la
+            descripción y la ficha técnica — las fotos NO se repiten) */}
         {(() => {
           const { intro, specs } = parseProductSpecs(product.description)
-          const detailImages = [product.imageUrl, ...(product.images || [])].filter(Boolean)
           const hasText = !!(intro && intro.trim()) || specs.length > 0
-          const hasGallery = detailImages.length > 1
-          if (!hasText && !hasGallery) return null
+          if (!hasText) return null
           return (
-            <div className="mt-16">
+            <div className="mt-12 md:mt-16">
               <h2 className="text-xl font-bold text-gray-900 mb-6">Detalles del producto</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-                {hasText && (
-                  <div>
-                    {intro && intro.trim() && (
-                      <div>
-                        <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">
-                          Descripción
-                        </h3>
-                        <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">{intro}</p>
-                      </div>
-                    )}
-                    {specs.length > 0 && (
-                      <div className={intro && intro.trim() ? 'mt-6' : ''}>
-                        <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">
-                          Especificaciones
-                        </h3>
-                        <ul className="rounded-xl border border-gray-100 bg-gray-50/60 divide-y divide-gray-100 overflow-hidden">
-                          {specs.map((s, i) => (
-                            <li key={`${s.label}-${i}`} className="flex items-start gap-2.5 px-3.5 py-2.5 text-sm">
-                              <Check className="w-4 h-4 mt-0.5 shrink-0" style={{ color: store.colors.primary }} />
-                              <span className="text-gray-500 leading-snug">
-                                <span className="font-semibold text-gray-800">{s.label}:</span> {s.value}
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                )}
-                {hasGallery && (
-                  <div className={hasText ? '' : 'md:col-span-2'}>
-                    <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">
-                      Galería <span className="text-gray-400 font-medium normal-case tracking-normal">({detailImages.length} fotos)</span>
-                    </h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                      {detailImages.map((img, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => { setSelectedImageIndex(idx); setShowZoom(true) }}
-                          className="group aspect-square rounded-xl overflow-hidden border border-gray-100 bg-gray-50 cursor-zoom-in"
-                        >
-                          <img
-                            src={img}
-                            alt={`${product.name} - foto ${idx + 1}`}
-                            loading="lazy"
-                            decoding="async"
-                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
-                            onError={(e) => {
-                              ;(e.target as HTMLImageElement).src = imgFallback
-                            }}
-                          />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+              {intro && intro.trim() && (
+                <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line max-w-3xl">{intro}</p>
+              )}
+              {specs.length > 0 && (
+                <div className={intro && intro.trim() ? 'mt-6' : ''}>
+                  <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">
+                    Especificaciones
+                  </h3>
+                  <ul className="max-w-3xl rounded-xl border border-gray-100 bg-gray-50/60 divide-y divide-gray-100 overflow-hidden">
+                    {specs.map((s, i) => (
+                      <li key={`${s.label}-${i}`} className="flex items-start gap-2.5 px-3.5 py-2.5 text-sm">
+                        <Check className="w-4 h-4 mt-0.5 shrink-0" style={{ color: store.colors.primary }} />
+                        <span className="text-gray-500 leading-snug">
+                          <span className="font-semibold text-gray-800">{s.label}:</span> {s.value}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           )
         })()}

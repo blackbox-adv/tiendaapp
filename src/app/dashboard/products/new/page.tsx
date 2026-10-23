@@ -463,9 +463,9 @@ export default function NewProductPage() {
             {/* Description */}
             <div className="space-y-2">
               <Label htmlFor="description">Descripción</Label>
-              <Textarea id="description" placeholder="Describe tu producto..." value={description} onChange={(e) => setDescription(e.target.value)} rows={5} />
+              <Textarea id="description" placeholder="Describe tu producto... puedes escribir toda la descripción larga que quieras, en varias líneas" value={description} onChange={(e) => setDescription(e.target.value)} rows={8} />
               <p className="text-[11px] text-gray-400 mt-1 leading-relaxed">
-                Tip: escribe especificaciones una por línea y tu tienda las mostrará como ficha técnica — ej: <span className="text-gray-500 font-medium">Material: acero inoxidable · Talla: M · Incluye: caja de regalo</span>
+                Puedes escribir la descripción extendida que quieras (sin límite). Tip: agrega 2 o más líneas tipo ficha técnica y tu tienda las mostrará como especificaciones — ej: <span className="text-gray-500 font-medium">Material: acero inoxidable · Talla: M · Incluye: caja de regalo</span>
               </p>
             </div>
 
