@@ -192,6 +192,17 @@ export async function PUT(
       }
     }
 
+    // ── Gating: popup de ofertas solo Pro/Premium ──
+    // Mismo patrón que payFirst: si el plan no lo incluye se apaga en silencio
+    // (nunca bloqueamos el guardado; p.ej. tras una baja de plan). El panel ya lo
+    // bloquea por UI; esto evita que un plan Gratis lo active llamando a la API.
+    if (body.popupEnabled === true && auth.user.role !== 'super_admin') {
+      const planType = await getUserPlanType(auth.user.userId);
+      if (planType !== 'pro' && planType !== 'premium') {
+        body.popupEnabled = false;
+      }
+    }
+
     for (const field of allowedFields) {
       if (body[field] !== undefined) {
         updateData[field] = body[field];
