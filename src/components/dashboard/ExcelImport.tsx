@@ -247,7 +247,7 @@ export function ExcelImport() {
             <ul className="text-sm text-left text-[#5D5A7E] space-y-2.5 mx-auto max-w-sm">
               <li className="flex gap-2.5"><CheckCircle2 className="w-4 h-4 text-violet-600 shrink-0 mt-0.5" /> Tu Excel es el jefe: las columnas de más se ignoran</li>
               <li className="flex gap-2.5"><CheckCircle2 className="w-4 h-4 text-violet-600 shrink-0 mt-0.5" /> Mapeo guiado una sola vez, luego es 1 click</li>
-              <li className="flex gap-2.5"><CheckCircle2 className="w-4 h-4 text-violet-600 shrink-0 mt-0.5" /> Productos ilimitados con el plan Premium</li>
+              <li className="flex gap-2.5"><CheckCircle2 className="w-4 h-4 text-violet-600 shrink-0 mt-0.5" /> Hasta 500 productos con el plan Premium</li>
             </ul>
             <Link href="/dashboard/plan" className="block">
               <Button className="w-full bg-violet-600 hover:bg-violet-700 text-white">

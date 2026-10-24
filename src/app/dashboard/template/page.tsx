@@ -539,7 +539,7 @@ export default function TemplatePage() {
                   <p className="text-[11px] text-violet-600 leading-snug -mt-2 mb-3">
                     {tmpl.plan === 'pro'
                       ? 'Con Pro: buscador de productos y hasta 50 productos.'
-                      : 'Con Premium: diseño exclusivo de tu rubro, buscador y productos ilimitados.'}
+                      : 'Con Premium: diseño exclusivo de tu rubro, buscador y hasta 500 productos.'}
                   </p>
                 )}
                 <div className="flex items-center gap-2">

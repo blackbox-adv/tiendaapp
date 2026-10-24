@@ -38,7 +38,7 @@ const features = [
     icon: Package,
     title: 'Catálogo con fotos que venden',
     description:
-      'Sube tus productos con foto, precio, descripción y stock, y organízalos por categorías. Empiezas gratis con 6 productos y tu catálogo crece contigo: hasta 50 con Pro e ilimitado con Premium.',
+      'Sube tus productos con foto, precio, descripción y stock, y organízalos por categorías. Empiezas gratis con 6 productos y tu catálogo crece contigo: hasta 50 con Pro y hasta 500 con Premium.',
   },
   {
     icon: Gift,

@@ -62,10 +62,10 @@ export const CANONICAL_PLANS: CanonicalPlan[] = [
     type: 'premium',
     name: 'Premium',
     price: 79.99,
-    maxProducts: -1,
+    maxProducts: 500,
     description: 'Para negocios establecidos',
     features: [
-      'Productos ilimitados',
+      'Hasta 500 productos',
       'Hasta 3 tiendas',
       'Las 28 plantillas (un diseño por rubro)',
       'Packs y combos con descuento',
