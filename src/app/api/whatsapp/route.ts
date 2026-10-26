@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
       return apiError(validation.error, 400, undefined, request)
     }
 
-    const { storeId, productName, productPrice, productUrl, customerMessage, quantity } = validation.data
+    const { storeId, productName, productPrice, productUrl, customerMessage, quantity, sellerId } = validation.data
 
     // Fetch store to get WhatsApp number
     const store = await db.store.findUnique({
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
       select: { name: true, whatsappNumber: true, slug: true, primaryColor: true, isActive: true },
     })
 
-    if (!store || !store.whatsappNumber) {
+    if (!store) {
       return apiError('Tienda no encontrada o sin WhatsApp configurado', 404, undefined, request)
     }
 
@@ -31,10 +31,36 @@ export async function POST(request: NextRequest) {
       return apiError('Esta tienda esta desactivada temporalmente', 403, undefined, request)
     }
 
+    // Vendedor del equipo (Premium): el cliente eligio a quien atenderle.
+    // Valido SOLO si pertenece a esta tienda, esta activo y tiene WhatsApp
+    // propio; cualquier falla cae al numero principal (la venta no se bloquea).
+    let targetNumber = store.whatsappNumber
+    let greetName = store.name
+    if (sellerId) {
+      try {
+        const member = await db.storeMember.findUnique({
+          where: { id: sellerId },
+          select: { storeId: true, isActive: true, whatsappNumber: true, userId: true },
+        })
+        if (member && member.storeId === storeId && member.isActive && member.whatsappNumber) {
+          targetNumber = member.whatsappNumber
+          // StoreMember no tiene relación `user` en el schema → lookup aparte
+          const u = await db.user
+            .findUnique({ where: { id: member.userId }, select: { name: true } })
+            .catch(() => null)
+          greetName = (u?.name || '').trim() || store.name
+        }
+      } catch { /* numero principal */ }
+    }
+
+    if (!targetNumber) {
+      return apiError('Tienda no encontrada o sin WhatsApp configurado', 404, undefined, request)
+    }
+
     // Validate and normalize WhatsApp number for Peru format
     let cleanNumber: string
     try {
-      cleanNumber = normalizePeruWhatsapp(store.whatsappNumber)
+      cleanNumber = normalizePeruWhatsapp(targetNumber)
     } catch {
       console.error('[WHATSAPP] Invalid Peru WhatsApp number format for store:', storeId)
       return apiError(PERU_WHATSAPP_ERROR, 400, undefined, request)
@@ -50,7 +76,7 @@ export async function POST(request: NextRequest) {
     } else if (productName && productPrice) {
       const qtyText = quantity && quantity > 1 ? `${quantity} unidades de` : 'el producto'
       const totalText = quantity && quantity > 1 ? `Total: S/${(Number(productPrice) * quantity).toFixed(2)}\n` : ''
-      message = `Hola ${store.name}!\n\n` +
+      message = `Hola ${greetName}!\n\n` +
         `Me interesa ${qtyText}:\n` +
         `${sanitizeBasic(String(productName))}\n` +
         `S/${Number(productPrice).toFixed(2)}${quantity && quantity > 1 ? ' c/u' : ''}\n` +
@@ -58,7 +84,7 @@ export async function POST(request: NextRequest) {
         `${productUrl || storeUrl}\n\n` +
         `Tienen disponibilidad?`
     } else {
-      message = `Hola ${store.name}! Quisiera mas informacion sobre sus productos.`
+      message = `Hola ${greetName}! Quisiera mas informacion sobre sus productos.`
     }
 
     const encodedMessage = encodeURIComponent(message)

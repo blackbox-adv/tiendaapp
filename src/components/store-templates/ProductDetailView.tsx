@@ -146,6 +146,11 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
               sizeGuide: (data.sizeGuide && typeof data.sizeGuide === 'object' && !Array.isArray(data.sizeGuide))
                 ? (data.sizeGuide as SizeGuide)
                 : null,
+              sellers: Array.isArray(data.sellers)
+                ? (data.sellers as Array<Record<string, unknown>>)
+                    .filter((x) => x && typeof x.id === 'string' && typeof x.name === 'string')
+                    .map((x) => ({ id: x.id as string, name: x.name as string }))
+                : [],
             }
             setApiStore(mappedStore)
 
@@ -383,10 +388,10 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
 
   const totalPrice = isPackMode ? packPriceNum * quantity : unitPriceNum * quantity
 
-  const openWhatsApp = async () => {
+  const openWhatsApp = async (seller?: { id: string; name: string }) => {
     // Mensaje con la presentación elegida: por bulto incluye etiqueta, contenido y total
     const packMessage = isPackMode
-      ? `Hola ${store.name}!\n\n` +
+      ? `Hola ${seller?.name || store.name}!\n\n` +
         `Me interesa ${quantity} ${packUnitLabel}${quantity > 1 ? 's' : ''} (${unitsPerPackNum} unidades c/u):\n` +
         `${product.name}\n` +
         `S/${packPriceNum.toFixed(2)} por ${packUnitLabel}${quantity > 1 ? `\nTotal: S/${totalPrice.toFixed(2)}` : ''}\n\n` +
@@ -400,8 +405,8 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(
           isPackMode
-            ? { storeId: store.id, customerMessage: packMessage }
-            : { storeId: store.id, productName: product.name, productPrice: product.price, quantity }
+            ? { storeId: store.id, customerMessage: packMessage, sellerId: seller?.id }
+            : { storeId: store.id, productName: product.name, productPrice: product.price, quantity, sellerId: seller?.id }
         ),
       })
       const data = await res.json()
@@ -423,6 +428,27 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
     )
     window.open(`https://wa.me/${store.whatsappNumber.replace(/[^0-9]/g, '')}?text=${msg}`, '_blank')
   }
+
+  // Vendedores del equipo (Premium): chips "Te atiende" bajo el botón de compra.
+  // El número NUNCA llega al cliente — el enlace lo arma /api/whatsapp con el
+  // número del vendedor y saluda por su nombre. Sin equipo, no se renderiza nada.
+  const sellerChips = store.sellers && store.sellers.length > 0 ? (
+    <div className="mt-3">
+      <p className="text-xs text-gray-400 mb-2">Te atiende:</p>
+      <div className="flex flex-wrap gap-2">
+        {store.sellers.map((s) => (
+          <button
+            key={s.id}
+            onClick={() => openWhatsApp(s)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300 text-xs font-medium text-gray-700 transition-colors"
+          >
+            <MessageCircle className="w-3.5 h-3.5" style={{ color: '#25D366' }} />
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </div>
+  ) : null
 
   const shareProduct = async () => {
     const shareData = {
@@ -900,22 +926,24 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
                   <Button
                     variant="outline"
                     className="w-full gap-3 rounded-2xl py-4 text-sm font-medium"
-                    onClick={openWhatsApp}
+                    onClick={() => openWhatsApp()}
                   >
                     <MessageCircle className="w-4 h-4" />
                     Consultar por WhatsApp
                   </Button>
+                  {sellerChips}
                 </>
               ) : (
                 <>
                   <Button
                     className="w-full text-white gap-3 rounded-2xl py-6 text-base font-bold shadow-lg hover:opacity-90 transition-opacity"
                     style={{ backgroundColor: '#25D366' }}
-                    onClick={openWhatsApp}
+                    onClick={() => openWhatsApp()}
                   >
                     <MessageCircle className="w-5 h-5" />
                     {isPackMode ? `Comprar por WhatsApp (${packUnitLabel})` : 'Comprar por WhatsApp'}
                   </Button>
+                  {sellerChips}
                   {isPackMode ? (
                     <p className="text-xs text-center text-gray-400">
                       La compra por {packUnitLabel} se coordina directo por WhatsApp — te confirmamos stock y total
@@ -1445,7 +1473,7 @@ export function ProductDetailView({ slug, productId, onDemoBack }: { slug: strin
             <Button
               className="w-full mt-5 text-white gap-2 rounded-xl py-3 font-semibold"
               style={{ backgroundColor: '#25D366' }}
-              onClick={openWhatsApp}
+              onClick={() => openWhatsApp()}
             >
               <MessageCircle className="w-4 h-4" />
               Consultar mi talla por WhatsApp

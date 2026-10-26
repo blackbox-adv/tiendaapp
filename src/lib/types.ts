@@ -97,6 +97,7 @@ export interface Store {
   otherPayments?: OtherPayment[]
   shippingOptions?: ShippingOption[]
   sizeGuide?: SizeGuide | null
+  sellers?: Array<{ id: string; name: string }>
   announcementText?: string | null
   announcementLink?: string | null
   userId: string

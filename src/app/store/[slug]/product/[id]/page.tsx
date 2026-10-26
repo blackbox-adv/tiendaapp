@@ -102,8 +102,8 @@ export default async function ProductPage({ params }: Props) {
     if (product && product.store) {
       store = product.store as Record<string, unknown>
 
-      // Plan activo + productos relacionados: independientes → EN PARALELO
-      const [latestSub, allRelated] = await Promise.all([
+      // Plan activo + productos relacionados + vendedores: independientes → EN PARALELO
+      const [latestSub, allRelated, activeMembers] = await Promise.all([
         db.subscription
           .findFirst({
             where: { storeId: store.id as string, status: 'active' },
@@ -125,9 +125,31 @@ export default async function ProductPage({ params }: Props) {
               })
               .catch(() => [])
           : Promise.resolve([]),
+        // Equipo de vendedores (Premium): activos con WhatsApp propio.
+        // Al cliente solo se le publica id + nombre; el número se resuelve
+        // en el servidor dentro de /api/whatsapp (nunca es público).
+        // Raw SQL con JOIN: StoreMember no tiene relación `user` en el schema
+        // y evitamos el include por PgBouncer.
+        db.$queryRawUnsafe(`
+          SELECT m.id, m."whatsappNumber", COALESCE(u.name, '') AS name
+          FROM "StoreMember" m
+          JOIN "User" u ON u.id = m."userId"
+          WHERE m."storeId" = $1 AND m."isActive" = true
+            AND COALESCE(m."whatsappNumber", '') <> ''
+          ORDER BY m."createdAt" ASC
+          LIMIT 5
+        `, store.id as string).catch(() => [] as Array<Record<string, unknown>>),
       ])
       if (latestSub?.plan?.type) {
         store = { ...store, planType: latestSub.plan.type }
+      }
+      if (latestSub?.plan?.type === 'premium' && Array.isArray(activeMembers)) {
+        const sellers = (activeMembers as Array<Record<string, unknown>>)
+          .filter((m) => typeof m.id === 'string')
+          .map((m) => ({ id: m.id as string, name: String(m.name || '').trim() || 'Vendedor' }))
+        if (sellers.length > 0) {
+          store = { ...store, sellers }
+        }
       }
       relatedProducts = allRelated as unknown as Record<string, unknown>[]
     }

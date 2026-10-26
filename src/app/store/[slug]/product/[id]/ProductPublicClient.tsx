@@ -42,6 +42,12 @@ function transformStore(s: Record<string, unknown>): Store {
     sizeGuide: (s.sizeGuide && typeof s.sizeGuide === 'object' && !Array.isArray(s.sizeGuide))
       ? (s.sizeGuide as SizeGuide)
       : null,
+    // Vendedores del equipo (Premium): solo id + nombre (el SSR ya sanitiza)
+    sellers: Array.isArray(s.sellers)
+      ? (s.sellers as Array<Record<string, unknown>>)
+          .filter((x) => x && typeof x.id === 'string' && typeof x.name === 'string')
+          .map((x) => ({ id: x.id as string, name: x.name as string }))
+      : [],
   }
 }
 
