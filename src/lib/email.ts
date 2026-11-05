@@ -708,3 +708,161 @@ export async function sendContactEmail(params: {
   }
   console.log(`[EMAIL] Contact email sent from ${params.email}, id: ${data?.id}`)
 }
+
+// ============================================================
+// CORREOS DE VENCIMIENTO DE PLAN (cron diario + barrido)
+//   - Avisos escalonados: 7 / 3 / 1 día antes de nextBillingDate
+//   - Aviso "venció" al entrar a los 7 días de gracia (past_due)
+// Mismo layout que las plantillas de suscripción. El envío real
+// es decidido por src/lib/billing-emails.ts (dedupe vía EmailLog):
+// aquí solo se construye y se manda.
+// ============================================================
+
+function expirationEmailShell(opts: {
+  name: string
+  themeBg: string
+  themeBorder: string
+  themeColor: string
+  heading: string
+  messageHtml: string
+  extraHtml: string
+  ctaText: string
+  ctaBg: string
+}) {
+  return `
+      <div style="max-width: 480px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+        <div style="text-align: center; padding: 32px 0 24px;">
+          <img src="${APP_URL}/logo-email.png" width="48" height="48" alt="Kyllari" style="border-radius: 12px;" />
+          <h1 style="margin: 16px 0 8px; font-size: 20px; font-weight: 700; color: #1f2937;">Kyllari</h1>
+        </div>
+
+        <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 32px;">
+          <h2 style="margin: 0 0 16px; font-size: 18px; font-weight: 600; color: #1f2937;">
+            Hola, ${opts.name}
+          </h2>
+
+          <div style="display: flex; align-items: center; gap: 10px; background: ${opts.themeBg}; border: 1px solid ${opts.themeBorder}; border-radius: 8px; padding: 14px 16px; margin: 0 0 20px;">
+            <span style="font-size: 15px; font-weight: 600; color: ${opts.themeColor};">${opts.heading}</span>
+          </div>
+
+          <div style="font-size: 15px; color: #4b5563; line-height: 1.6;">
+            ${opts.messageHtml}
+          </div>
+
+          ${opts.extraHtml}
+
+          <div style="text-align: center; margin: 24px 0;">
+            <a href="${APP_URL}/dashboard/plan"
+               style="display: inline-block; background: ${opts.ctaBg}; color: #ffffff; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: 600; font-size: 15px;">
+              ${opts.ctaText}
+            </a>
+          </div>
+
+          <p style="margin: 24px 0 0; font-size: 13px; color: #9ca3af; line-height: 1.5;">
+            Si tienes alguna pregunta, no dudes en contactarnos. Estamos aquí para ayudarte.
+          </p>
+        </div>
+
+        <div style="text-align: center; padding: 24px 0; font-size: 12px; color: #9ca3af;">
+          <p style="margin: 0 0 4px;">Enviado por Kyllari</p>
+          <p style="margin: 0;">Crea tu tienda online en minutos</p>
+        </div>
+      </div>
+    `
+}
+
+function fechaCorta(d: Date): string {
+  return new Intl.DateTimeFormat('es-PE', { day: '2-digit', month: 'long' }).format(d)
+}
+
+export async function sendSubscriptionExpiringEmail(
+  userName: string,
+  userEmail: string,
+  planName: string,
+  planPrice: number,
+  daysLeft: 7 | 3 | 1,
+  dueDate: Date
+): Promise<void> {
+  try {
+    const fecha = fechaCorta(dueDate)
+    const heads: Record<7 | 3 | 1, { subject: string; heading: string; intro: string }> = {
+      7: {
+        subject: `Tu plan ${planName} vence en 7 días`,
+        heading: `⏰ Tu plan ${planName} vence el ${fecha}`,
+        intro: `Tu plan <strong>${planName}</strong> (S/${planPrice}/mes) vence en <strong>7 días</strong>, el ${fecha}.`,
+      },
+      3: {
+        subject: `Últimos 3 días de tu plan ${planName}`,
+        heading: `⏰ Quedan 3 días: vence el ${fecha}`,
+        intro: `Tu plan <strong>${planName}</strong> (S/${planPrice}/mes) vence el <strong>${fecha}</strong>, en 3 días.`,
+      },
+      1: {
+        subject: `Tu plan ${planName} vence mañana`,
+        heading: `⏰ Mañana vence tu plan ${planName}`,
+        intro: `Tu plan <strong>${planName}</strong> (S/${planPrice}/mes) vence <strong>mañana</strong>, el ${fecha}.`,
+      },
+    }
+    const h = heads[daysLeft]
+    const html = expirationEmailShell({
+      name: userName,
+      themeBg: '#fef3c7',
+      themeBorder: '#fcd34d',
+      themeColor: '#b45309',
+      heading: h.heading,
+      messageHtml: `<p style="margin: 0 0 12px;">${h.intro}</p>
+            <p style="margin: 0;">Si ya tienes tu comprobante de pago listo, súbelo y se confirmará pronto. Renueva a tiempo y tu tienda sigue vendiendo sin interrupciones.</p>`,
+      extraHtml: '',
+      ctaText: 'Renovar mi plan',
+      ctaBg: '#d97706',
+    })
+    const { data, error } = await sendEmail({
+      from: FROM_EMAIL,
+      to: userEmail,
+      subject: h.subject,
+      html,
+    })
+    if (error) {
+      console.error(`[EMAIL] Error sending expiring email (${daysLeft}d):`, error)
+      return
+    }
+    console.log(`[EMAIL] Expiring email (${daysLeft}d) sent to ${userEmail}, id: ${data?.id}`)
+  } catch (err) {
+    console.error('[EMAIL] Expiring email failed (non-blocking):', err)
+  }
+}
+
+export async function sendSubscriptionExpiredEmail(
+  userName: string,
+  userEmail: string,
+  planName: string,
+  planPrice: number
+): Promise<void> {
+  try {
+    const html = expirationEmailShell({
+      name: userName,
+      themeBg: '#fef2f2',
+      themeBorder: '#fecaca',
+      themeColor: '#b91c1c',
+      heading: `Tu plan ${planName} venció`,
+      messageHtml: `<p style="margin: 0 0 12px;">Tu plan <strong>${planName}</strong> (S/${planPrice}/mes) acaba de vencer.</p>
+            <p style="margin: 0 0 12px;">Tienes <strong>7 días de gracia</strong> con todo funcionando para renovar. Pasado ese tiempo tu tienda vuelve al plan <strong>Gratuito</strong> automáticamente.</p>
+            <p style="margin: 0;"><strong>No se borra nada</strong>: tus productos, pedidos y configuración se conservan. En cuanto confirme tu pago, tu plan vuelve a estar activo.</p>`,
+      extraHtml: '',
+      ctaText: 'Renovar mi plan ahora',
+      ctaBg: '#dc2626',
+    })
+    const { data, error } = await sendEmail({
+      from: FROM_EMAIL,
+      to: userEmail,
+      subject: `Tu plan ${planName} venció — renuévalo para no perder beneficios`,
+      html,
+    })
+    if (error) {
+      console.error('[EMAIL] Error sending expired email:', error)
+      return
+    }
+    console.log(`[EMAIL] Expired email sent to ${userEmail}, id: ${data?.id}`)
+  } catch (err) {
+    console.error('[EMAIL] Expired email failed (non-blocking):', err)
+  }
+}

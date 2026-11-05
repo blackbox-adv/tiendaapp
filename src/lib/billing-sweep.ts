@@ -1,6 +1,7 @@
 import { db } from '@/lib/db'
 import { decimalToNumber } from '@/lib/utils'
-import { sendSubscriptionEmail } from '@/lib/email'
+import { sendSubscriptionEmail, sendSubscriptionExpiredEmail } from '@/lib/email'
+import { claimEmailOnce } from '@/lib/billing-emails'
 
 // ============================================================
 // BARRIDO DE FACTURACIÓN (vencimiento de planes) — versión lazy
@@ -13,6 +14,7 @@ import { sendSubscriptionEmail } from '@/lib/email'
 //
 // Máquina de estados (idéntica a la lógica original):
 //   active + nextBillingDate vencida  → past_due (7 días de gracia, todo funciona)
+//                                       + correo "tu plan venció" (1 sola vez, EmailLog)
 //   past_due + 7 días de mora         → expired + se crea suscripción Free activa
 //
 // Nunca borra datos: al renovar (pago confirmado) todo vuelve solo.
@@ -77,6 +79,19 @@ export async function runBillingSweep(): Promise<SweepResult> {
         }),
       ])
       pastDueCount++
+
+      // Correo "tu plan venció": 1 sola vez por suscripción (EmailLog).
+      // Non-blocking: si falla, la transición de estado ya quedó hecha.
+      if (sub.user) {
+        try {
+          const claimed = await claimEmailOnce('expired', sub.id, sub.userId, sub.user.email)
+          if (claimed) {
+            sendSubscriptionExpiredEmail(
+              sub.user.name, sub.user.email, sub.plan.name, Number(sub.plan.price)
+            ).catch(() => {})
+          }
+        } catch { /* nunca romper el barrido por un correo */ }
+      }
     } catch (txError) {
       console.error(`[BILLING] Transaction failed for subscription ${sub.id}:`, txError)
     }

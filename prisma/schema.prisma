@@ -430,3 +430,21 @@ model StoreMember {
 
   @@index([storeId])
 }
+
+// ── Log de correos enviados (dedupe de avisos de facturación) ──
+// Un registro por (kind, subscriptionId): la clave única garantiza que
+// cada aviso de vencimiento (expiring-7 / expiring-3 / expiring-1 /
+// expired) se envíe UNA sola vez por suscripción, aunque el cron diario
+// corra dos veces o compita con el barrido perezoso de las rutas.
+model EmailLog {
+  id             String   @id @default(cuid())
+  kind           String                                // expiring-7 | expiring-3 | expiring-1 | expired
+  subscriptionId String
+  userId         String?
+  email          String?
+  createdAt      DateTime @default(now())
+
+  @@unique([kind, subscriptionId])
+  @@index([subscriptionId])
+  @@index([createdAt(sort: Desc)])
+}
